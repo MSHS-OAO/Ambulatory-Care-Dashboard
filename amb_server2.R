@@ -1,20 +1,20 @@
 server <- function(input, output, session) {
   
-    ### (1) Create reactive filters ===================================================================================================
+  ### (1) Create reactive filters ===================================================================================================
   output$specialtyControl <- renderUI({
     
-      box(
-        title = "Select Specialty:",
-        width = 12, 
-        solidHeader = FALSE,
-        pickerInput("selectedSpecialty",label=NULL,
-                    choices=sort(unique(data.subset.new[data.subset.new$Campus %in% input$selectedCampus, "Campus.Specialty"])),
-                    multiple=TRUE,
-                    options = pickerOptions(
-                      liveSearch = TRUE,
-                      actionsBox = TRUE,
-                      dropupAuto = FALSE),
-                    selected = NULL))
+    box(
+      title = "Select Specialty:",
+      width = 12, 
+      solidHeader = FALSE,
+      pickerInput("selectedSpecialty",label=NULL,
+                  choices=sort(unique(data.subset.new[data.subset.new$Campus %in% input$selectedCampus, "Campus.Specialty"])),
+                  multiple=TRUE,
+                  options = pickerOptions(
+                    liveSearch = TRUE,
+                    actionsBox = TRUE,
+                    dropupAuto = FALSE),
+                  selected = NULL))
   })
   
   output$departmentControl <- renderUI({
@@ -69,7 +69,7 @@ server <- function(input, output, session) {
                   choices=c("Mon","Tue","Wed","Thu","Fri","Sat"), selected = daysOfWeek.options,
                   multiple=TRUE, selectize=TRUE))
   })
-
+  
   
   ### (2) Prepare datasets for analysis ===============================================================================================
   # [2.1] All pre-processed data ------------------------------------------------------------------------------------------------------
@@ -108,19 +108,19 @@ server <- function(input, output, session) {
   })
   
   
-
+  
   ### (3) Dashboard Layout ============================================================================================================
   ### [3.1] Title of  Dashboard -------------------------------------------------------------------------------------------------------
   # Practice Overview Tab
   output$practiceName_profile <- renderText({
     paste0(input$selectedDepartment," from ",input$dateRange[1]," to ", input$dateRange[2])
-
+    
   })
   
   # KPIs Tab
   output$practiceName_KPIs <- renderText({
     paste0(input$selectedDepartment," from ",input$dateRange[1]," to ", input$dateRange[2])
-
+    
   })
   
   # Utilization Tab
@@ -181,7 +181,7 @@ server <- function(input, output, session) {
     avgPtsByHour <- ptsByHour[,c("Time","Scheduled","Arrived")]
     
     avgPtsByHour <- reshape::melt(avgPtsByHour, id="Time", measure = c("Scheduled","Arrived"))
- 
+    
     # Scheduled vs. Actual Arrival in Hour Interval 
     
     ggplot(avgPtsByHour, aes(x=Time, y=value, col=variable, group=variable))+
@@ -252,7 +252,7 @@ server <- function(input, output, session) {
       geom_text(aes(label=paste0(value,"%")), vjust=-.1, hjust=-.3, color="black", fontface="bold",
                 position = position_dodge(1), size=5)
     
-    })
+  })
   
   output$apptStatus <- renderPlot({
     
@@ -320,13 +320,13 @@ server <- function(input, output, session) {
   # Volume KPI ====================================================================
   output$kpiVolumeGraph <- renderPlot({
     kpiVolumeData <- aggregate(dataArrived()$uniqueId, by=list(dataArrived()$Appt.Year,dataArrived()$Appt.Quarter,
-                                                              dataArrived()$Appt.Month, dataArrived()$Appt.Date), FUN=NROW)
+                                                               dataArrived()$Appt.Month, dataArrived()$Appt.Date), FUN=NROW)
     
     # kpiVolumeData <- aggregate(arrived.data$uniqueId, by=list(arrived.data$Appt.Year,arrived.data$Appt.Quarter,
     #                                                         arrived.data$Appt.Month, arrived.data$Appt.Date), FUN=NROW)
-
+    
     colnames(kpiVolumeData) <- c("Year","Quarter","Month","Date","Volume")
-
+    
     #a <- list("Year" = 1, "Quarter" = 2, "Month" = 3, "Day" = 4)
     #a <- as.numeric(unlist(a))
     
@@ -394,8 +394,8 @@ server <- function(input, output, session) {
             axis.title.x = element_blank(),
             axis.text.x = element_text(size = "12", vjust=0.5, angle = 90),
             axis.text.y = element_text(size = "16"))
-          # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
-          #              date_minor_breaks = "1 day", expand = c(0, 0.6))
+        # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
+        #              date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
@@ -460,19 +460,19 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "16", vjust=0.5, angle = 90),
             axis.text.y = element_text(size = "16"))+
           scale_color_MountSinai("main")
-          # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
-          #              date_minor_breaks = "1 day", expand = c(0, 0.6))
-        }
+        # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
+        #              date_minor_breaks = "1 day", expand = c(0, 0.6))
+      }
     }
     
   })
   
   # Appt Status KPI ========================================================================
   output$kpiApptStatusGraph <- renderPlot({
-
+    
     statusData <- aggregate(dataAll()$uniqueId, by=list(dataAll()$Appt.Year,dataAll()$Appt.Quarter,
-                                                               dataAll()$Appt.Month, dataAll()$Appt.Date,
-                                                               dataAll()$Appt.Status), FUN=NROW)
+                                                        dataAll()$Appt.Month, dataAll()$Appt.Date,
+                                                        dataAll()$Appt.Status), FUN=NROW)
     
     colnames(statusData) <- c("Year","Quarter","Month","Date","Status","Count")
     
@@ -481,7 +481,7 @@ server <- function(input, output, session) {
     #                                                           all.data$Appt.Status), FUN=NROW)
     # 
     # colnames(statusData) <- c("Year","Quarter","Month","Date","Status","Count")
-
+    
     statusDataYear <- statusData %>% group_by(Year,Status) %>% summarize(Total = sum(Count))
     statusDataYear <- reshape2::dcast(statusDataYear, Year ~ Status)
     statusDataYear[is.na(statusDataYear)] <- 0
@@ -492,7 +492,7 @@ server <- function(input, output, session) {
       dplyr::select(c("Year","Cancelled","Bumped","NoShow"))
     statusDataYear[is.na(statusDataYear)] <- 0
     statusDataYear <- reshape2::melt(statusDataYear, id.vars = c("Year"))
-            
+    
     statusDataQuarter <- statusData %>% group_by(Year, Quarter, Status) %>% summarize(Total = sum(Count))
     statusDataQuarter <- reshape2::dcast(statusDataQuarter, Year + Quarter ~ Status)
     statusDataQuarter[is.na(statusDataQuarter)] <- 0
@@ -547,7 +547,7 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "16"))+
           scale_color_MountSinai("main")
         
-
+        
       } else if(input$kpiFreq == 2) { # Quarter
         ggplot(statusDataQuarter, aes(x=interaction(Year,Quarter,lex.order = TRUE), y=value, col=variable, group=variable)) +
           ggtitle("Historical Trend of Scheduling Status by Quarter")+
@@ -607,8 +607,8 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "16", vjust=0.5, angle = 90),
             axis.text.y = element_text(size = "16"))+
           scale_color_MountSinai("main")
-          # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
-          #              date_minor_breaks = "1 day", expand = c(0, 0.6))
+        # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
+        #              date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     } else {
       if(input$kpiFreq == 1){ # Year
@@ -685,14 +685,14 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "16", vjust=0.5, angle = 90),
             axis.text.y = element_text(size = "16"))+
           scale_color_MountSinai("main")
-          # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
-          #              date_minor_breaks = "1 day", expand = c(0, 0.6))
+        # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
+        #              date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     }
-
+    
   })
-
-
+  
+  
   # ggplot(kpiVolumeData, aes_string(x=names(kpiVolumeData)[1], y="Total",group=1)) +
   #   geom_line(size=1.2) +
   #   geom_point(size=2) +
@@ -853,8 +853,8 @@ server <- function(input, output, session) {
             axis.title.x = element_blank(),
             axis.text.x = element_text(size = "12", vjust=0.5, angle = 90),
             axis.text.y = element_text(size = "16"))
-          # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
-          #              date_minor_breaks = "1 day", expand = c(0, 0.6))
+        # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
+        #              date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
@@ -926,11 +926,11 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "12", vjust=0.5, angle = 90),
             axis.text.y = element_text(size = "16"))+
           scale_color_MountSinai("main")
-          # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
-          #              date_minor_breaks = "1 day", expand = c(0, 0.6))
+        # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
+        #              date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     }
-
+    
   })
   
   ## % Provider Time
@@ -1050,8 +1050,8 @@ server <- function(input, output, session) {
     data <- melt(data, id=c("Time"))
     
     #data <- data %>%
-     # arrange(desc(variable))
- 
+    # arrange(desc(variable))
+    
     ggplot(data, aes(x=Time, y=value, fill=factor(variable, levels=c("Canceled","No Show","Arrived"))))+
       geom_bar(position="stack",stat="identity", width=0.7)+
       scale_fill_manual(values=c("grey","#d80b8c","midnightblue"))+
@@ -1081,9 +1081,9 @@ server <- function(input, output, session) {
       guides(colour = guide_legend(nrow = 1))+
       geom_text(aes(label=ifelse(value < max(value)*0.1," ",value)), color="white", 
                 size=5, fontface="bold", position = position_stack(vjust = 0.5))+
-          stat_summary(fun.y = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",..y..), group = Time), geom="text", color="black", 
-                       size=5, fontface="bold.italic")
-
+      stat_summary(fun.y = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",..y..), group = Time), geom="text", color="black", 
+                   size=5, fontface="bold.italic")
+    
     
     
   })
@@ -1133,8 +1133,8 @@ server <- function(input, output, session) {
   
   # Reactive Filters for Scheduling Tab: Appointment Type & Insurance 
   output$apptTypeControl <- renderUI({
-   
-     box(
+    
+    box(
       title = NULL,
       width = 12, 
       solidHeader = FALSE,
@@ -1165,9 +1165,9 @@ server <- function(input, output, session) {
   })
   
   # Arrived No Show Data with Additional Filteres (Appointment Type and Insurance)
-    dataArrivedNoShow_1 <- reactive({
+  dataArrivedNoShow_1 <- reactive({
     groupByFilters_1(dataArrivedNoShow(),
-                   input$selectedApptType, input$selectedInsurance)
+                     input$selectedApptType, input$selectedInsurance)
   })
   
   # Total No Shows per Day
@@ -1227,10 +1227,10 @@ server <- function(input, output, session) {
       noShows %>%
       group_by(apptLeadDays) %>%
       summarise(Average = round(mean(noShow_perc),2))
-
+    
     noShows_bar_tb <-
       melt(noShows_bar_tb, id.vars = c("apptLeadDays"))
-
+    
     noShows_bar <-
       ggplot(noShows_bar_tb, aes(x=factor(apptLeadDays, levels = status), y=value,fill=variable)) +
       geom_bar(stat="identity", position=position_dodge(), width = 0.8, fill="midnightblue") +
@@ -1246,9 +1246,9 @@ server <- function(input, output, session) {
         plot.margin = margin(30,0,30,30))+
       geom_text(aes(label=paste0(value*100,"%")), vjust = -1, hjust = .5, color="black", fontface="bold",
                 position = position_dodge(1), size=5)
-
+    
     grid.arrange(noShows_bar, noShows_box, ncol = 2)
-
+    
     
   })
   
@@ -1279,7 +1279,7 @@ server <- function(input, output, session) {
   
   
   # No Shows by Time of Day 
-    output$avgNoShowCount <- renderPlot({
+  output$avgNoShowCount <- renderPlot({
     
     noShow_count <- dataArrivedNoShow_1() %>%
       filter(Appt.Status %in% "No Show") %>%
@@ -1329,7 +1329,7 @@ server <- function(input, output, session) {
     byDayTime.df <- byDayTime.df[which(byDayTime.df$Day %in% unique(noShow_perc$Day)),]
     
     noShow_perc <- as.data.frame(merge(byDayTime.df,noShow_perc, by.x = c("Day","Time"), by.y = c("Appt.Day","Appt.TM.Hr"), all = TRUE))
-
+    
     ggplot(noShow_perc, aes(x=factor(Day, levels = daysOfWeek.options), y=Time))+
       labs(x=NULL, y=NULL)+
       geom_tile(aes(fill=percentage), colour = "black", size=0.5)+
@@ -1450,9 +1450,9 @@ server <- function(input, output, session) {
     c.end <- which(colnames(dataHourArrived())=="23:00")
     
     round(sum(dataHourArrived()[c(c.start:c.end)])/(length(unique(dataHourArrived()$Appt.DateYear))*(60*input$setHours)),1) %>%
-    valueBox(
-      subtitle = tags$p("Avg Rooms Required", style = "font-size: 130%;"), icon = NULL, color = "yellow"
-    )
+      valueBox(
+        subtitle = tags$p("Avg Rooms Required", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      )
   })
   
   # Average Utilization --------------------------------------------------------------------------------------------------------
@@ -1469,19 +1469,19 @@ server <- function(input, output, session) {
   
   # Average Number of Rooms Required
   output$spaceUsed <- renderPlot({
-  
+    
     c.start <- which(colnames(dataHourArrived())=="00:00")
     c.end <- which(colnames(dataHourArrived())=="23:00")
-
+    
     space.hour.day <- aggregate(dataHourArrived()[c(c.start:c.end)], list(dataHourArrived()$Appt.Day),FUN = sum)
     space.hour.day <- melt(space.hour.day, id=c("Group.1"))
     space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$Appt.Day,space.hour.day$Group.1)]
-
+    
     space.hour.day$average <- round(space.hour.day$value/(space.hour.day$days*60), 1)
     names(space.hour.day) <- c("Day","Time","Total_Dur","Days","Average_Req")
-
+    
     byDayTime.df <- byDayTime.df[which(byDayTime.df$Day %in% unique(space.hour.day$Day)),]
-
+    
     space.hour.day <- as.data.frame(merge(byDayTime.df,space.hour.day, by.x = c("Day","Time"), by.y = c("Day","Time"), all = TRUE))
     space.hour.day[is.na(space.hour.day)] <- 0
     
@@ -1535,7 +1535,7 @@ server <- function(input, output, session) {
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
       geom_text(aes(label= ifelse(is.na(Average_Req),"", round(Average_Req,1))), color="black", size=5, fontface="bold")
-
+    
     
     grid.arrange(graph, table, ncol = 1, heights = c(4,3))
     
@@ -1546,19 +1546,19 @@ server <- function(input, output, session) {
     
     c.start <- which(colnames(dataHourArrived())=="00:00")
     c.end <- which(colnames(dataHourArrived())=="23:00")
-
+    
     space.hour.day <- aggregate(dataHourArrived()[c(c.start:c.end)], list(dataHourArrived()$Appt.Day),FUN = sum)
     space.hour.day <- melt(space.hour.day, id=c("Group.1"))
     space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$Appt.Day,space.hour.day$Group.1)]
-
+    
     space.hour.day$utilization <- round(space.hour.day$value/(space.hour.day$days*60*input$setRooms), 1)
     names(space.hour.day) <- c("Day","Time","Total_Dur","Days","Average_Util")
-
+    
     byDayTime.df <- byDayTime.df[which(byDayTime.df$Day %in% unique(space.hour.day$Day)),]
-
+    
     space.hour.day <- as.data.frame(merge(byDayTime.df,space.hour.day, by.x = c("Day","Time"), by.y = c("Day","Time"), all = TRUE))
     space.hour.day[is.na(space.hour.day)] <- 0
-
+    
     
     graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Util, col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
@@ -1611,10 +1611,10 @@ server <- function(input, output, session) {
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
       geom_text(aes(label= ifelse(is.na(Average_Util),"",paste0(round(Average_Util,2)*100,"%"))), color="black", size=5, fontface="bold")
-
+    
     
     grid.arrange(graph, table, ncol = 1, heights = c(4,3))
-      
+    
     
   })
   
@@ -1636,7 +1636,7 @@ server <- function(input, output, session) {
         `90th Percentile`= round(quantile(value, probs=0.90)/60,1))
     
     colnames(space.hour)[1] <- "Time"
-   
+    
     space.hour <- as.data.frame(melt(space.hour, id=c("Time")))
     
     graph <- ggplot(space.hour, aes(x=Time, y=value, col=variable, group=variable))+
@@ -1688,16 +1688,16 @@ server <- function(input, output, session) {
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
       geom_text(aes(label= ifelse(is.na(value),"", round(value,1))), color="black", size=5, fontface="bold")
-
+    
     
     grid.arrange(graph, table, ncol = 1, heights = c(4,2))
-  
+    
   })
   
   # Utilization by Percentile
   
   output$spaceUtilPerc <- renderPlot({
-
+    
     c.start <- which(colnames(dataHourArrived())=="00:00")
     c.end <- which(colnames(dataHourArrived())=="23:00")
     
@@ -1764,15 +1764,15 @@ server <- function(input, output, session) {
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
       geom_text(aes(label= ifelse(is.na(value),"",paste0(round(value,2)*100,"%"))), color="black", size=5, fontface="bold")
-
+    
     
     grid.arrange(graph, table, ncol = 1, heights = c(4,2))
-
+    
   })
-
   
-      
-
+  
+  
+  
   ### [3. ] Population Tab Output -----------------------------------------------------------------------------------------------------
   
   ## Demographics Breakdown
@@ -1798,9 +1798,9 @@ server <- function(input, output, session) {
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = "16", hjust=1, vjust=1, angle = 45),
         axis.text.y = element_text(size = "16"))
-      
+    
   })
-
+  
   output$sex_breakdown <- renderPlot({
     
     data <- dataArrived() %>% drop_na(Sex) %>%
@@ -1827,7 +1827,7 @@ server <- function(input, output, session) {
   output$pop_breakdown <- renderPlot({
     
     arrived.data <- dataArrived()
-
+    
     arrived.data$age <- round(age_calc(as.Date(arrived.data$Birth.Date, format="%Y-%m-%d"), units='years'),0)
     arrived.data$age_group <- cut(arrived.data$age, breaks = c(10,20,30,40,50,60,70,80), na.rm=TRUE)
     
@@ -1866,7 +1866,7 @@ server <- function(input, output, session) {
       coord_flip()+
       geom_text(aes(label=paste0(round(female_perc*100,0),"%")), vjust = .5, hjust =1.2, color="black", fontface="bold",
                 position = position_dodge(1), size=5)
-  
+    
     g2 <- ggplot(age_data, aes(x = age_group, y = male_perc)) +xlab(NULL)+
       geom_bar(stat = "identity", fill="midnightblue") + ggtitle("% of Male Visits by Age Group") +
       theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
@@ -1964,7 +1964,7 @@ server <- function(input, output, session) {
     
   })
   
- 
+  
   # output$population1 <- renderLeaflet({
   #   leaflet(population.data) %>%
   #     # set view to New York City
@@ -2017,7 +2017,7 @@ server <- function(input, output, session) {
     
     names(pts.count) <- c("Date","Volume")
     pts.count$Date <- as.Date(pts.count$Date, format="%Y-%m-%d")
-   
+    
     ggplot(pts.count,  aes(x=Date, y=Volume))+
       geom_line(color="midnightblue")+
       geom_point(color="midnightblue")+
@@ -2037,7 +2037,7 @@ server <- function(input, output, session) {
   output$volume2 <- renderPlot({
     
     pts.by.month <- aggregate(dataArrived()$uniqueId, 
-                           by=list(dataArrived()$Appt.MonthYear), FUN=NROW)
+                              by=list(dataArrived()$Appt.MonthYear), FUN=NROW)
     
     names(pts.by.month) <- c("Month","Volume")
     pts.by.month$Volume <- as.numeric(pts.by.month$Volume)
@@ -2152,7 +2152,7 @@ server <- function(input, output, session) {
                           by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date, dataArrived()$Appt.Day), FUN=NROW)
     
     names(pts.dist) <- c("Month","Date","Day","Volume")
-
+    
     ggplot(pts.dist, aes(x=factor(Day, level = daysOfWeek.options), y=Volume))+
       geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+ 
       stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
@@ -2169,35 +2169,35 @@ server <- function(input, output, session) {
   
   #Daily Volume Distribution by Day Table
   output$volume5.1 <- function(){
-
+    
     pts.dist <- aggregate(dataArrived()$uniqueId,
                           by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date, dataArrived()$Appt.Day), FUN=NROW)
-
+    
     names(pts.dist) <- c("Month","Date","Day","Volume")
-
+    
     pts.dist.summary <-
       pts.dist %>%
       group_by(Day) %>%
       summarise(Avg = round(mean(Volume),1), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
-
+    
     pts.dist.summary <- pts.dist.summary[match(daysOfWeek.options,pts.dist.summary$Day),]
     pts.dist.summary <- pts.dist.summary[complete.cases(pts.dist.summary),]
-
+    
     pts.dist.summary %>%
       knitr::kable("html", align = "l") %>%
       kable_styling(bootstrap_options = c("striped", "hover"), full_width=F, position="center", font_size = 15) %>%
       row_spec(0, bold=T) %>%
       column_spec(1, bold=T, width = "3cm")
-
+    
   }
   
   
   # Display graphs for KPIs selected
-
-
-
-
-
+  
+  
+  
+  
+  
   #render the plot when x=age, gender=gender_neutral, sample=world
   # output$kpiGraphs1<-renderPlot({
   #   validate(need(input$kpiFreq == 1 & input$kpiTrend == 1 & input$selectedKPIs %in% c("Volume"), message=FALSE))
@@ -2245,7 +2245,7 @@ server <- function(input, output, session) {
   # })
   
   # ### [3. ] Day of Visit Tab -----------------------------------------------------------------------------------------------------------
-
+  
   # Example Event Log Dataset 
   
   ex_pts_throughput <- as.data.frame(ex_patients %>% throughput_time("case"))
@@ -2290,9 +2290,9 @@ server <- function(input, output, session) {
     
   })
   
-  throughput_tb <- ex_patients %>% throughput_time("log")
-  processing_tb <- ex_patients %>% processing_time("log")
-  idle_tb <- ex_patients %>% idle_time("log")
+  # throughput_tb <- ex_patients %>% throughput_time("log")
+  # processing_tb <- ex_patients %>% processing_time("log")
+  # idle_tb <- ex_patients %>% idle_time("log")
   
   # Distribution of cycle, value added, non-value added times 
   output$cycleTimeDis <- renderPlot ({
@@ -2317,30 +2317,30 @@ server <- function(input, output, session) {
   # Patient flow by frequency count
   output$vsm_freqCount <- renderGrViz({
     process_map(ex_patients, type = frequency("absolute"))
-    })
-
+  })
+  
   # Patient flow by relative frequency (%) (Total count of activity / Total count of prior activity)
   output$vsm_freqPerc <- renderGrViz({
     process_map(ex_patients, type = frequency("relative_case"))
-    })
-
+  })
+  
   # Patient flow by duration (average)
   output$vsm_durAvg <- renderGrViz({
     process_map(ex_patients, performance(FUN=mean, "hours"))
-    })
-
+  })
+  
   # Patient flow by duration (median)
   output$vsm_durMed<- renderGrViz({
     process_map(ex_patients, performance(FUN=median, "hours"))
   })
-
-
-
-
   
   
   
-
+  
+  
+  
+  
+  
   
   ### [3. ] Data Tab Output -----------------------------------------------------------------------------------------------------------
   dataDisplay <- reactive({
@@ -2364,5 +2364,4 @@ shinyApp(ui, server)
 
 
 
-       
-      
+

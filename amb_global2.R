@@ -1,4 +1,4 @@
-### (1) Install and Load Required Packages ============================================================
+### (0) Install and Load Required Packages ============================================================
 
 # install.packages("readxl")
 # install.packages("dplyr")
@@ -82,77 +82,334 @@ library(ggplot2)
 library(shiny)
 library(leaflet)
 
+### (1) Set aesthetics theme -----------------------------------------------------------------------------
 
-### (2) Import Data ===================================================================================
-### [2.1] Set Working Directory
+# Color Functions for Graphs
+theme_set(theme_minimal())
 
+# Mount Sinai corporate colors 
+MountSinai_colors <- c(
+  `dark purple`  = "#212070",
+  `dark pink`    = "#d80b8c",
+  `dark blue`    = "#00aeef",
+  `dark grey`    = "#7f7f7f",
+  `yellow`       = "#ffc000",
+  `purple`       = "#7030a0",
+  `med purple`   = "#5753d0",
+  `med pink`     = "#f75dbe",
+  `med blue`     = "#5cd3ff",
+  `med grey`     = "#a5a7a5",
+  `light purple` = "#c7c6ef",
+  `light pink`   = "#fcc9e9",
+  `light blue`   = "#c9f0ff",
+  `light grey`   = "#dddedd"
+)
+
+# Function to extract Mount Sinai colors as hex codes
+# Use Character names of MountSinai_colors
+
+MountSinai_cols <- function(...) {
+  cols <- c(...)
+  
+  if (is.null(cols))
+    return (MountSinai_colors)
+  
+  MountSinai_colors[cols]
+}
+
+# Color Function that can be used to call all colors is "MountSinai_cols()"
+# Use in ggplot 
+
+#MountSinai_cols()       # will provide all colors and their hex codes in a table 
+#MountSinai_cols("pink") # will provide color name and the hex code for the pink color
+
+# Create palettes 
+MountSinai_palettes <- list(
+  `all`   = MountSinai_cols("dark purple","dark pink","dark blue","dark grey",
+                            "med purple","med pink","med blue","med grey", 
+                            "light purple","light pink","light blue","light grey"),
+  
+  `main`  = MountSinai_cols("dark purple","dark pink","dark blue","dark grey"),
+  
+  `purple`  = MountSinai_cols("dark purple","med purple","light purple"),
+  
+  `pink`  = MountSinai_cols("dark pink","med pink","light pink"),
+  
+  `blue`  = MountSinai_cols("dark blue", "med blue", "light blue"),
+  
+  `grey`  = MountSinai_cols("dark grey", "med grey", "light grey"),
+  
+  `purpleGrey` = MountSinai_cols("dark purple", "dark grey"),
+  
+  `pinkBlue` = MountSinai_cols("dark pink", "dark blue")
+  
+)
+
+# MountSinai_palettes
+# Return function to interpolate a Mount Sinai color palette
+# default value is the main palette, reverse = True will change the order
+
+MountSinai_pal <- function(palette = "all", reverse = FALSE, ...) {
+  pal <- MountSinai_palettes[[palette]]
+  
+  if (reverse) pal <- rev(pal)
+  
+  colorRampPalette(pal, ...)
+}
+
+
+# Scale Function for ggplot can be used instead of scale_color_manual
+scale_color_MountSinai <- function(palette = "all", discrete = TRUE, reverse = FALSE, ...) {
+  pal <- MountSinai_pal(palette = palette, reverse = reverse)
+  
+  if (discrete) {
+    discrete_scale("colour", paste0("MountSinai_", palette), palette = pal, ...)
+  } else {
+    scale_color_gradientn(colours = pal(256), ...)
+  }
+}
+
+# Scale Fill for ggplot insetead of scale_fill_manual 
+scale_fill_MountSinai <- function(palette = "all", discrete = TRUE, reverse = FALSE, ...) {
+  pal <- MountSinai_pal(palette = palette, reverse = reverse)
+  
+  if (discrete) {
+    discrete_scale("fill", paste0("MountSinai_", palette), palette = pal, ...)
+  } else {
+    scale_fill_gradientn(colours = pal(256), ...)
+  }
+}
+
+# ggplot themes
+
+library(dplyr)
+library(extrafont)
+font_import()
+loadfonts(device = "win")
+windowsFonts()
+
+# ggplot theme functions
+theme_new_line <- function(base_size = 12,
+                           base_family = "Calibri",
+                           base_line_size = base_size / 170,
+                           base_rect_size = base_size / 170) {
+  theme_minimal(
+    base_size = base_size,
+    base_family = base_family,
+    base_line_size = base_line_size
+  ) %+replace%
+    theme(
+      plot.title = element_text(
+        color = rgb(25, 43, 65, maxColorValue = 255),
+        size = rel(1.5),
+        face = "bold",
+        hjust = 0
+      ),
+      plot.subtitle = element_text(
+        color = rgb(25, 43, 65, maxColorValue = 255),
+        size = rel(1.25),
+        face = "italic",
+        hjust = 0,
+        margin = margin(0, 0, 10, 0)
+      ),
+      axis.title = element_text(
+        color = rgb(25, 43, 65, maxColorValue = 255),
+        size = rel(0.75)
+      ),
+      axis.text = element_text(
+        color = rgb(25, 43, 65, maxColorValue = 255),
+        size = rel(0.75)
+      ),
+      axis.text.x = element_text(angle = 45,
+                                 hjust = 0.5),
+      axis.line = element_line(color = rgb(25, 43, 65, maxColorValue = 255)),
+      panel.grid.minor = element_blank(),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      
+      complete = TRUE
+    )
+}
+
+
+theme_new_line <- function(base_size = 12,
+                           base_family = "Calibri",
+                           base_line_size = base_size / 170,
+                           base_rect_size = base_size / 170) {
+  theme_minimal(
+    base_size = base_size,
+    base_family = base_family,
+    base_line_size = base_line_size
+  ) %+replace%
+    theme(
+      plot.title = element_text(
+        hjust = 0.5,
+        face = "bold",
+        size = 20,
+        margin = margin(0, 0, 30, 0)
+      ),
+      legend.position = "top",
+      legend.text = element_text(size = "12"),
+      legend.direction = "horizontal",
+      legend.key.size = unit(1.0, "cm"),
+      legend.title = element_blank(),
+      axis.title = element_text(size = "14"),
+      axis.text = element_text(size = "14"),
+      axis.title.x = element_blank(),
+      axis.title.y = element_text(margin = margin(r = 5)),
+      axis.text.x = element_text(
+        angle = 90,
+        hjust = 0.5,
+        margin = margin(t = 10)
+      ),
+      axis.text.y = element_text(margin = margin(l = 5, r = 5)),
+      panel.grid.minor = element_blank(),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      axis.line = element_line(size = 0.3, colour = "black"),
+      plot.margin = margin(30, 30, 30, 30)
+    )
+}
+
+theme_new1 <- function(base_size = 12,
+                       base_family = "Calibri",
+                       base_line_size = base_size / 170,
+                       base_rect_size = base_size / 170) {
+  theme_minimal(
+    base_size = base_size,
+    base_family = base_family,
+    base_line_size = base_line_size
+  ) %+replace%
+    theme(
+      plot.title = element_text(
+        hjust = 0.5,
+        face = "bold",
+        size = 20,
+        margin = margin(0, 0, 30, 0)
+      ),
+      legend.position = "top",
+      legend.text = element_text(size = "12"),
+      legend.direction = "horizontal",
+      legend.key.size = unit(1.0, "cm"),
+      legend.title = element_blank(),
+      axis.title = element_text(size = "14"),
+      axis.text = element_text(size = "14"),
+      axis.title.x = element_blank(),
+      axis.title.y = element_text(margin = margin(r = 5)),
+      axis.text.x = element_text(
+        angle = 90,
+        hjust = 0.5,
+        margin = margin(t = 10)
+      ),
+      axis.text.y = element_text(margin = margin(l = 5, r = 5)),
+      panel.grid.minor = element_blank(),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      axis.line = element_line(size = 0.3, colour = "black"),
+      plot.margin = margin(30, 30, 30, 30)
+    )
+}
+
+
+
+
+
+
+
+
+
+
+### (2) Import Data ----------------------------------------------------------------------------------
+
+# Set Working Directory
 #wdpath <- "J:/deans/Presidents/HSPI-PM/Operations Analytics and Optimization/Projects/System Operations/Ambulatory Dashboard/Coding"
 wdpath <- "C:/Users/kweons01/Desktop/Ambulatory Dashboard/Coding"
 setwd(wdpath)
 
-### [2.2] Load Data files -----------------------------------------------------------------------------
-# MSUS Scheduling Dataset from Hala (this particular file with 15,000+ rows took 3-4 min to be imported - maybe consider other options?)
+# Load Data Files 
+#master.data.old <- read_excel("Master_Data.xlsx", col_names = TRUE, na = c("", "NA"))
+master.data.new <- read_excel("MV DM PATIENT ACCESS sample.xlsx", col_names = TRUE, na = c("", "NA"))
 
-master.data.raw  <- as.data.frame(read_excel(file.choose()))
-data.raw <- master.data.raw
-#head(data.raw)
+# Load Reference Files
+site_ref <-  read_excel("Department Site Crosswalk 8-24-2020.xlsx", col_names = TRUE, na = c("", "NA"))
 
-### (3) Pre-process data ==============================================================================
-### [3.1] Merge datasets ------------------------------------------------------------------------------
+# 
+# old_cols <- as.data.frame(colnames(master.data.old))
+# old_cols$in_old <- "Yes"
+# 
+# new_cols <- as.data.frame(colnames(master.data.new))
+# new_cols$in_old <- old_cols$in_old[match(new_cols$`colnames(master.data.new)`, old_cols$`colnames(master.data.old)`)]
+# 
+# #write_xlsx(new_cols, "new fields.xlsx")
+# 
+# cols_inc <- new_cols %>% filter(in_old == "Yes")
+# cols_inc <- as.vector(cols_inc$`colnames(master.data.new)`)
+# 
+# data_raw <- master.data.new[,cols_inc]
 
-# Create unique identifiers
-# Merge horizontally by matching unique identifiers
+data.raw <- master.data.new
 
-### [3.2] Subset master.data.raw
+# Crosswalk Campus to Site by Department Name
+data.raw$campus_new <- site_ref$`Site Final`[match(data.raw$DEPARTMENT_NAME,site_ref$`Dept Name`)]
 
-# Columns to be included in pre-processed dataset
-original.cols <- c("campus","campus specialty...9","Department Name","PROV_NAME_WID",
+### (3) Pre-process data ----------------------------------------------------------------------------------
+
+# Data fields incldued for analysis 
+original.cols <- c("campus_new","DEPT_SPECIALTY_NAME","DEPARTMENT_NAME","PROV_NAME_WID",
                    "MRN","PAT_NAME","ZIP_CODE","SEX","BIRTH_DATE","FINCLASS",
-                   "APPT_MADE_DTTM","SCHEDULED  APPOINTMENT DATE","PRC_NAME","APPT_LENGTH","Derived Status",
+                   "APPT_MADE_DTTM","APPT_DTTM","PRC_NAME","APPT_LENGTH","DERIVED_STATUS_DESC",
                    "APPT_CANC_DTTM", "CANCEL_REASON_NAME","FPA",
-                   "SIGNIN_DTTM","CHECKIN_DTTM",
-                   "ROOMED DTTM","ROOM #","VITALS_TAKEN_TM","Provider_Enter_DTTM","Provider_Leave_DTTM",
-                   "VISIT_END_DTTM","CHECKOUT_DTTM")
- 
+                   "SIGNIN_DTTM","PAGED_DTTM","CHECKIN_DTTM","ARVL_LIST_REMOVE_DTTM",
+                   "ROOMED_DTTM","FIRST_ROOM_ASSIGN_DTTM","VITALS_TAKEN_TM",
+                   "PHYS_ENTER_DTTM","Provider_Leave_DTTM",
+                   "VISIT_END_DTTM","CHECKOUT_DTTM",
+                   "TIME_IN_ROOM_MINUTES","CYCLE_TIME_MINUTES")
+
 # Subset raw data 
 data.subset <- data.raw[original.cols]
 
-
-# [3.3] Change column names -----------------------------------------------------------------------------
-
+# Rename data fields (columns) 
 new.cols <- c("Campus","Campus.Specialty","Department","Provider",
               "MRN","Patient.Name","Zip.Code","Sex","Birth.Date","Coverage",
               "Appt.Made.DTTM","Appt.DTTM","Appt.Type","Appt.Dur","Appt.Status",
               "Appt.Cancel.DTTM", "Cancel.Reason","FPA",
-              "Signin.DTTM","Checkin.DTTM",
-              "Roomin.DTTM","ROOM #","Vitals.DTTM","Providerin_DTTM","Providerout_DTTM",
-              "Visitend.DTTM","Checkout.DTTM")
+              "Signin.DTTM","Paged.DTTM","Checkin.DTTM","Arrival.remove.DTTM",
+              "Roomin.DTTM","Room.assigned.DTTM","Vitals.DTTM",
+              "Providerin_DTTM","Providerout_DTTM",
+              "Visitend.DTTM","Checkout.DTTM",
+              "Time.in.room","Cycle.time")
 
 colnames(data.subset) <- new.cols
 
-#my.master.list should include all elements used for data pre-processing & analyses: my.master.list[["component name"]] <- component to be added
-my.master.list <- list(raw.data.columns = original.cols, new.data.columns = new.cols) 
+# Format Date and Time Columns
+dttm.cols <- c("Birth.Date","Appt.Made.DTTM","Appt.DTTM","Appt.Cancel.DTTM",
+               "Checkin.DTTM","Arrival.remove.DTTM","Roomin.DTTM","Room.assigned.DTTM",
+               "Vitals.DTTM","Providerin_DTTM","Providerout_DTTM",
+               "Visitend.DTTM","Checkout.DTTM")
 
-# [3.5] Formate Date and Time columns --------------------------------------------------------------------
+dttm <- function(x) {
+  as.POSIXct(x,format="%d-%b-%Y %H:%M:%S",tz=Sys.timezone())
+}
 
-# as.POSIXct(a, format="%Y-%m-%d %H:%M:%S"): timezone = "UTC"
-# as.POSIXct(master.data.raw$APPT_ARRIVAL_DTTM * (60*60*24), origin="1899-12-30", tz="UTC")
-# tz(master.data.raw$`CHECKIN TO CHECK OUT DATE`)
+data.subset$Birth.Date <- dttm(data.subset$Birth.Date)
+data.subset$Appt.Made.DTTM <- dttm(data.subset$Appt.Made.DTTM)
+data.subset$Appt.DTTM <- dttm(data.subset$Appt.DTTM)
+data.subset$Appt.Cancel.DTTM <- dttm(data.subset$Appt.Cancel.DTTM)
+data.subset$Checkin.DTTM <- dttm(data.subset$Checkin.DTTM)
+data.subset$Arrival.remove.DTTM <- dttm(data.subset$Arrival.remove.DTTM)
+data.subset$Roomin.DTTM <- dttm(data.subset$Roomin.DTTM)
+data.subset$Room.assigned.DTTM <- dttm(data.subset$Room.assigned.DTTM)
+data.subset$Vitals.DTTM <- dttm(data.subset$Vitals.DTTM)
+data.subset$Providerin_DTTM <- dttm(data.subset$Providerin_DTTM)
+data.subset$Providerout_DTTM <- dttm(data.subset$Providerout_DTTM)
+data.subset$Visitend.DTTM <- dttm(data.subset$Visitend.DTTM)
+data.subset$Checkout.DTTM <- dttm(data.subset$Checkout.DTTM)
 
-# Change numerical date and time value to date time format
-data.subset$Signin.DTTM <- as.POSIXct(master.data.raw$SIGNIN_DTTM * (60*60*24), origin="1899-12-30", tz="UTC")
-
-# [3.5] Remove duplicates in the data --------------------------------------------------------------------
-
+# Notify and remove duplicates in data 
 data.duplicates <- data.subset %>% duplicated()
-data.duplicates <- length(data.duplicates[data.duplicates == TRUE]) #count of duplicative records
+data.duplicates <- length(data.duplicates[data.duplicates == TRUE]) ## Count of duplicated records
+data.subset.new <- data.subset %>% distinct() ## New data set with duplicates removed
 
-# New subset data with duplicates removed
-data.subset.new <- data.subset %>% distinct()
-
-my.master.list[["processed data"]] <- data.subset.new # Add final pre-processed data to my.master.list
-
-# User notification of duplicative records v(pop-up window)
 if(data.duplicates == 0){
   tkmessageBox(title = "NOTE",
                message = "There are no duplicative records founds. Press OK to continue.", icon="info", type="ok")
@@ -161,244 +418,183 @@ if(data.duplicates == 0){
                message = print(paste(data.duplicates," duplicative data records removed. Press OK to continue.")))
 }
 
+# Create additional columns for analysis 
+data.subset.new$Appt.DateYear <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%Y-%m-%d") ## Create date-year column
+data.subset.new$Appt.MonthYear <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%b-%Y") ## Create month - year column
+data.subset.new$Appt.Date <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%m-%d") ## Create date column
+data.subset.new$Appt.Year <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%Y") ## Create year column
+data.subset.new$Appt.Month <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%b") ## Create month colunm
+data.subset.new$Appt.Day <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%a") ## Create day of week colunm
+data.subset.new$Appt.Quarter <- quarters(as.Date(data.subset.new$Appt.DTTM)) ## Create quarter column 
+data.subset.new$Appt.TM.Hr <- format(strptime(as.ITime(round_date(data.subset.new$Appt.DTTM, "hour")), "%H:%M:%S"),'%H:%M') ## Appt time rounded by hour 
+data.subset.new$Appt.TM.30m <- format(strptime(as.ITime(round_date(data.subset.new$Appt.DTTM, "30 minutes")), "%H:%M:%S"),'%H:%M') ## Appt time rounded by 30-min
+data.subset.new$Checkin.Hr <- format(strptime(as.ITime(round_date(data.subset.new$Checkin.DTTM, "hour")), "%H:%M:%S"),'%H:%M') ## Checkin time rounded by hour 
+data.subset.new$Checkin.30m <- format(strptime(as.ITime(round_date(data.subset.new$Checkin.DTTM, "30 minutes")), "%H:%M:%S"),'%H:%M') ## Checkin time rounded by 30-min
+data.subset.new$Lead.Days <- as.numeric(round(difftime(data.subset.new$Appt.DTTM, data.subset.new$Appt.Cancel.DTTM,  units = "days"),2)) ## Lead days for appt cancellation 
+data.subset.new$uniqueId <- paste(data.subset.new$Department,data.subset.new$MRN,data.subset.new$Appt.DTTM) ## Unique ID 
+data.subset.new$cycleTime <- as.numeric(round(difftime(data.subset.new$Visitend.DTTM,data.subset.new$Checkin.DTTM,units="mins"),1)) ## Checkin to Visitend (min)
+data.subset.new$checkinToRoomin <- as.numeric(round(difftime(data.subset.new$Roomin.DTTM,data.subset.new$Checkin.DTTM,units="mins"),1)) ## Checkin to Roomin (min)
+data.subset.new$providerinToOut <- as.numeric(round(difftime(data.subset.new$Providerout.DTTM,data.subset.new$Providerin.DTTM,units="mins"),1)) ## Provider in to out (min)
+data.subset.new$visitEndToCheckout <- as.numeric(round(difftime(data.subset.new$Checkout.DTTM,data.subset.new$Visitend.DTTM,units="mins"),1)) ## Visitend to Checkout (min)
+
+data.subset.new <- as.data.frame(data.subset.new)
 
 
-# [3.6] Create additional columns for analysis -------------------------------------------------------------
-## Create date-year column
-data.subset.new$Appt.DateYear <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%Y-%m-%d")
+### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
-## Create month - year column
-data.subset.new$Appt.MonthYear <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%b-%Y")
+all.data <- data.subset.new ## All data: Arrived, No Show, Canceled, Bumped, Rescheduled
+arrivedNoShow.data <- data.subset.new %>% filter(Appt.Status %in% c("Arrived","No Show")) ## Arrived + No Show data: Arrived and No Show
+arrived.data <- data.subset.new %>% filter(Appt.Status %in% c("Arrived")) ## Arrived data: Arrived
+canceled.data <- data.subset.new %>% filter(Appt.Status %in% c("Canceled")) ## Canceled data: canceled appointments only
+bumped.data <- data.subset.new %>% filter(Appt.Status %in% c("Bumped")) ## Bumped data: bumped appointments only
 
-## Create date column
-data.subset.new$Appt.Date <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%m-%d")
+### (5) Pre-processing Space Utilization Dataframe ----------------------------------------------------------------------
 
-## Create year column
-data.subset.new$Appt.Year <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%Y")
-
-## Create month colunm
-data.subset.new$Appt.Month <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%b")
-
-## Create day of week colunm
-data.subset.new$Appt.Day <- format(as.Date(data.subset.new$Appt.DTTM, format="%m/%d/%Y"), "%a")
-
-## Create quarter column 
-data.subset.new$Appt.Quarter <- quarters(as.Date(data.subset.new$Appt.DTTM))
-
-
-## Create rounded scheduled appointment times in hour and 30 minute intervals 
-data.subset.new$Appt.TM.Hr <- as.ITime(round_date(data.subset.new$Appt.DTTM, "hour"))
-data.subset.new$Appt.TM.Hr <- format(strptime(data.subset.new$Appt.TM.Hr ,"%H:%M:%S"),'%H:%M')
-data.subset.new$Appt.TM.30m <- as.ITime(round_date(data.subset.new$Appt.DTTM, "30 minutes"))
-data.subset.new$Appt.TM.30m  <- format(strptime(data.subset.new$Appt.TM.30m ,"%H:%M:%S"),'%H:%M')
-
-## Create rounded check-in times in hour and 30 minute intervals 
-data.subset.new$Checkin.Hr <- as.ITime(round_date(data.subset.new$Checkin.DTTM, "hour"))
-data.subset.new$Checkin.Hr <- format(strptime(data.subset.new$Checkin.Hr,"%H:%M:%S"),'%H:%M')
-data.subset.new$Checkin.30m <- as.ITime(round_date(data.subset.new$Checkin.DTTM, "30 minutes"))
-data.subset.new$Checkin.30m <- format(strptime(data.subset.new$Checkin.30m,"%H:%M:%S"),'%H:%M')
-
-# Create lead days to cancellation column
-data.subset.new$Lead.Days <- as.numeric(round(difftime(data.subset.new$Appt.DTTM, data.subset.new$Appt.Cancel.DTTM,  units = "days"),2))
-
-## Unique Identifier
-data.subset.new$uniqueId <- paste(data.subset.new$Department,data.subset.new$MRN,data.subset.new$Appt.DTTM)
-
-# (4) Subset data ==============================================================================================
-# All data: Arrived, No Show, Canceled, Bumped, Rescheduled
-all.data <- data.subset.new 
-
-# Arrived + No Show data: Arrived and No Show
-arrivedNoShow.data <- data.subset.new %>%
-  filter(Appt.Status %in% c("Arrived","No Show"))
-  
-# Arrived data: Arrived
-arrived.data <- data.subset.new %>%
-  filter(Appt.Status %in% c("Arrived"))
-
-## Create cycle time duration (min) - Visitend.DTTM - Checkin.DTTM
-arrived.data$cycleTime <- as.numeric(round(difftime(arrived.data$Visitend.DTTM,arrived.data$Checkin.DTTM,units="mins"),1))
-
-## Create Checkin to Rooming duration (min) - Checkin.DTTM - Roomin.DTTM
-arrived.data$checkinToRoomin <- as.numeric(round(difftime(arrived.data$Roomin.DTTM,arrived.data$Checkin.DTTM,units="mins"),1))
-
-## Create Provider in to Provider out duration (min) - Providerout.DTTM - Providerin.DTTM
-arrived.data$providerinToOut <- as.numeric(round(difftime(arrived.data$Providerout.DTTM,arrived.data$Providerin.DTTM,units="mins"),1))
-
-## Create Visit End to Check out duration (min) - Checkout.DTTM - Visitend.DTTM
-arrived.data$visitEndToCheckout <- as.numeric(round(difftime(arrived.data$Checkout.DTTM,arrived.data$Visitend.DTTM,units="mins"),1))
-
-# Canceled data: canceled appointments only
-canceled.data <- data.subset.new %>%
-  filter(Appt.Status %in% c("Canceled"))
-
-# Bumped data: bumped appointments only
-bumped.data <- data.subset.new %>%
-  filter(Appt.Status %in% c("Bumped"))
-
-# Save subsetted data to my.master.list
-my.master.list[["all data"]] <- all.data
-my.master.list[["arrived and noshow data"]] <- arrivedNoShow.data
-my.master.list[["arrived data"]] <- arrived.data
-my.master.list[["canceled.data"]] <- canceled.data
-my.master.list[["bumped.data"]] <- bumped.data
-
-
-#### ( ) Utilization Data Frame ==============================================================================
-
-# Arrived and No Show Data Pre-processed 
-
-scheduled.data <- arrivedNoShow.data
-
+scheduled.data <- arrivedNoShow.data ## All appts scheduled 
 scheduled.data$Appt.Start <- as.POSIXct(scheduled.data$Appt.TM.Hr, format = "%H:%M")
 scheduled.data$Appt.End <- as.POSIXct(scheduled.data$Appt.Start + scheduled.data$Appt.Dur*60, format = "%H:%M")
 
-## Data frame for 30-min interval (including both NOS and ARR) -----------------------------------------------------------------------
-# 
-# print.POSIXct <- function(x,...)print(format(x,"%Y-%m-%d %H:%M:%S"))
-# 
-# time.hour <- format(seq.POSIXt(as.POSIXct(Sys.Date()), as.POSIXct(Sys.Date()+1), by = "hour"),"%H:%M", tz="GMT")
-# time.hour <- time.hour[1:24]
-# 
-# time.hour.df <- data.frame(matrix(ncol=length(time.hour), nrow=nrow(scheduled.data)))
-# 
-# colnames(time.hour.df) <- time.hour
-# time.hour.df <- cbind(scheduled.data,time.hour.df)
-# 
-# ### Utilization calculation - Method 1 - While Loop
-# c.start <- which(colnames(time.hour.df)=="00:00")
-# c.end <- which(colnames(time.hour.df)=="23:00") + 1
-# 
-# midnight <- data.frame(matrix(ncol=1, nrow=nrow(scheduled.data)))
-# colnames(midnight) <- "00:00"
-# 
-# time.hour.df <- cbind(time.hour.df,midnight)
-# 
-# i <- 1
-# n <- nrow(time.hour.df) + 1
-# 
-# sleep_for_a_minute <- function() { Sys.sleep(60) }
-# start_time <- Sys.time()
-# sleep_for_a_minute()
-# 
-# while(c.start!=c.end){
-#  i <- 1
-# while(i!=n){
-# if(time.hour.df$Appt.Start[i] >= as.POSIXct(colnames(time.hour.df)[c.start], format = "%H:%M") &
-#    time.hour.df$Appt.Start[i] < as.POSIXct(colnames(time.hour.df)[c.start+1], format = "%H:%M")){
-# time.hour.df[i,c.start] <- pmin(time.hour.df$Appt.Dur[i],difftime(as.POSIXct(colnames(time.hour.df)[c.start+1],format = "%H:%M"),
-#                                                                   as.POSIXct(colnames(time.hour.df)[c.start],format = "%H:%M"), unit="mins"))
-# }else if(time.hour.df$Appt.End[i] >= as.POSIXct(colnames(time.hour.df)[c.start], format = "%H:%M") &
-#         time.hour.df$Appt.End[i] < as.POSIXct(colnames(time.hour.df)[c.start+1], format = "%H:%M")){
-# time.hour.df[i,c.start] <- difftime(time.hour.df$Appt.End[i],as.POSIXct(colnames(time.hour.df)[c.start], format = "%H:%M"), unit="mins")
-# }else if(time.hour.df$Appt.Start[i] >= as.POSIXct(colnames(time.hour.df)[c.start+1], format = "%H:%M")){
-#  time.hour.df[i,c.start] <- 0
-# }else if(time.hour.df$Appt.End[i] <= as.POSIXct(colnames(time.hour.df)[c.start], format = "%H:%M")){
-#  time.hour.df[i,c.start] <- 0
-# }else{
-#  time.hour.df[i,c.start] <- 60
-# }
-# i <- i+1
-# }
-# c.start <- c.start+1
-# }
-# 
-# time.hour.df <- time.hour.df[1:length(time.hour.df)-1]
-# 
-# data.hour.scheduled <- time.hour.df
-# 
-# data.hour.arrived <- time.hour.df %>%
-#   filter(Appt.Status %in% c("Arrived"))
-# 
-# write_xlsx(data.hour.arrived, "data.hour.arrived.xlsx")
-# 
-# end_time <- Sys.time()
-# 
-# processing.time1 <- (end_time - start_time) # 12.7 - 20.7 min to process 34,687 rows + 23 columns (processing time varies each time)
+# 1. Scheduled utilization dataframe by hour interval 
+#print.POSIXct <- function(x,...)print(format(x,"%Y-%m-%d %H:%M:%S"))
+
+time.hour <- format(seq.POSIXt(as.POSIXct(Sys.Date()), as.POSIXct(Sys.Date()+1), by = "hour"),"%H:%M", tz="GMT")
+time.hour <- time.hour[1:24]
+time.hour.df <- data.frame(matrix(ncol=length(time.hour), nrow=nrow(scheduled.data)))
+colnames(time.hour.df) <- time.hour
+time.hour.df <- cbind(scheduled.data,time.hour.df) ## Scheduled data + columns by hour 
+
+c.start <- which(colnames(time.hour.df)=="00:00")
+c.end <- which(colnames(time.hour.df)=="23:00") + 1
+
+midnight <- data.frame(matrix(ncol=1, nrow=nrow(scheduled.data)))
+colnames(midnight) <- "00:00"
+
+time.hour.df <- cbind(time.hour.df,midnight)
+
+i <- 1
+n <- nrow(time.hour.df) + 1
+
+sleep_for_a_minute <- function() { Sys.sleep(60) }
+start_time <- Sys.time()
+sleep_for_a_minute()
+
+while(c.start!=c.end){
+  i <- 1
+  while(i!=n){
+    if(time.hour.df$Appt.Start[i] >= as.POSIXct(colnames(time.hour.df)[c.start], format = "%H:%M") &
+       time.hour.df$Appt.Start[i] < as.POSIXct(colnames(time.hour.df)[c.start+1], format = "%H:%M")){
+      time.hour.df[i,c.start] <- pmin(time.hour.df$Appt.Dur[i],difftime(as.POSIXct(colnames(time.hour.df)[c.start+1],format = "%H:%M"),
+                                                                        as.POSIXct(colnames(time.hour.df)[c.start],format = "%H:%M"), unit="mins"))
+      }else if(time.hour.df$Appt.End[i] >= as.POSIXct(colnames(time.hour.df)[c.start], format = "%H:%M") &
+               time.hour.df$Appt.End[i] < as.POSIXct(colnames(time.hour.df)[c.start+1], format = "%H:%M")){
+        time.hour.df[i,c.start] <- difftime(time.hour.df$Appt.End[i],as.POSIXct(colnames(time.hour.df)[c.start], format = "%H:%M"), unit="mins")
+        }else if(time.hour.df$Appt.Start[i] >= as.POSIXct(colnames(time.hour.df)[c.start+1], format = "%H:%M")){
+          time.hour.df[i,c.start] <- 0
+          }else if(time.hour.df$Appt.End[i] <= as.POSIXct(colnames(time.hour.df)[c.start], format = "%H:%M")){
+            time.hour.df[i,c.start] <- 0
+          }else{time.hour.df[i,c.start] <- 60
+            }
+    i <- i+1
+  }
+  c.start <- c.start+1
+  }
+
+time.hour.df <- time.hour.df[1:length(time.hour.df)-1]
+
+data.hour.scheduled <- time.hour.df
+
+data.hour.arrived <- time.hour.df %>% filter(Appt.Status %in% c("Arrived")) ## Utilization by hour data for arrived appts only 
+
+write_xlsx(data.hour.scheduled, "scheduled_util_by_hour.xlsx")
+write_xlsx(data.hour.arrived, "actual_util_by_hour.xlsx")
+
+end_time <- Sys.time()
+
+processing.time1 <- (end_time - start_time) # 12.7 - 20.7 min to process 34,687 rows + 23 columns (processing time varies each time)
 processing.time1
 
-data.hour.arrived <- "data.hour.arrived.csv"
-data.hour.arrived <- read_csv(data.hour.arrived)
+# 2. Scheduled utilization dataframe by 30-min interval 
 
-## Data frame for 30-min interval (including both NOS and ARR) -----------------------------------------------------------------------
+time.30min <- format(seq.POSIXt(as.POSIXct(Sys.Date()), as.POSIXct(Sys.Date()+1), by = "30 min"),"%H:%M", tz="GMT")
+time.30min <- time.30min[1:48]
 
-# time.30min <- format(seq.POSIXt(as.POSIXct(Sys.Date()), as.POSIXct(Sys.Date()+1), by = "30 min"),"%H:%M", tz="GMT")
-# time.30min <- time.30min[1:48]
-# 
-# time.30min.df <- data.frame(matrix(ncol=length(time.30min), nrow=nrow(scheduled.data)))
-# 
-# colnames(time.30min.df) <- time.30min
-# time.30min.df <- cbind(scheduled.data,time.30min.df)
-# 
-# c.start <- which(colnames(time.30min.df)=="00:00") 
-# c.end <- which(colnames(time.30min.df)=="23:30") + 1
-# 
-# midnight <- data.frame(matrix(ncol=1, nrow=nrow(scheduled.data)))
-# colnames(midnight) <- "00:00"
-# 
-# time.30min.df <- cbind(time.30min.df,midnight)
-# 
-# i <- 1
-# n <- nrow(time.30min.df) + 1
-# 
-# sleep_for_a_minute <- function() { Sys.sleep(60) }
-# start_time <- Sys.time()
-# sleep_for_a_minute()
-# 
-# while(c.start!=c.end){
-# i <- 1
-# while(i!=n){
-# if(time.30min.df$Appt.Start[i] >= as.POSIXct(colnames(time.30min.df)[c.start], format = "%H:%M") &
-#  time.30min.df$Appt.Start[i] < as.POSIXct(colnames(time.30min.df)[c.start+1], format = "%H:%M")){
-# time.30min.df[i,c.start] <- pmin(time.30min.df$Appt.Dur[i],difftime(as.POSIXct(colnames(time.30min.df)[c.start+1],format = "%H:%M"), 
-#                                                                       as.POSIXct(colnames(time.30min.df)[c.start],format = "%H:%M"), unit="mins"))
-# }else if(time.30min.df$Appt.End[i] >= as.POSIXct(colnames(time.30min.df)[c.start], format = "%H:%M") &
-#         time.30min.df$Appt.End[i] < as.POSIXct(colnames(time.30min.df)[c.start+1], format = "%H:%M")){
-# time.30min.df[i,c.start] <- difftime(time.30min.df$Appt.End[i],as.POSIXct(colnames(time.30min.df)[c.start], format = "%H:%M"), unit="mins")
-# }else if(time.30min.df$Appt.Start[i] >= as.POSIXct(colnames(time.30min.df)[c.start+1], format = "%H:%M")){
-#  time.30min.df[i,c.start] <- 0
-# }else if(time.30min.df$Appt.End[i] <= as.POSIXct(colnames(time.30min.df)[c.start], format = "%H:%M")){
-#  time.30min.df[i,c.start] <- 0
-# }else{
-#  time.30min.df[i,c.start] <- 30
-# }
-# i <- i+1
-# }
-# c.start <- c.start+1
-# }
-# 
-# time.30min.df <- time.30min.df[1:length(time.30min.df)-1]
-# data.30min.scheduled <- time.30min.df
-# data.30min.arrived <- data.30min.scheduled %>%
-#   filter(Appt.Status %in% c("Arrived"))
-# write_xlsx(time.30min.df, "time.30min.df.xlsx")
-# 
-# end_time <- Sys.time()
-# 
-# processing.time2 <- (end_time - start_time) # 26.1 min to process 34,687 rows + 47 columns
+time.30min.df <- data.frame(matrix(ncol=length(time.30min), nrow=nrow(scheduled.data)))
+
+colnames(time.30min.df) <- time.30min
+time.30min.df <- cbind(scheduled.data,time.30min.df)
+
+c.start <- which(colnames(time.30min.df)=="00:00")
+c.end <- which(colnames(time.30min.df)=="23:30") + 1
+
+midnight <- data.frame(matrix(ncol=1, nrow=nrow(scheduled.data)))
+colnames(midnight) <- "00:00"
+
+time.30min.df <- cbind(time.30min.df,midnight)
+
+i <- 1
+n <- nrow(time.30min.df) + 1
+
+sleep_for_a_minute <- function() { Sys.sleep(60) }
+start_time <- Sys.time()
+sleep_for_a_minute()
+
+while(c.start!=c.end){
+  i <- 1
+  while(i!=n){
+    if(time.30min.df$Appt.Start[i] >= as.POSIXct(colnames(time.30min.df)[c.start], format = "%H:%M") &
+       time.30min.df$Appt.Start[i] < as.POSIXct(colnames(time.30min.df)[c.start+1], format = "%H:%M")){
+      time.30min.df[i,c.start] <- pmin(time.30min.df$Appt.Dur[i],difftime(as.POSIXct(colnames(time.30min.df)[c.start+1],format = "%H:%M"),
+                                                                          as.POSIXct(colnames(time.30min.df)[c.start],format = "%H:%M"), unit="mins"))
+      }else if(time.30min.df$Appt.End[i] >= as.POSIXct(colnames(time.30min.df)[c.start], format = "%H:%M") &
+               time.30min.df$Appt.End[i] < as.POSIXct(colnames(time.30min.df)[c.start+1], format = "%H:%M")){
+        time.30min.df[i,c.start] <- difftime(time.30min.df$Appt.End[i],as.POSIXct(colnames(time.30min.df)[c.start], format = "%H:%M"), unit="mins")
+        }else if(time.30min.df$Appt.Start[i] >= as.POSIXct(colnames(time.30min.df)[c.start+1], format = "%H:%M")){
+          time.30min.df[i,c.start] <- 0
+          }else if(time.30min.df$Appt.End[i] <= as.POSIXct(colnames(time.30min.df)[c.start], format = "%H:%M")){
+            time.30min.df[i,c.start] <- 0
+            }else{
+              time.30min.df[i,c.start] <- 30
+              }
+    i <- i+1}
+  c.start <- c.start+1
+  }
+
+time.30min.df <- time.30min.df[1:length(time.30min.df)-1]
+
+data.30min.scheduled <- time.30min.df
+data.30min.arrived <- data.30min.scheduled %>% filter(Appt.Status %in% c("Arrived"))
+
+write_xlsx(data.hour.scheduled, "scheduled_util_by_30min.xlsx")
+write_xlsx(data.hour.arrived, "actual_util_by_30min.xlsx")
+
+end_time <- Sys.time()
+
+processing.time2 <- (end_time - start_time) # 26.1 min to process 34,687 rows + 47 columns
 processing.time2
-time.30min.arrived <- "time.30min.df.csv"
-time.30min.arrived <- read_csv(time.30min.arrived)
+
+# # Import calculated utilization dataframes
+# data.hour.arrived <- read_excel("actual_util_by_hour.xlsx", col_names = TRUE, na = c("", "NA"))
+# data.hour.scheduled <- read_excel("scheduled_util_by_hour.xlsx", col_names = TRUE, na = c("", "NA"))
+# data.30min.arrived <- read_excel("actual_util_by_30min.xlsx", col_names = TRUE, na = c("", "NA"))
+# data.30min.scheduled <- read_excel("scheduled_util_by_30min.xlsx", col_names = TRUE, na = c("", "NA"))
 
 
-#### (4) Shiny App ===========================================================================================
-# [4.1] Days of week filters ---------------------------------------------------------------------------------
-daysOfWeek.options <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+### (6) Shiny App Components Set-up -------------------------------------------------------------------------------
 
-# [4.2] Time range filters -----------------------------------------------------------------------------------
+# Mater Filters 
+daysOfWeek.options <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun") ## Days of Week Filter
 
 timeOptionsHr <- c("00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00",
-                    "10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00",
-                    "20:00","21:00","22:00","23:00")
+                   "10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00",
+                   "20:00","21:00","22:00","23:00") ## Time Range by Hour Filter
 
 timeOptions30m <- c("00:00","00:30","01:00","01:30","02:00","02:30","03:00","03:30","04:00","04:30",
                     "05:00","05:30","06:00","06:30","07:00","07:30","08:00","08:30","09:00","09:30",
                     "10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30",
                     "15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30",
-                    "20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30")
+                    "20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30") ## Time Range by 30min Filter
 
 # KPI Filters
-
 KPIvolumeOptions <- c("Appointment Volume","Appointment Status")
 KPIschedulingOptions <- c("Booked Rate","Fill Rate")
 KPIaccessOptions <- c("New Patient Ratio","Appointment Lead Time","3rd Next Available")
@@ -408,33 +604,27 @@ kpiOptions <- c("Patient Volume","Appointment Status",
                 "New Patient Ratio","New Patient Wait Time","3rd Next Available",
                 "Check-in to Room-in Time","Provider Time")
 
-# Total Days in the Entire Data Set 
-daysOfWeek.Table <- 
-  data.hour.arrived %>%
-  group_by(Appt.Day,Appt.DateYear) %>%
-  summarise(count = n()) %>%
-  summarise(count = n())
+# Reference dataframes, vectors, etc.
+daysOfWeek.Table <- data.hour.arrived %>% group_by(Appt.Day,Appt.DateYear) %>% summarise(count = n()) %>% summarise(count = n()) ## Total Days in the Entire Data Set 
 
-# Empty data frame for day of week by time (hour)
 Time <- rep(timeOptionsHr, 7)
 Day <- rep(daysOfWeek.options, each = 24)
-byDayTime.df <- as.data.frame(cbind(Day,Time))
+byDayTime.df <- as.data.frame(cbind(Day,Time)) ## Empty data frame for day of week by time (hour)
 
-# Empty data frame for date and time (hour)
 dateInData <- length(unique(data.hour.arrived$Appt.DateYear))
 Date <- rep(unique(data.hour.arrived$Appt.DateYear), each = 24)
 Time <- rep(timeOptionsHr, dateInData)
-byDateTime.df <- as.data.frame(cbind(Date,Time))
+byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (hour)
 
-# Empty data frame for time (hour)
 byTime.df <- as.data.frame(timeOptionsHr)
-colnames(byTime.df) <- c("Time")
+colnames(byTime.df) <- c("Time") ## Empty data frame for time (hour)
 
-# [4.2] Data filter functions ---------------------------------------------------------------------------------
+
+# (7) Data Reactive functions ---------------------------------------------------------------------------------
+
 groupByFilters <- function(dt, campus, specialty, department, provider, mindateRange, maxdateRange, daysofweek){
   result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Provider %in% provider,
-                          mindateRange <= Appt.DTTM, maxdateRange >= Appt.DTTM, Appt.Day %in% daysofweek
-  )
+                          mindateRange <= Appt.DTTM, maxdateRange >= Appt.DTTM, Appt.Day %in% daysofweek)
   return(result)
 }
 
@@ -443,7 +633,7 @@ groupByFilters_1 <- function(dt, apptType, insurance){
   return(result)
 }
 
-# PLACEHOLDER FOR DAY OF VISIT ANALYSIS ------------------------------------------------------------------------
+# (8) PLACEHOLDER FOR DAY OF VISIT ANALYSIS ------------------------------------------------------------------------
 library(edeaR)
 ex_patients <- "example patient flow observation.csv"
 ex_patients <- read.csv(ex_patients, stringsAsFactors = TRUE)

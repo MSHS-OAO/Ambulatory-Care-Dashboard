@@ -1,7 +1,7 @@
 ui <- dashboardPage(
-
+  
   ### UI start-----------------------------------------------------------
-  dashboardHeader(title = "Operational Dashboard",
+  dashboardHeader(title = "Amb Care Analytics Tool",
                   titleWidth = 250),
   dashboardSidebar(
     # Customize dashboard color scheme: title bar = .logo & .navbar; side bar = .main-sidebar; background = .content-wrapper
@@ -46,7 +46,7 @@ ui <- dashboardPage(
                 menuItem("Help", tabName = "help", icon = icon("question-circle"),
                          menuSubItem("About", tabName = "helpabout", icon = icon("info")),
                          menuSubItem("Analysis Methods", tabName = "helpanalysis", icon = icon("file-excel")))
-                ) # Close sidebarMenu
+    ) # Close sidebarMenu
     
   ), # Close dashboardSidebar
   
@@ -77,92 +77,92 @@ ui <- dashboardPage(
                      tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                      #textOutput("practiceName_profile"),
                      column(8,
-                     boxPlus(
-                       title = "Volume", width = 12, status = "primary",
-                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                       fluidRow(
-                         valueBoxOutput("uniquePts", width=3),
-                         valueBoxOutput("totalVisits", width=3),
-                         valueBoxOutput("avgVisitsPt", width=3),
-                         valueBoxOutput("avgVisitsDay", width=3)),
-                       plotOutput("avgPtArrival")
-                       ),
-                     boxPlus(
-                       title = "Day of Visit", width = 12, status = "primary",
-                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                       fluidRow(valueBoxOutput("avgCycleTime", width=3),
-                                valueBoxOutput("avgCheckinToRoomin", width=3),
-                                valueBoxOutput("avgProviderTime", width=3),
-                                valueBoxOutput("avgCheckoutTime", width=3)))
+                            boxPlus(
+                              title = "Volume", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              fluidRow(
+                                valueBoxOutput("uniquePts", width=3),
+                                valueBoxOutput("totalVisits", width=3),
+                                valueBoxOutput("avgVisitsPt", width=3),
+                                valueBoxOutput("avgVisitsDay", width=3)),
+                              plotOutput("avgPtArrival")
+                            ),
+                            boxPlus(
+                              title = "Day of Visit", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              fluidRow(valueBoxOutput("avgCycleTime", width=3),
+                                       valueBoxOutput("avgCheckinToRoomin", width=3),
+                                       valueBoxOutput("avgProviderTime", width=3),
+                                       valueBoxOutput("avgCheckoutTime", width=3)))
                      ),
-              column(4,
-                     boxPlus(
-                       title = "Access", width = 12, status = "primary",
-                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                       fluidRow(infoBoxOutput("newPtRatio", width =12)),
-                       fluidRow(infoBoxOutput("thirdDays", width=12)),
-                       fluidRow(infoBoxOutput("apptWaitTime", width=12))
-                     ),
-                     boxPlus(
-                       title = "Scheduling", width = 12, status = "primary",
-                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                       fluidRow(plotOutput("fillRate", height = "150px")),
-                       fluidRow(plotOutput("apptStatus", height = "250px"))
-                     ))
+                     column(4,
+                            boxPlus(
+                              title = "Access", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              fluidRow(infoBoxOutput("newPtRatio", width =12)),
+                              fluidRow(infoBoxOutput("thirdDays", width=12)),
+                              fluidRow(infoBoxOutput("apptWaitTime", width=12))
+                            ),
+                            boxPlus(
+                              title = "Scheduling", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              fluidRow(plotOutput("fillRate", height = "150px")),
+                              fluidRow(plotOutput("apptStatus", height = "250px"))
+                            ))
               )),
       
       tabItem(tabName = "KPIs",
               # KPIs Tab --------------------------------------------------------------------------------------------------------------------
-                column(10,
-                       div("KPIs", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                       tags$style("#practiceName1{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
-                       #textOutput("practiceName_KPIs"),
-                       column(2,
-                              # box(
-                              #   title = NULL,
-                              #   width = 12,
-                              #   solidHeader = FALSE,
-                              #   checkboxGroupInput(
-                              #     inputId = "selectedKPIs", label = h4("Select KPIs:"),
-                              #     choices = kpiOptions,
-                              #     selected = "Volume")),
-                              box(
-                                title = NULL,
-                                width = 12,
-                                solidHeader = FALSE,
-                                radioButtons("kpiTrend", label = h4("Compare KPIs by:"),
-                                             choices = list("Historical Trend" = 1, "Seasonality" = 2), 
-                                             selected = 1)),
-                              box(
-                                title = NULL,
-                                width = 12,
-                                solidHeader = FALSE,
-                                radioButtons("kpiFreq", label = h4("Display KPIs by:"),
-                                             choices = list("Year" = 1, "Quarter" = 2, "Month" = 3, "Day" = 4), 
-                                             selected = 1))
-                       ),
-                       column(10,
-                              boxPlus(
-                                title = "Volume KPIs", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("kpiVolumeGraph")
-                              ),
-                              boxPlus(
-                                title = "Scheduling KPIs", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("kpiApptStatusGraph", height="800px")
-                              ),
-                              boxPlus(
-                                title = "Access KPIs", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE
-                              ),
-                              boxPlus(
-                                title = "Day of Visit KPIs", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("kpiWaitTimeGraph")
-                              )
-                              )
-  
+              column(10,
+                     div("KPIs", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     tags$style("#practiceName1{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                     #textOutput("practiceName_KPIs"),
+                     column(2,
+                            # box(
+                            #   title = NULL,
+                            #   width = 12,
+                            #   solidHeader = FALSE,
+                            #   checkboxGroupInput(
+                            #     inputId = "selectedKPIs", label = h4("Select KPIs:"),
+                            #     choices = kpiOptions,
+                            #     selected = "Volume")),
+                            box(
+                              title = NULL,
+                              width = 12,
+                              solidHeader = FALSE,
+                              radioButtons("kpiTrend", label = h4("Compare KPIs by:"),
+                                           choices = list("Historical Trend" = 1, "Seasonality" = 2), 
+                                           selected = 1)),
+                            box(
+                              title = NULL,
+                              width = 12,
+                              solidHeader = FALSE,
+                              radioButtons("kpiFreq", label = h4("Display KPIs by:"),
+                                           choices = list("Year" = 1, "Quarter" = 2, "Month" = 3, "Day" = 4), 
+                                           selected = 1))
+                     ),
+                     column(10,
+                            boxPlus(
+                              title = "Volume KPIs", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              plotOutput("kpiVolumeGraph")
+                            ),
+                            boxPlus(
+                              title = "Scheduling KPIs", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              plotOutput("kpiApptStatusGraph", height="800px")
+                            ),
+                            boxPlus(
+                              title = "Access KPIs", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE
+                            ),
+                            boxPlus(
+                              title = "Day of Visit KPIs", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              plotOutput("kpiWaitTimeGraph")
+                            )
+                     )
+                     
               )),
       
       # Population Tab ------------------------------------------------------------------------------------------------------
@@ -170,28 +170,28 @@ ui <- dashboardPage(
               column(10,
                      div("Population", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$style("#practiceName1{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
-                       column(12,
-                              boxPlus(
-                                title = "Patient Gender and Age Group", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                fluidRow(
-                                  column(6, offset = 3, plotOutput("sex_breakdown", height = "300px"))),
-                                fluidRow(
-                                  plotOutput("pop_breakdown", width = "100%", height = "500px")))
-                       ),
-                       column(12,
-                              boxPlus(
-                                title = "Insurance Types", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("ins_breakdown", width = "100%", height = "600px"))
-                       ),
-                       column(12,
-                              boxPlus(
-                                title = "Geographical Analysis", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                leafletOutput("population1", width = "100%", height = "800px")))
-                       )
-              ),
+                     column(12,
+                            boxPlus(
+                              title = "Patient Gender and Age Group", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              fluidRow(
+                                column(6, offset = 3, plotOutput("sex_breakdown", height = "300px"))),
+                              fluidRow(
+                                plotOutput("pop_breakdown", width = "100%", height = "500px")))
+                     ),
+                     column(12,
+                            boxPlus(
+                              title = "Insurance Types", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              plotOutput("ins_breakdown", width = "100%", height = "600px"))
+                     ),
+                     column(12,
+                            boxPlus(
+                              title = "Geographical Analysis", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              leafletOutput("population1", width = "100%", height = "800px")))
+              )
+      ),
       
       # Volume Tab -----------------------------------------------------------------------------------------------------------
       tabItem(tabName = "volume",
@@ -255,14 +255,14 @@ ui <- dashboardPage(
                          fluidRow(
                            column(6, plotOutput("avgNoShowCount", height="600px")),
                            column(6, plotOutput("avgNoShowPercent", height = "600px")))
-                         ),
+                       ),
                        boxPlus(
                          title = "No Shows by Lead Days to Appointment", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                          br(),
                          plotOutput("noShowLeadDays", height = "600px"))
                      )
-                     )),
+              )),
       
       tabItem(tabName = "cancellations",
               column(10,
@@ -275,7 +275,7 @@ ui <- dashboardPage(
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                          column(6, plotOutput("canceledLeadDays")),
                          column(6, "placeholder for cancellation reason graph"))
-                       ),
+                     ),
                      fluidRow(
                        boxPlus(
                          title = "Bumps", width = 12, status = "primary",
@@ -283,7 +283,7 @@ ui <- dashboardPage(
                          column(6, plotOutput("bumpedLeadDays")),
                          column(6, "placeholder for bumped reason graph"))
                      )
-                     )),
+              )),
       
       # Utilization Tab ------------------------------------------------------------------------------------------------------
       tabItem(tabName = "utilization",
@@ -304,20 +304,20 @@ ui <- dashboardPage(
                                 column(3, valueBoxOutput("avgRoomsRequired", width=12)),
                                 column(3, valueBoxOutput("avgUtilization", width=12))),
                               hr(),
-                                tabBox(
-                                  title = NULL,
-                                  id = "tabset1", width = "100%", height = "1000px",
-                                  tabPanel("Average", 
-                                           plotOutput("spaceUsed", height = "900px"),
-                                           hr(),
-                                           plotOutput("spaceUtil", height = "900px")),
-                                  tabPanel("Percentiles",
-                                           plotOutput("spaceUsedPerc", height = "900px"),
-                                           hr(),
-                                           plotOutput("spaceUtilPerc", height = "900px")
-                                           ))
-                              ))
-                     )),
+                              tabBox(
+                                title = NULL,
+                                id = "tabset1", width = "100%", height = "1000px",
+                                tabPanel("Average", 
+                                         plotOutput("spaceUsed", height = "900px"),
+                                         hr(),
+                                         plotOutput("spaceUtil", height = "900px")),
+                                tabPanel("Percentiles",
+                                         plotOutput("spaceUsedPerc", height = "900px"),
+                                         hr(),
+                                         plotOutput("spaceUtilPerc", height = "900px")
+                                ))
+                            ))
+              )),
       
       # Access Tab ------------------------------------------------------------------------------------------------------------
       # tabItem(tabName = "access"),
@@ -353,7 +353,7 @@ ui <- dashboardPage(
                          title = "New Patient Sources", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                          "Placeholder for breakdown of new patient visit sources"))
-                     )),
+              )),
       
       tabItem(tabName = "upcomingDemand",
               column(10,
@@ -383,7 +383,7 @@ ui <- dashboardPage(
                            tabPanel("By Provider",
                                     "Placeholder for booked rate (%) by day and provider"))))
               )),
-
+      
       tabItem(tabName = "slotUsage",
               column(10,
                      div("Access | Slot Usage", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
@@ -400,10 +400,10 @@ ui <- dashboardPage(
                                     "Placeholder for booked vs. filled rate (%) by day"),
                            tabPanel("By Provider",
                                     "Placeholder for booked rate vs. filled (%) by day and provider"))))
-    
+                     
               )),
-
-            
+      
+      
       # Day of Visit Tab ------------------------------------------------------------------------------------------------------------
       tabItem(tabName = "day",
               column(10,
@@ -420,7 +420,7 @@ ui <- dashboardPage(
                                 valueBoxOutput("avgNonValueAdded", width=4)),
                               fluidRow(
                                 plotOutput("cycleTimeDis", height = "400px"))
-                              ),
+                            ),
                             boxPlus(
                               title = "Paient Flow and Frequency", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -442,14 +442,14 @@ ui <- dashboardPage(
                                 tabPanel("Median",
                                          grVizOutput("vsm_durMed"))))
                             
-                            ))
+                     ))
       ),
       
       # Data Tab ---------------------------------------------------------------------------------------------------------------
       tabItem(tabName = "data",
               DT::dataTableOutput(outputId = "dTableAll"))
       
-      ),
+    ),
     
     # Master Filter Panel ---------------------------------------------------------------------------------------------------------------------
     conditionalPanel(
@@ -473,7 +473,7 @@ ui <- dashboardPage(
              uiOutput("daysOfWeekControl")
       ))
     
-
+    
     
   ) # Close daashboardBody
 ) # Close DashboardPage
