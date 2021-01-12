@@ -45,6 +45,7 @@
 # install.packages("plyr")
 
 suppressMessages({
+  library(ggplot2)
   library(readxl)
   library(writexl)
   library(plyr)
