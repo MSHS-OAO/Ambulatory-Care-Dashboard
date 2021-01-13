@@ -43,6 +43,10 @@
 # install.packages("vroom")
 # install.packages("lubridate")
 # install.packages("plyr")
+# install.packages("sjmisc")
+# install.packages("shinyBS")
+# install.packages("shinyscreenshot")
+
 
 suppressMessages({
   library(readxl)
@@ -101,6 +105,8 @@ suppressMessages({
   library(sjmisc)
   library(tools)
   library(here)
+  library(shinyBS)
+  library(shinyscreenshot)
 })
 
 # ### (0) Maximize R Memory Size 
