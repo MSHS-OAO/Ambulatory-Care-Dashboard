@@ -390,13 +390,13 @@ ui <- dashboardPage(
                        boxPlus(
                          title = "Scheduled Patients", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                         plotOutput("scheduledPts", height = "500px"))
+                         plotOutput("scheduledPts", height = "600px"))
                      ),
                      fluidRow(
                        boxPlus(
                          title = "Arrived Patients", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                         plotOutput("arrivedPts", height = "500px"))
+                         plotOutput("arrivedPts", height = "600px"))
                      ))),
       
       tabItem(tabName = "noshows",
@@ -406,14 +406,18 @@ ui <- dashboardPage(
                      #textOutput("practiceName_utilization"),
                      fluidRow(
                        boxPlus(
-                         title = "No Shows by Time of Day", width = 12, status = "primary",
+                         title = "No Show Summary", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                          br(),
                          fluidRow(
                            column(3, uiOutput("apptTypeControl")),
                            column(3, uiOutput("insuranceControl")),
                            column(3, valueBoxOutput("avgDailyNoShow_Count", width = 12)),
-                           column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
+                           column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12)))
+                       ),
+                       boxPlus(
+                         title = "No Shows by Time of Day", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                          fluidRow(
                            column(6, plotOutput("avgNoShowCount", height="800px")),
                            column(6, plotOutput("avgNoShowPercent", height = "800px")))
@@ -430,27 +434,39 @@ ui <- dashboardPage(
               column(10,
                      div("Scheduling | Bumps/Cancellations", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
-                     fluidRow(
                        boxPlus(
-                         title = "Total Bumped/Canceled/Recheduled", width = 12, status = "primary",
+                         title = "Bumped/Canceled/Recheduled Summary", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
-                         valueBoxOutput("totalCanceledBumpedBox", width = 4), 
-                         valueBoxOutput("totalCanceledBox", width = 4),
-                         valueBoxOutput("totalBumpedBox", width = 4))),
-                     column(5,
-                            boxPlus(
-                              title = "Bump/Cancellation Lead Days", width = 12, status = "primary",
-                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("canceledBumpedLeadDays", height = "980px"))),
-                     column(7,
-                            boxPlus(
-                              title = "Top 10 Canceled Reasons", width = 12, status = "primary",
-                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("canceledReasonsLeadDays", height = "450px")),
-                            boxPlus(
-                              title = "Top 10 Bumped Reasons", width = 12, status = "primary",
-                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("bumpedReasonsLeadDays", height = "450px")))
+                         fluidRow(valueBoxOutput("totalBumpedCanceledRescheduledBox", width = 3),
+                                  valueBoxOutput("totalBumpedBox", width = 3), 
+                                  valueBoxOutput("totalCanceledBox", width = 3),
+                                  valueBoxOutput("totalRescheduledBox", width = 3)),
+                         fluidRow(valueBoxOutput("avgDailyBumpedCanceledRescheduledBox", width = 3),
+                                  valueBoxOutput("avgDailyBumpedBox", width = 3), 
+                                  valueBoxOutput("avgDailyCanceledBox", width = 3),
+                                  valueBoxOutput("avgDailyRescheduledBox", width = 3))),
+                     fluidRow(
+                       column(5,
+                              boxPlus(
+                                title = "Same-Day Bumped/Canceled/Rescheduled", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                plotOutput("sameDayBumpedCanceledRescheduled ", height = "500px"))),
+                       column(7,
+                              boxPlus(
+                                title = "Top 10 Bumped Reasons", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                plotOutput("bumpedReasonsLeadDays", height = "500px")))),
+                     fluidRow(
+                       column(5,
+                              boxPlus(
+                                title = "Bumped/Canceled/Rescheduled Lead Days", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                plotOutput("bumpedCanceledRescheduledLeadDays", height = "500px"))),
+                       column(7,
+                              boxPlus(
+                                title = "Top 10 Canceled Reasons", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                plotOutput("canceledReasonsLeadDays", height = "500px"))))
               )),
       
       
@@ -489,7 +505,7 @@ ui <- dashboardPage(
                                                   inputId = "utilType",
                                                   label = h4("Analysis based on:"),
                                                   size = "lg",
-                                                  choices = c("SCHEDULED time and duration", "ACTUAL time and duration"),
+                                                  choices = list("scheduled" ="SCHEDULED time and duration", "arrived" = "ACTUAL time and duration"),
                                                   checkIcon = list(
                                                     yes = tags$i(class = "fa fa-check-square", style = "color: steelblue"),
                                                     no = tags$i(class = "fa fa-square-o", style = "color: steelblue"))))),

@@ -45,7 +45,6 @@
 # install.packages("plyr")
 
 suppressMessages({
-  library(ggplot2)
   library(readxl)
   library(writexl)
   library(plyr)
@@ -105,7 +104,7 @@ suppressMessages({
 })
 
 # ### (0) Maximize R Memory Size 
-# memory.limit(size = 8000000)
+memory.limit(size = 8000000)
 
 ### (1) Set aesthetics theme -----------------------------------------------------------------------------
 
@@ -683,6 +682,8 @@ util.function <- function(time, df){
 
 # Pre-process Utilization by Hour based on Scheduled Appointment Times --------------------------------------------------
 data.hour.scheduled <- scheduled.data
+data.hour.scheduled$actual.visit.dur <- data.hour.scheduled$Appt.Dur
+
 data.hour.scheduled$Appt.Start <- as.POSIXct(data.hour.scheduled$Appt.DTTM, format = "%H:%M")
 data.hour.scheduled$Appt.End <- as.POSIXct(data.hour.scheduled$Appt.Start + data.hour.scheduled$Appt.Dur*60, format = "%H:%M")
 
@@ -718,8 +719,8 @@ data.hour.scheduled$`22:00` <- util.function("22:00:00", data.hour.scheduled)
 data.hour.scheduled$`23:00` <- util.function("23:00:00", data.hour.scheduled)  
 
 # Data Validation
-# colnames(data.hour.scheduled[65])
-data.hour.scheduled$sum <- rowSums(data.hour.scheduled [,65:88])
+# colnames(data.hour.scheduled[89])
+data.hour.scheduled$sum <- rowSums(data.hour.scheduled [,66:89])
 data.hour.scheduled$actual <- as.numeric(difftime(data.hour.scheduled$Appt.End.Time, data.hour.scheduled$Appt.Start.Time, units = "mins"))
 data.hour.scheduled$comparison <- ifelse(data.hour.scheduled$sum ==data.hour.scheduled$actual, 0, 1)
 # nrow(data.hour.scheduled %>% filter(comparison == 1))/nrow(data.hour.scheduled)
@@ -733,9 +734,12 @@ data.hour.arrived.all$actual.visit.dur <- round(difftime(data.hour.arrived.all$V
 ########### Analysis of % of visits with actual visit start and end times ############
 # nrow(data.hour.arrived %>% filter(!is.na(Roomin.DTTM) & !is.na(Visitend.DTTM)))/nrow(data.hour.arrived)
 
-data.hour.arrived.all$Appt.Start.Time <- format(strptime(as.ITime(data.hour.arrived.all$Roomin.DTTM), "%H:%M:%S"),'%H:%M:%S')
-data.hour.arrived.all$Appt.Start.Time <- as.POSIXct(data.hour.arrived.all$Appt.Start, format = "%H:%M")
-data.hour.arrived.all$Appt.End.Time <- as.POSIXct(data.hour.arrived.all$Appt.Start + data.hour.arrived.all$actual.visit.dur, format = "%H:%M")
+data.hour.arrived.all$Appt.Start <- format(strptime(as.ITime(data.hour.arrived.all$Roomin.DTTM), "%H:%M:%S"),'%H:%M:%S')
+data.hour.arrived.all$Appt.Start <- as.POSIXct(data.hour.arrived.all$Appt.Start, format = "%H:%M")
+data.hour.arrived.all$Appt.End <- as.POSIXct(data.hour.arrived.all$Appt.Start + data.hour.arrived.all$actual.visit.dur, format = "%H:%M")
+
+data.hour.arrived.all$Appt.Start.Time <- data.hour.arrived.all$Appt.Start
+data.hour.arrived.all$Appt.End.Time <- data.hour.arrived.all$Appt.End
 
 data.hour.arrived.all$time.interval <- interval(data.hour.arrived.all$Appt.Start.Time, data.hour.arrived.all$Appt.End.Time)
 
@@ -768,11 +772,17 @@ data.hour.arrived$`22:00` <- util.function("22:00:00", data.hour.arrived)
 data.hour.arrived$`23:00` <- util.function("23:00:00", data.hour.arrived)  
 
 # Data Validation
-colnames(data.hour.arrived[64])
-data.hour.arrived$sum <- rowSums(data.hour.arrived [,64:87])
+# colnames(data.hour.arrived[89])
+data.hour.arrived$sum <- rowSums(data.hour.arrived [,66:89])
 data.hour.arrived$actual <- as.numeric(difftime(data.hour.arrived$Appt.End.Time, data.hour.arrived$Appt.Start.Time, units = "mins"))
 data.hour.arrived$comparison <- ifelse(data.hour.arrived$sum ==data.hour.arrived$actual, 0, 1)
 data.hour.arrived <- data.hour.arrived %>% filter(comparison == 0)
+
+# Combine Utilization Data
+data.hour.scheduled$util.type <- "scheduled"
+data.hour.arrived$util.type <- "arrived"
+scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
+arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
 
 
 ### (6) Shiny App Components Set-up -------------------------------------------------------------------------------
@@ -848,6 +858,13 @@ groupByFilters_1 <- function(dt, apptType, insurance){
   return(result)
 }
 
+## Filtered Utilization Data
+groupByFilters_2 <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays, type){
+  result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Provider %in% provider, Resource %in% resource,
+                          Visit.Method %in% visitMethod, mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays, util.type %in% type)
+  return(result)
+}
+
 
 
 # (8) PLACEHOLDER FOR DAY OF VISIT ANALYSIS ------------------------------------------------------------------------
@@ -913,34 +930,4 @@ valueBoxSpark <- function(value, title, subtitle, sparkobj = NULL, info = NULL,
   )
 }
 
-
-## TEMPORARY DATA FOR VALUE SPARKS PLACEHOLDERS ----------
-
-set.seed(123)
-
-N <- 20
-
-x <- cumsum(rnorm(N)) + 0.5 * cumsum(runif(N))
-x <- round(200*x)
-
-df <- data.frame(
-  x = sort(as.Date(Sys.time() - lubridate::days(1:N))),
-  y = abs(x)
-)
-
-
-hc <- hchart(df, "area", hcaes(x, y), name = "lines of code")  %>% 
-  hc_size(height = 100) %>% 
-  hc_credits(enabled = FALSE) %>% 
-  hc_add_theme(hc_theme_sparkline_vb()) 
-
-hc2 <- hchart(df, "line", hcaes(x, y), name = "Distance")  %>% 
-  hc_size(height = 100) %>% 
-  hc_credits(enabled = FALSE) %>% 
-  hc_add_theme(hc_theme_sparkline_vb()) 
-
-hc3 <- hchart(df, "column", hcaes(x, y), name = "Daily amount")  %>% 
-  hc_size(height = 100) %>% 
-  hc_credits(enabled = FALSE) %>% 
-  hc_add_theme(hc_theme_sparkline_vb())
 
