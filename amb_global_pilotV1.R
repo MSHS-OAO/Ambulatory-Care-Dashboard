@@ -544,7 +544,7 @@ max_date <- function(singleday,monthly){
   max_month_monthly <- month(max_date_monthly)
   singleday_dates <- data.frame(Date = file_path_sans_ext(singleday_path_part(singleday)))
   max_date_singleday <- max(as.Date(singleday_dates$Date, "%Y-%m-%d",origin = "1970-01-01"))
-  max_month_singleday <- month(max_date_singleday)
+  max_month_singleday <- format(max_date_singleday,"%m")
   max_date_list <- list(max_date_monthly,max_month_monthly,max_month_singleday)
   return(max_date_list)
 }
