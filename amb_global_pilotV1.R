@@ -480,6 +480,8 @@ process_data <- function(access_data,slot_data){
   
   slot.data.subset$holiday <- holid$holiday[match(slot.data.subset$Appt.DateYear, holid$date)] ## Identify US Holidays in Data
   slot.data.subset$Visit.Method <- "IN PERSON"
+  slot.data.subset$Resource <- ifelse(slot.data.subset$Resource == 1, "Provider", "Resource")
+  
   
   reuturn_list <- list(slot.data.subset,data.subset.new,holid)
   return(reuturn_list)
@@ -868,14 +870,14 @@ groupByFilters_2 <- function(dt, campus, specialty, department, resource, provid
 
 
 # (8) PLACEHOLDER FOR DAY OF VISIT ANALYSIS ------------------------------------------------------------------------
-#install.packages("edeaR")
+# install.packages("edeaR")
 # library(edeaR)
 # ex_patients <- "example patient flow observation.csv"
 # ex_patients <- read.csv(ex_patients, stringsAsFactors = TRUE)
 # 
 # ex_patients$registration_type <- factor(ex_patients$registration_type, labels = c("complete","start")) # Converting the activity status to factor values
 # ex_patients$time <- ymd_hms(ex_patients$time) # Converting the timestamps
-
+# 
 # ex_patients <- eventlog(eventlog =  ex_patients,
 #                         case_id = "patient",
 #                         activity_id = "handling",
