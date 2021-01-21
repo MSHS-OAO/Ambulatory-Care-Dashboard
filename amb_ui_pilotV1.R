@@ -719,7 +719,7 @@ ui <- dashboardPage(
                title = "Download Current Tab",
                width = 12,
                solidHeader = FALSE,
-               actionButton("download", "Download", width=200px),
+               actionButton("download", "Download", width="200px"),
                bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
                          "top", options = list(container = "body"))
                

@@ -665,8 +665,6 @@ future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM 
 
 
 ### (5) Pre-processing Space Utilization Dataframe --------------------------------------------------------------------------------------
-# Filter utilization data in last 60 days
-scheduled.data <- arrivedNoShow.data %>% filter(Appt.DTTM >= max_date - 60*24*60*60) ## All appts scheduled
 
 # Function for formatting date and time by hour
 system_date <- function(time){
@@ -685,93 +683,100 @@ util.function <- function(time, df){
   return(result)
 }
 
-
-# Pre-process Utilization by Hour based on Scheduled Appointment Times --------------------------------------------------
-data.hour.scheduled <- scheduled.data
-data.hour.scheduled$Appt.Start <- as.POSIXct(data.hour.scheduled$Appt.DTTM, format = "%H:%M")
-data.hour.scheduled$Appt.End <- as.POSIXct(data.hour.scheduled$Appt.Start + data.hour.scheduled$Appt.Dur*60, format = "%H:%M")
-
-data.hour.scheduled$Appt.Start.Time <- as.POSIXct(paste0(Sys.Date()," ", format(data.hour.scheduled$Appt.Start, format="%H:%M:%S")))
-data.hour.scheduled$Appt.End.Time <- as.POSIXct(paste0(Sys.Date()," ", format(data.hour.scheduled$Appt.End, format="%H:%M:%S")))
-
-data.hour.scheduled$time.interval <- interval(data.hour.scheduled$Appt.Start.Time, data.hour.scheduled$Appt.End.Time)
-
-# Excluding visits without Roomin or Visit End Tines 
-data.hour.scheduled$`00:00` <- util.function("00:00:00", data.hour.scheduled)  
-data.hour.scheduled$`01:00` <- util.function("01:00:00", data.hour.scheduled)  
-data.hour.scheduled$`02:00` <- util.function("02:00:00", data.hour.scheduled)  
-data.hour.scheduled$`03:00` <- util.function("03:00:00", data.hour.scheduled)  
-data.hour.scheduled$`04:00` <- util.function("04:00:00", data.hour.scheduled)  
-data.hour.scheduled$`05:00` <- util.function("05:00:00", data.hour.scheduled)  
-data.hour.scheduled$`06:00` <- util.function("06:00:00", data.hour.scheduled)  
-data.hour.scheduled$`07:00` <- util.function("07:00:00", data.hour.scheduled)  
-data.hour.scheduled$`08:00` <- util.function("08:00:00", data.hour.scheduled)  
-data.hour.scheduled$`09:00` <- util.function("09:00:00", data.hour.scheduled)  
-data.hour.scheduled$`10:00` <- util.function("10:00:00", data.hour.scheduled)  
-data.hour.scheduled$`11:00` <- util.function("11:00:00", data.hour.scheduled)  
-data.hour.scheduled$`12:00` <- util.function("12:00:00", data.hour.scheduled)  
-data.hour.scheduled$`13:00` <- util.function("13:00:00", data.hour.scheduled)  
-data.hour.scheduled$`14:00` <- util.function("14:00:00", data.hour.scheduled)  
-data.hour.scheduled$`15:00` <- util.function("15:00:00", data.hour.scheduled)  
-data.hour.scheduled$`16:00` <- util.function("16:00:00", data.hour.scheduled)  
-data.hour.scheduled$`17:00` <- util.function("17:00:00", data.hour.scheduled)  
-data.hour.scheduled$`18:00` <- util.function("18:00:00", data.hour.scheduled)  
-data.hour.scheduled$`19:00` <- util.function("19:00:00", data.hour.scheduled)  
-data.hour.scheduled$`20:00` <- util.function("20:00:00", data.hour.scheduled)  
-data.hour.scheduled$`21:00` <- util.function("21:00:00", data.hour.scheduled)  
-data.hour.scheduled$`22:00` <- util.function("22:00:00", data.hour.scheduled)  
-data.hour.scheduled$`23:00` <- util.function("23:00:00", data.hour.scheduled)  
-
-# Data Validation
-# colnames(data.hour.scheduled[65])
-data.hour.scheduled$sum <- rowSums(data.hour.scheduled [,65:88])
-data.hour.scheduled$actual <- as.numeric(difftime(data.hour.scheduled$Appt.End.Time, data.hour.scheduled$Appt.Start.Time, units = "mins"))
-data.hour.scheduled$comparison <- ifelse(data.hour.scheduled$sum ==data.hour.scheduled$actual, 0, 1)
-# nrow(data.hour.scheduled %>% filter(comparison == 1))/nrow(data.hour.scheduled)
-data.hour.scheduled <- data.hour.scheduled %>% filter(comparison == 0)
-
-
-# Pre-process Utilization by Hour based on Actual Room in to Visit End Times ---------------------------------------------------
-data.hour.arrived.all <- scheduled.data %>% filter(Appt.Status == "Arrived")
-data.hour.arrived.all$actual.visit.dur <- round(difftime(data.hour.arrived.all$Visitend.DTTM, data.hour.arrived.all$Roomin.DTTM, units = "mins"))
-
-########### Analysis of % of visits with actual visit start and end times ############
-# nrow(data.hour.arrived %>% filter(!is.na(Roomin.DTTM) & !is.na(Visitend.DTTM)))/nrow(data.hour.arrived)
-
-data.hour.arrived.all$Appt.Start.Time <- format(strptime(as.ITime(data.hour.arrived.all$Roomin.DTTM), "%H:%M:%S"),'%H:%M:%S')
-data.hour.arrived.all$Appt.Start.Time <- as.POSIXct(data.hour.arrived.all$Appt.Start, format = "%H:%M")
-data.hour.arrived.all$Appt.End.Time <- as.POSIXct(data.hour.arrived.all$Appt.Start + data.hour.arrived.all$actual.visit.dur, format = "%H:%M")
-
-data.hour.arrived.all$time.interval <- interval(data.hour.arrived.all$Appt.Start.Time, data.hour.arrived.all$Appt.End.Time)
-
-# Excluding visits without Roomin or Visit End Tines 
-data.hour.arrived <- data.hour.arrived.all %>% filter(actual.visit.dur > 0)
-
-data.hour.arrived$`00:00` <- util.function("00:00:00", data.hour.arrived)  
-data.hour.arrived$`01:00` <- util.function("01:00:00", data.hour.arrived)  
-data.hour.arrived$`02:00` <- util.function("02:00:00", data.hour.arrived)  
-data.hour.arrived$`03:00` <- util.function("03:00:00", data.hour.arrived)  
-data.hour.arrived$`04:00` <- util.function("04:00:00", data.hour.arrived)  
-data.hour.arrived$`05:00` <- util.function("05:00:00", data.hour.arrived)  
-data.hour.arrived$`06:00` <- util.function("06:00:00", data.hour.arrived)  
-data.hour.arrived$`07:00` <- util.function("07:00:00", data.hour.arrived)  
-data.hour.arrived$`08:00` <- util.function("08:00:00", data.hour.arrived)  
-data.hour.arrived$`09:00` <- util.function("09:00:00", data.hour.arrived)  
-data.hour.arrived$`10:00` <- util.function("10:00:00", data.hour.arrived)  
-data.hour.arrived$`11:00` <- util.function("11:00:00", data.hour.arrived)  
-data.hour.arrived$`12:00` <- util.function("12:00:00", data.hour.arrived)  
-data.hour.arrived$`13:00` <- util.function("13:00:00", data.hour.arrived)  
-data.hour.arrived$`14:00` <- util.function("14:00:00", data.hour.arrived)  
-data.hour.arrived$`15:00` <- util.function("15:00:00", data.hour.arrived)  
-data.hour.arrived$`16:00` <- util.function("16:00:00", data.hour.arrived)  
-data.hour.arrived$`17:00` <- util.function("17:00:00", data.hour.arrived)  
-data.hour.arrived$`18:00` <- util.function("18:00:00", data.hour.arrived)  
-data.hour.arrived$`19:00` <- util.function("19:00:00", data.hour.arrived)  
-data.hour.arrived$`20:00` <- util.function("20:00:00", data.hour.arrived)  
-data.hour.arrived$`21:00` <- util.function("21:00:00", data.hour.arrived)  
-data.hour.arrived$`22:00` <- util.function("22:00:00", data.hour.arrived)  
-data.hour.arrived$`23:00` <- util.function("23:00:00", data.hour.arrived)  
-
+pre_process_utilization <-  function(max_date,arrivedNoshow.data){
+  # Filter utilization data in last 60 days
+  scheduled.data <- arrivedNoShow.data %>% filter(Appt.DTTM >= max_date - 60*24*60*60) ## All appts scheduled
+  
+  # Pre-process Utilization by Hour based on Scheduled Appointment Times --------------------------------------------------
+  data.hour.scheduled <- scheduled.data
+  data.hour.scheduled$Appt.Start <- as.POSIXct(data.hour.scheduled$Appt.DTTM, format = "%H:%M")
+  data.hour.scheduled$Appt.End <- as.POSIXct(data.hour.scheduled$Appt.Start + data.hour.scheduled$Appt.Dur*60, format = "%H:%M")
+  
+  data.hour.scheduled$Appt.Start.Time <- as.POSIXct(paste0(Sys.Date()," ", format(data.hour.scheduled$Appt.Start, format="%H:%M:%S")))
+  data.hour.scheduled$Appt.End.Time <- as.POSIXct(paste0(Sys.Date()," ", format(data.hour.scheduled$Appt.End, format="%H:%M:%S")))
+  
+  data.hour.scheduled$time.interval <- interval(data.hour.scheduled$Appt.Start.Time, data.hour.scheduled$Appt.End.Time)
+  
+  # Excluding visits without Roomin or Visit End Tines 
+  data.hour.scheduled$`00:00` <- util.function("00:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`01:00` <- util.function("01:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`02:00` <- util.function("02:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`03:00` <- util.function("03:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`04:00` <- util.function("04:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`05:00` <- util.function("05:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`06:00` <- util.function("06:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`07:00` <- util.function("07:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`08:00` <- util.function("08:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`09:00` <- util.function("09:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`10:00` <- util.function("10:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`11:00` <- util.function("11:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`12:00` <- util.function("12:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`13:00` <- util.function("13:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`14:00` <- util.function("14:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`15:00` <- util.function("15:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`16:00` <- util.function("16:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`17:00` <- util.function("17:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`18:00` <- util.function("18:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`19:00` <- util.function("19:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`20:00` <- util.function("20:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`21:00` <- util.function("21:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`22:00` <- util.function("22:00:00", data.hour.scheduled)  
+  data.hour.scheduled$`23:00` <- util.function("23:00:00", data.hour.scheduled)  
+  
+  # Data Validation
+  # colnames(data.hour.scheduled[65])
+  data.hour.scheduled$sum <- rowSums(data.hour.scheduled [,65:88])
+  data.hour.scheduled$actual <- as.numeric(difftime(data.hour.scheduled$Appt.End.Time, data.hour.scheduled$Appt.Start.Time, units = "mins"))
+  data.hour.scheduled$comparison <- ifelse(data.hour.scheduled$sum ==data.hour.scheduled$actual, 0, 1)
+  # nrow(data.hour.scheduled %>% filter(comparison == 1))/nrow(data.hour.scheduled)
+  data.hour.scheduled <- data.hour.scheduled %>% filter(comparison == 0)
+  
+  
+  # Pre-process Utilization by Hour based on Actual Room in to Visit End Times ---------------------------------------------------
+  data.hour.arrived.all <- scheduled.data %>% filter(Appt.Status == "Arrived")
+  data.hour.arrived.all$actual.visit.dur <- round(difftime(data.hour.arrived.all$Visitend.DTTM, data.hour.arrived.all$Roomin.DTTM, units = "mins"))
+  
+  ########### Analysis of % of visits with actual visit start and end times ############
+  # nrow(data.hour.arrived %>% filter(!is.na(Roomin.DTTM) & !is.na(Visitend.DTTM)))/nrow(data.hour.arrived)
+  
+  data.hour.arrived.all$Appt.Start.Time <- format(strptime(as.ITime(data.hour.arrived.all$Roomin.DTTM), "%H:%M:%S"),'%H:%M:%S')
+  data.hour.arrived.all$Appt.Start.Time <- as.POSIXct(data.hour.arrived.all$Appt.Start, format = "%H:%M")
+  data.hour.arrived.all$Appt.End.Time <- as.POSIXct(data.hour.arrived.all$Appt.Start + data.hour.arrived.all$actual.visit.dur, format = "%H:%M")
+  
+  data.hour.arrived.all$time.interval <- interval(data.hour.arrived.all$Appt.Start.Time, data.hour.arrived.all$Appt.End.Time)
+  
+  # Excluding visits without Roomin or Visit End Tines 
+  data.hour.arrived <- data.hour.arrived.all %>% filter(actual.visit.dur > 0)
+  
+  data.hour.arrived$`00:00` <- util.function("00:00:00", data.hour.arrived)  
+  data.hour.arrived$`01:00` <- util.function("01:00:00", data.hour.arrived)  
+  data.hour.arrived$`02:00` <- util.function("02:00:00", data.hour.arrived)  
+  data.hour.arrived$`03:00` <- util.function("03:00:00", data.hour.arrived)  
+  data.hour.arrived$`04:00` <- util.function("04:00:00", data.hour.arrived)  
+  data.hour.arrived$`05:00` <- util.function("05:00:00", data.hour.arrived)  
+  data.hour.arrived$`06:00` <- util.function("06:00:00", data.hour.arrived)  
+  data.hour.arrived$`07:00` <- util.function("07:00:00", data.hour.arrived)  
+  data.hour.arrived$`08:00` <- util.function("08:00:00", data.hour.arrived)  
+  data.hour.arrived$`09:00` <- util.function("09:00:00", data.hour.arrived)  
+  data.hour.arrived$`10:00` <- util.function("10:00:00", data.hour.arrived)  
+  data.hour.arrived$`11:00` <- util.function("11:00:00", data.hour.arrived)  
+  data.hour.arrived$`12:00` <- util.function("12:00:00", data.hour.arrived)  
+  data.hour.arrived$`13:00` <- util.function("13:00:00", data.hour.arrived)  
+  data.hour.arrived$`14:00` <- util.function("14:00:00", data.hour.arrived)  
+  data.hour.arrived$`15:00` <- util.function("15:00:00", data.hour.arrived)  
+  data.hour.arrived$`16:00` <- util.function("16:00:00", data.hour.arrived)  
+  data.hour.arrived$`17:00` <- util.function("17:00:00", data.hour.arrived)  
+  data.hour.arrived$`18:00` <- util.function("18:00:00", data.hour.arrived)  
+  data.hour.arrived$`19:00` <- util.function("19:00:00", data.hour.arrived)  
+  data.hour.arrived$`20:00` <- util.function("20:00:00", data.hour.arrived)  
+  data.hour.arrived$`21:00` <- util.function("21:00:00", data.hour.arrived)  
+  data.hour.arrived$`22:00` <- util.function("22:00:00", data.hour.arrived)  
+  data.hour.arrived$`23:00` <- util.function("23:00:00", data.hour.arrived)  
+  
+  return_list <- list(data.hour.scheduled,data.hour.arrived)
+  
+  return(return_list)
+}
 # Data Validation
 colnames(data.hour.arrived[64])
 data.hour.arrived$sum <- rowSums(data.hour.arrived [,64:87])
