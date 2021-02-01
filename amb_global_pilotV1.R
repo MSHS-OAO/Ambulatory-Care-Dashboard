@@ -108,6 +108,7 @@ suppressMessages({
   library(shinyBS)
   library(shinyscreenshot)
   library(fasttime)
+  library(shinycssloaders)
 })
 
 # ### (0) Maximize R Memory Size 
