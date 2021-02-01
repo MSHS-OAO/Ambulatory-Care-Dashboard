@@ -5994,6 +5994,9 @@ server <- function(input, output, session) {
     DT::datatable(dataDisplay()[,c("Campus","Campus.Specialty","Department","Provider","MRN","Appt.DTTM","Appt.Day","Appt.Type","Appt.Status","holiday")])
   })
   
+  observeEvent(input$download, {
+    screenshot()
+  })
   
 } # Close server 
 

@@ -785,12 +785,22 @@ ui <- dashboardPage(
     
     # Conditional Filters ------------------------------------------------------------------------------------------------------
     
+    
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
       input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
       column(2,
              br(), br(),
+             box(
+               title = "Download Current Tab",
+               width = 12,
+               solidHeader = FALSE,
+               actionButton("download", "Download", width='200px'),
+               bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
+                         "top", options = list(container = "body"))
+               
+             ),
              box(
                title = "Select Campus:",
                width = 12,
@@ -910,5 +920,5 @@ ui <- dashboardPage(
 ) # Close DashboardPage
 
 # Run ShinyApp ===============================================================================================
-shinyApp(ui, server)
+#shinyApp(ui, server)
 

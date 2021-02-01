@@ -43,6 +43,10 @@
 # install.packages("vroom")
 # install.packages("lubridate")
 # install.packages("plyr")
+# install.packages("sjmisc")
+# install.packages("shinyBS")
+# install.packages("shinyscreenshot")
+
 
 suppressMessages({
   library(readxl)
@@ -101,6 +105,8 @@ suppressMessages({
   library(sjmisc)
   library(tools)
   library(here)
+  library(shinyBS)
+  library(shinyscreenshot)
 })
 
 # ### (0) Maximize R Memory Size 
@@ -153,7 +159,7 @@ MountSinai_palettes <- list(
                             "med purple","med pink","med blue","med grey", 
                             "light purple","light pink","light blue","light grey"),
   
-  `main`  = MountSinai_cols("dark purple","dark pink","dark blue","dark grey"),
+  `main`  = MountSinai_cols("dark purple","dark grey","dark pink","med blue","light pink","light blue","light grey"),
   
   `purple`  = MountSinai_cols("dark purple","med purple","light purple"),
   
@@ -541,7 +547,7 @@ max_date <- function(singleday,monthly){
   max_month_monthly <- month(max_date_monthly)
   singleday_dates <- data.frame(Date = file_path_sans_ext(singleday_path_part(singleday)))
   max_date_singleday <- max(as.Date(singleday_dates$Date, "%Y-%m-%d",origin = "1970-01-01"))
-  max_month_singleday <- month(max_date_singleday)
+  max_month_singleday <- format(max_date_singleday,"%m")
   max_date_list <- list(max_date_monthly,max_month_monthly,max_month_singleday)
   return(max_date_list)
 }
