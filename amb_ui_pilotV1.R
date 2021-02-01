@@ -1,3 +1,15 @@
+default_campus <- "MSUS"
+default_specialty <- sort(unique(historical.data[historical.data$Campus %in% "MSUS", "Campus.Specialty"]))
+default_departments <- sort(unique(historical.data[historical.data$Campus %in% "MSUS" &
+                                                     historical.data$Campus.Specialty %in% default_specialty, "Department"])) 
+default_resource_type <- c("Provider","Resource")
+default_provider <- sort(unique(historical.data[
+  historical.data$Campus %in% default_campus &
+    historical.data$Campus.Specialty %in% default_specialty &
+    historical.data$Department %in% default_departments & 
+    historical.data$Resource %in% default_resource_type, "Provider"]))
+
+
 ui <- dashboardPage(
   
   ### UI start-----------------------------------------------------------
@@ -785,11 +797,11 @@ ui <- dashboardPage(
     
     # Conditional Filters ------------------------------------------------------------------------------------------------------
     
-    
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
       input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
+      
       column(2,
              br(), br(),
              box(
@@ -815,10 +827,62 @@ ui <- dashboardPage(
                              countSelectedText = "{0}/{1} Campuses", 
                              dropupAuto = FALSE),
                            selected = "MSUS")),
-             uiOutput("specialtyControl"),
-             uiOutput("departmentControl"),
-             uiOutput("resourceControl"),
-             uiOutput("providerControl"),
+             
+             box(
+               title = "Select Specialty:",
+               width = 12,
+               solidHeader = FALSE,
+               pickerInput("selectedSpecialty",label=NULL,
+                           choices=default_specialty,
+                           multiple=TRUE,
+                           options = pickerOptions(
+                             liveSearch = TRUE,
+                             actionsBox = TRUE,
+                             selectedTextFormat = "count > 1",
+                             countSelectedText = "{0}/{1} Specialties",
+                             dropupAuto = FALSE),
+                           selected = default_specialty)),
+             box(
+               title = "Select Department:",
+               width = 12,
+               solidHeader = FALSE,
+               pickerInput("selectedDepartment",label=NULL,
+                           choices=default_departments,
+                           multiple=TRUE,
+                           options = pickerOptions(
+                             liveSearch = TRUE,
+                             actionsBox = TRUE,
+                             selectedTextFormat = "count > 1",
+                             countSelectedText = "{0}/{1} Departments",
+                             dropupAuto = FALSE),
+                           selected = default_departments)),
+             box(
+               title = "Select Resource Type:",
+               width = 12,
+               solidHeader = FALSE,
+               checkboxGroupButtons(
+                 inputId = "selectedResource",
+                 label = NULL, 
+                 choices = c("Provider","Resource"),
+                 justified = TRUE,
+                 checkIcon = list(
+                   yes = icon("ok", lib = "glyphicon")),
+                 selected = c("Provider","Resource"))
+             ),
+             box(
+               title = "Select Provider:",
+               width = 12, 
+               solidHeader = FALSE, 
+               pickerInput("selectedProvider",label=NULL,
+                           choices=default_provider,
+                           multiple=TRUE,
+                           options = pickerOptions(
+                             liveSearch = TRUE,
+                             actionsBox = TRUE,
+                             selectedTextFormat = "count > 1", 
+                             countSelectedText = "{0}/{1} Providers", 
+                             dropupAuto = FALSE),
+                           selected = default_provider)),
              box(
                title = "Select Visit Type:",
                width = 12,
