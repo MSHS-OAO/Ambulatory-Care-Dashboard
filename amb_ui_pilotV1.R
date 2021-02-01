@@ -1,3 +1,15 @@
+default_campus <- "MSUS"
+default_specialty <- sort(unique(historical.data[historical.data$Campus %in% "MSUS", "Campus.Specialty"]))
+default_departments <- sort(unique(historical.data[historical.data$Campus %in% "MSUS" &
+                                                     historical.data$Campus.Specialty %in% default_specialty, "Department"])) 
+default_resource_type <- c("Provider","Resource")
+default_provider <- sort(unique(historical.data[
+  historical.data$Campus %in% default_campus &
+    historical.data$Campus.Specialty %in% default_specialty &
+    historical.data$Department %in% default_departments & 
+    historical.data$Resource %in% default_resource_type, "Provider"]))
+
+
 ui <- dashboardPage(
   
   ### UI start-----------------------------------------------------------
@@ -312,7 +324,7 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Volume KPIs", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("kpiVolumeGraph", height="450px")
+                              withSpinner(plotOutput("kpiVolumeGraph", height="450px"))
                             ),
                             boxPlus(
                               title = "Scheduling KPIs", width = 12, status = "primary",
@@ -789,8 +801,18 @@ ui <- dashboardPage(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
       input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
+      
       column(2,
              br(), br(),
+             box(
+               title = "Download Current Tab",
+               width = 12,
+               solidHeader = FALSE,
+               actionButton("download", "Download", width='200px'),
+               bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
+                         "top", options = list(container = "body"))
+               
+             ),
              box(
                title = "Select Campus:",
                width = 12,
@@ -805,10 +827,62 @@ ui <- dashboardPage(
                              countSelectedText = "{0}/{1} Campuses", 
                              dropupAuto = FALSE),
                            selected = "MSUS")),
-             uiOutput("specialtyControl"),
-             uiOutput("departmentControl"),
-             uiOutput("resourceControl"),
-             uiOutput("providerControl"),
+             
+             box(
+               title = "Select Specialty:",
+               width = 12,
+               solidHeader = FALSE,
+               pickerInput("selectedSpecialty",label=NULL,
+                           choices=default_specialty,
+                           multiple=TRUE,
+                           options = pickerOptions(
+                             liveSearch = TRUE,
+                             actionsBox = TRUE,
+                             selectedTextFormat = "count > 1",
+                             countSelectedText = "{0}/{1} Specialties",
+                             dropupAuto = FALSE),
+                           selected = default_specialty)),
+             box(
+               title = "Select Department:",
+               width = 12,
+               solidHeader = FALSE,
+               pickerInput("selectedDepartment",label=NULL,
+                           choices=default_departments,
+                           multiple=TRUE,
+                           options = pickerOptions(
+                             liveSearch = TRUE,
+                             actionsBox = TRUE,
+                             selectedTextFormat = "count > 1",
+                             countSelectedText = "{0}/{1} Departments",
+                             dropupAuto = FALSE),
+                           selected = default_departments)),
+             box(
+               title = "Select Resource Type:",
+               width = 12,
+               solidHeader = FALSE,
+               checkboxGroupButtons(
+                 inputId = "selectedResource",
+                 label = NULL, 
+                 choices = c("Provider","Resource"),
+                 justified = TRUE,
+                 checkIcon = list(
+                   yes = icon("ok", lib = "glyphicon")),
+                 selected = c("Provider","Resource"))
+             ),
+             box(
+               title = "Select Provider:",
+               width = 12, 
+               solidHeader = FALSE, 
+               pickerInput("selectedProvider",label=NULL,
+                           choices=default_provider,
+                           multiple=TRUE,
+                           options = pickerOptions(
+                             liveSearch = TRUE,
+                             actionsBox = TRUE,
+                             selectedTextFormat = "count > 1", 
+                             countSelectedText = "{0}/{1} Providers", 
+                             dropupAuto = FALSE),
+                           selected = default_provider)),
              box(
                title = "Select Visit Type:",
                width = 12,
@@ -910,5 +984,5 @@ ui <- dashboardPage(
 ) # Close DashboardPage
 
 # Run ShinyApp ===============================================================================================
-shinyApp(ui, server)
+#shinyApp(ui, server)
 

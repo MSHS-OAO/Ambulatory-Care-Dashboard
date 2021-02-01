@@ -2,11 +2,39 @@ server <- function(input, output, session) {
   
   ### (1) Create reactive filters ===================================================================================================
   ## SCheduling Data
+  observeEvent(input$selectedCampus,{
+    updatePickerInput(session,
+                      inputId = "selectedSpecialty",
+                      choices = sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
+    )})
+  
+  
+  observeEvent(c(input$selectedCampus,input$selectedSpecialty),{
+    updatePickerInput(session,
+                      inputId = "selectedDepartment",
+                      choices = sort(unique(historical.data[
+                        historical.data$Campus %in% input$selectedCampus &
+                          historical.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
+    )})
+  
+  observeEvent(c(input$selectedCampus,input$selectedSpecialty,input$selectedDepartment,input$selectedResource),{
+    updatePickerInput(session,
+                      inputId = "selectedProvider",
+                      choices=sort(unique(historical.data[
+                        historical.data$Campus %in% input$selectedCampus &
+                          historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                          historical.data$Department %in% input$selectedDepartment & 
+                          historical.data$Resource %in% input$selectedResource, "Provider"])),
+    )})  
+  
+  
+  
+  
   output$specialtyControl <- renderUI({
-    
+
     box(
       title = "Select Specialty:",
-      width = 12, 
+      width = 12,
       solidHeader = FALSE,
       pickerInput("selectedSpecialty",label=NULL,
                   choices=sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus, "Campus.Specialty"])),
@@ -14,8 +42,8 @@ server <- function(input, output, session) {
                   options = pickerOptions(
                     liveSearch = TRUE,
                     actionsBox = TRUE,
-                    selectedTextFormat = "count > 1", 
-                    countSelectedText = "{0}/{1} Specialties", 
+                    selectedTextFormat = "count > 1",
+                    countSelectedText = "{0}/{1} Specialties",
                     dropupAuto = FALSE),
                   selected = sort(unique((historical.data %>% filter(Campus == "MSUS"))$Campus.Specialty))))
   })
@@ -64,27 +92,27 @@ server <- function(input, output, session) {
   #   status = "danger"
   # )
   
-  output$providerControl <- renderUI({
-    
-    box(
-      title = "Select Provider:",
-      width = 12, 
-      solidHeader = FALSE, 
-      pickerInput("selectedProvider",label=NULL,
-                  choices=sort(unique(historical.data[
-                    historical.data$Campus %in% input$selectedCampus &
-                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
-                      historical.data$Department %in% input$selectedDepartment & 
-                      historical.data$Resource %in% input$selectedResource, "Provider"])),
-                  multiple=TRUE,
-                  options = pickerOptions(
-                    liveSearch = TRUE,
-                    actionsBox = TRUE,
-                    selectedTextFormat = "count > 1", 
-                    countSelectedText = "{0}/{1} Providers", 
-                    dropupAuto = FALSE),
-                  selected = sort(unique((historical.data %>% filter(Campus == "MSUS"))$Provider))))
-  })
+  # output$providerControl <- renderUI({
+  #   
+  #   box(
+  #     title = "Select Provider:",
+  #     width = 12, 
+  #     solidHeader = FALSE, 
+  #     pickerInput("selectedProvider",label=NULL,
+  #                 choices=sort(unique(historical.data[
+  #                   historical.data$Campus %in% input$selectedCampus &
+  #                     historical.data$Campus.Specialty %in% input$selectedSpecialty &
+  #                     historical.data$Department %in% input$selectedDepartment & 
+  #                     historical.data$Resource %in% input$selectedResource, "Provider"])),
+  #                 multiple=TRUE,
+  #                 options = pickerOptions(
+  #                   liveSearch = TRUE,
+  #                   actionsBox = TRUE,
+  #                   selectedTextFormat = "count > 1", 
+  #                   countSelectedText = "{0}/{1} Providers", 
+  #                   dropupAuto = FALSE),
+  #                 selected = sort(unique((historical.data %>% filter(Campus == "MSUS"))$Provider))))
+  # })
   
   output$dateRangeControl <- renderUI({
     
@@ -5994,6 +6022,9 @@ server <- function(input, output, session) {
     DT::datatable(dataDisplay()[,c("Campus","Campus.Specialty","Department","Provider","MRN","Appt.DTTM","Appt.Day","Appt.Type","Appt.Status","holiday")])
   })
   
+  observeEvent(input$download, {
+    screenshot()
+  })
   
 } # Close server 
 
