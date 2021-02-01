@@ -544,7 +544,7 @@ max_date <- function(singleday,monthly){
   else{
     max_date_monthly <- date(max(monthly_data$SLOT_BEGIN_TIME))
   }
-  max_month_monthly <- month(max_date_monthly)
+  max_month_monthly <- format(max_date_monthly,"%m") 
   singleday_dates <- data.frame(Date = file_path_sans_ext(singleday_path_part(singleday)))
   max_date_singleday <- max(as.Date(singleday_dates$Date, "%Y-%m-%d",origin = "1970-01-01"))
   max_month_singleday <- format(max_date_singleday,"%m")
@@ -610,7 +610,7 @@ max_date_monthly_slot <- max_date_monthly_access
 
 if(out_of_date == 'TRUE'){
   missing_dates_monthly_access <- data.frame(Date = format(as.Date(as.Date(max_date_access+1):as.Date(max_date_monthly_access), origin="1970-01-01"), "%m-%d-%Y"))
-  max_month_monthly_access <- month(max_date_monthly_access)
+  max_month_monthly_access <- format(max_date_monthly_access,"%m")
   curr_year <- format(Sys.Date(), "%Y")
   recent_monthly_filepath_access <- paste0(monthly_access,"/",curr_year,"-",max_month_monthly_access,"-01.csv")
   recent_monthly_data_access <- read_csv(recent_monthly_filepath_access)
@@ -628,8 +628,8 @@ if(out_of_date == 'TRUE'){
   data.subset.new.missing <- processed_dataset[[2]]
   slot.data.subset <- bind_rows(slot.data.subset,slot.data.subset.missing)
   data.subset.new <- bind_rows(data.subset.new,data.subset.new.missing)
-  slot.comb.path <- paste0(combined_path_slot,"/",max_date_monthly)
-  access.comb.path <- paste0(combined_path_access,"/",max_date_monthly)
+  #slot.comb.path <- paste0(combined_path_slot,"/",max_date_monthly)
+  #access.comb.path <- paste0(combined_path_access,"/",max_date_monthly)
   #file.remove(list.files(path = slot.data.subset,pattern = "*.rds", full.names = T))
   #file.remove(list.files(path = data.subset.new,pattern = "*.rds", full.names = T))
   # slot.data.subset <- process_data(data_all)[[1]]
