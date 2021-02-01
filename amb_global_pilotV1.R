@@ -217,7 +217,7 @@ graph_theme <- function(legend_pos) {
     plot.subtitle = element_text(hjust=0.5, size = 14),
     legend.position = legend_pos,
     strip.text = element_text(size=14),
-    axis.title = element_blank(),
+    axis.title = element_text(size = 14),
     axis.text.x = element_text(size = 14, angle=40, hjust=1),
     axis.text.y = element_text(size = 12),
     axis.line.x = element_blank())#,
@@ -467,6 +467,7 @@ process_data <- function(access_data,slot_data){
   colnames(slot.data.subset) <- new.cols.slots
   
   # Create additional columns for Slot Data
+  slot.data.subset$BOOKED_MINUTES <- slot.data.subset$BOOKED_MINUTES + slot.data.subset$CANCELED_MINUTES # Booked + Canceled Minutes 
   slot.data.subset$Appt.DTTM <- as.POSIXct(slot.data.subset$SLOT_BEGIN_TIME,format="%Y-%m-%d %H:%M:%S",tz=Sys.timezone(),origin = "1970-01-01")
   slot.data.subset$Appt.DateYear <- as.Date(slot.data.subset$SLOT_BEGIN_TIME, format="%Y-%m-%d") ## Create day of week colunm
   slot.data.subset$Appt.MonthYear <- format(as.Date(slot.data.subset$SLOT_BEGIN_TIME, format="%Y-%m-%d %H:%M:%S"), "%Y-%m") ## Create month - year column
@@ -748,13 +749,13 @@ data.hour.arrived.all$time.interval <- interval(data.hour.arrived.all$Appt.Start
 # Excluding visits without Roomin or Visit End Tines 
 data.hour.arrived <- data.hour.arrived.all %>% filter(actual.visit.dur > 0)
 
-data.hour.arrived$`00:00` <- util.function("00:00:00", data.hour.arrived)  
-data.hour.arrived$`01:00` <- util.function("01:00:00", data.hour.arrived)  
-data.hour.arrived$`02:00` <- util.function("02:00:00", data.hour.arrived)  
-data.hour.arrived$`03:00` <- util.function("03:00:00", data.hour.arrived)  
-data.hour.arrived$`04:00` <- util.function("04:00:00", data.hour.arrived)  
-data.hour.arrived$`05:00` <- util.function("05:00:00", data.hour.arrived)  
-data.hour.arrived$`06:00` <- util.function("06:00:00", data.hour.arrived)  
+data.hour.arrived$`00:00` <- util.function("00:00:00", data.hour.arrived)
+data.hour.arrived$`01:00` <- util.function("01:00:00", data.hour.arrived)
+data.hour.arrived$`02:00` <- util.function("02:00:00", data.hour.arrived)
+data.hour.arrived$`03:00` <- util.function("03:00:00", data.hour.arrived)
+data.hour.arrived$`04:00` <- util.function("04:00:00", data.hour.arrived)
+data.hour.arrived$`05:00` <- util.function("05:00:00", data.hour.arrived)
+data.hour.arrived$`06:00` <- util.function("06:00:00", data.hour.arrived)
 data.hour.arrived$`07:00` <- util.function("07:00:00", data.hour.arrived)  
 data.hour.arrived$`08:00` <- util.function("08:00:00", data.hour.arrived)  
 data.hour.arrived$`09:00` <- util.function("09:00:00", data.hour.arrived)  
@@ -769,9 +770,9 @@ data.hour.arrived$`17:00` <- util.function("17:00:00", data.hour.arrived)
 data.hour.arrived$`18:00` <- util.function("18:00:00", data.hour.arrived)  
 data.hour.arrived$`19:00` <- util.function("19:00:00", data.hour.arrived)  
 data.hour.arrived$`20:00` <- util.function("20:00:00", data.hour.arrived)  
-data.hour.arrived$`21:00` <- util.function("21:00:00", data.hour.arrived)  
-data.hour.arrived$`22:00` <- util.function("22:00:00", data.hour.arrived)  
-data.hour.arrived$`23:00` <- util.function("23:00:00", data.hour.arrived)  
+data.hour.arrived$`21:00` <- util.function("21:00:00", data.hour.arrived)
+data.hour.arrived$`22:00` <- util.function("22:00:00", data.hour.arrived)
+data.hour.arrived$`23:00` <- util.function("23:00:00", data.hour.arrived)
 
 # Data Validation
 # colnames(data.hour.arrived[89])
@@ -801,6 +802,14 @@ timeOptions30m <- c("00:00","00:30","01:00","01:30","02:00","02:30","03:00","03:
                     "10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30",
                     "15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30",
                     "20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30") ## Time Range by 30min Filter
+
+timeOptionsHr_filter <- c("07:00","08:00","09:00",
+                   "10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00",
+                   "20:00") ## Time Range by Hour Filter
+
+timeOptions30m_filter <- c("07:00","07:30","08:00","08:30","09:00","09:30",
+                    "10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30",
+                    "15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00") ## Time Range by 30min Filter
 
 monthOptions <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
@@ -864,6 +873,12 @@ groupByFilters_1 <- function(dt, apptType, insurance){
 groupByFilters_2 <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays, type){
   result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Provider %in% provider, Resource %in% resource,
                           Visit.Method %in% visitMethod, mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays, util.type %in% type)
+  return(result)
+}
+
+## Filtered by Appt.Type Data
+groupByFilters_3 <- function(dt, apptType){
+  result <- dt %>% filter(New.PT3 == FALSE, Appt.Type %in% apptType)
   return(result)
 }
 

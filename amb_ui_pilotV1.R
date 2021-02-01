@@ -206,18 +206,24 @@ ui <- dashboardPage(
                                 valueBoxOutput("totalVisits", width=3),
                                 valueBoxOutput("avgVisitsPt", width=3),
                                 valueBoxOutput("avgVisitsDay", width=3)),
-                              plotOutput("avgPtArrival", height = "450px")
-                            ),
+                              plotOutput("avgPtArrival", height = "450px")),
                             boxPlus(
                               title = "Day of Visit", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              fluidRow(valueBoxOutput("avgCycleTime", width=6), 
-                                       valueBoxOutput("avgCheckinToRoomin", width=6)),
-                              fluidRow(valueBoxOutput("medCycleTime", width=6),
-                                       valueBoxOutput("medCheckinToRoomin", width=6)),
-                              fluidRow(column(6,plotOutput("cycleTimeBoxPlot")),
-                                       column(6,plotOutput("checkInRoomInBoxPlot"))))
-                     ),
+                              fluidRow(
+                              column(4,
+                                     fluidRow(valueBoxOutput("avgCycleTime", width = 12)), 
+                                     fluidRow(valueBoxOutput("medCycleTime", width = 12))),
+                              column(8,
+                                     plotOutput("cycleTimeBoxPlot"))), 
+                              hr(),
+                              fluidRow(
+                                column(4,
+                                       fluidRow(valueBoxOutput("avgCheckinToRoomin", width = 12)), 
+                                       fluidRow(valueBoxOutput("medCheckinToRoomin", width = 12))),
+                                column(8,
+                                       plotOutput("checkInRoomInBoxPlot"))))
+                            ),
                      column(4,
                             boxPlus(
                               title = "Access", width = 12, status = "primary",
@@ -229,8 +235,8 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Scheduling", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              fluidRow(plotOutput("fillRate", height = "300px")),
-                              fluidRow(plotOutput("apptStatus", height = "450px"))
+                              fluidRow(plotOutput("fillRate", height = "350px")),
+                              fluidRow(plotOutput("apptStatus", height = "650px"))
                             ))
               )),
       
@@ -415,7 +421,8 @@ ui <- dashboardPage(
                            column(3, uiOutput("apptTypeControl")),
                            column(3, uiOutput("insuranceControl")),
                            column(3, valueBoxOutput("avgDailyNoShow_Count", width = 12)),
-                           column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12)))
+                           column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
+                         h5("No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")
                        ),
                        boxPlus(
                          title = "No Shows by Time of Day", width = 12, status = "primary",
@@ -510,7 +517,10 @@ ui <- dashboardPage(
                                                   choices = list("SCHEDULED time and duration" = "scheduled", "ACTUAL time and duration" = "arrived"),
                                                   checkIcon = list(
                                                     yes = tags$i(class = "fa fa-check-square", style = "color: steelblue"),
-                                                    no = tags$i(class = "fa fa-square-o", style = "color: steelblue"))))),
+                                                    no = tags$i(class = "fa fa-square-o", style = "color: steelblue"))),
+                                                hr(),
+                                                h5("SCHEDULED: Utilization of all arrived appointments based on scheduled appointment start and end time."),
+                                                h5("ACTUAL: Utilization of all arrived appointments based on actual appointment start and end time."))),
                                      column(9,
                                             fluidRow(
                                               column(4,
@@ -689,15 +699,12 @@ ui <- dashboardPage(
                               title = "Cycle Time by Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               br(),
-                              materialSwitch(
-                                inputId = "median2",
-                                label = "Median", 
-                                right = TRUE,
-                                status = "primary"),
-                              plotOutput("cycleTimeTrend", height = "800px"),
+                              fluidRow(column(4, uiOutput("apptTypeControl2"))),
+                              fluidRow(column(12, plotOutput("cycleTimeTrend", height = "700px"))),
+                              hr(),
                               fluidRow(
-                                column(6, plotOutput("newCycleTimeBoxPlot")),
-                                column(6, plotOutput("establishedCycleTimeBoxPlot")))),
+                                column(6, plotOutput("newCycleTimeBoxPlot", height = "500px")),
+                                column(6, plotOutput("establishedCycleTimeBoxPlot", height = "500px")))),
                             boxPlus(
                               title = "Cycle Time by Provider", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -716,15 +723,12 @@ ui <- dashboardPage(
                               title = "Room-in Time by Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               br(),
-                              materialSwitch(
-                                inputId = "median3",
-                                label = "Median", 
-                                right = TRUE,
-                                status = "primary"),
-                              plotOutput("roomInTimeTrend", height = "800px"),
+                              fluidRow(column(4, uiOutput("apptTypeControl3"))),
+                              fluidRow(column(12, plotOutput("roomInTimeTrend", height = "700px"))),
+                              hr(),
                               fluidRow(
-                                column(6, plotOutput("newRoomInTimeBoxPlot")),
-                                column(6, plotOutput("establishedRoomInTimeBoxPlot")))),
+                                column(6, plotOutput("newRoomInTimeBoxPlot", height = "500px")),
+                                column(6, plotOutput("establishedRoomInTimeBoxPlot", height = "500px")))),
                             boxPlus(
                               title = "Room-in Time by Provider", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -883,10 +887,9 @@ ui <- dashboardPage(
     #   )),
     
     conditionalPanel(
-      condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
-      input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime',
-      input.sbm=='KPIs' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage'",
+      condition = "input.sbm=='KPIs' | input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
+      input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='slotUsage' |
+      input.sbm=='newPatients' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
       column(2,
              box(
                title = "Select Holidays to Exclude:",
