@@ -324,7 +324,7 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Volume KPIs", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("kpiVolumeGraph", height="450px")
+                              withSpinner(plotOutput("kpiVolumeGraph", height="450px"))
                             ),
                             boxPlus(
                               title = "Scheduling KPIs", width = 12, status = "primary",

@@ -30,23 +30,23 @@ server <- function(input, output, session) {
   
   
   
-  # output$specialtyControl <- renderUI({
-  #   
-  #   box(
-  #     title = "Select Specialty:",
-  #     width = 12, 
-  #     solidHeader = FALSE,
-  #     pickerInput("selectedSpecialty",label=NULL,
-  #                 choices=sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus, "Campus.Specialty"])),
-  #                 multiple=TRUE,
-  #                 options = pickerOptions(
-  #                   liveSearch = TRUE,
-  #                   actionsBox = TRUE,
-  #                   selectedTextFormat = "count > 1", 
-  #                   countSelectedText = "{0}/{1} Specialties", 
-  #                   dropupAuto = FALSE),
-  #                 selected = sort(unique((historical.data %>% filter(Campus == "MSUS"))$Campus.Specialty))))
-  # })
+  output$specialtyControl <- renderUI({
+
+    box(
+      title = "Select Specialty:",
+      width = 12,
+      solidHeader = FALSE,
+      pickerInput("selectedSpecialty",label=NULL,
+                  choices=sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus, "Campus.Specialty"])),
+                  multiple=TRUE,
+                  options = pickerOptions(
+                    liveSearch = TRUE,
+                    actionsBox = TRUE,
+                    selectedTextFormat = "count > 1",
+                    countSelectedText = "{0}/{1} Specialties",
+                    dropupAuto = FALSE),
+                  selected = sort(unique((historical.data %>% filter(Campus == "MSUS"))$Campus.Specialty))))
+  })
   output$departmentControl <- renderUI({
     
     box(
