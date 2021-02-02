@@ -695,11 +695,11 @@ util.function <- function(time, df){
 data.hour.scheduled <- scheduled.data
 data.hour.scheduled$actual.visit.dur <- data.hour.scheduled$Appt.Dur
 
-data.hour.scheduled$Appt.Start <- fastPOSIXct(format(data.hour.scheduled$Appt.DTTM,format = "%H:%M")) + 5*60*60
-data.hour.scheduled$Appt.End <- fastPOSIXct(format((data.hour.scheduled$Appt.Start + data.hour.scheduled$Appt.Dur*60), format = "%H:%M")) + 5*60*60
+data.hour.scheduled$Appt.Start <- as.POSIXct(data.hour.scheduled$Appt.DTTM, format = "%H:%M")
+data.hour.scheduled$Appt.End <- as.POSIXct(data.hour.scheduled$Appt.Start + data.hour.scheduled$Appt.Dur*60, format = "%H:%M")
 
-data.hour.scheduled$Appt.Start.Time <- fastPOSIXct(paste0(Sys.Date()," ", format(data.hour.scheduled$Appt.Start, format="%H:%M:%S"))) + 5*60*60			
-data.hour.scheduled$Appt.End.Time <- fastPOSIXct(paste0(Sys.Date()," ", format(data.hour.scheduled$Appt.End, format="%H:%M:%S"))) + 5*60*60			
+data.hour.scheduled$Appt.Start.Time <- as.POSIXct(paste0(Sys.Date()," ", format(data.hour.scheduled$Appt.Start, format="%H:%M:%S")))
+data.hour.scheduled$Appt.End.Time <- as.POSIXct(paste0(Sys.Date()," ", format(data.hour.scheduled$Appt.End, format="%H:%M:%S")))
 
 
 data.hour.scheduled$time.interval <- interval(data.hour.scheduled$Appt.Start.Time, data.hour.scheduled$Appt.End.Time)
