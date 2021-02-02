@@ -112,7 +112,7 @@ ui <- dashboardPage(
                               boxPlus(
                                 title = "Specialties", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("siteSpecialties", height = "520px")))),
+                                withSpinner(plotOutput("siteSpecialties", height = "520px"), type = 5, color = "#d80b8c")))),
                      column(12, 
                             boxPlus(
                               title = "Appointment Wait Time", width = 12, status = "primary",
@@ -122,13 +122,13 @@ ui <- dashboardPage(
                                 label = "Median", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteWaitTime", height="800px"))),
+                              withSpinner(plotOutput("siteWaitTime", height="800px")))),
                      column(12, 
                             boxPlus(
                               title = "Working FTE", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("siteWorkingFTE", height="550px"), br(),
-                              plotOutput("sitePtsPerFTE", height="550px")))
+                              withSpinner(plotOutput("siteWorkingFTE", height="550px")), br(),
+                              withSpinner(plotOutput("sitePtsPerFTE", height="550px"))))
               )),
       
       # System Comparison Overview Tab ------------------------------------------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ ui <- dashboardPage(
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonPts", height="550px")),
+                              withSpinner(plotOutput("siteComparisonPts", height="550px"))),
                             boxPlus(
                               title = "New Patients", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -154,13 +154,13 @@ ui <- dashboardPage(
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonNewPtRatio", height="550px"), br(),
+                              withSpinner(plotOutput("siteComparisonNewPtRatio", height="550px")), br(),
                               materialSwitch(
                                 inputId = "bySpecialty3",
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonNewPtWaitTime", height="550px")),
+                              withSpinner(plotOutput("siteComparisonNewPtWaitTime", height="550px"))),
                             boxPlus(
                               title = "Scheduling", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -169,13 +169,13 @@ ui <- dashboardPage(
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonBookedRate", height="900px"), br(),
+                              withSpinner(plotOutput("siteComparisonBookedRate", height="900px")), br(),
                               materialSwitch(
                                 inputId = "bySpecialty5",
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonNoShow", height="550px")),
+                              withSpinner(plotOutput("siteComparisonNoShow", height="550px"))),
                             boxPlus(
                               title = "Cycle Times", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -184,7 +184,7 @@ ui <- dashboardPage(
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonCycleTime", height="900px")),
+                              withSpinner(plotOutput("siteComparisonCycleTime", height="900px"))),
                             boxPlus(
                               title = "Working FTE", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -193,13 +193,13 @@ ui <- dashboardPage(
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonWorkingFTE", height="550px"), br(),
+                              withSpinner(plotOutput("siteComparisonWorkingFTE", height="550px")), br(),
                               materialSwitch(
                                 inputId = "bySpecialty8",
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonPtsPerFTE", height="550px")))
+                              withSpinner(plotOutput("siteComparisonPtsPerFTE", height="550px"))))
                      
               )),
       
@@ -223,11 +223,11 @@ ui <- dashboardPage(
                               title = "Day of Visit", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               fluidRow(
-                              column(4,
-                                     fluidRow(valueBoxOutput("avgCycleTime", width = 12)), 
-                                     fluidRow(valueBoxOutput("medCycleTime", width = 12))),
-                              column(8,
-                                     plotOutput("cycleTimeBoxPlot"))), 
+                                column(4,
+                                       fluidRow(valueBoxOutput("avgCycleTime", width = 12)), 
+                                       fluidRow(valueBoxOutput("medCycleTime", width = 12))),
+                                column(8,
+                                       plotOutput("cycleTimeBoxPlot"))), 
                               hr(),
                               fluidRow(
                                 column(4,
@@ -235,7 +235,7 @@ ui <- dashboardPage(
                                        fluidRow(valueBoxOutput("medCheckinToRoomin", width = 12))),
                                 column(8,
                                        plotOutput("checkInRoomInBoxPlot"))))
-                            ),
+                     ),
                      column(4,
                             boxPlus(
                               title = "Access", width = 12, status = "primary",
@@ -329,18 +329,18 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Scheduling KPIs", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("kpiApptStatusGraph", height="800px")
+                              withSpinner(plotOutput("kpiApptStatusGraph", height="800px"))
                             ),
                             boxPlus(
                               title = "Access KPIs", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("kpiNewWaitTimeGraph", height="450px")
+                              withSpinner(plotOutput("kpiNewWaitTimeGraph", height="450px"))
                             ),
                             boxPlus(
                               title = "Day of Visit KPIs", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("kpiCycleTimeGraph", height="450px"), br(),
-                              plotOutput("kpiWaitTimeGraph", height="450px")
+                              withSpinner(plotOutput("kpiCycleTimeGraph", height="450px")), br(),
+                              withSpinner(plotOutput("kpiWaitTimeGraph", height="450px"))
                             )
                      )
                      
@@ -455,17 +455,17 @@ ui <- dashboardPage(
               column(10,
                      div("Scheduling | Bumps/Cancellations", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
-                       boxPlus(
-                         title = "Bumped/Canceled/Recheduled Summary", width = 12, status = "primary",
-                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
-                         fluidRow(valueBoxOutput("totalBumpedCanceledRescheduledBox", width = 3),
-                                  valueBoxOutput("totalBumpedBox", width = 3), 
-                                  valueBoxOutput("totalCanceledBox", width = 3),
-                                  valueBoxOutput("totalRescheduledBox", width = 3)),
-                         fluidRow(valueBoxOutput("avgDailyBumpedCanceledRescheduledBox", width = 3),
-                                  valueBoxOutput("avgDailyBumpedBox", width = 3), 
-                                  valueBoxOutput("avgDailyCanceledBox", width = 3),
-                                  valueBoxOutput("avgDailyRescheduledBox", width = 3))),
+                     boxPlus(
+                       title = "Bumped/Canceled/Recheduled Summary", width = 12, status = "primary",
+                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
+                       fluidRow(valueBoxOutput("totalBumpedCanceledRescheduledBox", width = 3),
+                                valueBoxOutput("totalBumpedBox", width = 3), 
+                                valueBoxOutput("totalCanceledBox", width = 3),
+                                valueBoxOutput("totalRescheduledBox", width = 3)),
+                       fluidRow(valueBoxOutput("avgDailyBumpedCanceledRescheduledBox", width = 3),
+                                valueBoxOutput("avgDailyBumpedBox", width = 3), 
+                                valueBoxOutput("avgDailyCanceledBox", width = 3),
+                                valueBoxOutput("avgDailyRescheduledBox", width = 3))),
                      fluidRow(
                        column(5,
                               boxPlus(
@@ -708,21 +708,26 @@ ui <- dashboardPage(
                      #textOutput("practiceName_utilization"),
                      column(12,
                             boxPlus(
-                              title = "Cycle Time by Appointment Type", width = 12, status = "primary",
+                              title = "Cycle Time Summary", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               br(),
-                              fluidRow(column(4, uiOutput("apptTypeControl2"))),
-                              fluidRow(column(12, plotOutput("cycleTimeTrend", height = "700px"))),
+                              fluidRow(column(4, uiOutput("apptTypeControl2")),
+                                       column(4, valueBoxOutput("cycleTimeCompNew", width = 12)),
+                                       column(4, valueBoxOutput("cycleTimeCompOther", width = 12)))),
+                            boxPlus(
+                              title = "Cycle Time by Appointment Type", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              fluidRow(column(12, plotOutput("cycleTimeTrend", height = "600px"))),
                               hr(),
                               fluidRow(
                                 column(6, plotOutput("newCycleTimeBoxPlot", height = "500px")),
                                 column(6, plotOutput("establishedCycleTimeBoxPlot", height = "500px")))),
                             boxPlus(
-                              title = "Cycle Time by Provider", width = 12, status = "primary",
+                              title = "Cycle Time by Provider and Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               plotOutput("newCycleTimeByProv", height = "800px"),
                               plotOutput("establishedCycleTimeByProv", height = "800px"))
-                            ))
+                     ))
       ),
       
       tabItem(tabName = "roomInTime",
@@ -732,17 +737,22 @@ ui <- dashboardPage(
                      #textOutput("practiceName_utilization"),
                      column(12,
                             boxPlus(
-                              title = "Room-in Time by Appointment Type", width = 12, status = "primary",
+                              title = "Room-in Time Summary", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               br(),
-                              fluidRow(column(4, uiOutput("apptTypeControl3"))),
-                              fluidRow(column(12, plotOutput("roomInTimeTrend", height = "700px"))),
+                              fluidRow(column(4, uiOutput("apptTypeControl3")),
+                                       column(4, valueBoxOutput("roomInTimeCompNew", width = 12)),
+                                       column(4, valueBoxOutput("roomInTimeCompOther", width = 12)))),
+                            boxPlus(
+                              title = "Room-in Time by Appointment Type", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              fluidRow(column(12, plotOutput("roomInTimeTrend", height = "600px"))),
                               hr(),
                               fluidRow(
                                 column(6, plotOutput("newRoomInTimeBoxPlot", height = "500px")),
                                 column(6, plotOutput("establishedRoomInTimeBoxPlot", height = "500px")))),
                             boxPlus(
-                              title = "Room-in Time by Provider", width = 12, status = "primary",
+                              title = "Room-in Time by Provider and Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               plotOutput("newRoomInTimeByProv", height = "800px"),
                               plotOutput("establishedRoomInTimeByProv", height = "800px"))
@@ -809,8 +819,8 @@ ui <- dashboardPage(
                width = 12,
                solidHeader = FALSE,
                actionButton("download", "Download", width='200px'),
-               bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
-                         "top", options = list(container = "body"))
+               # bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
+               #           "top", options = list(container = "body"))
                
              ),
              box(
@@ -985,4 +995,3 @@ ui <- dashboardPage(
 
 # Run ShinyApp ===============================================================================================
 #shinyApp(ui, server)
-
