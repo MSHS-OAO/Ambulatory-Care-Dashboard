@@ -10,6 +10,12 @@ default_provider <- sort(unique(historical.data[
     historical.data$Resource %in% default_resource_type, "Provider"]))
 
 
+dateRangeKpi_start = min(kpi.arrived.data$Appt.DateYear) 
+dateRangeKpi_end = max(kpi.arrived.data$Appt.DateYear)
+dateRangeKpi_min = min(arrived.data$Appt.DateYear) 
+dateRangeKpi_max = max(arrived.data$Appt.DateYear)
+
+
 ui <- dashboardPage(
   
   ### UI start-----------------------------------------------------------
@@ -1032,8 +1038,20 @@ ui <- dashboardPage(
     conditionalPanel(
       condition = "input.sbm=='KPIs'",
       column(2,
-             uiOutput("dateRangeControlKpi"),
-             uiOutput("daysOfWeekControlKpi")
+             box(
+               title = "Select Date Range:",
+               width = 12, 
+               solidHeader = FALSE, 
+               dateRangeInput("dateRangeKpi", label = NULL,
+                              start = dateRangeKpi_start, end = dateRangeKpi_end,
+                              min = dateRangeKpi_min, max = dateRangeKpi_max)),
+             box(
+               title = "Select Days of Week:",
+               width = 12, 
+               solidHeader = FALSE, 
+               selectInput("daysOfWeekKpi",label = NULL,
+                           choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
+                           multiple=TRUE, selectize=TRUE))
       )),
     
     conditionalPanel(

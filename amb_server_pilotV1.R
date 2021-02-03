@@ -139,30 +139,7 @@ server <- function(input, output, session) {
                   multiple=TRUE, selectize=TRUE))
   })
   
-  ## KPI Data - Date Range Filters
-  output$dateRangeControlKpi <- renderUI({
-    
-    box(
-      title = "Select Date Range:",
-      width = 12, 
-      solidHeader = FALSE, 
-      dateRangeInput("dateRangeKpi", label = NULL,
-                     start = min(kpi.arrived.data$Appt.DateYear), end = max(kpi.arrived.data$Appt.DateYear),
-                     min = min(arrived.data$Appt.DateYear), max = max(arrived.data$Appt.DateYear)))
-  })
   
-  output$daysOfWeekControlKpi <- renderUI({
-    
-    box(
-      title = "Select Days of Week:",
-      width = 12, 
-      solidHeader = FALSE, 
-      selectInput("daysOfWeekKpi",label = NULL,
-                  choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
-                  multiple=TRUE, selectize=TRUE))
-  })
-  
-  # Utilization Data - Date Range Filters
   output$dateRangeControlUtil <- renderUI({
     
     box(
