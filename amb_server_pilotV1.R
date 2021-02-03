@@ -6164,7 +6164,10 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$download, {
-    screenshot()
+    screenshot(filename = "Ambulatory Care Dashboard")
+  })
+  observeEvent(input$download1, {
+    screenshot(filename = "Ambulatory Care Dashboard")
   })
   
 } # Close server 
