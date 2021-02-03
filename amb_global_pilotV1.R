@@ -112,7 +112,7 @@ suppressMessages({
 })
 
 # ### (0) Maximize R Memory Size 
-memory.limit(size = 8000000)
+memory.limit(size = 4000)
 
 ### (1) Set aesthetics theme -----------------------------------------------------------------------------
 
@@ -670,6 +670,8 @@ future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM 
 
 
 ### (5) Pre-processing Space Utilization Dataframe --------------------------------------------------------------------------------------
+# Filter utilization data in last 60 days
+scheduled.data <- arrivedNoShow.data %>% filter(Appt.DTTM >= max_date - 60*24*60*60) ## All appts scheduled
 
 # Function for formatting date and time by hour
 system_date <- function(time){
