@@ -324,7 +324,7 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Volume KPIs", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              withSpinner(plotOutput("kpiVolumeGraph", height="450px"))
+                              plotOutput("kpiVolumeGraph", height="450px") %>% withSpinner(type = 5, color = "#d80b8c")
                             ),
                             boxPlus(
                               title = "Scheduling KPIs", width = 12, status = "primary",
@@ -818,15 +818,10 @@ ui <- dashboardPage(
                title = "Download Current Tab",
                width = 12,
                solidHeader = FALSE,
-<<<<<<< HEAD
                actionButton("download", "Download", width="200px"),
                bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
                          "top", options = list(container = "body"))
-=======
-               actionButton("download", "Download", width='200px'),
-               # bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
-               #           "top", options = list(container = "body"))
->>>>>>> 75aceb4fbf3d6bc0bc85f120d706c09f275e858b
+
                
              ),
              box(
