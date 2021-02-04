@@ -717,11 +717,21 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Cycle Time by Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              br(),
                               fluidRow(column(12, plotOutput("cycleTimeTrend", height = "600px"))),
                               hr(),
                               fluidRow(
                                 column(6, plotOutput("newCycleTimeBoxPlot", height = "500px")),
                                 column(6, plotOutput("establishedCycleTimeBoxPlot", height = "500px")))),
+                            boxPlus(
+                              title = "Cycle Time by Time of Day", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              materialSwitch(
+                                inputId = "median2",
+                                label = "Median", 
+                                right = TRUE,
+                                status = "primary"),
+                              plotOutput("cycleTimeByHour", height = "700px")),
                             boxPlus(
                               title = "Cycle Time by Provider and Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -746,11 +756,21 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Room-in Time by Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              br(),
                               fluidRow(column(12, plotOutput("roomInTimeTrend", height = "600px"))),
                               hr(),
                               fluidRow(
                                 column(6, plotOutput("newRoomInTimeBoxPlot", height = "500px")),
                                 column(6, plotOutput("establishedRoomInTimeBoxPlot", height = "500px")))),
+                            boxPlus(
+                              title = "Room-in Time by Time of Day", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              materialSwitch(
+                                inputId = "median3",
+                                label = "Median", 
+                                right = TRUE,
+                                status = "primary"),
+                              plotOutput("roomInTimeByHour", height = "700px")),
                             boxPlus(
                               title = "Room-in Time by Provider and Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
