@@ -6,7 +6,8 @@ server <- function(input, output, session) {
     updatePickerInput(session,
                       inputId = "selectedSpecialty",
                       choices = sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
-    )})
+    )},
+    ignoreInit = TRUE)
   
   
   observeEvent(c(input$selectedCampus,input$selectedSpecialty),{
@@ -15,7 +16,8 @@ server <- function(input, output, session) {
                       choices = sort(unique(historical.data[
                         historical.data$Campus %in% input$selectedCampus &
                           historical.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
-    )})
+    )},
+    ignoreInit = TRUE)
   
   observeEvent(c(input$selectedCampus,input$selectedSpecialty,input$selectedDepartment,input$selectedResource),{
     updatePickerInput(session,
@@ -25,7 +27,8 @@ server <- function(input, output, session) {
                           historical.data$Campus.Specialty %in% input$selectedSpecialty &
                           historical.data$Department %in% input$selectedDepartment & 
                           historical.data$Resource %in% input$selectedResource, "Provider"])),
-    )})  
+    )},
+    ignoreInit = TRUE)  
   
   
   
@@ -136,30 +139,7 @@ server <- function(input, output, session) {
                   multiple=TRUE, selectize=TRUE))
   })
   
-  ## KPI Data - Date Range Filters
-  output$dateRangeControlKpi <- renderUI({
-    
-    box(
-      title = "Select Date Range:",
-      width = 12, 
-      solidHeader = FALSE, 
-      dateRangeInput("dateRangeKpi", label = NULL,
-                     start = min(kpi.arrived.data$Appt.DateYear), end = max(kpi.arrived.data$Appt.DateYear),
-                     min = min(arrived.data$Appt.DateYear), max = max(arrived.data$Appt.DateYear)))
-  })
   
-  output$daysOfWeekControlKpi <- renderUI({
-    
-    box(
-      title = "Select Days of Week:",
-      width = 12, 
-      solidHeader = FALSE, 
-      selectInput("daysOfWeekKpi",label = NULL,
-                  choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
-                  multiple=TRUE, selectize=TRUE))
-  })
-  
-  # Utilization Data - Date Range Filters
   output$dateRangeControlUtil <- renderUI({
     
     box(
@@ -6238,7 +6218,10 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$download, {
-    screenshot()
+    screenshot(filename = "Ambulatory Care Dashboard")
+  })
+  observeEvent(input$download1, {
+    screenshot(filename = "Ambulatory Care Dashboard")
   })
   
 } # Close server 

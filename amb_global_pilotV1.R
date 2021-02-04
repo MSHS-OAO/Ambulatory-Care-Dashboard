@@ -306,13 +306,13 @@ setwd(wdpath)
 process_data <- function(access_data,slot_data){
   slot.data.raw <- slot_data
   ## Site-Dept Reference File
-  site_ref <-  read_xlsx("Data/Department Site Crosswalk 8-24-2020.xlsx", col_names = TRUE, na = c("", "NA")) 
-  
+  #site_ref <-  read_xlsx("Data/Department Site Crosswalk 8-24-2020.xlsx", col_names = TRUE, na = c("", "NA")) 
+  site_ref <- read_excel("Data/Ambulatory Department Mapping (Master).xlsx",sheet = "Mapping")
   
   ### (3) Pre-process data ----------------------------------------------------------------------------------
   # SCheduling Data Pre-processing
   data.raw <- access_data # Assign scheduling Data
-  data.raw$campus_new <- site_ref$`Site Final`[match(data.raw$DEPARTMENT_NAME,site_ref$`Dept Name`)] # Crosswalk Campus to Site by Department Name
+  data.raw$campus_new <- site_ref$`Site`[match(data.raw$DEPARTMENT_NAME,site_ref$`Department Name`)] # Crosswalk Campus to Site by Department Name
   data.raw <- data.raw %>% filter(!campus_new == "NA") %>% filter(!campus_new %in% c("Other","OTHER","EHS")) ## Exclude Mapped Sites: Other, OTHER, EHS
   
   # Dummy columns until they are added to Clarity table: SEX, FPA
@@ -448,7 +448,7 @@ process_data <- function(access_data,slot_data){
   
   
   # Crosswalk Campus to Site by Department Name
-  slot.data.raw$Campus_new <- site_ref$`Site Final`[match(slot.data.raw$DEPARTMENT_NAME,site_ref$`Dept Name`)]
+  slot.data.raw$Campus_new <- site_ref$`Site`[match(slot.data.raw$DEPARTMENT_NAME,site_ref$`Department Name`)]
   slot.data.raw <- slot.data.raw %>% filter(!Campus_new == "NA") %>% filter(!Campus_new %in% c("Other","OTHER","EHS")) ## Exclude Mapped Sites: Other, OTHER, EHS
   
   # Data fields incldued for analysis
