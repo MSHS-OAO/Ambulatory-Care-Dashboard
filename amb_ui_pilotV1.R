@@ -913,24 +913,24 @@ ui <- dashboardPage(
       
       column(2,
            fluidRow(
-             column(2, offset = 1,
-                dropdownButton(
-                  circle = F,
-                  inline = T,
-                  icon = icon("download"), 
-                  width = "300px",
-                  size = "sm",
-                 br(), br(),
-                 box(
-                   title = "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
-                   width = 12,
-                   solidHeader = FALSE,
-                   actionButton("download", "Download", width="200px"),
-                   #bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
-                             #"top", options = list(container = "body"))
-                  )
-                )
-             ),
+             # column(2, offset = 1,
+             #    dropdownButton(
+             #      circle = F,
+             #      inline = T,
+             #      icon = icon("download"), 
+             #      width = "300px",
+             #      size = "sm",
+             #     br(), br(),
+             #     box(
+             #       title = "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
+             #       width = 12,
+             #       solidHeader = FALSE,
+             #       actionButton("download", "Download", width="200px"),
+             #       #bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
+             #                 #"top", options = list(container = "body"))
+             #      )
+             #    )
+             # ),
              column(2, offset = 1,
                     actionButton("download1",
                                  label = icon("download")),
