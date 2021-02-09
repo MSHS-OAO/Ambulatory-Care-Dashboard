@@ -1047,8 +1047,20 @@ ui <- dashboardPage(
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
       input.sbm=='newPatients' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
       column(2,
-             uiOutput("dateRangeControl"),
-             uiOutput("daysOfWeekControl")
+             box(
+               title = "Select Date Range:",
+               width = 12, 
+               solidHeader = FALSE, 
+               dateRangeInput("dateRange", label = NULL,
+                              start = dateRangeKpi_min, end = dateRangeKpi_max,
+                              min = dateRangeKpi_min, max = dateRangeKpi_max)),
+             box(
+               title = "Select Days of Week:",
+               width = 12, 
+               solidHeader = FALSE, 
+               selectInput("daysOfWeek",label = NULL,
+                           choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
+                           multiple=TRUE, selectize=TRUE))
       )),
     
     conditionalPanel(
