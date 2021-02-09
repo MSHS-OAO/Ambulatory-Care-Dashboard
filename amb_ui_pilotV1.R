@@ -649,34 +649,34 @@ ui <- dashboardPage(
                      div("Access | New Patients", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
                      #textOutput("practiceName_utilization"),
-                     fluidRow(
-                       boxPlus(
-                         title = "New Patient Visit Ratio", width = 12, status = "primary",
-                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                         tabBox(
-                           title = NULL,
-                           id = "tabset4", width = "100%",
-                           tabPanel("Total", 
-                                    plotOutput("newPtRatioByDept", height = "550px") %>% 
-                                      withSpinner(type = 5, color = "#d80b8c")),
-                           tabPanel("By Provider",
-                                    "*Select Fewer Providers for Better Visibility",
-                                    plotOutput("newPtRatioByProv", height = "550px") %>% 
-                                      withSpinner(type = 5, color = "#d80b8c"))))),
-                     fluidRow(
-                       boxPlus(
-                         title = "New Patient Wait Time", width = 12, status = "primary",
-                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                         tabBox(
-                           title = NULL,
-                           id = "tabset5", width = "100%",
-                           tabPanel("Total", 
-                                    plotOutput("newPtWaitTimeByDept", height = "550px") %>% 
-                                      withSpinner(type = 5, color = "#d80b8c")),
-                           tabPanel("By Provider",
-                                    "*Select Fewer Providers for Better Visibility",
-                                    plotOutput("newPtWaitTimeByProv", height = "550px") %>% 
-                                      withSpinner(type = 5, color = "#d80b8c"))))),
+                     # fluidRow(
+                     #   boxPlus(
+                     #     title = "New Patient Visit Ratio", width = 12, status = "primary",
+                     #     solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                     #     tabBox(
+                     #       title = NULL,
+                     #       id = "tabset4", width = "100%",
+                     #       tabPanel("Total", 
+                     #                plotOutput("newPtRatioByDept", height = "550px") %>% 
+                     #                  withSpinner(type = 5, color = "#d80b8c")),
+                     #       tabPanel("By Provider",
+                     #                "*Select Fewer Providers for Better Visibility",
+                     #                plotOutput("newPtRatioByProv", height = "550px") %>% 
+                     #                  withSpinner(type = 5, color = "#d80b8c"))))),
+                     # fluidRow(
+                     #   boxPlus(
+                     #     title = "New Patient Wait Time", width = 12, status = "primary",
+                     #     solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                     #     tabBox(
+                     #       title = NULL,
+                     #       id = "tabset5", width = "100%",
+                     #       tabPanel("Total", 
+                     #                plotOutput("newPtWaitTimeByDept", height = "550px") %>% 
+                     #                  withSpinner(type = 5, color = "#d80b8c")),
+                     #       tabPanel("By Provider",
+                     #                "*Select Fewer Providers for Better Visibility",
+                     #                plotOutput("newPtWaitTimeByProv", height = "550px") %>% 
+                     #                  withSpinner(type = 5, color = "#d80b8c"))))),
                      fluidRow(
                        boxPlus(
                          title = "New Patient Source", width = 12, status = "primary",
@@ -730,13 +730,13 @@ ui <- dashboardPage(
                        boxPlus(
                          title = "Booked vs. Filled Rate", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                         radioButtons("slotUsageChoice", label = NULL, inline=T,
-                                      choices = list("Available Hours " = 1, "Booked Hours " = 2, "Filled Hours " = 3, 
-                                                     "Booked Rate (%) " = 4, "Filled Rate (%) " = 5), selected = 1),
-                         "*Select Fewer Providers for Better Visibility",
-                         plotOutput("slotUsageGraph", height = "800px") %>% 
-                           withSpinner(type = 5, color = "#d80b8c"),
-                         br(),
+                         # radioButtons("slotUsageChoice", label = NULL, inline=T,
+                         #              choices = list("Available Hours " = 1, "Booked Hours " = 2, "Filled Hours " = 3, 
+                         #                             "Booked Rate (%) " = 4, "Filled Rate (%) " = 5), selected = 1),
+                         # "*Select Fewer Providers for Better Visibility",
+                         # plotOutput("slotUsageGraph", height = "800px") %>% 
+                         #   withSpinner(type = 5, color = "#d80b8c"),
+                         # br(),
                          materialSwitch(
                            inputId = "byProvider2",
                            label = "By Provider",
@@ -914,31 +914,10 @@ ui <- dashboardPage(
       column(2,
            fluidRow(
              column(2, offset = 1,
-                dropdownButton(
-                  circle = F,
-                  inline = T,
-                  icon = icon("download"), 
-                  width = "300px",
-                  size = "sm",
-                 br(), br(),
-                 box(
-                   title = "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
-                   width = 12,
-                   solidHeader = FALSE,
-                   actionButton("download", "Download", width="200px"),
-                   #bsTooltip("download", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
-                             #"top", options = list(container = "body"))
-                  )
-                )
-             ),
-             column(2, offset = 1,
                     actionButton("download1",
                                  label = icon("download")),
                     bsTooltip("download1", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
-                                "bottom", options = list(container = "body"))
-                    
-             )
-          ),
+                                "bottom", options = list(container = "body")))),
             br(),
              box(
                title = "Select Campus:",
