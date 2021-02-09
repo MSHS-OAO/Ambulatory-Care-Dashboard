@@ -5645,7 +5645,7 @@ server <- function(input, output, session) {
       appt.type <- "Other*"
     }
     
-    new <- ggplot(data, aes(Appt.TM.Hr, factor(Appt.Day,levels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")), fill = avg)) + 
+    new <- ggplot(data, aes(Appt.TM.Hr, factor(Appt.Day,levels=rev(daysOfWeek.options)), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#d80b8c", na.value = "#dddedd")+
       labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour\n"),
@@ -5667,7 +5667,7 @@ server <- function(input, output, session) {
             plot.margin = margin(10,30,30,30))+
       geom_text(aes(label= ifelse(is.na(avg),"", round(avg))), color="black", size=5, fontface="bold")
     
-    other <- ggplot(data_other, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
+    other <- ggplot(data_other, aes(Appt.TM.Hr, factor(Appt.Day,levels=rev(daysOfWeek.options)), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#00aeef", na.value = "#dddedd")+
       labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
@@ -5970,7 +5970,7 @@ server <- function(input, output, session) {
       appt.type <- "Other*"
     }
     
-    new <- ggplot(data, aes(Appt.TM.Hr, factor(Appt.Day,levels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")), fill = avg)) + 
+    new <- ggplot(data, aes(Appt.TM.Hr, factor(Appt.Day,levels=rev(daysOfWeek.options)), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#d80b8c", na.value = "#dddedd")+
       labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour\n"),
@@ -5992,7 +5992,7 @@ server <- function(input, output, session) {
             plot.margin = margin(10,30,30,30))+
       geom_text(aes(label= ifelse(is.na(avg),"", round(avg))), color="black", size=5, fontface="bold")
     
-    other <- ggplot(data_other, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
+    other <- ggplot(data_other, aes(Appt.TM.Hr, factor(Appt.Day,levels=rev(daysOfWeek.options)), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#00aeef", na.value = "#dddedd")+
       labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
