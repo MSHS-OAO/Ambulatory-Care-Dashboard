@@ -4573,6 +4573,7 @@ server <- function(input, output, session) {
       theme(
         plot.title = element_text(hjust=0.5, face = "bold", size = 20),
         plot.subtitle = element_text(hjust=0.5, size = 14),
+        plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
         legend.position = "none",
         axis.title.y = element_blank(),
         axis.title.x = element_blank(),
@@ -4790,7 +4791,7 @@ server <- function(input, output, session) {
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
         axis.text.y = element_text(size = "14"))+
-      geom_label(aes(x = 0.8, y = target, label = paste0("Target: ", target," days")), fill = "white", fontface = "bold", color = "red", size=4)+
+      geom_label(aes(x = 0.5, y = target, label = paste0("Target: ", target," days")), fill = "white", fontface = "bold", color = "red", size=4)+
       geom_text(aes(label=paste(medWaitTime," days")), color="black", 
                 size=5, position = position_dodge(1), hjust=-.5)
     
@@ -5644,10 +5645,10 @@ server <- function(input, output, session) {
       appt.type <- "Other*"
     }
     
-    new <- ggplot(data, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
+    new <- ggplot(data, aes(Appt.TM.Hr, factor(Appt.Day,levels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")), fill = avg)) + 
       geom_tile(colour = "white") + 
-      scale_fill_gradient(low="white", high="#d80b8c")+
-      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour"),
+      scale_fill_gradient(low="white", high="#d80b8c", na.value = "#dddedd")+
+      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour\n"),
            y = NULL,
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
@@ -5668,7 +5669,7 @@ server <- function(input, output, session) {
     
     other <- ggplot(data_other, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
       geom_tile(colour = "white") + 
-      scale_fill_gradient(low="white", high="#00aeef")+
+      scale_fill_gradient(low="white", high="#00aeef", na.value = "#dddedd")+
       labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
            y = NULL,
            caption = paste0("*Includes following appointment types: ", names),
@@ -5969,10 +5970,10 @@ server <- function(input, output, session) {
       appt.type <- "Other*"
     }
     
-    new <- ggplot(data, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
+    new <- ggplot(data, aes(Appt.TM.Hr, factor(Appt.Day,levels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")), fill = avg)) + 
       geom_tile(colour = "white") + 
-      scale_fill_gradient(low="white", high="#d80b8c")+
-      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour"),
+      scale_fill_gradient(low="white", high="#d80b8c", na.value = "#dddedd")+
+      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour\n"),
            y = NULL,
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
@@ -5993,12 +5994,13 @@ server <- function(input, output, session) {
     
     other <- ggplot(data_other, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
       geom_tile(colour = "white") + 
-      scale_fill_gradient(low="white", high="#00aeef")+
+      scale_fill_gradient(low="white", high="#00aeef", na.value = "#dddedd")+
       labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
            y = NULL,
            caption = paste0("*Includes following appointment types: ", names),
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            plot.caption = element_text(size = "12", face = "italic"),
             legend.position = "right",
             legend.direction = "vertical",
             legend.key.size = unit(.8,"cm"),
