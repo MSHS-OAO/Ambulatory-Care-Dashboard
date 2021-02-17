@@ -5973,7 +5973,7 @@ server <- function(input, output, session) {
     new <- ggplot(data, aes(Appt.TM.Hr, factor(Appt.Day,levels=rev(daysOfWeek.options)), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#d80b8c", na.value = "#dddedd")+
-      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour\n"),
+      labs(title = paste0(input," NEW Appointments Check-in to Room-in Time by Hour\n"),
            y = NULL,
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
@@ -5995,7 +5995,7 @@ server <- function(input, output, session) {
     other <- ggplot(data_other, aes(Appt.TM.Hr, factor(Appt.Day,levels=rev(daysOfWeek.options)), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#00aeef", na.value = "#dddedd")+
-      labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
+      labs(title = paste0(input," ",appt.type," Appointments Check-in to Room-in Time by Hour\n"), 
            y = NULL,
            caption = paste0("*Includes following appointment types: ", names),
            fill = "Minutes")+
