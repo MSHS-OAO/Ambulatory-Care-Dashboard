@@ -562,6 +562,14 @@ server <- function(input, output, session) {
   
   output$siteComparisonPts <- renderPlot({
     
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
     
     # Scheduling Arrived Data
     arrivedPts <- dataArrived()
@@ -614,6 +622,15 @@ server <- function(input, output, session) {
   })
   
   output$siteComparisonNewPtRatio <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
     
     # Scheduling Arrived Data
     arrivedPts <- dataArrived()
@@ -694,6 +711,15 @@ server <- function(input, output, session) {
   
   output$siteComparisonNewPtWaitTime <- renderPlot({
     
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     # Scheduling Arrived Data
     arrivedPts <- dataArrived()
     # arrivedPts <- arrived.data %>% filter(Campus.Specialty == "Cardiology")
@@ -763,6 +789,15 @@ server <- function(input, output, session) {
   
   
   output$siteComparisonNoShow <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
     
     # Scheduling Arrived and No Show Data
     arrivedNoShowPts <- dataArrivedNoShow()
@@ -840,6 +875,15 @@ server <- function(input, output, session) {
   
   
   output$siteComparisonBookedRate <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
     
     # Slot Data
     slotData <- dataPastSlot()
@@ -926,6 +970,15 @@ server <- function(input, output, session) {
   
   output$siteComparisonCycleTime <- renderPlot({
     
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     # Scheduling Arrived Data
     arrivedPts <- dataArrived()
     # arrivedPts <- arrived.data %>% filter(Campus.Specialty == "Cardiology")
@@ -1010,6 +1063,15 @@ server <- function(input, output, session) {
   
   output$siteComparisonWorkingFTE <- renderPlot({
     
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     # Slot Data
     slotData <- dataPastSlot()
     # slotData <- past.slot.data %>% filter(Campus == "MSUS")
@@ -1085,6 +1147,15 @@ server <- function(input, output, session) {
   })
   
   output$siteComparisonPtsPerFTE <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
     
     # Slot Data
     slotData <- dataPastSlot()
