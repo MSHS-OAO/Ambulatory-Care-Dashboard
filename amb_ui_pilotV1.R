@@ -37,7 +37,7 @@ ui <- dashboardPage(
     ))),
     
     # Overwrite fixed height of dashboard sidebar
-    tags$head(tags$style(HTML('.content-wrapper { height: 6000px !important;}'))),
+    #tags$head(tags$style(HTML('.content-wrapper { height: 6000px !important;}'))),
     
     width = 200,
     
@@ -71,7 +71,10 @@ ui <- dashboardPage(
   ), # Close dashboardSidebar
   
   dashboardBody(
-    
+    # tags$head(tags$style(
+    #   HTML('.wrapper {height: auto !important; position:relative; overflow-x:hidden; overflow-y:hidden}')
+    # )),
+    fluidPage(
     # box "status" color for Mount Sinai Purple
     tags$style(HTML("
     .box.box-solid.box-primary>.box-header {
@@ -349,6 +352,7 @@ ui <- dashboardPage(
                             box(
                               title = NULL,
                               width = 12,
+                              height = "200px",
                               solidHeader = FALSE,
                               radioButtons("kpiTrend", label = h4("Compare KPIs by:"),
                                            choices = list("Historical Trend" = 1, "Seasonality" = 2), 
@@ -356,6 +360,7 @@ ui <- dashboardPage(
                             box(
                               title = NULL,
                               width = 12,
+                              height = "200px",
                               solidHeader = FALSE,
                               radioButtons("kpiFreq", label = h4("Display KPIs by:"),
                                            choices = list("Year" = 1, "Quarter" = 2, "Month" = 3, "Day" = 4), 
@@ -363,13 +368,13 @@ ui <- dashboardPage(
                      ),
                      column(10,
                             boxPlus(
-                              title = "Volume KPIs", width = 12, status = "primary",
+                              title = "Volume KPIs", width = 12, status = "primary", height = "500px",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               plotOutput("kpiVolumeGraph", height="450px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c")
                             ),
                             boxPlus(
-                              title = "Scheduling KPIs", width = 12, status = "primary",
+                              title = "Scheduling KPIs", width = 12, status = "primary", height = "500px",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               plotOutput("kpiApptStatusGraph", height="800px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c")
@@ -938,6 +943,7 @@ ui <- dashboardPage(
              box(
                title = "Select Campus:",
                width = 12,
+               height = "100px",
                solidHeader = FALSE,
                pickerInput("selectedCampus",label=NULL,
                            choices=sort(unique(historical.data$Campus)),
@@ -953,6 +959,7 @@ ui <- dashboardPage(
              box(
                title = "Select Specialty:",
                width = 12,
+               height = "100px",
                solidHeader = FALSE,
                pickerInput("selectedSpecialty",label=NULL,
                            choices=default_specialty,
@@ -967,6 +974,7 @@ ui <- dashboardPage(
              box(
                title = "Select Department:",
                width = 12,
+               height = "100px",
                solidHeader = FALSE,
                pickerInput("selectedDepartment",label=NULL,
                            choices=default_departments,
@@ -981,6 +989,7 @@ ui <- dashboardPage(
              box(
                title = "Select Resource Type:",
                width = 12,
+               height = "100px",
                solidHeader = FALSE,
                checkboxGroupButtons(
                  inputId = "selectedResource",
@@ -993,7 +1002,8 @@ ui <- dashboardPage(
              ),
              box(
                title = "Select Provider:",
-               width = 12, 
+               width = 12,
+               height = "100px",
                solidHeader = FALSE, 
                pickerInput("selectedProvider",label=NULL,
                            choices=default_provider,
@@ -1008,6 +1018,7 @@ ui <- dashboardPage(
              box(
                title = "Select Visit Type:",
                width = 12,
+               height = "100px",
                solidHeader = FALSE,
                pickerInput("selectedVisitMethod",label=NULL,
                            choices=sort(unique(historical.data$Visit.Method)),
@@ -1050,6 +1061,7 @@ ui <- dashboardPage(
              box(
                title = "Select Date Range:",
                width = 12, 
+               height = "100px",
                solidHeader = FALSE, 
                dateRangeInput("dateRange", label = NULL,
                               start = dateRangeKpi_min, end = dateRangeKpi_max,
@@ -1125,7 +1137,7 @@ ui <- dashboardPage(
                            selected = unique(holid$holiday)))
       ))
     
-    
+    )#Close Fluid Page
   ) # Close daashboardBody
 ) # Close DashboardPage
 

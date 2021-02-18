@@ -350,6 +350,15 @@ server <- function(input, output, session) {
   ### [3.1] Title of  Dashboard -------------------------------------------------------------------------------------------------------
   # Site Overview Tab -------------------------------------------------------------------------------------------------
   output$siteTotalPts <- renderValueBox({
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     valueBox(
       prettyNum(round(length(unique(dataArrived()$uniqueId))/length(unique(dataArrived()$Appt.DateYear))), big.mark = ','),
       subtitle = tags$p("Avg Patients per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
@@ -357,6 +366,7 @@ server <- function(input, output, session) {
   })
   
   output$siteNewPtRatio <- renderValueBox({
+    
     valueBox(
       paste0(round((nrow(dataArrived() %>% filter(New.PT3 == TRUE)) / nrow(dataArrived()))*100),"%"),
       subtitle = tags$p("Avg New Patient Ratio", style = "font-size: 130%;"), icon = NULL, color = "yellow"
@@ -364,6 +374,7 @@ server <- function(input, output, session) {
   })
   
   output$siteTotalProvs <- renderValueBox({
+
     valueBox(
       prettyNum(round(mean((dataArrived() %>% group_by(Appt.DateYear, Provider) %>% dplyr::summarise(n()) 
                             %>% group_by(Appt.DateYear) %>% dplyr::summarise(total = n()))$total)), big.mark = ','),
@@ -372,6 +383,7 @@ server <- function(input, output, session) {
   })
   
   output$sitePtsPerProv <- renderValueBox({
+    
     valueBox(
       prettyNum(round((length(unique(dataArrived()$uniqueId))/length(unique(dataArrived()$Appt.DateYear)))/
                         (mean((dataArrived() %>% group_by(Appt.DateYear, Provider) %>% dplyr::summarise(n()) 
@@ -380,6 +392,15 @@ server <- function(input, output, session) {
     )
   })
   output$siteSpecialties <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
     
     data <- dataArrived()
     
@@ -407,6 +428,15 @@ server <- function(input, output, session) {
   
   
   output$siteWaitTime <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
     
     data <- dataAll()
     # data <- all.data %>% filter(Campus == "MSUS")
@@ -461,6 +491,15 @@ server <- function(input, output, session) {
   
   output$siteWorkingFTE <- renderPlot({
     
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     data <- dataPastSlot()
     # data <- past.slot.data %>% filter(Campus == "MSUS")
     
@@ -488,6 +527,15 @@ server <- function(input, output, session) {
   
   output$sitePtsPerFTE <- renderPlot({
     
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     data <- dataPastSlot()
     # data <- past.slot.data %>% filter(Campus == "MSUS")
     
@@ -513,6 +561,7 @@ server <- function(input, output, session) {
   # Site Comparison Tab -------------------------------------------------------------------------------------------------
   
   output$siteComparisonPts <- renderPlot({
+    
     
     # Scheduling Arrived Data
     arrivedPts <- dataArrived()
@@ -2040,6 +2089,16 @@ server <- function(input, output, session) {
   ### KPIs Tab ------------------------------------------------------------------------------------------------------------------------
   # Volume KPI ====================================================================
   output$kpiVolumeGraph <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     kpiVolumeData <- aggregate(dataArrivedKpi()$uniqueId, by=list(dataArrivedKpi()$Appt.Year,dataArrivedKpi()$Appt.Quarter,
                                                                   dataArrivedKpi()$Appt.Month, dataArrivedKpi()$Appt.Date, dataArrivedKpi()$Appt.MonthYear, dataArrivedKpi()$Appt.DateYear), FUN=NROW)
     
@@ -2219,6 +2278,16 @@ server <- function(input, output, session) {
   
   # Appt Status KPI ========================================================================
   output$kpiApptStatusGraph <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     
     statusData <- aggregate(dataAllKpi()$uniqueId, by=list(dataAllKpi()$Appt.Year,dataAllKpi()$Appt.Quarter,
                                                            dataAllKpi()$Appt.Month, dataAllKpi()$Appt.Date,
@@ -2487,6 +2556,15 @@ server <- function(input, output, session) {
   ## Avg New Wait Time
   output$kpiNewWaitTimeGraph <- renderPlot({
     
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     data <- dataAllKpi() 
     
     data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
@@ -2667,6 +2745,16 @@ server <- function(input, output, session) {
   ## Avg Check-in to Visit-end
   output$kpiCycleTimeGraph <- renderPlot({
     
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
+    
     data <- dataArrivedKpi() %>% filter(cycleTime > 0)
     
     if(input$kpiTrend ==1){ # Historical Trend
@@ -2842,6 +2930,15 @@ server <- function(input, output, session) {
   
   ## Check-in to Room-in Wait Time
   output$kpiWaitTimeGraph <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Type")
+    )
     
     data <- dataArrivedKpi() %>% filter(checkinToRoomin > 0)
     
