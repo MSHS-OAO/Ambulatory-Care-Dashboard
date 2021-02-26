@@ -6903,10 +6903,10 @@ server <- function(input, output, session) {
   
 } # Close server 
 
-shinyApp(ui, server)
+#shinyApp(ui, server)
 
 
-shinyApp(ui, server, options = list(launch.browser = T,browser = "C:/Program Files/Google/Chrome/Application/chrome.exe"))
+#shinyApp(ui, server, options = list(launch.browser = T,browser = "C:/Program Files/Google/Chrome/Application/chrome.exe"))
 
 
 
