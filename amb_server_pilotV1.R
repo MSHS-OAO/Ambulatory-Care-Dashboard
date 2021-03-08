@@ -1,37 +1,171 @@
 server <- function(input, output, session) {
   
   ### (1) Create reactive filters ===================================================================================================
+  observeEvent(input$resetheight, {
+    updateSliderInput(session,"plotHeight",value = 650)
+    
+  })
   ## SCheduling Data
   observeEvent(input$selectedCampus,{
+    specialty_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
     updatePickerInput(session,
                       inputId = "selectedSpecialty",
-                      choices = sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
-    )},
-    ignoreInit = TRUE)
-  
-  
-  observeEvent(c(input$selectedCampus,input$selectedSpecialty),{
+                      choices = specialty_choices,
+                      selected = specialty_choices
+    )
+    department_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                        historical.data$Campus.Specialty %in% specialty_choices, "Department"]))
     updatePickerInput(session,
                       inputId = "selectedDepartment",
-                      choices = sort(unique(historical.data[
-                        historical.data$Campus %in% input$selectedCampus &
-                          historical.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
-    )},
-    ignoreInit = TRUE)
+                      choices = department_choices,
+                      selected = department_choices
+    )
+    resource_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                        historical.data$Campus.Specialty %in% specialty_choices &
+                                                        historical.data$Department %in% department_choices, "Resource"]))
+    updateCheckboxGroupButtons(session,
+                      inputId = "selectedResource",
+                      checkIcon = list(
+                        yes = icon("ok", lib = "glyphicon")),
+                      choices = c("Provider","Resource"),
+                      selected = resource_choices
+    )
+    provider_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                      historical.data$Campus.Specialty %in% specialty_choices &
+                                                      historical.data$Department %in% department_choices &
+                                                      historical.data$Resource %in% resource_choices, "Provider"]))
+    updatePickerInput(session,
+                               inputId = "selectedProvider",
+                               choices = provider_choices,
+                               selected = provider_choices
+    )
+    visit_type_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                      historical.data$Campus.Specialty %in% specialty_choices &
+                                                      historical.data$Department %in% department_choices &
+                                                      historical.data$Resource %in% resource_choices &
+                                                      historical.data$Provider %in% provider_choices, "Visit.Method"]))
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_type_choices,
+                      selected = visit_type_choices
+    )
+    },
+    ignoreInit = TRUE,
+    ignoreNULL = FALSE)
   
-  observeEvent(c(input$selectedCampus,input$selectedSpecialty,input$selectedDepartment,input$selectedResource),{
+  observeEvent(input$selectedSpecialty,{
+    department_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                        historical.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
+    updatePickerInput(session,
+                      inputId = "selectedDepartment",
+                      choices = department_choices,
+                      selected = department_choices
+    )
+    resource_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                                                      historical.data$Department %in% department_choices, "Resource"]))
+    updateCheckboxGroupButtons(session,
+                               inputId = "selectedResource",
+                               checkIcon = list(
+                                 yes = icon("ok", lib = "glyphicon")),
+                               choices = c("Provider","Resource"),
+                               selected = resource_choices
+    )
+    provider_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                                                      historical.data$Department %in% department_choices &
+                                                      historical.data$Resource %in% resource_choices, "Provider"]))
     updatePickerInput(session,
                       inputId = "selectedProvider",
-                      choices=sort(unique(historical.data[
-                        historical.data$Campus %in% input$selectedCampus &
-                          historical.data$Campus.Specialty %in% input$selectedSpecialty &
-                          historical.data$Department %in% input$selectedDepartment & 
-                          historical.data$Resource %in% input$selectedResource, "Provider"])),
-    )},
-    ignoreInit = TRUE)  
+                      choices = provider_choices,
+                      selected = provider_choices
+    )
+    visit_type_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                                                        historical.data$Department %in% department_choices &
+                                                        historical.data$Resource %in% resource_choices &
+                                                        historical.data$Provider %in% provider_choices, "Visit.Method"]))
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_type_choices,
+                      selected = visit_type_choices
+    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
+  observeEvent(input$selectedDepartment,{
+    resource_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                                                      historical.data$Department %in% input$selectedDepartment, "Resource"]))
+    updateCheckboxGroupButtons(session,
+                               inputId = "selectedResource",
+                               checkIcon = list(
+                                 yes = icon("ok", lib = "glyphicon")),
+                               choices = c("Provider","Resource"),
+                               selected = resource_choices
+    )
+    provider_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                                                      historical.data$Department %in% input$selectedDepartment &
+                                                      historical.data$Resource %in% resource_choices, "Provider"]))
+    updatePickerInput(session,
+                      inputId = "selectedProvider",
+                      choices = provider_choices,
+                      selected = provider_choices
+    )
+    visit_type_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                                                        historical.data$Department %in% input$selectedDepartment &
+                                                        historical.data$Resource %in% resource_choices &
+                                                        historical.data$Provider %in% provider_choices, "Visit.Method"]))
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_type_choices,
+                      selected = visit_type_choices
+    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
+  observeEvent(input$selectedResource,{
+    provider_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                                                      historical.data$Department %in% input$selectedDepartment &
+                                                      historical.data$Resource %in% input$selectedResource, "Provider"]))
+    updatePickerInput(session,
+                      inputId = "selectedProvider",
+                      choices = provider_choices,
+                      selected = provider_choices
+    )
+    visit_type_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                                                        historical.data$Department %in% input$selectedDepartment &
+                                                        historical.data$Resource %in% input$selectedResource &
+                                                        historical.data$Provider %in% provider_choices, "Visit.Method"]))
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_type_choices,
+                      selected = visit_type_choices
+    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
+  observeEvent(input$selectedProvider,{
+    visit_type_choices <- sort(unique(historical.data[historical.data$Campus %in% input$selectedCampus &
+                                                        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                                                        historical.data$Department %in% input$selectedDepartment &
+                                                        historical.data$Resource %in% input$selectedResource &
+                                                        historical.data$Provider %in% input$selectedProvider, "Visit.Method"]))
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_type_choices,
+                      selected = visit_type_choices
+    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
   output$specialtyControl <- renderUI({
     
@@ -2411,7 +2545,7 @@ server <- function(input, output, session) {
       }
     }
     
-  })
+  },height = function(x) input$plotHeight)
   
   # Appt Status KPI ========================================================================
   output$kpiApptStatusGraph <- renderPlot({

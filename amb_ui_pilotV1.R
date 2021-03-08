@@ -344,7 +344,7 @@ ui <- dashboardPage(
       
       tabItem(tabName = "KPIs",
               # KPIs Tab --------------------------------------------------------------------------------------------------------------------
-              column(10,
+              column(11,
                      div("KPIs", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$style("#practiceName1{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
                      #textOutput("practiceName_KPIs"),
@@ -368,13 +368,13 @@ ui <- dashboardPage(
                      ),
                      column(10,
                             boxPlus(
-                              title = "Volume KPIs", width = 12, status = "primary", height = "500px",
+                              title = "Volume KPIs", width = 12, status = "primary", #height = "500px",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("kpiVolumeGraph", height="450px") %>% 
+                              plotOutput("kpiVolumeGraph", height="auto") %>% 
                                 withSpinner(type = 5, color = "#d80b8c")
                             ),
                             boxPlus(
-                              title = "Scheduling KPIs", width = 12, status = "primary", height = "500px",
+                              title = "Scheduling KPIs", width = 12, status = "primary", #height = "500px",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               plotOutput("kpiApptStatusGraph", height="800px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c")
@@ -924,21 +924,35 @@ ui <- dashboardPage(
     
     # Conditional Filters ------------------------------------------------------------------------------------------------------
     
+    # Formatting Buttons
+    tags$head(tags$style(HTML("#dropdownbutton1 {color: #212070;}"))),
+    tags$head(tags$style(HTML("#dropdownheight {color: #212070;}"))),
+    tags$head(
+      tags$style(HTML("
+                  #download1 {
+                    background: #fff;
+                    color: #212070;
+                    padding: 8px 15px;
+                    font-size: 24px;
+                    font-family: inherit;
+                    height: 54px;
+                    width: 54px;
+                    line-height: 44px;
+                    outline: none;
+                    box-shadow: 0 2px 5px 0 rgba(0,0,0,.18), 0 1px 5px 0 rgba(0,0,0,.15);
+                    border-radius: 50%;
+                    border-color: transparent;}"))),
+    
+    br(),
+    br(),
+    br(),
+    br(),
+    dropdown(
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
       input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
       
-      column(2,
-           fluidRow(
-             column(2, offset = 1,
-                    actionButton("download1",
-                                 label = icon("download")),
-                    bsTooltip("download1", "Creates a PNG file with all visible graphs on this page. Use the minimize or close buttons to hide unwanted graphs",
-                                "bottom", options = list(container = "body"))
-                    
-             )
-          ),
             br(),
              box(
                title = "Select Campus:",
@@ -1030,8 +1044,8 @@ ui <- dashboardPage(
                              countSelectedText = "{0}/{1} Visit Types", 
                              dropupAuto = FALSE),
                            selected = unique(historical.data$Visit.Method)))
-      )),
-    
+      ),
+
     
     # conditionalPanel(
     #   condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
@@ -1057,7 +1071,6 @@ ui <- dashboardPage(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
       input.sbm=='newPatients' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
-      column(2,
              box(
                title = "Select Date Range:",
                width = 12, 
@@ -1065,7 +1078,19 @@ ui <- dashboardPage(
                solidHeader = FALSE, 
                dateRangeInput("dateRange", label = NULL,
                               start = dateRangeKpi_min, end = dateRangeKpi_max,
-                              min = dateRangeKpi_min, max = dateRangeKpi_max)),
+                                min = dateRangeKpi_min, max = dateRangeKpi_max),
+                 fluidRow(
+                   column(12, offset = 2,
+                          radioGroupButtons(
+                            inputId = "dateRangePreset",
+                            #label = "Choices", 
+                            choices = c("3M", "6M", "1Y"),
+                            #status = "primary"
+                            selected = character(0)
+                          )
+                   )
+                 )
+               ),
              box(
                title = "Select Days of Week:",
                width = 12, 
@@ -1073,18 +1098,29 @@ ui <- dashboardPage(
                selectInput("daysOfWeek",label = NULL,
                            choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
                            multiple=TRUE, selectize=TRUE))
-      )),
+      ),
     
     conditionalPanel(
       condition = "input.sbm=='KPIs'",
-      column(2,
              box(
                title = "Select Date Range:",
                width = 12, 
                solidHeader = FALSE, 
                dateRangeInput("dateRangeKpi", label = NULL,
                               start = dateRangeKpi_start, end = dateRangeKpi_end,
-                              min = dateRangeKpi_min, max = dateRangeKpi_max)),
+                              min = dateRangeKpi_min, max = dateRangeKpi_max),
+                 fluidRow(
+                   column(12, offset = 2,
+                          radioGroupButtons(
+                            inputId = "dateRangePreset",
+                            #label = "Choices", 
+                            choices = c("3M", "6M", "1Y"),
+                            #status = "primary"
+                            selected = character(0)
+                          )
+                   )
+                 )
+               ),
              box(
                title = "Select Days of Week:",
                width = 12, 
@@ -1092,23 +1128,21 @@ ui <- dashboardPage(
                selectInput("daysOfWeekKpi",label = NULL,
                            choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
                            multiple=TRUE, selectize=TRUE))
-      )),
+      ),
     
     conditionalPanel(
       condition = "input.sbm=='utilization'",
-      column(2,
              uiOutput("dateRangeControlUtil"),
              uiOutput("daysOfWeekControlUtil")
-      )),
+      ),
     
     
     # Future Slot 
     conditionalPanel(
       condition = "input.sbm=='upcomingDemand'",
-      column(2,
              uiOutput("dateRangeControlFutureSlot"),
              uiOutput("daysOfWeekControlFutureSlot")
-      )),
+      ),
     
     # # Past Slot 
     # conditionalPanel(
@@ -1122,7 +1156,6 @@ ui <- dashboardPage(
       condition = "input.sbm=='KPIs' | input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='slotUsage' |
       input.sbm=='newPatients' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
-      column(2,
              box(
                title = "Select Holidays to Exclude:",
                width = 12,
@@ -1135,7 +1168,62 @@ ui <- dashboardPage(
                              actionsBox = TRUE,
                              dropupAuto = FALSE),
                            selected = unique(holid$holiday)))
-      ))
+      ),
+    style = "material-circle", size = "lg", right = TRUE, status = "default",
+    icon = icon("filter"), width = "300px",
+    tooltip = tooltipOptions(title = "Set additional filters for graphs/tables."),
+    inputId = "dropdownbutton1"
+    ), #Close dropdown
+    
+    conditionalPanel(
+      condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
+      input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
+      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
+      
+      br(),
+      dropdown(
+        box(
+          title = "Change height:",
+          width = 12,
+          height = "150px",
+          solidHeader = FALSE,
+          sliderInput(
+            inputId = "plotHeight",
+            label = NULL, 
+            value = 650, min = 450, max = 2000,
+            ticks = FALSE
+          ),
+          fluidRow(
+            column(2, offset = 4,
+                   actionButton("resetheight", "Reset")
+            )
+          )
+        ),
+        
+        
+        
+        # numericInput("height", "height", 300),
+        
+        style = "material-circle", size = "lg", right = TRUE, status = "default",
+        icon = icon("gear"), width = "300px",
+        
+        tooltip = tooltipOptions(title = "Format graphs."),
+        inputId = "dropdownheight"
+        
+      ), # Close Drop Down Button
+      
+      br(),
+      actionButton("download1",
+                   label = icon("download")),
+      bsTooltip("download1", "Download (PNG) current tab.",
+                "right", options = list(container = "body")
+      )
+      
+      
+    )
+    
+    
+   
     
     )#Close Fluid Page
   ) # Close daashboardBody
