@@ -279,32 +279,9 @@ theme_new_line <- function(base_size = 12,
 
 ### (2) Import Data ----------------------------------------------------------------------------------
 
-#singleday_path <<- here("Data/Access/SingleDay")
-#monthly_path <<- here("Data/Access/Monthly")
-monthly_access <<- here("Data/Access/Monthly")
-monthly_slot <<- here("Data/Slot/Monthly")
-singleday_access <<- here("Data/Access/SingleDay")
-singleday_slot <<- here("Data/Slot/SingleDay")
-
-
-# Set Working Directory (PILOT)
-#wdpath <- "J:/deans/Presidents/HSPI-PM/Operations Analytics and Optimization/Projects/System Operations/Ambulatory Dashboard/Pilot Application v1"
-#wdpath <- "J:/Presidents/HSPI-PM/Operations Analytics and Optimization/Projects/System Operations/Ambulatory Dashboard/Pilot Application v1"
-# wdpath <- "C:/Users/kweons01/Desktop/Pilot Application v1"
-
-
 wdpath <- here::here()
 
 setwd(wdpath)
-
-
-#master.data.new_new <- data_all
-
-
-# ## Utilization Data
-# data.hour.scheduled <- read_csv("Data/Utilization/data.hour.scheduled.pilotV1.csv")
-# data.hour.arrived <- read_csv("Data/Utilization/data.hour.arrived.pilotV1.csv")
-
 
 
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
@@ -312,6 +289,7 @@ historical.data <- readRDS(here::here("Data/historical_data.rds")) ## Filter out
 slot.data.subset <- readRDS(here::here("Data/slot_subset.rds"))
 holid <- readRDS(here::here("Data/holid.rds"))
 max_date <- max(historical.data$Appt.DateYear)
+
 ## KPI datasets
 kpi.all.data <- historical.data %>% filter(Appt.DTTM >= max_date - 3*365) ## All data: Arrived, No Show, Canceled, Bumped, Rescheduled
 kpi.arrivedNoShow.data <- kpi.all.data %>% filter(Appt.Status %in% c("Arrived","No Show"))  ## Arrived + No Show data: Arrived and No Show
@@ -336,15 +314,6 @@ arrivedNoShow.data <- rbind(arrived.data,noShow.data) ## Arrived + No Show data:
 past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
 future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
 
-
-### (5) Pre-processing Space Utilization Dataframe --------------------------------------------------------------------------------------
-# Filter utilization data in last 60 days
-
-# Combine Utilization Data
-data.hour.scheduled <- readRDS(here::here("Data/hour_scheduled.rds"))
-data.hour.arrived <- readRDS(here::here("Data/hour_arrived.rds"))
-scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
-arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
 
 
 ### (6) Shiny App Components Set-up -------------------------------------------------------------------------------
@@ -382,34 +351,11 @@ kpiOptions <- c("Patient Volume","Appointment Status",
                 "New Patient Ratio","New Patient Wait Time","3rd Next Available",
                 "Check-in to Room-in Time","Provider Time")
 
-# Reference dataframes, vectors, etc.
-daysOfWeek.Table <- data.hour.arrived %>% group_by(Appt.Day,Appt.DateYear) %>% dplyr::summarise(count = n()) ## Total Days in the Entire Data Set 
 
+# Reference dataframes, vectors, etc.
 Time <- rep(timeOptionsHr, 7)
 Day <- rep(daysOfWeek.options, each = 24)
 byDayTime.df <- as.data.frame(cbind(Day,Time)) ## Empty data frame for day of week by time (hour)
-
-dateInData <- length(unique(data.hour.arrived$Appt.DateYear))
-Date <- rep(unique(data.hour.arrived$Appt.DateYear), each = 24)
-Time <- rep(timeOptionsHr, dateInData)
-byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (hour)
-
-Time <- rep(timeOptions30m, 7)
-Day <- rep(daysOfWeek.options, each = 48)
-byDayTime30m.df <- as.data.frame(cbind(Day,Time)) ## Empty data frame for day of week by time (30-min)
-
-dateInData <- length(unique(data.hour.arrived$Appt.DateYear))
-Date <- rep(unique(data.hour.arrived$Appt.DateYear), each = 24)
-Time <- rep(timeOptionsHr, dateInData)
-byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (30-min)
-
-byTime.df <- as.data.frame(timeOptionsHr)
-colnames(byTime.df) <- c("Time") ## Empty data frame for time (hour)
-
-byTime30.df <- as.data.frame(timeOptions30m)
-colnames(byTime30.df) <- c("Time") ## Empty data frame for time (hour)
-
-
 
 
 # (7) Data Reactive functions ---------------------------------------------------------------------------------
@@ -440,26 +386,6 @@ groupByFilters_3 <- function(dt, apptType){
   result <- dt %>% filter(New.PT3 == FALSE, Appt.Type %in% apptType)
   return(result)
 }
-
-
-
-# (8) PLACEHOLDER FOR DAY OF VISIT ANALYSIS ------------------------------------------------------------------------
-# install.packages("edeaR")
-# library(edeaR)
-# ex_patients <- "example patient flow observation.csv"
-# ex_patients <- read.csv(ex_patients, stringsAsFactors = TRUE)
-# 
-# ex_patients$registration_type <- factor(ex_patients$registration_type, labels = c("complete","start")) # Converting the activity status to factor values
-# ex_patients$time <- ymd_hms(ex_patients$time) # Converting the timestamps
-# 
-# ex_patients <- eventlog(eventlog =  ex_patients,
-#                         case_id = "patient",
-#                         activity_id = "handling",
-#                         activity_instance_id = "handling_id",
-#                         lifecycle_id = "registration_type",
-#                         timestamp = "time",
-#                         resource_id = "employee",
-#                         order = ".order")
 
 # Function for Value Boxes ------------------------------------------------------------------
 valueBoxSpark <- function(value, title, subtitle, sparkobj = NULL, info = NULL, 
