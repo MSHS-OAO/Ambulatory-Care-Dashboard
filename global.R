@@ -286,7 +286,7 @@ setwd(wdpath)
 
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 historical.data <- readRDS(here::here("Data/historical_data.rds")) ## Filter out historical data only
-slot.data.subset <- readRDS(here::here("Data/slot_subset.rds"))
+slot.data.subset <- readRDS(here::here("Data/slot_data_subset.rds"))
 holid <- readRDS(here::here("Data/holid.rds"))
 max_date <- max(historical.data$Appt.DateYear)
 
