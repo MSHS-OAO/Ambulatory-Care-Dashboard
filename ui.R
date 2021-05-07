@@ -61,7 +61,8 @@ ui <- dashboardPage(
                          menuSubItem("Site Overview", tabName = "system"),
                          menuSubItem("Site Comparison", tabName = "systemComparison")),
                 menuItem("Practice Overview", tabName = "profile", icon = icon("hospital")),
-                menuItem("Provider Overview", tabName = "provider", icon = icon("user-md"))
+                menuItem("Provider Overview", tabName = "provider", icon = icon("user-md")),
+                menuItem("Utilization", tabName = "utilization", icon = icon("percent"))
     ) # Close sidebarMenu
     
   ), # Close dashboardSidebar
@@ -394,7 +395,79 @@ ui <- dashboardPage(
                             )
                      )
                      
-              ))
+              )),
+      # Utilization Tab ------------------------------------------------------------------------------------------------------
+      tabItem(tabName = "utilization",
+              column(11,
+                     div("Utilization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
+                     #textOutput("practiceName_utilization"),
+                     column(12,
+                            boxPlus(
+                              title = "Utilization Overview", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              br(),
+                              column(12,
+                                     column(3, 
+                                            box(title = NULL, width = 12, solidHeader = FALSE,
+                                                radioGroupButtons(
+                                                  inputId = "utilType",
+                                                  label = h4("Analysis based on:"),
+                                                  size = "lg",
+                                                  choices = list("SCHEDULED time and duration" = "scheduled", "ACTUAL time and duration" = "arrived"),
+                                                  checkIcon = list(
+                                                    yes = tags$i(class = "fa fa-check-square", style = "color: steelblue"),
+                                                    no = tags$i(class = "fa fa-square-o", style = "color: steelblue"))),
+                                                hr(),
+                                                h5("SCHEDULED: Utilization of all arrived appointments based on scheduled appointment start and end time."),
+                                                h5("ACTUAL: Utilization of all arrived appointments based on actual appointment start and end time."))),
+                                     column(9,
+                                            fluidRow(
+                                              column(4,
+                                                     box(title = NULL, width = 12, solidHeader = FALSE,
+                                                         sliderInput("setRooms", label = h4("Set Rooms Available:"), min = 1, max = 24, value = 8))),
+                                              column(4,
+                                                     valueBoxOutput("roomStat1", width=12)),
+                                              # fluidRow(valueBoxOutput("roomStat1", width=12)),
+                                              # fluidRow(valueBoxOutput("roomStat2", width=12))),
+                                              column(4,
+                                                     valueBoxOutput("avgRoomsRequired", width=12))),
+                                            fluidRow(
+                                              column(4,
+                                                     box(title = NULL, width = 12, solidHeader = FALSE,
+                                                         sliderInput("setHours", label = h4("Set Daily Open Hours:"), min = 1, max = 24, value = 8))),
+                                              column(4,
+                                                     valueBoxOutput("avgScheduledUtilization", width=12)),
+                                              column(4,
+                                                     valueBoxOutput("avgUtilization", width=12)))))),
+                            boxPlus(
+                              title = "Space Utilization", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              tabBox(
+                                title = NULL,
+                                id = "tabset1", width = "100%", height = "1000px",
+                                tabPanel("Average",
+                                         plotOutput("spaceUtil", height = "900px") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c")),
+                                tabPanel("Percentiles",
+                                         plotOutput("spaceUtilPerc", height = "900px") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c")))),
+                            boxPlus(
+                              title = "Space Required", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              tabBox(
+                                title = NULL,
+                                id = "tabset2", width = "100%", height = "1000px",
+                                tabPanel("Average",
+                                         plotOutput("spaceUsed", height = "900px") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c")),
+                                tabPanel("Percentiles",
+                                         plotOutput("spaceUsedPerc", height = "900px") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c"))))
+                            
+                            
+                     )) 
+      )
     ), #Close Tab Items
 
     

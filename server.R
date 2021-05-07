@@ -3491,7 +3491,857 @@ server <- function(input, output, session) {
     }
     
   })
+  
+  # Utilization Tab
+  output$practiceName_utilization <- renderText({
+    paste0(input$selectedDepartment," from ",input$dateRange[1]," to ", input$dateRange[2])
+    
+  })
+  
+  ### (4) Analysis Output ==============================================================================================================
+  ### Practice Overview Tab ------------------------------------------------------------------------------------------------------------
+  ### Volume Section
+  output$uniquePts <- renderValueBox({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    valueBox(
+      prettyNum(length((unique(dataArrived()$MRN))), big.mark = ','),
+      subtitle = tags$p("Total Unique Patients", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+    )
+  })
+  
+  output$totalVisits <- renderValueBox({
+    valueBox(
+      prettyNum(length((unique(dataArrived()$uniqueId))), big.mark = ','), 
+      subtitle = tags$p("Total Visits", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+    )
+  })
+  
+  output$avgVisitsPt <- renderValueBox({
+    valueBox(
+      prettyNum(round(length((unique(dataArrived()$uniqueId))) / length((unique(dataArrived()$MRN))),1), big.mark = ','),
+      subtitle = tags$p("Avg Visits per Patient", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+    )
+  })
+  
+  output$avgVisitsDay <- renderValueBox({
+    valueBox(
+      prettyNum(round(length((unique(dataArrived()$uniqueId))) / length((unique(dataArrived()$Appt.DateYear))),1), big.mark = ','),
+      subtitle = tags$p("Avg Visits per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+    )
+  })
+  
+  ### Average Daily Patients by Scheduled vs. Check-in Times (1-hour interval)
+  
+  output$avgPtArrival <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    data.arrivedNoShow <- dataArrivedNoShow()
+    # data.arrivedNoShow <- arrivedNoShow.data
+    
+    data.arrived <- dataArrived()
+    # data.arrived <- arrived.data
+    
+    ptsScheduled <- data.arrivedNoShow %>%
+      group_by(Appt.TM.Hr) %>%
+      summarise(Total = n_distinct(uniqueId)) %>%
+      mutate(Scheduled = round(Total / length(unique(data.arrived$Appt.DateYear))))
+    
+    ptsArrived <- data.arrived %>%
+      group_by(Appt.TM.Hr) %>%
+      summarise(Total = n_distinct(uniqueId)) %>%
+      mutate(Arrived = round(Total / length(unique(data.arrived$Appt.DateYear))))
+    
+    ptsByHour <- as.data.frame(timeOptionsHr) 
+    ptsByHour <- merge(ptsByHour,ptsScheduled, by.x = "timeOptionsHr", by.y = "Appt.TM.Hr", all.x = TRUE)  
+    ptsByHour <- merge(ptsByHour, ptsArrived, by.x = "timeOptionsHr", by.y = "Appt.TM.Hr", all.x = TRUE)
+    ptsByHour[is.na(ptsByHour)] <- 0
+    
+    names(ptsByHour) <- c("Time","Total Scheduled","Scheduled","Total Arrived","Arrived")
+    avgPtsByHour <- ptsByHour[,c("Time","Scheduled","Arrived")]
+    
+    avgPtsByHour <- reshape2::melt(avgPtsByHour, id="Time", measure = c("Scheduled","Arrived"))
+    
+    avgPtsByHour <- avgPtsByHour %>% filter(Time %in% timeOptionsHr_filter)
+    
+    # Scheduled vs. Actual Arrival in Hour Interval 
+    
+    ggplot(avgPtsByHour, aes(x=Time, y=value, col=variable, group=variable))+
+      geom_line(aes(linetype=variable), size=1.2)+
+      scale_linetype_manual(values=c("dashed","solid"))+
+      scale_color_manual(values=c("maroon1","midnightblue"))+
+      labs(x=NULL, y=NULL,
+           title = "Average Scheduled vs. Arrived Patients",
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+           caption = "Scheduled = Arrived + No Show Patients")+
+      theme_bw()+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 16),
+            plot.subtitle = element_text(hjust=0.5, size = 14),
+            plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
+            legend.position = "top",
+            legend.text = element_text(size="12"),
+            legend.direction = "horizontal",
+            legend.key.size = unit(1.0,"cm"),
+            legend.title = element_blank(),
+            axis.title = element_text(size="14"),
+            axis.text = element_text(size="14"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.x = element_text(angle = 35,hjust = 1),
+            axis.text.y = element_text(margin = margin(l=5, r=5)),
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            panel.background = element_blank(),
+            axis.line = element_line(size = 0.3, colour = "black"),
+            plot.margin = margin(30,30,30,30))
+    
+  })
+  
+  ### Access Section
+  
+  output$newPtRatio <- renderInfoBox({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    infoBox(
+      title = tags$p("Arrived New Patient Ratio", style = "font-size: 130%;"), subtitle = NULL, 
+      value = paste0(round((nrow(dataArrived() %>% filter(New.PT3 == TRUE)) / nrow(dataArrived()))*100),"%"), icon = icon("user")
+    )
+  })
+  
+  output$newNoShow <- renderInfoBox({
+    infoBox(
+      title = tags$p("Avg New Patient No Show %", style = "font-size: 130%;"), subtitle = NULL,
+      value = paste0(round(nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status != "Arrived"))/ nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE)),2)*100,"%"), icon = icon("clock")
+    )
+  })
+  
+  output$newApptWaitTime <- renderInfoBox({
+    infoBox(
+      title = tags$p("Avg Lead Days to New Appointment", style = "font-size: 130%;"), subtitle = NULL, 
+      value =  paste0(round(mean((dataAll() %>% filter(New.PT3 == TRUE) %>%
+                                    mutate(wait.time = as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2))) %>%
+                                    filter(!is.na(wait.time)) %>% filter(wait.time >= 0))$wait.time))," days"), icon = icon("clock")
+    )
+  })
+  
+  ### Scheduling Section
+  
+  output$fillRate <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataPastSlot()
+    # data <- past.slot.data
+    
+    daily.booked <- data %>%
+      dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
+                       `Booked Hours` = round(sum(BOOKED_MINUTES),0),
+                       `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
+                       `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
+                       `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
+      mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
+             `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
+      gather(variable, value, 1:7) %>%
+      filter(variable %in% c("Booked Rate","Filled Rate"))
+    
+    
+    ggplot(daily.booked %>% filter(variable %in% c("Booked Rate","Filled Rate")), aes(factor(variable,levels=c("Filled Rate","Booked Rate")),value, fill=variable)) +
+      geom_bar(stat="identity", width = 0.8) +
+      scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits=c(0,max(daily.booked$value)*1.5))+
+      labs(subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+      coord_flip() +
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      theme_new_line()+
+      theme(
+        plot.subtitle = element_text(size = 14, hjust = 0.5),
+        legend.position = "none",
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size =14),
+        axis.text.x = element_blank(),
+        axis.line.x = element_blank()) +
+      geom_text(aes(label=paste0(round(value*100),"%")), vjust=-.1, hjust=-.3, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
+    
+  })
+  
+  output$apptStatus <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    apptsCanceled <- aggregate(dataAll()$uniqueId, by=list(dataAll()$Appt.Status), FUN=NROW)
+    names(apptsCanceled) <- c("Status","Total")
+    
+    apptsCanceled <- apptsCanceled %>% filter(Status %in% c("Rescheduled","Canceled","No Show","Bumped","Scheduled","Arrived")) %>%
+      mutate(Percent = as.numeric(round((Total / sum(Total)),2)))
+    
+    apptsCanceled$percent[apptsCanceled$Status == "No Show"] <- round((apptsCanceled$Total[apptsCanceled$Status == "No Show"] / (apptsCanceled$Total[apptsCanceled$Status == "Arrived"] + apptsCanceled$Total[apptsCanceled$Status == "No Show"])),2)
+    
+    
+    ggplot(apptsCanceled, aes(reorder(Status, Percent),Percent, fill=Status)) +
+      geom_bar(stat="identity", width = 0.8) +
+      scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits=c(0,(max(apptsCanceled$Percent))*1.5))+
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      labs(caption = paste0("% No Show = No Show / No Show and Arrived\n",
+                            "Based on breakdown of all appintments by status"))+
+      coord_flip()+
+      theme_new_line()+
+      theme(
+        plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
+        legend.position = "none",
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size =14),
+        axis.line.x = element_blank())+
+      geom_text(aes(label=paste0(round(Percent*100),"%")), hjust = -.5, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
+    
+    
+  })
+  
+  ### Day of Visit Section
+  
+  output$avgCycleTime <- renderValueBox({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    valueBoxSpark(
+      value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0))$cycleTime, na.rm = TRUE))," min"),
+      title = toupper("Avg Check-in to Visit-End"),
+      sparkobj = NULL,
+      info = "Sample size (N) is the total number of arrived patients included in this analysis.\nPatients must have both check-in and check-out times > 0 min.",
+      icon = NULL,
+      subtitle = paste0("*Sample Size = ",round(nrow(dataArrived() %>% filter(!is.na(cycleTime) | cycleTime > 0))/nrow(dataArrived()),2)*100,"% of Total Arrived Patients"),
+      width = 6,
+      color = "yellow",
+      href = NULL
+    )
+    
+  })
+  
+  output$medCycleTime <- renderValueBox({
+    
+    valueBoxSpark(
+      value =  paste0(round(median((dataArrived() %>% filter(cycleTime > 0))$cycleTime, na.rm = TRUE))," min"),
+      title = toupper("Median Check-in to Visit-End"),
+      sparkobj = NULL,
+      info = "Sample size (N) is the total number of arrived patients included in this analysis.\nPatients must have both check-in and check-out times > 0 min.",
+      icon = NULL,
+      subtitle = paste0("*Sample Size = ",round(nrow(dataArrived() %>% filter(!is.na(cycleTime) | cycleTime > 0))/nrow(dataArrived()),2)*100,"% of Total Arrived Patients"),
+      width = 6,
+      color = "yellow",
+      href = NULL
+    )
+    
+  })
+  
+  output$cycleTimeBoxPlot <- renderPlot({
+    
+    data <- dataArrived() %>% filter(cycleTime > 0)
+    # data <- arrived.data %>% filter(cycleTime > 0, Campus == "MSUS")
+    
+    ggplot(data, aes(x=cycleTime)) + 
+      geom_histogram(aes(y = (..count..)/sum(..count..)),
+                     bins = 22,
+                     color="#212070", fill="#c7c6ef") +
+      labs(title = "Distribution of Check-in to Visit-end Time\n", 
+           y = "\n% of Patients",
+           x = "\nMinutes")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
+            legend.position = "top",
+            legend.text = element_text(size="12"),
+            legend.direction = "horizontal",
+            legend.key.size = unit(1.0,"cm"),
+            legend.title = element_blank(),
+            axis.title = element_text(size="14"),
+            axis.text = element_text(size="14"),
+            axis.line = element_line(size = 0.3, colour = "black"))+
+      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+      scale_y_continuous(labels = scales::percent)
+    
+  })
+  
+  
+  output$avgCheckinToRoomin <- renderValueBox({
+    
+    valueBoxSpark(
+      value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0))$checkinToRoomin, na.rm = TRUE))," min"),
+      title = toupper("Avg Check-in to Room-in"),
+      sparkobj = NULL,
+      info = "Sample size (N) is the total number of arrived patients included in this analysis.\nPatients must have both check-in and room-in times >= 0.",
+      icon = NULL,
+      subtitle = paste0("*Sample Size = ",round(nrow(dataArrived() %>% filter(!is.na(checkinToRoomin) | checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of Total Arrived Patients"),
+      width = 6,
+      color = "yellow",
+      href = NULL
+    )
+    
+  })
+  
+  output$medCheckinToRoomin <- renderValueBox({
+    
+    valueBoxSpark(
+      value =  paste0(round(median((dataArrived() %>% filter(checkinToRoomin >= 0))$checkinToRoomin, na.rm = TRUE))," min"),
+      title = toupper("Median Check-in to Room-in"),
+      sparkobj = NULL,
+      info = "Sample size (N) is the total number of arrived patients included in this analysis.\nPatients must have both check-in and room-in times >= 0.",
+      icon = NULL,
+      subtitle = paste0("*Sample Size = ",round(nrow(dataArrived() %>% filter(is.na(checkinToRoomin) | checkinToRoomin <= 0))/nrow(dataArrived()),2)*100,"% of Total Arrived Patients"),
+      width = 6,
+      color = "yellow",
+      href = NULL
+    )
+    
+  })
+  
+  output$checkInRoomInBoxPlot <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrived() %>% filter(checkinToRoomin >= 0)
+    # data <- arrived.data %>% filter(checkinToRoomin >= 0)
+    
+    ggplot(data, aes(x=checkinToRoomin)) + 
+      geom_histogram(aes(y = (..count..)/sum(..count..)),
+                     bins = 14,
+                     color="#212070", fill="#c7c6ef") +
+      labs(title = "Distribution of Check-in to Room-in Time\n", 
+           y = "\n% of Patients",
+           x = "\nMinutes")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
+            legend.position = "top",
+            legend.text = element_text(size="12"),
+            legend.direction = "horizontal",
+            legend.key.size = unit(1.0,"cm"),
+            legend.title = element_blank(),
+            axis.title = element_text(size="14"),
+            axis.text = element_text(size="14"),
+            axis.line = element_line(size = 0.3, colour = "black"))+
+      scale_x_continuous(breaks = seq(0, 210, 30), lim = c(0, 210))+
+      scale_y_continuous(labels = scales::percent)
+    
+  })
+  
+  # output$avgProviderTime <- renderValueBox({
+  #   
+  #   # valueBox(
+  #   #   paste0(round(mean(dataArrived()$providerinToOut, na.rm = TRUE),1)," min"),
+  #   #   subtitle = tags$p("Avg Provider Time", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+  #   # )
+  #   # 
+  #   valueBoxSpark(
+  #     value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0))$checkinToRoomin, na.rm = TRUE))," | ",
+  #                     round(median((dataArrived() %>% filter(checkinToRoomin >= 0))$checkinToRoomin, na.rm = TRUE))," min"),
+  #     title = toupper("Avg | Median Check-in to Room-in"),
+  #     sparkobj = NULL,
+  #     info = "Sample size (N) is the total number of arrived patients included in this analysis.\nPatients must have both check-in and room-in times >= 0.",
+  #     icon = NULL,
+  #     subtitle = paste0("N =  ",round(nrow(dataArrived() %>% filter(is.na(checkinToRoomin) | checkinToRoomin <= 0))/nrow(dataArrived())),"% of Total Arrived Patients"),
+  #     width = 6,
+  #     color = "yellow",
+  #     href = NULL
+  #   )
+  #   
+  # })
+  # 
+  # output$avgCheckoutTime <- renderValueBox({
+  #   
+  #   valueBox(
+  #     paste0(round(mean(dataArrived()$visitEndToCheckout, na.rm = TRUE),1)," min"),
+  #     subtitle = tags$p("Avg Check-out Time", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+  #   )
+  #   
+  # })
 
+  ### Utilization Tab -----------------------------------------------------------------------------------------------------------------
+  # Average Rooms Required --------------------------------------------------------------------------------------------
+  output$roomStat1 <- renderValueBox({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    valueBox(NULL,
+             # paste0(input$setRooms," rooms available\n throughout",input$setHours," hours"),
+             subtitle = tags$p(paste0("Analysis based on ",input$setRooms," rooms available\n throughout ",input$setHours," hours"), style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "yellow"
+    )
+  })
+  
+  # output$roomStat2 <- renderValueBox({
+  #   
+  #   valueBox(
+  #     paste0("Daily Available Rooms: ",input$setRooms),
+  #     subtitle = NULL, icon = NULL, color = "yellow"
+  #   )
+  # })
+  
+  output$avgRoomsRequired <- renderValueBox({
+    
+    max((dataArrivedUtilization() %>%
+           select(Appt.DateYear, timeOptionsHr_filter) %>%
+           gather(Time, sum, 2:15) %>%
+           group_by(Time) %>%
+           summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg) %>%
+      valueBox(
+        subtitle = tags$p("Max Rooms Required During the Day", style = "font-size: 160%;"), icon = NULL, color = "fuchsia")
+  })
+  
+  # Scheduled and Avg Utilization --------------------------------------------------------------------------------------------------------
+  output$avgScheduledUtilization <- renderValueBox({
+    
+    data <- dataHourScheduled()
+    # data <- data.hour.scheduled
+    
+    paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
+      valueBox(
+        subtitle = tags$p("Average Daily Booked Utilization", style = "font-size: 160%;"), icon = NULL, color = "aqua")
+  })
+  
+  output$avgUtilization <- renderValueBox({
+    
+    data <- dataArrivedUtilization()
+    
+    paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100)," %") %>%
+      valueBox(
+        subtitle = tags$p("Average Daily Filled Utilization", style = "font-size: 160%;"), icon = NULL, color = "aqua")
+  })
+  
+  # Average Number of Rooms Required -----------------------------------------------
+  output$spaceUsed <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrivedUtilization()
+    
+    # Days of Week Table
+    daysOfWeek.Table <- 
+      data %>%
+      group_by(Appt.Day, Appt.DateYear) %>%
+      dplyr::summarise(total = n()) %>%
+      group_by(Appt.Day) %>%
+      dplyr::summarise(count = n())
+    
+    c.start <- which(colnames(data)=="00:00")
+    c.end <- which(colnames(data)=="23:00")
+    
+    space.hour.day <- aggregate(data[c(c.start:c.end)], list(data$Appt.Day),FUN = sum)
+    space.hour.day <- reshape2::melt(space.hour.day, id=c("Group.1"))
+    space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$Appt.Day,space.hour.day$Group.1)]
+    
+    space.hour.day$average <- round(space.hour.day$value/(space.hour.day$days*60), 1)
+    names(space.hour.day) <- c("Day","Time","Total_Dur","Days","Average_Req")
+    
+    byDayTime.df <- byDayTime.df[which(byDayTime.df$Day %in% unique(space.hour.day$Day)),]
+    
+    space.hour.day <- as.data.frame(merge(byDayTime.df,space.hour.day, by.x = c("Day","Time"), by.y = c("Day","Time"), all = TRUE))
+    space.hour.day[is.na(space.hour.day)] <- 0
+    
+    space.hour.day <- space.hour.day %>% filter(Time %in% timeOptionsHr_filter)
+    
+    graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Req, col=factor(Day,level = daysOfWeek.options), group=Day))+
+      geom_line(size=1.2)+
+      labs(x=NULL, y="Number of Rooms\n",
+           title = "Average Space Required by Time of Day and Day of Week",
+           subtitle = paste0("Based on scheduled appointment time and duration from ",input$dateRangeUtil[1]," to ",input$dateRangeUtil[2]))+
+      scale_color_MountSinai("main")+
+      theme_bw()+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            plot.subtitle = element_text(hjust=0.5, size = 14),
+            legend.position = "top",
+            legend.text = element_text(size="12"),
+            legend.direction = "horizontal",
+            legend.key.size = unit(1.0,"cm"),
+            legend.title = element_blank(),
+            axis.title = element_text(size="14"),
+            axis.text = element_text(size="14"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(margin = margin(r=5)),
+            axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
+            axis.text.y = element_text(margin = margin(l=5, r=5)),
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            panel.background = element_blank(),
+            axis.line = element_line(size = 0.3, colour = "black"),
+            plot.margin = margin(30,30,10,30))+
+      guides(colour = guide_legend(nrow = 1))
+    
+    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
+      labs(x=NULL, y=NULL)+
+      geom_tile(aes(fill=Average_Req), colour = "black", size=0.5)+
+      coord_flip()+
+      scale_fill_gradient2(midpoint = median(unique(space.hour.day$Average_Req)), low = "#5a8ac6", mid = "white", high = "#f8696b", space = "Lab", na.value = "black", guide = "colourbar", name="Space Required ")+
+      scale_x_discrete(position = "bottom")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "top",
+            legend.direction = "horizontal",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_blank(),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(Average_Req),"", round(Average_Req,1))), color="black", size=5, fontface="bold")
+    
+    grid.arrange(graph, table, ncol = 1, heights = c(5,3))
+    
+  })
+  
+  # Average Utilization by Time of Day
+  output$spaceUtil <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrivedUtilization()
+    
+    # Days of Week Table
+    daysOfWeek.Table <- 
+      data %>%
+      group_by(Appt.Day, Appt.DateYear) %>%
+      dplyr::summarise(total = n()) %>%
+      group_by(Appt.Day) %>%
+      dplyr::summarise(count = n())
+    
+    c.start <- which(colnames(data)=="00:00")
+    c.end <- which(colnames(data)=="23:00")
+    
+    space.hour.day <- aggregate(data[c(c.start:c.end)], list(data$Appt.Day),FUN = sum)
+    space.hour.day <- reshape2::melt(space.hour.day, id=c("Group.1"))
+    space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$Appt.Day,space.hour.day$Group.1)]
+    
+    space.hour.day$utilization <- round(space.hour.day$value/(space.hour.day$days*60*input$setRooms), 1)
+    names(space.hour.day) <- c("Day","Time","Total_Dur","Days","Average_Util")
+    
+    byDayTime.df <- byDayTime.df[which(byDayTime.df$Day %in% unique(space.hour.day$Day)),]
+    
+    space.hour.day <- as.data.frame(merge(byDayTime.df,space.hour.day, by.x = c("Day","Time"), by.y = c("Day","Time"), all = TRUE))
+    space.hour.day[is.na(space.hour.day)] <- 0
+    
+    space.hour.day <- space.hour.day %>% filter(Time %in% timeOptionsHr_filter)
+    
+    graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Util, col=factor(Day,level = daysOfWeek.options), group=Day))+
+      geom_line(size=1.2)+
+      labs(x=NULL, y="Utilization (%)\n", 
+           title = "Average Space Utilization (%) by Time of Day and Day of Week",
+           subtitle = paste0("Based on scheduled appointment time and duration from ",input$dateRangeUtil[1]," to ",input$dateRangeUtil[2]))+
+      scale_color_MountSinai("main")+
+      geom_hline(yintercept=.8, linetype="dashed", color = "red")+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0,max(space.hour.day$Average_Util)*1.2))+
+      theme_bw()+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            plot.subtitle = element_text(hjust=0.5, size = 14),
+            legend.position = "top",
+            legend.text = element_text(size="12"),
+            legend.direction = "horizontal",
+            legend.key.size = unit(1.0,"cm"),
+            legend.title = element_blank(),
+            axis.title = element_text(size="14"),
+            axis.text = element_text(size="14"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
+            axis.text.y = element_text(margin = margin(l=5, r=5)),
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            panel.background = element_blank(),
+            axis.line = element_line(size = 0.3, colour = "black"),
+            plot.margin = margin(30,30,30,30))+
+      guides(colour = guide_legend(nrow = 1))
+    
+    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
+      labs(x=NULL, y=NULL)+
+      geom_tile(aes(fill=Average_Util), colour = "black", size=0.5)+
+      coord_flip()+
+      scale_fill_gradient2(midpoint = median(unique(space.hour.day$Average_Util)), low = "#5a8ac6", mid = "white", high = "#f8696b", space = "Lab", na.value = "black", guide = "colourbar", name="Space Utilization ")+
+      #scale_y_discrete(limits = unique(sort(space.hour.day$Time)), position = "bottom")+
+      scale_x_discrete(position = "bottom")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "top",
+            legend.direction = "horizontal",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_blank(),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(Average_Util),"",paste0(round(Average_Util,2)*100,"%"))), color="black", size=5, fontface="bold")
+    
+    grid.arrange(graph, table, ncol = 1, heights = c(5,3))
+    
+  })
+  
+  # Rooms Required by Percentile 
+  output$spaceUsedPerc <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrivedUtilization()
+    
+    c.start <- which(colnames(data)=="00:00")
+    c.end <- which(colnames(data)=="23:00")
+    
+    space.hour <- aggregate(data[c(c.start:c.end)], list(data$Appt.DateYear),FUN = sum)
+    space.hour <- reshape2::melt(space.hour, id=c("Group.1"))
+    
+    space.hour <- space.hour %>%
+      group_by(variable) %>%
+      dplyr::summarise( 
+        Median = round(quantile(value, probs=0.5)/60,1),
+        `70th Percentile`= round(quantile(value, probs=0.75)/60,1),
+        `90th Percentile`= round(quantile(value, probs=0.90)/60,1))
+    
+    colnames(space.hour)[1] <- "Time"
+    
+    space.hour <- as.data.frame(reshape2::melt(space.hour, id=c("Time")))
+    
+    space.hour <- space.hour %>% filter(Time %in% timeOptionsHr_filter)
+    
+    graph <- ggplot(space.hour, aes(x=Time, y=value, col=variable, group=variable))+
+      geom_line(size=1.2)+
+      scale_y_continuous(limits=c(0, max(space.hour$value)*1.2))+
+      labs(x=NULL, y="Number of Rooms\n",
+           title = "Space Required by Percentile by Time of Day",
+           subtitle = paste0("Based on scheduled appointment time and duration from ",input$dateRangeUtil[1]," to ",input$dateRangeUtil[2]))+
+      scale_color_MountSinai("main")+
+      theme_bw()+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            plot.subtitle = element_text(hjust=0.5, size = 14),
+            legend.position = "top",
+            legend.text = element_text(size="12"),
+            legend.direction = "horizontal",
+            legend.key.size = unit(1.0,"cm"),
+            legend.title = element_blank(),
+            axis.title = element_text(size="14"),
+            axis.text = element_text(size="14"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(margin = margin(r=5)),
+            axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
+            axis.text.y = element_text(margin = margin(l=5, r=5)),
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            panel.background = element_blank(),
+            axis.line = element_line(size = 0.3, colour = "black"),
+            plot.margin = margin(30,30,30,30))+
+      guides(colour = guide_legend(nrow = 1))
+    
+    table <- ggplot(space.hour, aes(x=variable, y=Time))+
+      labs(x=NULL, y=NULL)+
+      geom_tile(aes(fill=value), colour = "black", size=0.5)+
+      coord_flip()+
+      scale_fill_gradient2(midpoint = median(unique(space.hour$value)), low = "#5a8ac6", mid = "white", high = "#f8696b", space = "Lab", na.value = "black", guide = "colourbar", name="Space Required ")+
+      #scale_y_discrete(limits = unique(sort(space.hour$Time)), position = "bottom")+
+      scale_x_discrete(position = "bottom")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "top",
+            legend.direction = "horizontal",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_blank(),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(value),"", round(value,1))), color="black", size=5, fontface="bold")
+    
+    
+    grid.arrange(graph, table, ncol = 1, heights = c(5,2))
+    
+  })
+  
+  # Utilization by Percentile
+  output$spaceUtilPerc <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrivedUtilization()
+    
+    c.start <- which(colnames(data)=="00:00")
+    c.end <- which(colnames(data)=="23:00")
+    
+    space.hour <- aggregate(data[c(c.start:c.end)], list(data$Appt.DateYear),FUN = sum)
+    space.hour <- reshape2::melt(space.hour, id=c("Group.1"))
+    
+    space.hour <- space.hour %>%
+      group_by(variable) %>%
+      dplyr::summarise( 
+        Median = quantile(value, probs=0.5)/(60*input$setRooms),
+        `70th Percentile`= quantile(value, probs=0.75)/(60*input$setRooms),
+        `90th Percentile`= quantile(value, probs=0.90)/(60*input$setRooms))
+    
+    colnames(space.hour)[1] <- "Time"
+    space.hour <- as.data.frame(reshape2::melt(space.hour, id=c("Time")))
+    
+    space.hour <- space.hour %>% filter(Time %in% timeOptionsHr_filter)
+    
+    graph <- ggplot(space.hour, aes(x=Time, y=value, col=variable, group=variable))+
+      geom_line(size=1.2)+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0,max(space.hour$value)*1.2))+
+      labs(x=NULL, y="Number of Rooms\n", 
+           title = "Space Utilization (%) by Percentile by Time of Day",
+           subtitle = paste0("Based on scheduled appointment time and duration from ",input$dateRangeUtil[1]," to ",input$dateRangeUtil[2]))+
+      scale_color_MountSinai("main")+
+      theme_bw()+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            plot.subtitle = element_text(hjust=0.5, size = 14),
+            legend.position = "top",
+            legend.text = element_text(size="12"),
+            legend.direction = "horizontal",
+            legend.key.size = unit(1.0,"cm"),
+            legend.title = element_blank(),
+            axis.title = element_text(size="14"),
+            axis.text = element_text(size="14"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
+            axis.text.y = element_text(margin = margin(l=5, r=5)),
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            panel.background = element_blank(),
+            axis.line = element_line(size = 0.3, colour = "black"),
+            plot.margin = margin(30,30,30,30))+
+      guides(colour = guide_legend(nrow = 1))
+    
+    
+    table <- ggplot(space.hour, aes(x=variable, y=Time))+
+      labs(x=NULL, y=NULL)+
+      geom_tile(aes(fill=value), colour = "black", size=0.5)+
+      coord_flip()+
+      scale_fill_gradient2(midpoint = median(unique(space.hour$value)), low = "#5a8ac6", mid = "white", high = "#f8696b", space = "Lab", na.value = "black", guide = "colourbar", name="Space Utilization ")+
+      #scale_y_discrete(limits = unique(sort(space.hour$Time)), position = "bottom")+
+      scale_x_discrete(position = "bottom")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "top",
+            legend.direction = "horizontal",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_blank(),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(value),"",paste0(round(value,2)*100,"%"))), color="black", size=5, fontface="bold")
+    
+    
+    grid.arrange(graph, table, ncol = 1, heights = c(5,2))
+    
+  })
 
 } # Close server 
 

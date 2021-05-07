@@ -315,6 +315,15 @@ past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >
 future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
 
 
+### (5) Pre-processing Space Utilization Dataframe --------------------------------------------------------------------------------------
+# Filter utilization data in last 60 days
+
+# Combine Utilization Data
+data.hour.scheduled <- readRDS(here::here("Data/hour_scheduled.rds"))
+data.hour.arrived <- readRDS(here::here("Data/hour_arrived.rds"))
+scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
+arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
+
 
 ### (6) Shiny App Components Set-up -------------------------------------------------------------------------------
 
@@ -356,6 +365,26 @@ kpiOptions <- c("Patient Volume","Appointment Status",
 Time <- rep(timeOptionsHr, 7)
 Day <- rep(daysOfWeek.options, each = 24)
 byDayTime.df <- as.data.frame(cbind(Day,Time)) ## Empty data frame for day of week by time (hour)
+
+dateInData <- length(unique(data.hour.arrived$Appt.DateYear))
+Date <- rep(unique(data.hour.arrived$Appt.DateYear), each = 24)
+Time <- rep(timeOptionsHr, dateInData)
+byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (hour)
+
+Time <- rep(timeOptions30m, 7)
+Day <- rep(daysOfWeek.options, each = 48)
+byDayTime30m.df <- as.data.frame(cbind(Day,Time)) ## Empty data frame for day of week by time (30-min)
+
+dateInData <- length(unique(data.hour.arrived$Appt.DateYear))
+Date <- rep(unique(data.hour.arrived$Appt.DateYear), each = 24)
+Time <- rep(timeOptionsHr, dateInData)
+byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (30-min)
+
+byTime.df <- as.data.frame(timeOptionsHr)
+colnames(byTime.df) <- c("Time") ## Empty data frame for time (hour)
+
+byTime30.df <- as.data.frame(timeOptions30m)
+colnames(byTime30.df) <- c("Time") ## Empty data frame for time (hour)
 
 
 # (7) Data Reactive functions ---------------------------------------------------------------------------------
