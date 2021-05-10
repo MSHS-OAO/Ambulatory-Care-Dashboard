@@ -2739,7 +2739,7 @@ server <- function(input, output, session) {
                title = "Historical Trend of Scheduling Status by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-          facet_grid(variable~., scales = "free")+
+          facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2764,7 +2764,7 @@ server <- function(input, output, session) {
                title = "Historical Trend of Scheduling Status by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-          facet_grid(variable~., scales = "free")+
+          facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2788,7 +2788,7 @@ server <- function(input, output, session) {
                title = "Historical Trend of Scheduling Status by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-          facet_grid(variable~., scales = "free")+
+          facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2811,7 +2811,7 @@ server <- function(input, output, session) {
                title = "Historical Trend of Scheduling Status by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-          facet_grid(variable~., scales = "free")+
+          facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2838,7 +2838,7 @@ server <- function(input, output, session) {
                title = "Historical Trend of Scheduling Status by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-          facet_grid(variable~., scales = "free")+
+          facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2863,7 +2863,7 @@ server <- function(input, output, session) {
                title = "Historical Trend of Scheduling Status by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-          facet_grid(variable~., scales = "free")+
+          facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2888,7 +2888,7 @@ server <- function(input, output, session) {
                title = "Historical Trend of Scheduling Status by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-          facet_grid(variable~., scales = "free")+
+          facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2912,7 +2912,7 @@ server <- function(input, output, session) {
                title = "Historical Trend of Scheduling Status by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-          facet_grid(variable~., scales = "free")+
+          facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
           theme(
