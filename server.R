@@ -2746,7 +2746,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2754,6 +2754,7 @@ server <- function(input, output, session) {
             plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
             strip.text.y = element_text(size=12, face="bold"),
+            #strip.text = element_text(size = 16),
             strip.background = element_rect(fill="#b2b3b2"),
             legend.position = "none",
             panel.spacing = unit(1, "lines"),
@@ -2771,7 +2772,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2779,6 +2780,7 @@ server <- function(input, output, session) {
             plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
             strip.text.y = element_text(size=12, face="bold"),
+            strip.text = element_text(size = 16),
             strip.background = element_rect(fill="#b2b3b2"),
             legend.position = "none",
             panel.spacing = unit(1, "lines"),
@@ -2795,7 +2797,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2803,6 +2805,7 @@ server <- function(input, output, session) {
             plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
             strip.text.y = element_text(size=12, face="bold"),
+            strip.text = element_text(size = 16),
             strip.background = element_rect(fill="#b2b3b2"),
             legend.position = "none",
             panel.spacing = unit(1, "lines"),
@@ -2818,7 +2821,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,  
                title = "Historical Trend of Scheduling Status by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2826,6 +2829,7 @@ server <- function(input, output, session) {
             plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
             strip.text.y = element_text(size=12, face="bold"),
+            strip.text = element_text(size = 16),
             strip.background = element_rect(fill="#b2b3b2"),
             legend.position = "none",
             panel.spacing = unit(1, "lines"),
@@ -2845,7 +2849,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2853,6 +2857,7 @@ server <- function(input, output, session) {
             plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
             strip.text.y = element_text(size=12, face="bold"),
+            strip.text = element_text(size = 16),
             strip.background = element_rect(fill="#b2b3b2"),
             legend.position = "top",
             legend.title = element_blank(),
@@ -2870,7 +2875,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2878,6 +2883,7 @@ server <- function(input, output, session) {
             plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
             strip.text.y = element_text(size=12, face="bold"),
+            strip.text = element_text(size = 16),
             strip.background = element_rect(fill="#b2b3b2"),
             legend.position = "top",
             legend.title = element_blank(),
@@ -2895,7 +2901,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2903,6 +2909,7 @@ server <- function(input, output, session) {
             plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
             strip.text.y = element_text(size=12, face="bold"),
+            strip.text = element_text(size = 16),
             strip.background = element_rect(fill="#b2b3b2"),
             legend.position = "top",
             legend.title = element_blank(),
@@ -2919,7 +2926,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2927,6 +2934,7 @@ server <- function(input, output, session) {
             plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
             strip.text.y = element_text(size=12, face="bold"),
+            strip.text = element_text(size = 16),
             strip.background = element_rect(fill="#b2b3b2"),
             legend.position = "top",
             legend.title = element_blank(),
@@ -2967,12 +2975,14 @@ server <- function(input, output, session) {
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
-        ggplot(data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))), aes(x=Appt.Year, y=mean, group=1)) +
+        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
+        ggplot(data_filter, aes(x=Appt.Year, y=mean, group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average New Appointment Lead Days by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2985,13 +2995,15 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "16"))
         
       } else if(input$kpiFreq == 2) { # Quarter
-        ggplot(data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-                 dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))), aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter
+                                  %>%  dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))),
+        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1))) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average New Appointment Lead Days by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3004,13 +3016,15 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "14"))
         
       } else if(input$kpiFreq == 3){ # Month
-        ggplot(data %>% group_by(Appt.Year, Appt.Month) %>% 
-                 dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))), aes(x=interaction(Appt.Year,Appt.Month,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Month %>% 
+                                           dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))),
+        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Month,lex.order = TRUE), y=mean,group=1))) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average New Appointment Lead Days by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3023,12 +3037,14 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "14"))
         
       } else { # Day
-        ggplot(data %>% group_by(Appt.Year, Appt.Date) %>% 
-                 dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))), aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Date
+                                  %>% dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))),
+        ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1))) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = NULL,  
                title = "Average New Appointment Lead Days by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3044,12 +3060,14 @@ server <- function(input, output, session) {
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
-        ggplot(data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
-                 mutate(Label = "Year"), aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
+                                mutate(Label = "Year")
+        ggplot(data_filter, aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = NULL, 
                title = "Average New Appointment Lead Days by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3063,14 +3081,16 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "16"))+
           scale_color_MountSinai("main")
       } else if(input$kpiFreq == 2){ # Quarter 
-        ggplot(data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-                 dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
-                 mutate(Label = "Quarter"), aes(x=Appt.Quarter, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
+          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
+          mutate(Label = "Quarter")
+        ggplot(data_filter, aes(x=Appt.Quarter, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point() +
           labs(x = NULL, y = NULL, 
                title = "Average New Appointment Lead Days by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3086,14 +3106,16 @@ server <- function(input, output, session) {
         
         
       } else if(input$kpiFreq == 3){ # Month
-        ggplot(data %>% group_by(Appt.Year, Appt.Month) %>% 
-                 dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
-                 mutate(Label = "Month"), aes(x=Appt.Month, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
+          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
+          mutate(Label = "Month")
+        ggplot(data_filter, aes(x=Appt.Month, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point() +
           labs(x = NULL, y = NULL,  
                title = "Average New Appointment Lead Days by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3108,13 +3130,15 @@ server <- function(input, output, session) {
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 4){ # Day
-        ggplot(data %>% group_by(Appt.Year, Appt.Date) %>% 
-                 dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
-                 mutate(Label = "Date"), aes(x=as.Date(Appt.Date, format = "%m/%d/%y"), y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
+          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
+          mutate(Label = "Date")
+        ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m/%d/%y"), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           labs(x = NULL, y = NULL, 
                title = "Average New Appointment Lead Days by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3154,12 +3178,14 @@ server <- function(input, output, session) {
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
-        ggplot(data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))), aes(x=Appt.Year, y=mean, group=1)) +
+        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
+        ggplot(data_filter, aes(x=Appt.Year, y=mean, group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Visit-End Time (Min.) by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3172,13 +3198,15 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "16"))
         
       } else if(input$kpiFreq == 2) { # Quarter
-        ggplot(data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-                 dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))), aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
+          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
+        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Visit-End Time (Min.) by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3190,13 +3218,15 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
             axis.text.y = element_text(size = "14"))
       } else if(input$kpiFreq == 3){ # Month
-        ggplot(data %>% group_by(Appt.Year, Appt.Month) %>% 
-                 dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))), aes(x=interaction(Appt.Year,Appt.Month,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
+          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
+        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Month,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Visit-End Time (Min.) by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3208,12 +3238,14 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
             axis.text.y = element_text(size = "14"))
       } else { # Day
-        ggplot(data %>% group_by(Appt.Year, Appt.Date) %>% 
-                 dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))), aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
+          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
+        ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = NULL,  
                title = "Average Check-in to Visit-End Time (Min.) by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3229,13 +3261,15 @@ server <- function(input, output, session) {
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
-        ggplot(data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
-                 mutate(Label = "Year"), aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
+          mutate(Label = "Year")
+        ggplot(data_filter, aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = NULL,  
                title = "Average Check-in to Visit-End Time (Min.) by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3249,14 +3283,16 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "16"))+
           scale_color_MountSinai("main")
       } else if(input$kpiFreq == 2){ # Quarter 
-        ggplot(data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-                 dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
-                 mutate(Label = "Quarter"), aes(x=Appt.Quarter, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
+          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
+          mutate(Label = "Quarter")
+        ggplot(data_filter, aes(x=Appt.Quarter, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point() +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Visit-End Time (Min.) by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3270,14 +3306,16 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "16"))+
           scale_color_MountSinai("main")
       } else if(input$kpiFreq == 3){ # Month
-        ggplot(data %>% group_by(Appt.Year, Appt.Month) %>% 
-                 dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
-                 mutate(Label = "Month"), aes(x=Appt.Month, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
+          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
+          mutate(Label = "Month")
+        ggplot(data_filter, aes(x=Appt.Month, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point() +
           labs(x = NULL, y = NULL,
                title = "Average Check-in to Visit-End Time (Min.) by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3291,13 +3329,15 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "16"))+
           scale_color_MountSinai("main")
       } else if(input$kpiFreq == 4){ # Day
-        ggplot(data %>% group_by(Appt.Year, Appt.Date) %>% 
-                 dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
-                 mutate(Label = "Date"), aes(x=as.Date(Appt.Date, format = "%m/%d/%y"), y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
+          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
+          mutate(Label = "Date")
+        ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m/%d/%y"), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Visit-End Time (Min.) by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3334,13 +3374,15 @@ server <- function(input, output, session) {
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
-        ggplot(data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))), aes(x=Appt.Year, y=mean, group=1)) +
+        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
+        ggplot(data_filter, aes(x=Appt.Year, y=mean, group=1)) +
           #stat_summary(fun.y="mean", geom="line")+
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Room-in Time (Min.) by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3352,13 +3394,15 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
             axis.text.y = element_text(size = "16"))
       } else if(input$kpiFreq == 2) { # Quarter
-        ggplot(data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-                 dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))), aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
+          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
+        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Room-in Time (Min.) by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3370,13 +3414,15 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
             axis.text.y = element_text(size = "14"))
       } else if(input$kpiFreq == 3){ # Month
-        ggplot(data %>% group_by(Appt.Year, Appt.Month) %>% 
-                 dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))), aes(x=interaction(Appt.Year,Appt.Month,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
+          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
+        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Month,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Room-in Time (Min.) by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3388,12 +3434,14 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
             axis.text.y = element_text(size = "14"))
       } else { # Day
-        ggplot(data %>% group_by(Appt.Year, Appt.Date) %>% 
-                 dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))), aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
+          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
+        ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Room-in Time (Min.) by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3409,13 +3457,15 @@ server <- function(input, output, session) {
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
-        ggplot(data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
-                 mutate(Label = "Year"), aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
+          mutate(Label = "Year")
+        ggplot(data_filter, aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Room-in Time (Min.) by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3430,14 +3480,16 @@ server <- function(input, output, session) {
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 2){ # Quarter 
-        ggplot(data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-                 dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
-                 mutate(Label = "Quarter"), aes(x=Appt.Quarter, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
+          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
+          mutate(Label = "Quarter")
+        ggplot(data_filter, aes(x=Appt.Quarter, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point() +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Room-in Time (Min.) by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3452,14 +3504,16 @@ server <- function(input, output, session) {
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 3){ # Month
-        ggplot(data %>% group_by(Appt.Year, Appt.Month) %>% 
-                 dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
-                 mutate(Label = "Month"), aes(x=Appt.Month, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
+          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
+          mutate(Label = "Month")
+        ggplot(data_filter, aes(x=Appt.Month, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point() +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Room-in Time (Min.) by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -3474,13 +3528,15 @@ server <- function(input, output, session) {
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 4){ # Day
-      ggplot(data %>% group_by(Appt.Year, Appt.Date) %>% 
-                 dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
-                 mutate(Label = "Date"), aes(x=as.Date(Appt.Date, format = "%m/%d/%y"), y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
+          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
+          mutate(Label = "Date")
+      ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m/%d/%y"), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           labs(x = NULL, y = NULL, 
                title = "Average Check-in to Room-in Time (Min.) by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(

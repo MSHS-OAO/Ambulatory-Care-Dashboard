@@ -408,13 +408,15 @@ ui <- dashboardPage(
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               br(),
                               column(12,
-                                     column(3, 
+                                     column(3,
+                                            util_choices <- list("SCHEDULED time and duration" = "scheduled", "ACTUAL time and duration" = "arrived"),
                                             box(title = NULL, width = 12, solidHeader = FALSE,
                                                 radioGroupButtons(
                                                   inputId = "utilType",
                                                   label = h4("Analysis based on:"),
                                                   size = "lg",
-                                                  choices = list("SCHEDULED time and duration" = "scheduled", "ACTUAL time and duration" = "arrived"),
+                                                  choices = util_choices,
+                                                  selected = util_choices[1],
                                                   checkIcon = list(
                                                     yes = tags$i(class = "fa fa-check-square", style = "color: steelblue"),
                                                     no = tags$i(class = "fa fa-square-o", style = "color: steelblue"))),
