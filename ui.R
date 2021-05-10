@@ -104,7 +104,8 @@ ui <- dashboardPage(
       tabItem(tabName = "system",
               column(11,
                      div("Site Overview: Analysis by Campus", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
+                     textOutput("practiceName_siteOverview"),
+                     tags$head(tags$style("#practiceName_siteOverview{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      fluidRow(
                        column(3,
                               boxPlus(
@@ -149,7 +150,8 @@ ui <- dashboardPage(
       tabItem(tabName = "systemComparison",
               column(11,
                      div("Site Comparison: Analysis by Specialty", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
+                     textOutput("practiceName_siteComp"),
+                     tags$head(tags$style("#practiceName_siteComp{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      column(12, 
                             boxPlus(
                               title = "Patient Volume", width = 12, status = "primary",
@@ -234,66 +236,67 @@ ui <- dashboardPage(
       tabItem(tabName = "profile",
               column(11,
                      div("Practice Overview", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
-                     #textOutput("practiceName_profile"),
-                     column(8,
-                            boxPlus(
-                              title = "Volume", width = 12, status = "primary",
-                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              fluidRow(
-                                valueBoxOutput("uniquePts", width=3),
-                                valueBoxOutput("totalVisits", width=3),
-                                valueBoxOutput("avgVisitsPt", width=3),
-                                valueBoxOutput("avgVisitsDay", width=3)),
-                              plotOutput("avgPtArrival", height = "450px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c")
-                              ),
-                            boxPlus(
-                              title = "Day of Visit", width = 12, status = "primary",
-                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              fluidRow(
-                                column(4,
-                                       fluidRow(valueBoxOutput("avgCycleTime", width = 12)), 
-                                       fluidRow(valueBoxOutput("medCycleTime", width = 12))),
-                                column(8,
-                                       plotOutput("cycleTimeBoxPlot") %>% 
-                                         withSpinner(type = 5, color = "#d80b8c")
-                                       )), 
-                              hr(),
-                              fluidRow(
-                                column(4,
-                                       fluidRow(valueBoxOutput("avgCheckinToRoomin", width = 12)), 
-                                       fluidRow(valueBoxOutput("medCheckinToRoomin", width = 12))),
-                                column(8,
-                                       plotOutput("checkInRoomInBoxPlot") %>% 
-                                         withSpinner(type = 5, color = "#d80b8c")
-                                       )))
+                     textOutput("practiceName_practice"),
+                     tags$head(tags$style("#practiceName_practice{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     fluidRow(
+                       column(12,
+                              boxPlus(
+                                title = "Volume", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                fluidRow(
+                                  valueBoxOutput("uniquePts", width=3),
+                                  valueBoxOutput("totalVisits", width=3),
+                                  valueBoxOutput("avgVisitsPt", width=3),
+                                  valueBoxOutput("avgVisitsDay", width=3)),
+                                plotOutput("avgPtArrival", height = "500px") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c")
+                              ))
                      ),
-                     column(4,
-                            boxPlus(
-                              title = "Access", width = 12, status = "primary",
-                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              fluidRow(infoBoxOutput("newPtRatio", width =12) %>% 
-                                         withSpinner(type = 5, color = "#d80b8c")),
-                              fluidRow(infoBoxOutput("newApptWaitTime", width=12)),
-                              fluidRow(infoBoxOutput("newNoShow", width=12))
-                            ),
-                            boxPlus(
-                              title = "Scheduling", width = 12, status = "primary",
-                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              fluidRow(plotOutput("fillRate", height = "350px") %>% 
-                                         withSpinner(type = 5, color = "#d80b8c")),
-                              fluidRow(plotOutput("apptStatus", height = "650px") %>% 
-                                         withSpinner(type = 5, color = "#d80b8c"))
-                            ))
-              )),
+                     fluidRow(
+                       column(8, 
+                              boxPlus(
+                                title = "Day of Visit", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                fluidRow(
+                                  column(4,
+                                         fluidRow(valueBoxOutput("avgCycleTime", width = 12)), 
+                                         fluidRow(valueBoxOutput("medCycleTime", width = 12))),
+                                  column(8,
+                                         plotOutput("cycleTimeBoxPlot") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c")
+                                  )), 
+                                hr(),
+                                fluidRow(
+                                  column(4,
+                                         fluidRow(valueBoxOutput("avgCheckinToRoomin", width = 12)), 
+                                         fluidRow(valueBoxOutput("medCheckinToRoomin", width = 12))),
+                                  column(8,
+                                         plotOutput("checkInRoomInBoxPlot") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c")
+                                  )))
+                              ),
+                       column(4,
+                              boxPlus(
+                                title = "Access", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                fluidRow(infoBoxOutput("newPtRatio", width =12) %>% 
+                                           withSpinner(type = 5, color = "#d80b8c")),
+                                fluidRow(infoBoxOutput("newApptWaitTime", width=12)),
+                                fluidRow(infoBoxOutput("newNoShow", width=12))),
+                              boxPlus(
+                                title = "Scheduling", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                fluidRow(tableOutput("fillRate_tb") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c"))))))
+      ), # Close Practice Overview Tab
+                     
       
       # Provider Overview Tab ------------------------------------------------------------------------------------------------------------------
       tabItem(tabName = "provider",
               column(11,
                      div("Provider Overview", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
-                     #textOutput("practiceName_profile"),
+                     textOutput("practiceName_provider"),
+                     tags$head(tags$style("#practiceName_provider{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      column(12,
                             boxPlus(
                               title = "Key Metrics", width = 12, status = "primary",
@@ -344,8 +347,8 @@ ui <- dashboardPage(
               # KPIs Tab --------------------------------------------------------------------------------------------------------------------
               column(11,
                      div("KPIs", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     tags$style("#practiceName1{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
-                     #textOutput("practiceName_KPIs"),
+                     textOutput("practiceName_KPIs"),
+                     tags$head(tags$style("#practiceName_KPIs{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      column(2,
                             box(
                               title = NULL,
@@ -400,8 +403,8 @@ ui <- dashboardPage(
       tabItem(tabName = "utilization",
               column(11,
                      div("Utilization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), hr(),
-                     #textOutput("practiceName_utilization"),
+                     textOutput("practiceName_utilization"),
+                     tags$head(tags$style("#practiceName_utilization{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      column(12,
                             boxPlus(
                               title = "Utilization Overview", width = 12, status = "primary",
