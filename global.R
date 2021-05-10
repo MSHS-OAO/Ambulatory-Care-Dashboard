@@ -280,14 +280,20 @@ theme_new_line <- function(base_size = 12,
 ### (2) Import Data ----------------------------------------------------------------------------------
 
 wdpath <- here::here()
+wdpath <- "C:/Users/kweons01/Desktop/IP Demand Modeling Desktop/Ambulatory-Care-Dashboard-Publish"
 
 setwd(wdpath)
 
 
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
-historical.data <- readRDS(here::here("Data/historical_data.rds")) ## Filter out historical data only
-slot.data.subset <- readRDS(here::here("Data/slot_data_subset.rds"))
-holid <- readRDS(here::here("Data/holid.rds"))
+# historical.data <- readRDS(here::here("Data/historical_data.rds")) ## Filter out historical data only
+# slot.data.subset <- readRDS(here::here("Data/slot_data_subset.rds"))
+# holid <- readRDS(here::here("Data/holid.rds"))
+
+historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
+slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+
 max_date <- max(historical.data$Appt.DateYear)
 
 ## KPI datasets
@@ -319,8 +325,12 @@ future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM 
 # Filter utilization data in last 60 days
 
 # Combine Utilization Data
-data.hour.scheduled <- readRDS(here::here("Data/hour_scheduled.rds"))
-data.hour.arrived <- readRDS(here::here("Data/hour_arrived.rds"))
+# data.hour.scheduled <- readRDS(here::here("Data/hour_scheduled.rds"))
+# data.hour.arrived <- readRDS(here::here("Data/hour_arrived.rds"))
+
+data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
+data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
+
 scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
 arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
 
