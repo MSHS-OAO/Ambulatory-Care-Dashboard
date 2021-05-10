@@ -2488,7 +2488,7 @@ server <- function(input, output, session) {
     
     # kpiVolumeData <- aggregate(arrived.data$uniqueId, by=list(arrived.data$Appt.Year,arrived.data$Appt.Quarter,
     #                                                          arrived.data$Appt.Month, arrived.data$Appt.Date, arrived.data$Appt.MonthYear, arrived.data$Appt.DateYear), FUN=NROW)
-    # 
+
     colnames(kpiVolumeData) <- c("Year","Quarter","Month","Date","YearMonth","DateYear","Volume")
     kpiVolumeData$DateYear <-as.Date(kpiVolumeData$DateYear, "%Y-%m-%d")
     
@@ -2504,6 +2504,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,  
                title = "Historical Trend of Patient Volume by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataYear$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2523,6 +2524,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,  
                title = "Historical Trend of Patient Volume by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataQuarter$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2542,6 +2544,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Patient Volume by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataMonth$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2560,6 +2563,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Patient Volume by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeData$Volume)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2582,6 +2586,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,  
                title = "Comparison of Patient Volume by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataYear$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2602,6 +2607,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Comparison of Patient Volume by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataQuarter$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2622,6 +2628,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Comparison of Patient Volume by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataMonth$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2641,6 +2648,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Comparison of Patient Volume by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeData$Volume)*1.2))+
           theme_new_line()+
           theme_bw()+
           theme(
@@ -2738,7 +2746,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2763,7 +2771,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2787,7 +2795,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2810,7 +2818,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,  
                title = "Historical Trend of Scheduling Status by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2837,7 +2845,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2862,7 +2870,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2887,7 +2895,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
@@ -2911,7 +2919,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
+          scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
