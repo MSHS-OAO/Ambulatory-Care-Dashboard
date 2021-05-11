@@ -2853,7 +2853,7 @@ server <- function(input, output, session) {
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 4){ # Day
-        ggplot(statusDataDay, aes(x=as.Date(DateYear,"%Y-%m-%d"), y=value, col=Year,group=Year)) +
+        ggplot(statusDataDay, aes(x=as.Date(DateYear,"%m-%d"), y=value, col=Year,group=Year)) +
           geom_line() +
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Day",
@@ -2953,7 +2953,6 @@ server <- function(input, output, session) {
       } else if(input$kpiFreq == 3){ # Month
         data_filter <- data %>% group_by(Appt.MonthYear) %>% 
                                            dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
-        print(sort(colnames(data_filter)))
         #data_filter$Appt.Year <- as.Date(data_filter$Appt.Year, format = "%Y")
         #data_filter$Appt.Month <- as.Date(data_filter$Appt.Month, format = "%m")
         #data_filter$ApptYearMonth <- as.yearmon(paste(data_filter$Appt.Year, data_filter$Appt.Month), "%Y %m")
@@ -2981,9 +2980,11 @@ server <- function(input, output, session) {
       } else { # Day
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>%
                                    dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
+        data_filter$DateYear <- as.Date(with(data_filter, paste(Appt.Year, Appt.Date,sep="-")), "%Y-%m-%d")
+        #ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
+        ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
           geom_line(color="midnightblue") +
-          labs(x = NULL, y = "Days",  
+          labs(x = NULL, y = "Days",
                title = "Average New Appointment Lead Days by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
@@ -2997,9 +2998,9 @@ server <- function(input, output, session) {
             axis.title.y = element_text(size=14),
             axis.title.x = element_blank(),
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
-        # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
-        #              date_minor_breaks = "1 day", expand = c(0, 0.6))
+            axis.text.y = element_text(size = "14"))+
+        scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+                     date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
@@ -3079,7 +3080,7 @@ server <- function(input, output, session) {
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
           dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
           mutate(Label = "Date")
-        ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m/%d/%y"), y=mean, col=Appt.Year,group=Appt.Year)) +
+        ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m-%d"), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           labs(x = NULL, y = "Days", 
                title = "Average New Appointment Lead Days by Day",
@@ -3192,7 +3193,9 @@ server <- function(input, output, session) {
       } else { # Day
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
           dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
+        data_filter$DateYear <- as.Date(with(data_filter, paste(Appt.Year, Appt.Date,sep="-")), "%Y-%m-%d")
+        ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
+        #ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Time (min)",  
                title = "Average Check-in to Visit-End Time (Min.) by Day",
@@ -3208,9 +3211,9 @@ server <- function(input, output, session) {
             axis.title.y = element_text(size=14),
             axis.title.x = element_blank(),
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
-        # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
-        #              date_minor_breaks = "1 day", expand = c(0, 0.6))
+            axis.text.y = element_text(size = "14"))+
+          scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+                       date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
@@ -3264,7 +3267,7 @@ server <- function(input, output, session) {
         data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
           dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
           mutate(Label = "Month")
-        ggplot(data_filter, aes(x=Appt.Month, y=mean, col=Appt.Year,group=Appt.Year)) +
+        ggplot(data_filter, aes(x = factor(Appt.Month, level = monthOptions), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point() +
           labs(x = NULL, y = "Time (min)",
@@ -3288,7 +3291,7 @@ server <- function(input, output, session) {
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
           dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
           mutate(Label = "Date")
-        ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m/%d/%y"), y=mean, col=Appt.Year,group=Appt.Year)) +
+        ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m-%d"), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Visit-End Time (Min.) by Day",
@@ -3396,7 +3399,8 @@ server <- function(input, output, session) {
       } else { # Day
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
           dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
+        data_filter$DateYear <- as.Date(with(data_filter, paste(Appt.Year, Appt.Date,sep="-")), "%Y-%m-%d")
+        ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Day",
@@ -3412,9 +3416,9 @@ server <- function(input, output, session) {
             axis.title.y = element_text(size=14),
             axis.title.x = element_blank(),
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
-        # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
-        #              date_minor_breaks = "1 day", expand = c(0, 0.6))
+            axis.text.y = element_text(size = "14"))+
+          scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+                       date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
@@ -3470,7 +3474,7 @@ server <- function(input, output, session) {
         data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
           dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
           mutate(Label = "Month")
-        ggplot(data_filter, aes(x=Appt.Month, y=mean, col=Appt.Year,group=Appt.Year)) +
+        ggplot(data_filter, aes(x = factor(Appt.Month, level = monthOptions), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point() +
           labs(x = NULL, y = "Time (min)", 
@@ -3487,7 +3491,7 @@ server <- function(input, output, session) {
             legend.title = element_blank(),
             axis.title.y = element_text(size=14),
             axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
+            axis.text.x = element_text(size = "16", hjust=1, angle = 0),
             axis.text.y = element_text(size = "14"))+
           scale_color_MountSinai("main")
         
@@ -3495,7 +3499,7 @@ server <- function(input, output, session) {
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
           dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
           mutate(Label = "Date")
-      ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m/%d/%y"), y=mean, col=Appt.Year,group=Appt.Year)) +
+      ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m-%d"), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Day",
