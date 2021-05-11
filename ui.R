@@ -302,7 +302,7 @@ ui <- dashboardPage(
                               title = "Key Metrics", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               fluidRow(
-                                valueBoxOutput("vbox") %>%
+                                valueBoxOutput("vbox1") %>%
                                   withSpinner(type = 5, color = "#d80b8c"),
                                 valueBoxOutput("vbox2"),
                                 valueBoxOutput("vbox3")),
@@ -316,16 +316,22 @@ ui <- dashboardPage(
                                 valueBoxOutput("vbox9"))
                             )),
                      column(5,
-                            boxPlus(
-                              title = "Appointment Status", width = 12, status = "primary",
-                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("provApptStatusPie", height = "420px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c")),
+                            # boxPlus(
+                            #   title = "Slot Usage", width = 12, status = "primary",
+                            #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                            #   plotOutput("provSlotUsagesAvg", height = "300px") %>% 
+                            #     withSpinner(type = 5, color = "#d80b8c")),
+                            # boxPlus(
+                            #   title = "Appointment Status", width = 12, status = "primary",
+                            #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                            #   plotOutput("provApptStatusPie", height = "300px") %>% 
+                            #     withSpinner(type = 5, color = "#d80b8c")),
                             boxPlus(
                               title = "Coverage and No Show", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("provCoveragePie", height = "420px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c"))),
+                              tableOutput("provCoverage") %>%
+                                withSpinner(type = 5, color = "#d80b8c"))
+                            ),
                      column(7,
                             boxPlus(
                               title = "Daily Scheduling", width = 12, status = "primary",
@@ -334,13 +340,7 @@ ui <- dashboardPage(
                                            choices = list("Arrived " = 1, "No Show " = 2, "Overbooks " = 3, "Booked Rate (%) " = 4, "Filled Rate (%) " = 5), selected = 1),
                               plotOutput("provDailySchedule", height = "890px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c")
-                              )),
-                     column(12,
-                            boxPlus(
-                              title = "Slot Usage", width = 12, status = "primary",
-                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              plotOutput("provSlotUsagesAvg") %>% 
-                                withSpinner(type = 5, color = "#d80b8c")))
+                              ))
               )),
       
       tabItem(tabName = "KPIs",
@@ -389,7 +389,6 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Day of Visit KPIs", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              hr(),
                               column(12,
                                 plotOutput("kpiCycleTimeGraph", height="450px") %>% 
                                   withSpinner(type = 5, color = "#d80b8c"),hr(),
@@ -432,9 +431,8 @@ ui <- dashboardPage(
                                                      box(title = NULL, width = 12, solidHeader = FALSE,
                                                          sliderInput("setRooms", label = h4("Set Rooms Available:"), min = 1, max = 24, value = 8))),
                                               column(4,
-                                                     valueBoxOutput("roomStat1", width=12)),
-                                              # fluidRow(valueBoxOutput("roomStat1", width=12)),
-                                              # fluidRow(valueBoxOutput("roomStat2", width=12))),
+                                                     valueBoxOutput("roomStat1", width=12) %>%
+                                                       withSpinner(type = 5, color = "#d80b8c")),
                                               column(4,
                                                      valueBoxOutput("avgRoomsRequired", width=12))),
                                             fluidRow(

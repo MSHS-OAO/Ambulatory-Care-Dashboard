@@ -111,6 +111,7 @@ suppressMessages({
   library(shinycssloaders)
   library(feather)
   library(zipcodeR)
+  library(formattable)
 })
 
 # ### (0) Maximize R Memory Size 
