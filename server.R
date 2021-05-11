@@ -3054,7 +3054,7 @@ server <- function(input, output, session) {
         data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
           dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
           mutate(Label = "Month")
-        ggplot(data_filter, aes(x=Appt.Month, y=mean, col=Appt.Year,group=Appt.Year)) +
+        ggplot(data_filter, aes(x = factor(Appt.Month, level = monthOptions), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point() +
           labs(x = NULL, y = "Days",  
@@ -3123,6 +3123,7 @@ server <- function(input, output, session) {
     
     data <- dataArrivedKpi() %>% filter(cycleTime > 0)
     
+    
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
         data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
@@ -3166,10 +3167,11 @@ server <- function(input, output, session) {
             axis.title.x = element_blank(),
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
             axis.text.y = element_text(size = "14"))
+        
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
+        data_filter <- data %>% group_by(Appt.MonthYear) %>% 
           dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Month,lex.order = TRUE), y=mean,group=1)) +
+        ggplot(data_filter, aes(x=interaction(Appt.MonthYear,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
@@ -3371,9 +3373,9 @@ server <- function(input, output, session) {
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
             axis.text.y = element_text(size = "14"))
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
+        data_filter <- data %>% group_by(Appt.MonthYear) %>% 
           dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Month,lex.order = TRUE), y=mean,group=1)) +
+        ggplot(data_filter, aes(x=interaction(Appt.MonthYear,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
