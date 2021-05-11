@@ -291,11 +291,26 @@ setwd(wdpath)
 # slot.data.subset <- readRDS(here::here("Data/slot_data_subset.rds"))
 # holid <- readRDS(here::here("Data/holid.rds"))
 
-historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
-slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+#historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
+historical.data <- read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather")
+#historical.data <- readRDS("C:/Users/villea04/Documents/Data Test/historical_data.rds")
 
 max_date <- max(historical.data$Appt.DateYear)
+
+#slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+slot.data.subset <- read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather")
+#slot.data.subset <- readRDS("C:/Users/villea04/Documents/Data Test/slot_data_subset.rds")
+
+## Slot datasets
+past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
+future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
+rm(slot.data.subset)
+
+#holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+holid <- read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather")
+#holid <- readRDS("C:/Users/villea04/Documents/Data Test/holid.rds")
+
+
 
 ## KPI datasets
 kpi.all.data <- historical.data %>% filter(Appt.DTTM >= max_date - 3*365) ## All data: Arrived, No Show, Canceled, Bumped, Rescheduled
@@ -317,9 +332,7 @@ noShow.data <- all.data %>% filter(Appt.Status %in% c("No Show")) ## Arrived + N
 noShow.data <- rbind(noShow.data,sameDay) # No Shows + Same day canceled, bumped, rescheduled
 arrivedNoShow.data <- rbind(arrived.data,noShow.data) ## Arrived + No Show data: Arrived and No Show
 
-## Slot datasets
-past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
-future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
+
 
 
 ### (5) Pre-processing Space Utilization Dataframe --------------------------------------------------------------------------------------
@@ -329,8 +342,13 @@ future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM 
 # data.hour.scheduled <- readRDS(here::here("Data/hour_scheduled.rds"))
 # data.hour.arrived <- readRDS(here::here("Data/hour_arrived.rds"))
 
-data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
-data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
+#data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
+data.hour.scheduled <- read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather")
+#data.hour.scheduled <- readRDS("C:/Users/villea04/Documents/Data Test/hour_scheduled.rds")
+
+#data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
+data.hour.arrived  <- read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather")
+#data.hour.arrived <- readRDS("C:/Users/villea04/Documents/Data Test/hour_arrived.rds")
 
 scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
 arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)

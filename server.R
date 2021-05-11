@@ -1137,7 +1137,7 @@ server <- function(input, output, session) {
       ggplot(bookedFilledRate, aes(Appt.Week, value, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
         geom_point(size=2)+
-        facet_wrap(variable~., dir ="V")+
+        facet_wrap(variable~., dir ="v")+
         scale_y_continuous(labels=scales::percent_format(accuracy = 1))+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         # labs(x="Site - Specialty", y=NULL,
@@ -1201,7 +1201,85 @@ server <- function(input, output, session) {
   })
   
   
-  output$siteComparisonCycleTime <- renderPlot({
+  output$siteComparisonMedianCheckInCycleTime <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    # Scheduling Arrived Data
+    arrivedPts <- dataArrived()
+    # arrivedPts <- arrived.data %>% filter(Campus.Specialty == "Cardiology")
+    arrivedPts$siteSpecialty <- paste0(arrivedPts$Campus," - ",arrivedPts$Campus.Specialty)
+    
+    cycleTimes.tb <- arrivedPts %>% filter(cycleTime > 0) %>% 
+      group_by(siteSpecialty, Appt.MonthYear, Appt.Week, Appt.DateYear) %>% dplyr::summarise(cycleTime = round(median(cycleTime)))
+    
+    if(input$bySpecialty6 == TRUE) {
+      
+      # Check in to Visit End 
+      cycleTimes <- cycleTimes.tb %>% 
+        group_by(siteSpecialty, Appt.Week) %>% dplyr::summarise(`Median Cycle Time` = round(median(cycleTime)))
+      
+      ggplot(cycleTimes, aes(Appt.Week, `Median Cycle Time`, group=siteSpecialty, col=siteSpecialty)) +
+        geom_line()+
+        geom_point(size=2)+
+        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+        labs(x="Site - Specialty", y="Min.",
+             title = "Median Check-in to Visit End Time (Min.) by Site and Specialty",
+             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+        scale_y_continuous(expand = c(0,0), limits = c(0,max(cycleTimes$`Median Cycle Time`)*1.2))+
+        theme_bw()+
+        theme(
+          strip.text = element_text(size = 16),
+          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+          plot.subtitle = element_text(hjust=0.5, size = 14),
+          legend.position = "bottom",
+          legend.title = element_blank(),
+          axis.title = element_text(size = 12),
+          axis.text.x = element_text(size = 14, angle=40, hjust=1),
+          axis.text.y = element_text(size = 12),
+          axis.line.x = element_blank(),
+          plot.margin = margin(0,80,0,80))+
+        scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
+      
+    } else{
+      
+      # Check in to Visit End 
+      cycleTimes <- cycleTimes.tb %>% 
+        group_by(siteSpecialty, Appt.MonthYear) %>% dplyr::summarise(`Median Cycle Time` = round(median(cycleTime)))
+      
+      ggplot(cycleTimes, aes(Appt.MonthYear, `Median Cycle Time`, group=siteSpecialty, col=siteSpecialty)) +
+        geom_line()+
+        geom_point(size=2)+
+        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+        labs(x="Site - Specialty", y="Min.",
+             title = "Median Check-in to Visit End Time (Min.) by Site and Specialty",
+             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+        scale_y_continuous(expand = c(0,0), limits = c(0,max(cycleTimes$`Median Cycle Time`)*1.2))+
+        theme_bw()+
+        theme(
+          strip.text = element_text(size = 16),
+          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+          plot.subtitle = element_text(hjust=0.5, size = 14),
+          legend.position = "bottom",
+          legend.title = element_blank(),
+          axis.title = element_text(size = 12),
+          axis.text.x = element_text(size = 14, angle=40, hjust=1),
+          axis.text.y = element_text(size = 12),
+          axis.line.x = element_blank(),
+          plot.margin = margin(0,80,0,80))
+    }
+  })
+  
+  
+  output$siteComparisonMedianCycleTime <- renderPlot({
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -1234,19 +1312,15 @@ server <- function(input, output, session) {
       # Check in to Room in  
       roomedTime <- roomedTime.tb %>% 
         group_by(siteSpecialty, Appt.Week) %>% dplyr::summarise(`Median Check-in to Room-in Time` = round(median(checkinToRoomin)))
-      
-      cycleTimes <- merge(cycleTimes, roomedTime, all.x = TRUE)
-      cycleTimes <- cycleTimes %>% gather(variable, value, 3:4)
-      
-      ggplot(cycleTimes, aes(Appt.Week, value, group=siteSpecialty, col=siteSpecialty)) +
+    
+      ggplot(roomedTime, aes(Appt.Week, `Median Check-in to Room-in Time`, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
         geom_point(size=2)+
-        facet_wrap(variable~., scales = "free", dir = "v")+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y="Min.",
-             title = "Median Cycle Times (Min.) by Site and Specialty",
+             title = "Median Check-in to Room-in Time (Min.) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        scale_y_continuous(expand = c(0,0), limits = c(0,max(cycleTimes$value)*1.2))+
+        scale_y_continuous(expand = c(0,0), limits = c(0,max(roomedTime$`Median Check-in to Room-in Time`)*1.2))+
         theme_bw()+
         theme(
           strip.text = element_text(size = 16),
@@ -1271,18 +1345,14 @@ server <- function(input, output, session) {
       roomedTime <- roomedTime.tb %>% 
         group_by(siteSpecialty, Appt.MonthYear) %>% dplyr::summarise(`Median Check-in to Room-in Time` = round(median(checkinToRoomin)))
       
-      cycleTimes <- merge(cycleTimes, roomedTime, all.x = TRUE)
-      cycleTimes <- cycleTimes %>% gather(variable, value, 3:4)
-      
-      ggplot(cycleTimes, aes(Appt.MonthYear, value, group=siteSpecialty, col=siteSpecialty)) +
+      ggplot(roomedTime, aes(Appt.MonthYear, `Median Check-in to Room-in Time`, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
         geom_point(size=2)+
-        facet_wrap(variable~., scales = "free", dir = "v")+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y="Min.",
-             title = "Median Cycle Times (Min.) by Site and Specialty",
+             title = "Median Check-in to Room-in Time (Min.) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        scale_y_continuous(expand = c(0,0), limits = c(0,max(cycleTimes$value)*1.2))+
+        scale_y_continuous(expand = c(0,0), limits = c(0,max(roomedTime$`Median Check-in to Room-in Time`)*1.2))+
         theme_bw()+
         theme(
           strip.text = element_text(size = 16),
@@ -1297,7 +1367,6 @@ server <- function(input, output, session) {
           plot.margin = margin(0,80,0,80))
     }
   })
-  
   
   output$siteComparisonWorkingFTE <- renderPlot({
     

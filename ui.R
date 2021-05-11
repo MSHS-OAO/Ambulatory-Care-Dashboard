@@ -208,8 +208,10 @@ ui <- dashboardPage(
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonCycleTime", height="900px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c"))
+                              plotOutput("siteComparisonMedianCheckInCycleTime", height="550px") %>% 
+                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                            plotOutput("siteComparisonMedianCycleTime", height="550px") %>% 
+                              withSpinner(type = 5, color = "#d80b8c"))
                             # boxPlus(
                             #   title = "Working FTE", width = 12, status = "primary",
                             #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
