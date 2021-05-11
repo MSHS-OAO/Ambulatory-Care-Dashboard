@@ -2995,6 +2995,7 @@ server <- function(input, output, session) {
             plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
             legend.position = "none",
+            plot.margin = margin(0,0,0,0),
             axis.title.y = element_text(size=14),
             axis.title.x = element_blank(),
             axis.text.x = element_text(size = "12", hjust=1, angle = 35),
