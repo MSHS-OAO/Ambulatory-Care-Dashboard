@@ -561,7 +561,7 @@ server <- function(input, output, session) {
   dataPastSlot <- reactive({
     groupByFilters(past.slot.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange [1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod, input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   }) 
   
   groupByFilters <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
@@ -1189,6 +1189,7 @@ server <- function(input, output, session) {
           plot.title = element_text(hjust=0.5, face = "bold", size = 20),
           plot.subtitle = element_text(hjust=0.5, size = 14),
           legend.position = "bottom",
+          #legend.position = "none",
           legend.title = element_blank(),
           axis.title = element_text(size = 12),
           axis.text.x = element_text(size = 14, angle=40, hjust=1),
@@ -2901,9 +2902,9 @@ server <- function(input, output, session) {
     
     data <- dataAllKpi() 
     
+    #data <- kpi.all.data %>% filter(Campus == "MSUS")
     data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
     data <- data %>% filter(New.PT3 == TRUE) %>% filter(wait.time >= 0)
-    
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
@@ -2950,13 +2951,14 @@ server <- function(input, output, session) {
             axis.text.y = element_text(size = "14"))
         
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
+        data_filter <- data %>% group_by(Appt.MonthYear) %>% 
                                            dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
+        print(sort(colnames(data_filter)))
         #data_filter$Appt.Year <- as.Date(data_filter$Appt.Year, format = "%Y")
         #data_filter$Appt.Month <- as.Date(data_filter$Appt.Month, format = "%m")
         #data_filter$ApptYearMonth <- as.yearmon(paste(data_filter$Appt.Year, data_filter$Appt.Month), "%Y %m")
         #data_filter$Appt_Month_Num <- match(data_filter$Appt.Month, month.name)
-        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Month,lex.order = TRUE), y=mean,group=1)) +
+        ggplot(data_filter, aes(x=interaction(Appt.MonthYear,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days", 
