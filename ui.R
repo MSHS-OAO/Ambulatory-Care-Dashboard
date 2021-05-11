@@ -674,8 +674,23 @@ ui <- dashboardPage(
     
     conditionalPanel(
       condition = "input.sbm=='utilization'",
-             uiOutput("dateRangeControlUtil"),
-             uiOutput("daysOfWeekControlUtil")
+             #uiOutput("dateRangeControlUtil"),
+             #uiOutput("daysOfWeekControlUtil")
+      box(
+        title = "Select Date Range:",
+        width = 12, 
+        solidHeader = FALSE, 
+        dateRangeInput("dateRangeUtil", label = NULL,
+                       start = min(data.hour.arrived$Appt.DateYear), end = max(data.hour.arrived$Appt.DateYear),
+                       min = min(arrived.data$Appt.DateYear), max = max(arrived.data$Appt.DateYear))),
+      
+      box(
+        title = "Select Days of Week:",
+        width = 12, 
+        solidHeader = FALSE, 
+        selectInput("daysOfWeekUtil",label = NULL,
+                    choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
+                    multiple=TRUE, selectize=TRUE))
       ),
     
     

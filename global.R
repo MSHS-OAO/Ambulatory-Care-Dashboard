@@ -163,7 +163,7 @@ MountSinai_palettes <- list(
                             "med purple","med pink","med blue","med grey", 
                             "light purple","light pink","light blue","light grey"),
   
-  `main`  = MountSinai_cols("dark purple","dark grey","dark pink","med blue","light pink","light blue","light grey"),
+  `main`  = MountSinai_cols("dark purple","dark grey","dark pink","med blue","light pink","light blue","med purple"),
   
   `purple`  = MountSinai_cols("dark purple","med purple","light purple"),
   
@@ -227,9 +227,9 @@ graph_theme <- function(legend_pos) {
     plot.subtitle = element_text(hjust=0.5, size = 14),
     legend.position = legend_pos,
     strip.text = element_text(size=14),
-    axis.title = element_text(size = 14),
-    axis.text.x = element_text(size = 14, angle=40, hjust=1),
-    axis.text.y = element_text(size = 12),
+    axis.title = element_text(size = 16),
+    axis.text.x = element_text(size = 16, angle=40, hjust=1),
+    axis.text.y = element_text(size = 14),
     axis.line.x = element_blank())#,
   #plot.margin = margin(0,80,0,80))
 }
@@ -250,6 +250,7 @@ theme_new_line <- function(base_size = 12,
         size = 20,
         margin = margin(0, 0, 30, 0)
       ),
+      strip.text = element_text(size = 16),
       legend.position = "top",
       legend.text = element_text(size = "12"),
       legend.direction = "horizontal",
@@ -280,7 +281,7 @@ theme_new_line <- function(base_size = 12,
 ### (2) Import Data ----------------------------------------------------------------------------------
 
 wdpath <- here::here()
-wdpath <- "C:/Users/kweons01/Desktop/IP Demand Modeling Desktop/Ambulatory-Care-Dashboard-Publish"
+#wdpath <- "C:/Users/kweons01/Desktop/IP Demand Modeling Desktop/Ambulatory-Care-Dashboard-Publish"
 
 setwd(wdpath)
 
