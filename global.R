@@ -225,8 +225,10 @@ scale_fill_MountSinai <- function(palette = "all", discrete = TRUE, reverse = FA
 graph_theme <- function(legend_pos) {
   theme(
     plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-    plot.subtitle = element_text(hjust=0.5, size = 14),
+    plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
     legend.position = legend_pos,
+    legend.title = element_text(size = "14"),
+    legend.text = element_text(size = "14"),
     strip.text = element_text(size=14),
     axis.title = element_text(size = 16),
     axis.text.x = element_text(size = 16, angle=40, hjust=1),
@@ -253,7 +255,7 @@ theme_new_line <- function(base_size = 12,
       ),
       strip.text = element_text(size = 16),
       legend.position = "top",
-      legend.text = element_text(size = "12"),
+      legend.text = element_text(size = "14"),
       legend.direction = "horizontal",
       legend.key.size = unit(1.0, "cm"),
       legend.title = element_blank(),
@@ -299,15 +301,17 @@ setwd(wdpath)
 
 
 # historical.data <- readRDS(here::here("Data/historical_data.rds")) ## Filter out historical data only
-slot.data.subset <- readRDS(here::here("Data/slot_data_subset.rds"))
-holid <- readRDS(here::here("Data/holid.rds"))
+# slot.data.subset <- readRDS(here::here("Data/slot_data_subset.rds"))
+# holid <- readRDS(here::here("/Data/holid.rds"))
 
-#historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
-historical.data <- readRDS("Data/historical_data.rds")
+historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
+# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
+#historical.data <- readRDS("Data/historical_data.rds")
 
 max_date <- max(historical.data$Appt.DateYear)
 
-#slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
 #slot.data.subset <- readRDS("Data/slot_data_subset.rds")
 
 ## Slot datasets
@@ -316,8 +320,12 @@ future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM 
 rm(slot.data.subset)
 
 #holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+<<<<<<< HEAD
+=======
+# holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
+>>>>>>> 171b3cd58b71dd9249106087036e624024f82b27
 #holid <- readRDS("Data/holid.rds")
-
+holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
 
 
 ## KPI datasets
@@ -350,11 +358,21 @@ arrivedNoShow.data <- rbind(arrived.data,noShow.data) ## Arrived + No Show data:
 # data.hour.scheduled <- readRDS(here::here("Data/hour_scheduled.rds"))
 # data.hour.arrived <- readRDS(here::here("Data/hour_arrived.rds"))
 
+<<<<<<< HEAD
 #data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
 data.hour.scheduled <- readRDS("Data/hour_scheduled.rds")
 
 #data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
 data.hour.arrived <- readRDS("Data/hour_arrived.rds")
+=======
+data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
+# data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
+#data.hour.scheduled <- readRDS("Data/hour_scheduled.rds")
+
+data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
+# data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
+#data.hour.arrived <- readRDS("Data/hour_arrived.rds")
+>>>>>>> 171b3cd58b71dd9249106087036e624024f82b27
 
 scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
 arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
@@ -425,10 +443,10 @@ colnames(byTime30.df) <- c("Time") ## Empty data frame for time (hour)
 # (7) Data Reactive functions ---------------------------------------------------------------------------------
 
 ## Filtered Scheduling Data
-
-groupByFilters <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
-  result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Provider %in% provider, Resource %in% resource,
-                          Visit.Method %in% visitMethod, mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
+groupByFilters <- function(dt, campus, specialty, department, resource, provider, visitMethod, visitType, mindateRange, maxdateRange, daysofweek, holidays){
+  result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource, Provider %in% provider,
+                          Visit.Method %in% visitMethod, Appt.Type %in% visitType, 
+                          mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
   return(result)
 }
 
@@ -439,15 +457,24 @@ groupByFilters_1 <- function(dt, apptType, insurance){
 }
 
 ## Filtered Utilization Data
-groupByFilters_2 <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays, type){
-  result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Provider %in% provider, Resource %in% resource,
-                          Visit.Method %in% visitMethod, mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays, util.type %in% type)
+groupByFilters_2 <- function(dt, campus, specialty, department, resource, provider, visitMethod, visitType, mindateRange, maxdateRange, daysofweek, holidays, type){
+  result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource, Provider %in% provider, 
+                          Visit.Method %in% visitMethod, Appt.Type %in% visitType, 
+                          mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays, util.type %in% type)
   return(result)
 }
 
 ## Filtered by Appt.Type Data
 groupByFilters_3 <- function(dt, apptType){
   result <- dt %>% filter(New.PT3 == FALSE, Appt.Type %in% apptType)
+  return(result)
+}
+
+## Filtered Slot Data
+groupByFilters_4 <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
+  result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource, Provider %in% provider,
+                          Visit.Method %in% visitMethod, 
+                          mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
   return(result)
 }
 
