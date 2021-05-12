@@ -173,7 +173,7 @@ ui <- dashboardPage(
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonNewPtRatio", height="550px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                                withSpinner(type = 5, color = "#d80b8c"), hr(),
                               materialSwitch(
                                 inputId = "bySpecialty3",
                                 label = "By week", 
@@ -191,7 +191,7 @@ ui <- dashboardPage(
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonBookedRate", height="900px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                                withSpinner(type = 5, color = "#d80b8c"), hr(),
                               materialSwitch(
                                 inputId = "bySpecialty5",
                                 label = "By week", 
@@ -209,7 +209,7 @@ ui <- dashboardPage(
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonMedianCheckInCycleTime", height="550px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                                withSpinner(type = 5, color = "#d80b8c"), hr(),
                             plotOutput("siteComparisonMedianCycleTime", height="550px") %>% 
                               withSpinner(type = 5, color = "#d80b8c"))
                             # boxPlus(
@@ -323,11 +323,11 @@ ui <- dashboardPage(
                             #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                             #   plotOutput("provSlotUsagesAvg", height = "300px") %>% 
                             #     withSpinner(type = 5, color = "#d80b8c")),
-                            # boxPlus(
-                            #   title = "Appointment Status", width = 12, status = "primary",
-                            #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                            #   plotOutput("provApptStatusPie", height = "300px") %>% 
-                            #     withSpinner(type = 5, color = "#d80b8c")),
+                            boxPlus(
+                              title = "Scheduling Activity", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              plotOutput("provApptStatusPie", height = "300px") %>%
+                                withSpinner(type = 5, color = "#d80b8c")),
                             boxPlus(
                               title = "Coverage and No Show", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,

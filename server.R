@@ -1,7 +1,7 @@
 server <- function(input, output, session) {
   
   ### (1) Create reactive filters ===================================================================================================
-  ## SCheduling Data
+  ## Scheduling Data
   
   # observeEvent(input$resetheight, {
   #   updateSliderInput(session,"plotHeight",value = 650)
@@ -435,140 +435,146 @@ server <- function(input, output, session) {
   dataAll <- reactive({
     groupByFilters(all.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange [1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataArrivedNoShow <- reactive({
     groupByFilters(arrivedNoShow.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange [1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataArrived <- reactive({
     groupByFilters(arrived.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange [1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataNoShow <- reactive({
     groupByFilters(noShow.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange [1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataCanceledBumpedRescheduled<- reactive({
     groupByFilters(canceled.bumped.rescheduled.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange [1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataCanceled<- reactive({
     groupByFilters(canceled.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange [1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataBumped<- reactive({
     groupByFilters(bumped.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange [1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataRescheduled<- reactive({
     groupByFilters(rescheduled.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange [1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   # [2.2] All pre-processed data for kpi tabs --------------------------------------------------------------------------------------
   dataAllKpi <- reactive({
     groupByFilters(kpi.all.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRangeKpi [1], input$dateRangeKpi[2], input$daysOfWeekKpi, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataArrivedNoShowKpi <- reactive({
     groupByFilters(kpi.arrivedNoShow.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRangeKpi [1], input$dateRangeKpi[2], input$daysOfWeekKpi, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataArrivedKpi <- reactive({
     groupByFilters(kpi.arrived.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRangeKpi [1], input$dateRangeKpi[2], input$daysOfWeekKpi, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataCanceledBumpedKpi <- reactive({
     groupByFilters(kpi.canceled.bumped.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRangeKpi [1], input$dateRangeKpi[2], input$daysOfWeekKpi, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataCanceledKpi <- reactive({
     groupByFilters(kpi.canceled.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRangeKpi [1], input$dateRangeKpi[2], input$daysOfWeekKpi, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataBumpedKpi <- reactive({
     groupByFilters(kpi.bumped.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRangeKpi [1], input$dateRangeKpi[2], input$daysOfWeekKpi, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   }) 
   
   # [2.2] All pre-processed data for utilization tabs --------------------------------------------------------------------------------------
-  # Hour Interval
-  # dataHourScheduled <- reactive({
-  #   groupByFilters_2(utilization.data,
-  #                  input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-  #                  input$selectedVisitMethod, input$dateRangeUtil[1], input$dateRangeUtil[2], input$daysOfWeekUtil, input$excludeHolidays, input$utilType)
-  # }) 
-  # 
-  
   
   dataScheduledUtilization <- reactive({
     groupByFilters_2(scheduled.utilization.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$dateRangeUtil [1], input$dateRangeUtil[2], input$daysOfWeekUtil, input$excludeHolidays, input$utilType)
+                     input$selectedVisitMethod, input$selectedPRCName, 
+                     input$dateRange[1], nput$dateRange[2], input$daysOfWeek, input$excludeHolidays, input$utilType)
   }) 
   
   dataArrivedUtilization <- reactive({
     groupByFilters_2(arrived.utilization.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$dateRangeUtil [1], input$dateRangeUtil[2], input$daysOfWeekUtil, input$excludeHolidays, input$utilType)
+                     input$selectedVisitMethod, input$selectedPRCName, 
+                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays, input$utilType)
   }) 
   
   dataHourScheduled <- reactive({
     groupByFilters(data.hour.scheduled,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRangeUtil [1], input$dateRangeUtil[2], input$daysOfWeekUtil, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   }) 
   
   dataHourArrived <- reactive({
     groupByFilters(data.hour.arrived,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRangeUtil [1], input$dateRangeUtil[2], input$daysOfWeekUtil, input$excludeHolidays)
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   }) 
   
   # [2.3] All pre-processed data for access tabs --------------------------------------------------------------------------------------
   dataFutureSlot <- reactive({
-    groupByFilters(future.slot.data,
+    groupByFilters_4(future.slot.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRangeFutureSlot [1], input$dateRangeFutureSlot[2], input$daysOfWeekFutureSlot, input$excludeHolidays)
+                   input$selectedVisitMethod, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   }) 
   
   dataPastSlot <- reactive({
-    groupByFilters(past.slot.data,
+    groupByFilters_4(past.slot.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                   input$selectedVisitMethod,
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   }) 
-  
-  groupByFilters <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
-    result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Provider %in% provider, Resource %in% resource,
-                            Visit.Method %in% visitMethod, mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
-    return(result)
-  }
   
   ### (3) Dashboard Layout ============================================================================================================
   ### [3.1] Title of  Dashboard -------------------------------------------------------------------------------------------------------
@@ -681,13 +687,14 @@ server <- function(input, output, session) {
       ggplot(waitTime, 
              aes(reorder(Campus.Specialty, -medWaitTime), medWaitTime, fill = medWaitTime <= 14))+
         geom_bar(stat="identity", width = 0.8) +
-        scale_fill_manual("New Access Target:\n <= 14 Days", values = c("#f8696b", "#63be7b"))+
+        scale_fill_manual("New Access Target: <= 14 Days", values = c("#f8696b", "#63be7b"))+
         scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.2), expand = c(0,0))+
         labs(x=NULL, y="Days",
              title = "Median New Appointment Lead Days by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        graph_theme("top")+
-        theme(plot.margin = margin(0,80,0,80),strip.background = element_rect(fill="#dddedd"))
+        theme_new_line()+
+        theme_bw()+
+        graph_theme("top")
       
     }else{ # Average Wait Time 
       
@@ -699,8 +706,9 @@ server <- function(input, output, session) {
         labs(x=NULL, y="Days",
              title = "Average New Appointment Lead Days by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        graph_theme("top")+
-        theme(plot.margin = margin(0,80,0,80),strip.background = element_rect(fill="#dddedd"))
+        theme_new_line()+
+        theme_bw()+
+        graph_theme("top")
       
     }
   })
@@ -807,11 +815,9 @@ server <- function(input, output, session) {
              title = "Total Arrived Patients by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(arrivedPts.tb$`Total Patients Arrived`)*1.2))+
-        theme_bw()+ graph_theme(legend_pos = "bottom") +
-        theme(
-          legend.title = element_blank(),
-          strip.background = element_rect(fill="#dddedd"),
-          plot.margin = margin(0,80,0,80))+
+        theme_new_line()+
+        theme_bw()+
+        graph_theme("bottom")+ 
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
       
       
@@ -827,17 +833,9 @@ server <- function(input, output, session) {
              title = "Total Arrived Patients by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(arrivedPts.tb$`Total Patients Arrived`)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))
+        graph_theme("bottom")
     }
     
   })
@@ -881,17 +879,9 @@ server <- function(input, output, session) {
              title = "New Patient Ratio by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         #scale_y_continuous(expand = c(0,0), limits = c(0,max(newPts$newRatio)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))+
+        graph_theme("bottom")+
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
       
       
@@ -916,17 +906,9 @@ server <- function(input, output, session) {
              title = "New Patient Ratio by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         #scale_y_continuous(expand = c(0,0), limits = c(0,max(newPts$newRatio)*0.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))
+        graph_theme("bottom")
       
     }
     
@@ -970,17 +952,9 @@ server <- function(input, output, session) {
              title = "Median New Appointment Lead Days by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(newWaitTime.tb$`Median New Wait Time`)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))+
+        graph_theme("bottom")+
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
       
       
@@ -999,17 +973,9 @@ server <- function(input, output, session) {
              title = "Median New Appointment Lead Days by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(newWaitTime.tb$`Median New Wait Time`)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))
+        graph_theme("bottom")
       
     }
   })
@@ -1052,17 +1018,9 @@ server <- function(input, output, session) {
         labs(x="Site - Specialty", y="No Show Rate (%)",
              title = "Avg No Show (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))+
+        graph_theme("bottom")+
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
       
       
@@ -1086,17 +1044,9 @@ server <- function(input, output, session) {
         labs(x="Site - Specialty", y="No Show Rate (%)",
              title = "Avg No Show (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))
+        graph_theme("bottom")
     }
     
   })
@@ -1144,18 +1094,9 @@ server <- function(input, output, session) {
              title = "Avg Daily Booked vs. Filled Rate (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(bookedFilledRate$value)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          strip.text = element_text(size = 16),
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))+
+        graph_theme("bottom")+
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
     } else{
       
@@ -1183,19 +1124,9 @@ server <- function(input, output, session) {
              title = "Avg Daily Booked vs. Filled Rate (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         #scale_y_continuous(expand = c(0,0), limits = c(0,max(bookedFilledRate$value)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          strip.text = element_text(size = 16),
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          #legend.position = "none",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))
+        graph_theme("bottom")
       
     }
     
@@ -1236,18 +1167,9 @@ server <- function(input, output, session) {
              title = "Median Check-in to Visit End Time (Min.) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(cycleTimes$`Median Cycle Time`)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          strip.text = element_text(size = 16),
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))+
+        graph_theme("bottom")+
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
       
     } else{
@@ -1264,18 +1186,9 @@ server <- function(input, output, session) {
              title = "Median Check-in to Visit End Time (Min.) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(cycleTimes$`Median Cycle Time`)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          strip.text = element_text(size = 16),
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))
+        graph_theme("bottom")
     }
   })
   
@@ -1322,18 +1235,9 @@ server <- function(input, output, session) {
              title = "Median Check-in to Room-in Time (Min.) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(roomedTime$`Median Check-in to Room-in Time`)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          strip.text = element_text(size = 16),
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))+
+        graph_theme("bottom")+
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
       
     } else{
@@ -1354,18 +1258,9 @@ server <- function(input, output, session) {
              title = "Median Check-in to Room-in Time (Min.) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(roomedTime$`Median Check-in to Room-in Time`)*1.2))+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          strip.text = element_text(size = 16),
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          axis.title = element_text(size = 12),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank(),
-          plot.margin = margin(0,80,0,80))
+        graph_theme("bottom")
     }
   })
   
@@ -1404,19 +1299,9 @@ server <- function(input, output, session) {
              title = "Daily Avg Provider Hours and FTE Available by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
              caption = "1 FTE = 7.5 patient care hours per day")+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
-          legend.title = element_blank(),
-          legend.position = "bottom",
-          strip.background = element_rect(fill="#dddedd"),
-          strip.text = element_text(size=14),
-          axis.title = element_text(size=14),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank())+
+        graph_theme("bottom")+
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
     } else{
       
@@ -1436,22 +1321,11 @@ server <- function(input, output, session) {
              title = "Daily Avg Provider Hours and FTE Available by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
              caption = "1 FTE = 7.5 patient care hours per day")+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
-          legend.title = element_blank(),
-          legend.position = "bottom",
-          strip.background = element_rect(fill="#dddedd"),
-          strip.text = element_text(size=14),
-          axis.title = element_text(size=14),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank())
+        graph_theme("bottom")
       
     }
-    
   })
   
   output$siteComparisonPtsPerFTE <- renderPlot({
@@ -1487,19 +1361,9 @@ server <- function(input, output, session) {
              title = "Daily Avg Arrived Patients per Provider FTE by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
              caption = "1 FTE = 7.5 patient care hours per day")+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
-          legend.title = element_blank(),
-          legend.position = "bottom",
-          strip.background = element_rect(fill="#dddedd"),
-          strip.text = element_text(size=14),
-          axis.title = element_text(size=14),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank())+
+        graph_theme("bottom")+
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
     } else{
       
@@ -1518,19 +1382,9 @@ server <- function(input, output, session) {
              title = "Daily Avg Arrived Patients per Provider FTE by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
              caption = "1 FTE = 7.5 patient care hours per day")+
+        theme_new_line()+
         theme_bw()+
-        theme(
-          plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-          plot.subtitle = element_text(hjust=0.5, size = 14),
-          plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
-          legend.title = element_blank(),
-          legend.position = "bottom",
-          strip.background = element_rect(fill="#dddedd"),
-          strip.text = element_text(size=14),
-          axis.title = element_text(size=14),
-          axis.text.x = element_text(size = 14, angle=40, hjust=1),
-          axis.text.y = element_text(size = 12),
-          axis.line.x = element_blank())
+        graph_theme("bottom")
       
     }
     
@@ -1652,26 +1506,9 @@ server <- function(input, output, session) {
            title = "Average Scheduled vs. Arrived Patients",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
            caption = "Scheduled = Arrived + No Show Patients")+
+      theme_new_line()+
       theme_bw()+
-      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 16),
-            plot.subtitle = element_text(hjust=0.5, size = 14),
-            plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
-            legend.position = "top",
-            legend.text = element_text(size="12"),
-            legend.direction = "horizontal",
-            legend.key.size = unit(1.0,"cm"),
-            legend.title = element_blank(),
-            axis.title = element_text(size="14"),
-            axis.text = element_text(size="14"),
-            axis.title.x = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.text.x = element_text(angle = 35,hjust = 1),
-            axis.text.y = element_text(margin = margin(l=5, r=5)),
-            panel.grid.minor = element_blank(),
-            panel.border = element_blank(),
-            panel.background = element_blank(),
-            axis.line = element_line(size = 0.3, colour = "black"),
-            plot.margin = margin(30,30,30,30))
+      graph_theme("top")
     
   })
   
@@ -1968,7 +1805,7 @@ server <- function(input, output, session) {
     
     valueBox(
       paste0(prettyNum(round(length(unique(dataArrived()$uniqueId))/length(unique(dataArrived()$Appt.DateYear))), big.mark=',')," Patients/Day"),
-      subtitle = tags$p("AVG PATIENTS SEEN", style = "font-size: 140%;"), icon = NULL, color = "fuchsia")
+      subtitle = tags$p("AVG PATIENTS SEEN", style = "font-size: 140%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox5 <- renderValueBox({
@@ -1976,28 +1813,28 @@ server <- function(input, output, session) {
     valueBox(
       paste0(prettyNum(round(nrow(dataArrived() %>% filter(New.PT3 == TRUE) %>% 
                                     distinct(uniqueId))/length(unique(dataArrived()$Appt.DateYear))), big.mark=',')," Patients/Day"),
-      subtitle = tags$p("AVG NEW PATIENTS SEEN", style = "font-size: 140%;"), icon = NULL, color = "fuchsia")
+      subtitle = tags$p("AVG NEW PATIENTS SEEN", style = "font-size: 140%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox6 <- renderValueBox({
     
     valueBox(
       paste0(prettyNum(round(mean((dataAll() %>% filter(New.PT3 == TRUE, Wait.Time >= 0))$Wait.Time)), big.mark=',')," Days"),
-      subtitle = tags$p("AVG NEW APPT LEAD TIME", style = "font-size: 140%;"), icon = NULL, color = "fuchsia")
+      subtitle = tags$p("AVG NEW APPT LEAD TIME", style = "font-size: 140%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox7 <- renderValueBox({
     
       valueBox(
         paste0(prettyNum(round((sum(dataPastSlot()$AVAIL_MINUTES)/60)), big.mark=','), " Hrs."),
-        subtitle = tags$p("TOTAL HRS AVAILABLE", style = "font-size: 140%;"), icon = NULL, color = "aqua")
+        subtitle = tags$p("TOTAL HRS AVAILABLE", style = "font-size: 140%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox8 <- renderValueBox({
     
     valueBox(
       paste0(prettyNum(round((sum(dataPastSlot()$AVAIL_MINUTES) / length(unique(dataPastSlot()$Appt.DateYear)))/60), big.mark=','), " Hrs."),
-      subtitle = tags$p("AVG DAILY HRS AVAILABLE", style = "font-size: 140%;"), icon = NULL, color = "aqua")
+      subtitle = tags$p("AVG DAILY HRS AVAILABLE", style = "font-size: 140%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox9 <- renderValueBox({
@@ -2005,7 +1842,7 @@ server <- function(input, output, session) {
     valueBox(
       paste0(round((sum(dataPastSlot()$AVAIL_MINUTES) / length(unique(dataPastSlot()$Appt.DateYear)))/
                      (length(unique(dataArrived()$uniqueId)) / length(unique(dataArrived()$Appt.DateYear))), 1), " Min/Patient"),
-      subtitle = tags$p("AVG WORKED MINS PER PATIENT", style = "font-size: 140%;"), icon = NULL, color = "aqua")
+      subtitle = tags$p("AVG WORKED MINS PER PATIENT", style = "font-size: 140%;"), icon = NULL, color = "yellow")
   })
   
   
@@ -2245,57 +2082,31 @@ server <- function(input, output, session) {
   })
   
   
-  # output$provApptStatusPie <- renderPlot({
-  #   
-  #   data <- dataAll()
-  #   data <- all.data
-  #   
-  #   apptsCanceled <- data %>% 
-  #     group_by(Appt.Status) %>%
-  #     summarise(value = n()) %>%
-  #     arrange(desc(value)) %>%
-  #     mutate(percent = paste0(round((value/sum(value))*100),"%")) %>%
-  #     select(Appt.Status, percent) %>%
-  #     `colnames<-` (c("variable", "value"))
-  #   
-  #   # # apptsCanceled$percent[apptsCanceled$Status == "No Show"] <- round((apptsCanceled$Total[apptsCanceled$Status == "No Show"] / (apptsCanceled$Total[apptsCanceled$Status == "Arrived"] + apptsCanceled$Total[apptsCanceled$Status == "No Show"])),2)
-  #   # 
-  #   # scheduling_tb <- bind_rows(daily.booked, apptsCanceled)
-  #   # 
-  #   # 
-  #   # apptsCanceled <- aggregate(data$uniqueId, by=list(data$Appt.Status), FUN=NROW)
-  #   # names(apptsCanceled) <- c("Status","Total")
-  #   # 
-  #   # apptsCanceled <- apptsCanceled %>% filter(Status %in% c("Rescheduled","Canceled","No Show","Bumped","Scheduled","Arrived")) %>%
-  #   #   mutate(Percent = as.numeric(round((Total / sum(Total)),2)))
-  #   # 
-  #   # apptsCanceled$percent[apptsCanceled$Status == "No Show"] <- round((apptsCanceled$Total[apptsCanceled$Status == "No Show"] / (apptsCanceled$Total[apptsCanceled$Status == "Arrived"] + apptsCanceled$Total[apptsCanceled$Status == "No Show"])),2)
-  #   # 
-  #   
-  #   ggplot(apptsCanceled, aes(Status, Percent, fill=Status)) +
-  #     geom_bar(stat="identity", width = 0.8) +
-  #     scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits=c(0,(max(apptsCanceled$Percent))*1.5))+
-  #     scale_fill_manual(values=MountSinai_pal("all")(10))+
-  #     labs(x=NULL, y=NULL, title = NULL,
-  #          plot.title = "Appointment Status Breakdown",
-  #          # subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-  #          caption = "% No Show = No Show / No Show and Arrived\n
-  #          Based breakdown of all appointments by appointment status")+
-  #     theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-  #           plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-  #           legend.position = "none",
-  #           axis.title.y = element_blank(),
-  #           axis.title.x =  element_text(color= "black"),
-  #           axis.text.x = element_text(size = "14"),
-  #           axis.text.y = element_blank(),
-  #           panel.background = element_blank(),
-  #           panel.grid.minor = element_blank(),
-  #           panel.grid.major = element_blank(),
-  #           plot.margin = margin(30,30,30,30)) +
-  #     geom_text(aes(label=paste0(round(Percent*100),"%")), hjust = 0.5, vjust = -1, color="black", fontface="bold",
-  #               position = position_dodge(1), size=5)
-  # 
-  # })
+  output$provApptStatusPie <- renderPlot({
+
+    data <- dataAll()
+    # data <- all.data
+
+    apptsCanceled <- data %>%
+      group_by(Appt.Status) %>%
+      summarise(value = n()) %>%
+      arrange(desc(value)) %>%
+      mutate(percent = round((value/sum(value)), 2)) %>%
+      select(Appt.Status, percent) 
+
+    ggplot(apptsCanceled, aes(reorder(Appt.Status, -percent), percent, fill=Appt.Status)) +
+      geom_bar(stat="identity", width = 0.8) +
+      scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits=c(0,(max(apptsCanceled$percent))*1.5))+
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      labs(x=NULL, y=NULL, 
+           title = "Scheduling Activity Breakdown")+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      geom_text(aes(label=paste0(round(percent*100),"%")), hjust = 0.5, vjust = -1, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
+
+  })
 
   output$provCoverage <- function(){
     
@@ -2323,12 +2134,13 @@ server <- function(input, output, session) {
     major$Coverage[is.na(major$Coverage)] <- "Unknown"
     
     kable(major %>% select(Coverage, percent, noShow),
-          col.names = c("Coverage Type", "% of Total Patients Scheduled\n(Arrived + No Show)", "No Show %")) %>%
+          col.names = c("Coverage Type", "% of Total Patients Scheduled \n(Arrived + No Show)", "No Show %")) %>%
       kable_styling(bootstrap_options = c("hover","bordered"), full_width = FALSE,
-                    position = "center", row_label_position = "l", font_size = 16) %>%
+                    position = "center", row_label_position = "l", font_size = 18) %>%
       row_spec(0, background = "#d80b8c", color = "white") %>%
-      column_spec(1, bold = T) %>%
-      column_spec(3, color = "red")
+      column_spec(1, width = "40%", bold = T) %>%
+      column_spec(2, width = "30%", bold = T) %>%
+      column_spec(3, width = "15%", color = "red", bold = T)
     
   }
   
@@ -2419,82 +2231,50 @@ server <- function(input, output, session) {
         ggplot(kpiVolumeDataYear, aes(x=Year, y=Total,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
-          labs(x = NULL, y = "Patients",  
+          labs(x = NULL, y = "Patients",
                title = "Historical Trend of Patient Volume by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataYear$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))
-        
+          graph_theme("none") + theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
         
       } else if(input$kpiFreq == 2) { # Quarter
         ggplot(kpiVolumeDataQuarter, aes(x=interaction(Year,Quarter,lex.order = TRUE), y=Total,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
-          labs(x = NULL, y = "Patients",  
+          labs(x = NULL, y = "Patients",
                title = "Historical Trend of Patient Volume by Quarter",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataQuarter$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
+          graph_theme("none")
         
       } else if(input$kpiFreq == 3){ # Month
         ggplot(kpiVolumeDataMonth, aes(x=YearMonth, y=Total,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           geom_smooth(method='lm', col = "red", se=FALSE, size=0.5) +
-          labs(x = NULL, y = "Patients", 
+          labs(x = NULL, y = "Patients",
                title = "Historical Trend of Patient Volume by Month",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataMonth$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
+          graph_theme("none") 
         
       } else { # Day
         ggplot(kpiVolumeData, aes(x=DateYear, y=Volume,group=1)) +
           geom_line(color="midnightblue") +
           geom_smooth(method='lm', col = "red", se=FALSE, size=0.5)+
-          labs(x = NULL, y = "Patients", 
+          labs(x = NULL, y = "Patients",
                title = "Historical Trend of Patient Volume by Day",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeData$Volume)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))+
+          graph_theme("none")+
           scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
@@ -2504,87 +2284,51 @@ server <- function(input, output, session) {
         ggplot(kpiVolumeDataYear %>% mutate(Label = "Year"), aes(x=Label, y=Total, col=Year,group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
-          labs(x = NULL, y = "Patients",  
+          labs(x = NULL, y = "Patients",
                title = "Comparison of Patient Volume by Year",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataYear$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none") + theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 2){ # Quarter 
         ggplot(kpiVolumeDataQuarter, aes(x=Quarter, y=Total, col=Year,group=Year)) +
           geom_line() +
           geom_point() +
-          labs(x = NULL, y = "Patients", 
+          labs(x = NULL, y = "Patients",
                title = "Comparison of Patient Volume by Quarter",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataQuarter$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 3){ # Month
         ggplot(kpiVolumeDataMonth, aes(x = factor(x=Month, level= monthOptions), y=Total, col=Year,group=Year)) +
           geom_line() +
           geom_point() +
-          labs(x = NULL, y = "Patients", 
+          labs(x = NULL, y = "Patients",
                title = "Comparison of Patient Volume by Month",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeDataMonth$Total)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 4){ # Day
         ggplot(kpiVolumeData, aes(x=as.Date(Date,"%m-%d"), y=Volume, col=Year,group=Year)) +
           geom_line() +
-          labs(x = NULL, y = "Patients", 
+          labs(x = NULL, y = "Patients",
                title = "Comparison of Patient Volume by Day",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(kpiVolumeData$Volume)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ 
           scale_color_MountSinai("main")+
           scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
@@ -2607,18 +2351,16 @@ server <- function(input, output, session) {
     )
     
     
-    statusData <- aggregate(dataAllKpi()$uniqueId, by=list(dataAllKpi()$Appt.Year,dataAllKpi()$Appt.Quarter,
-                                                           dataAllKpi()$Appt.Month, dataAllKpi()$Appt.Date,
-                                                           dataAllKpi()$Appt.Status, dataAllKpi()$Appt.MonthYear, dataAllKpi()$Appt.DateYear), FUN=NROW)
+    statusData <- dataAll() %>% 
+      group_by(Appt.Year, Appt.Quarter, Appt.Month, Appt.Date, Appt.Status, Appt.MonthYear, Appt.DateYear) %>%
+      summarise(total = n()) %>%
+      `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
     
-    colnames(statusData) <- c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count")
-    
-    # statusData <- aggregate(all.data$uniqueId, by=list(all.data$Appt.Year,all.data$Appt.Quarter,
-    #                                                           all.data$Appt.Month, all.data$Appt.Date,
-    #                                                           all.data$Appt.Status,  all.data$Appt.MonthYear,  all.data$Appt.DateYear), FUN=NROW)
-    # 
-    # colnames(statusData) <- c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count")
-    
+    # statusData <- all.data %>% 
+    #   group_by(Appt.Year, Appt.Quarter, Appt.Month, Appt.Date, Appt.Status, Appt.MonthYear, Appt.DateYear) %>%
+    #   summarise(total = n()) %>%
+    #   `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
+   
     statusDataYear <- statusData %>% group_by(Year,Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataYear <- reshape2::dcast(statusDataYear, Year ~ Status)
     statusDataYear[is.na(statusDataYear)] <- 0
@@ -2670,24 +2412,12 @@ server <- function(input, output, session) {
           geom_point() +
           labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Year",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            strip.text.y = element_text(size=12, face="bold"),
-            strip.text = element_text(size = 16),
-            strip.background = element_rect(fill="#b2b3b2"),
-            legend.position = "none",
-            panel.spacing = unit(1, "lines"),
-            axis.title.y = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         
         
@@ -2703,18 +2433,7 @@ server <- function(input, output, session) {
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            strip.text.y = element_text(size=12, face="bold"),
-            strip.text = element_text(size = 16),
-            strip.background = element_rect(fill="#b2b3b2"),
-            legend.position = "none",
-            panel.spacing = unit(1, "lines"),
-            axis.title.y = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))+
+          graph_theme("none")+ 
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 3){ # Month
@@ -2729,18 +2448,7 @@ server <- function(input, output, session) {
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            strip.text.y = element_text(size=12, face="bold"),
-            strip.text = element_text(size = 16),
-            strip.background = element_rect(fill="#b2b3b2"),
-            legend.position = "none",
-            panel.spacing = unit(1, "lines"),
-            axis.title.y = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))+
+          graph_theme("none")+ 
           scale_color_MountSinai("main")
         
       } else { # Day
@@ -2754,18 +2462,7 @@ server <- function(input, output, session) {
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            strip.text.y = element_text(size=12, face="bold"),
-            strip.text = element_text(size = 16),
-            strip.background = element_rect(fill="#b2b3b2"),
-            legend.position = "none",
-            panel.spacing = unit(1, "lines"),
-            axis.title.y = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))+
+          graph_theme("none")+ 
           scale_color_MountSinai("main")+
           scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
@@ -2775,7 +2472,7 @@ server <- function(input, output, session) {
         ggplot(statusDataYear %>% mutate(Label = "Year"), aes(x=Label, y=value, col=Year,group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
-          labs(x = NULL, y = NULL, 
+          labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
@@ -2783,19 +2480,7 @@ server <- function(input, output, session) {
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            strip.text.y = element_text(size=12, face="bold"),
-            strip.text = element_text(size = 16),
-            strip.background = element_rect(fill="#b2b3b2"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            panel.spacing = unit(1, "lines"),
-            axis.title.y = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 2){ # Quarter
@@ -2810,19 +2495,7 @@ server <- function(input, output, session) {
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            strip.text.y = element_text(size=12, face="bold"),
-            strip.text = element_text(size = 16),
-            strip.background = element_rect(fill="#b2b3b2"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            panel.spacing = unit(1, "lines"),
-            axis.title.y = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 3){ # Month
@@ -2837,19 +2510,7 @@ server <- function(input, output, session) {
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            strip.text.y = element_text(size=12, face="bold"),
-            strip.text = element_text(size = 16),
-            strip.background = element_rect(fill="#b2b3b2"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            panel.spacing = unit(1, "lines"),
-            axis.title.y = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 4){ # Day
@@ -2863,19 +2524,7 @@ server <- function(input, output, session) {
           facet_wrap(variable~., scales = "free", dir = "v")+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            strip.text.y = element_text(size=12, face="bold"),
-            strip.text = element_text(size = 16),
-            strip.background = element_rect(fill="#b2b3b2"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            panel.spacing = unit(1, "lines"),
-            axis.title.y = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")+
           scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
@@ -2901,9 +2550,9 @@ server <- function(input, output, session) {
     )
     
     data <- dataAllKpi() 
+    # data <- kpi.all.data %>% filter(Campus == "MSUS")
     
-    #data <- kpi.all.data %>% filter(Campus == "MSUS")
-    data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
+    data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"), 2))
     data <- data %>% filter(New.PT3 == TRUE) %>% filter(wait.time >= 0)
     
     if(input$kpiTrend ==1){ # Historical Trend
@@ -2912,21 +2561,13 @@ server <- function(input, output, session) {
         ggplot(data_filter, aes(x=Appt.Year, y=mean, group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
-          labs(x = NULL, y = "Days", 
+          labs(x = NULL, y = "Days",
                title = "Average New Appointment Lead Days by Year",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
         
       } else if(input$kpiFreq == 2) { # Quarter
         data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>%
@@ -2934,29 +2575,17 @@ server <- function(input, output, session) {
         ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
-          labs(x = NULL, y = "Days", 
+          labs(x = NULL, y = "Days",
                title = "Average New Appointment Lead Days by Quarter",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
+          graph_theme("none") 
         
       } else if(input$kpiFreq == 3){ # Month
         data_filter <- data %>% group_by(Appt.MonthYear) %>% 
                                            dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
-        #data_filter$Appt.Year <- as.Date(data_filter$Appt.Year, format = "%Y")
-        #data_filter$Appt.Month <- as.Date(data_filter$Appt.Month, format = "%m")
-        #data_filter$ApptYearMonth <- as.yearmon(paste(data_filter$Appt.Year, data_filter$Appt.Month), "%Y %m")
-        #data_filter$Appt_Month_Num <- match(data_filter$Appt.Month, month.name)
         ggplot(data_filter, aes(x=interaction(Appt.MonthYear,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
@@ -2965,41 +2594,23 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
-          #scale_x_date(date_labels = "%Y-%m")+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
+          graph_theme("none")
         
       } else { # Day
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>%
                                    dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
         data_filter$DateYear <- as.Date(with(data_filter, paste(Appt.Year, Appt.Date,sep="-")), "%Y-%m-%d")
-        #ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
-        ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
+        ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean, group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Days",
                title = "Average New Appointment Lead Days by Day",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            plot.margin = margin(0,0,0,0),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))+
+          graph_theme("none")+
         scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
                      date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
@@ -3011,21 +2622,13 @@ server <- function(input, output, session) {
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days", 
                title = "Average New Appointment Lead Days by Year",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
+        
       } else if(input$kpiFreq == 2){ # Quarter 
         data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
           dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
@@ -3035,22 +2638,12 @@ server <- function(input, output, session) {
           geom_point() +
           labs(x = NULL, y = "Days", 
                title = "Average New Appointment Lead Days by Quarter",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
-        
         
       } else if(input$kpiFreq == 3){ # Month
         data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
@@ -3061,20 +2654,11 @@ server <- function(input, output, session) {
           geom_point() +
           labs(x = NULL, y = "Days",  
                title = "Average New Appointment Lead Days by Month",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 4){ # Day
@@ -3083,22 +2667,14 @@ server <- function(input, output, session) {
           mutate(Label = "Date")
         ggplot(data_filter, aes(x=as.Date(Appt.Date, format = "%m-%d"), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
-          labs(x = NULL, y = "Days", 
+          labs(x = NULL, y = "Days",
                title = "Average New Appointment Lead Days by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+
           scale_color_MountSinai("main")
         # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
         #              date_minor_breaks = "1 day", expand = c(0, 0.6))
@@ -3124,7 +2700,7 @@ server <- function(input, output, session) {
     )
     
     data <- dataArrivedKpi() %>% filter(cycleTime > 0)
-    
+    # data <- kpi.arrived.data %>% filter(cycleTime > 0)
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
@@ -3134,19 +2710,11 @@ server <- function(input, output, session) {
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Visit-End Time (Min.) by Year",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
         
       } else if(input$kpiFreq == 2) { # Quarter
         data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
@@ -3156,19 +2724,11 @@ server <- function(input, output, session) {
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Visit-End Time (Min.) by Quarter",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
+          graph_theme("none")
         
       } else if(input$kpiFreq == 3){ # Month
         data_filter <- data %>% group_by(Appt.MonthYear) %>% 
@@ -3178,19 +2738,12 @@ server <- function(input, output, session) {
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Visit-End Time (Min.) by Month",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
+          graph_theme("none")
+        
       } else { # Day
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
           dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
@@ -3205,14 +2758,7 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))+
+          graph_theme("none")+ 
           scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
@@ -3230,16 +2776,9 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
+        
       } else if(input$kpiFreq == 2){ # Quarter 
         data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
           dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
@@ -3254,16 +2793,9 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
+        
       } else if(input$kpiFreq == 3){ # Month
         data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
           dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
@@ -3278,16 +2810,9 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
+        
       } else if(input$kpiFreq == 4){ # Day
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
           dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
@@ -3301,15 +2826,7 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
         #              date_minor_breaks = "1 day", expand = c(0, 0.6))
@@ -3332,6 +2849,7 @@ server <- function(input, output, session) {
     )
     
     data <- dataArrivedKpi() %>% filter(checkinToRoomin > 0)
+    # data <- kpi.arrived.data %>% filter(checkinToRoomin > 0)
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
@@ -3342,19 +2860,12 @@ server <- function(input, output, session) {
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Year",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
+        
       } else if(input$kpiFreq == 2) { # Quarter
         data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
           dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
@@ -3363,19 +2874,12 @@ server <- function(input, output, session) {
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Quarter",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
+          graph_theme("none")
+        
       } else if(input$kpiFreq == 3){ # Month
         data_filter <- data %>% group_by(Appt.MonthYear) %>% 
           dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
@@ -3389,14 +2893,8 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))
+          graph_theme("none")
+        
       } else { # Day
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
           dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
@@ -3410,14 +2908,7 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "none",
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))+
+          graph_theme("none")+ 
           scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
@@ -3435,15 +2926,7 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-            axis.text.y = element_text(size = "16"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 2){ # Quarter 
@@ -3460,15 +2943,7 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))+
+          graph_theme("none")+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 3){ # Month
@@ -3485,15 +2960,7 @@ server <- function(input, output, session) {
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "16", hjust=1, angle = 0),
-            axis.text.y = element_text(size = "14"))+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")
         
       } else if(input$kpiFreq == 4){ # Day
@@ -3507,17 +2974,9 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
-          theme_new_line()+
-          theme_bw()+
-          theme(
-            plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.title = element_blank(),
-            axis.title.y = element_text(size=14),
-            axis.title.x = element_blank(),
-            axis.text.x = element_text(size = "12", hjust=1, angle = 35),
-            axis.text.y = element_text(size = "14"))+
+        theme_new_line()+
+        theme_bw()+
+        graph_theme("none")+ 
           scale_color_MountSinai("main")
         # scale_x_date(breaks = "day", date_labels = "%m/%d/%y", date_breaks = "1 week", 
         #              date_minor_breaks = "1 day", expand = c(0, 0.6))
@@ -3546,14 +3005,6 @@ server <- function(input, output, session) {
              subtitle = tags$p(paste0("Analysis based on ",input$setRooms," rooms available\n throughout ",input$setHours," hours"), style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "yellow"
     )
   })
-  
-  # output$roomStat2 <- renderValueBox({
-  #   
-  #   valueBox(
-  #     paste0("Daily Available Rooms: ",input$setRooms),
-  #     subtitle = NULL, icon = NULL, color = "yellow"
-  #   )
-  # })
   
   output$avgRoomsRequired <- renderValueBox({
     
