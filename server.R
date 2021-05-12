@@ -880,8 +880,8 @@ server <- function(input, output, session) {
         labs(x="Site - Specialty", y="Patients",
              title = "New Patient Ratio by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        #scale_y_continuous(expand = c(0,0), limits = c(0,max(newPts$newRatio)*1.2))+
-        theme_bw()+
+        scale_y_continuous(labels = percent_format(), limits=c(0,1)) + 
+      theme_bw()+
         theme(
           plot.title = element_text(hjust=0.5, face = "bold", size = 20),
           plot.subtitle = element_text(hjust=0.5, size = 14),
@@ -915,8 +915,8 @@ server <- function(input, output, session) {
         labs(x="Site - Specialty", y="Patients",
              title = "New Patient Ratio by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        #scale_y_continuous(expand = c(0,0), limits = c(0,max(newPts$newRatio)*0.2))+
-        theme_bw()+
+        scale_y_continuous(labels = percent_format(), limits=c(0,1)) +
+      theme_bw()+
         theme(
           plot.title = element_text(hjust=0.5, face = "bold", size = 20),
           plot.subtitle = element_text(hjust=0.5, size = 14),
@@ -1047,7 +1047,7 @@ server <- function(input, output, session) {
       ggplot(noShows, aes(Appt.Week, `No Show Perc`, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
         geom_point(size=2)+
-        scale_y_continuous(labels=scales::percent_format(accuracy = 1))+
+        scale_y_continuous(labels = percent_format(), limits = c(0,1))+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y="No Show Rate (%)",
              title = "Avg No Show (%) by Site and Specialty",
@@ -1081,7 +1081,7 @@ server <- function(input, output, session) {
       ggplot(noShows, aes(Appt.MonthYear, `No Show Perc`, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
         geom_point(size=2)+
-        scale_y_continuous(labels=scales::percent_format(accuracy = 1))+
+        scale_y_continuous(labels = percent_format(), limits = c(0,1))+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y="No Show Rate (%)",
              title = "Avg No Show (%) by Site and Specialty",
@@ -1138,7 +1138,7 @@ server <- function(input, output, session) {
         geom_line()+
         geom_point(size=2)+
         facet_wrap(variable~., dir ="v")+
-        scale_y_continuous(labels=scales::percent_format(accuracy = 1))+
+        scale_y_continuous(labels= percent_format(), limits = c(0,1))+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y=NULL,
              title = "Avg Daily Booked vs. Filled Rate (%) by Site and Specialty",
@@ -1177,7 +1177,7 @@ server <- function(input, output, session) {
         geom_line()+
         geom_point(size=2)+
         facet_wrap(variable~., dir = "v")+
-        scale_y_continuous(labels=scales::percent_format(accuracy = 1))+
+        scale_y_continuous(labels = percent_format(), limits = c(0,1))+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y=NULL,
              title = "Avg Daily Booked vs. Filled Rate (%) by Site and Specialty",
