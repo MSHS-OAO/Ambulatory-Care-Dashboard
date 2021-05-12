@@ -231,7 +231,7 @@ graph_theme <- function(legend_pos) {
     legend.text = element_text(size = "14"),
     strip.text = element_text(size=14),
     axis.title = element_text(size = 16),
-    axis.text.x = element_text(size = 16, angle=40, hjust=1),
+    axis.text.x = element_text(size = 16, angle=50, hjust=1),
     axis.text.y = element_text(size = 14),
     axis.line.x = element_blank())#,
   #plot.margin = margin(0,80,0,80))
