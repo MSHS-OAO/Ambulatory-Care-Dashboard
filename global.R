@@ -290,13 +290,15 @@ setwd(wdpath)
 
 
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
-###RStudio COnnect Data Read In
-# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
-# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
-# holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
-# data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
-# data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
-# 
+
+### RStudio COnnect Data Read In
+
+historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
+slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
+holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
+data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
+data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
+
 
 
 
@@ -304,15 +306,11 @@ setwd(wdpath)
 # slot.data.subset <- readRDS(here::here("Data/slot_data_subset.rds"))
 # holid <- readRDS(here::here("/Data/holid.rds"))
 
-historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
-# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
-#historical.data <- readRDS("Data/historical_data.rds")
+#historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
 
 max_date <- max(historical.data$Appt.DateYear)
 
-slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
-#slot.data.subset <- readRDS("Data/slot_data_subset.rds")
+#slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
 
 ## Slot datasets
 past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
@@ -320,9 +318,7 @@ future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM 
 rm(slot.data.subset)
 
 #holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-# holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
-#holid <- readRDS("Data/holid.rds")
-holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+
 
 
 ## KPI datasets
@@ -355,13 +351,9 @@ arrivedNoShow.data <- rbind(arrived.data,noShow.data) ## Arrived + No Show data:
 # data.hour.scheduled <- readRDS(here::here("Data/hour_scheduled.rds"))
 # data.hour.arrived <- readRDS(here::here("Data/hour_arrived.rds"))
 
-data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
-# data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
-#data.hour.scheduled <- readRDS("Data/hour_scheduled.rds")
+#data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
 
-data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
-# data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
-#data.hour.arrived <- readRDS("Data/hour_arrived.rds")
+#data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
 
 scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
 arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
