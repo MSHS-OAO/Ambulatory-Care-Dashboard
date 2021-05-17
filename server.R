@@ -576,6 +576,21 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   }) 
   
+  
+  
+  dataPastSlotTest <- reactive({
+    groupByFilters_4_Test(past.slot.data,
+                     input$selectedCampus, 
+                     input$selectedSpecialty, 
+                     input$selectedDepartment,
+                     input$selectedResource,
+                     #input$selectedProvider,
+                      input$selectedVisitMethod,
+                     input$dateRange[1], input$dateRange[2],
+                     input$daysOfWeek,
+                     input$excludeHolidays)
+  }) 
+  
   ### (3) Dashboard Layout ============================================================================================================
   ### [3.1] Title of  Dashboard -------------------------------------------------------------------------------------------------------
   # Site Overview Tab -------------------------------------------------------------------------------------------------
@@ -1052,6 +1067,24 @@ server <- function(input, output, session) {
     
   })
   
+  testdataset <- reactive({
+    slotData <- dataPastSlot()
+    slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
+    bookedFilledRate <- slotData %>%
+      group_by(siteSpecialty, Appt.Week) %>%
+      dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
+                       `Booked Hours` = round(sum(BOOKED_MINUTES),0),
+                       `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
+                       `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
+                       `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
+      mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
+             `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
+      gather(variable, value, 3:9)
+    
+    bookedFilledRate <- bookedFilledRate %>% filter(variable %in% c("Booked Rate","Filled Rate"))
+  })
+  
+  output$Testtable <- renderDataTable(testdataset(), filter = "top")
   
   output$siteComparisonBookedRate <- renderPlot({
     
@@ -1067,7 +1100,9 @@ server <- function(input, output, session) {
     
     # Slot Data
     slotData <- dataPastSlot()
+    #slotData <- dataPastSlotTest()
      #slotData <- past.slot.data %>% filter(Campus == "MSUS")
+    #slotData_maternal <- slotData %>% filter(Campus.Specialty == "Maternal Fetal Medicine")
 
     slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
 
@@ -1085,6 +1120,7 @@ server <- function(input, output, session) {
         gather(variable, value, 3:9)
       
       bookedFilledRate <- bookedFilledRate %>% filter(variable %in% c("Booked Rate","Filled Rate"))
+      #bookedFilledRate_maternal <- bookedFilledRate %>% filter(siteSpecialty == "MSUS - Maternal Fetal Medicine")
       
       ggplot(bookedFilledRate, aes(Appt.Week, value, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
@@ -1410,6 +1446,12 @@ server <- function(input, output, session) {
     paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
   
   output$practiceName_provider <- renderText({
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
+  
+  output$practiceName_volume <- renderText({
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
+  
+  output$practiceName_population <- renderText({
     paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
   
   output$practiceName_utilization <- renderText({
@@ -2335,7 +2377,7 @@ server <- function(input, output, session) {
           theme_bw()+
           graph_theme("top")+ theme(axis.title.x = element_blank()) +
           scale_color_MountSinai("main")+
-          scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+          scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     }
@@ -2531,7 +2573,7 @@ server <- function(input, output, session) {
           theme_bw()+
           graph_theme("top")+ 
           scale_color_MountSinai("main")+
-          scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+          scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
         
       }
@@ -2683,9 +2725,9 @@ server <- function(input, output, session) {
           coord_cartesian(clip = 'off') +
           theme_new_line()+
           theme_bw()+
-          graph_theme("none")+
+          graph_theme("top")+
           scale_color_MountSinai("main") +
-          scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+          scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     }
@@ -2837,7 +2879,7 @@ server <- function(input, output, session) {
           theme_bw()+
           graph_theme("top")+ 
           scale_color_MountSinai("main") +
-          scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+          scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))
         
       }
@@ -2988,7 +3030,7 @@ server <- function(input, output, session) {
         theme_bw()+
         graph_theme("top")+ 
           scale_color_MountSinai("main") + 
-        scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+        scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
                      date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     }
@@ -3418,6 +3460,582 @@ server <- function(input, output, session) {
     grid.arrange(graph, table, ncol = 1, heights = c(5,2))
     
   })
+  
+  ### [3. ] Population Tab Output -----------------------------------------------------------------------------------------------------
+  
+  ## Demographics Breakdown
+  
+  output$ins_breakdown <- renderGirafe({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    data <- dataArrived() %>%
+      group_by(Coverage) %>%
+      dplyr::summarise(value = n()) %>%
+      mutate(percent = round((value/sum(value))*100)) %>%
+      arrange(desc(value))
+    
+    data$Coverage[is.na(data$Coverage)] <- "Unknown"
+    
+    packing <- circleProgressiveLayout(data$value, sizetype='area')
+    packing$radius <- 0.95*packing$radius
+    
+    data <- cbind(data, packing)
+    
+    dat.gg <- circleLayoutVertices(packing, npoints=50)
+    
+    p <- ggplot() + 
+      # Make the bubbles
+      geom_polygon(data = dat.gg, aes(x, y, group = id, fill=as.factor(id)), colour = "black", alpha = 0.6) +
+      # Add text in the center of each bubble + control its size
+      geom_text(data = data, aes(x, y, size=value, label = paste0(str_wrap(Coverage, 15),"\n",prettyNum(value, big.mark = ','),"\n(",percent,"%)"), fontface="bold")) +
+      ggtitle(label="Coverage Breakdown",
+              subtitle = "Count and Percent of Total Arrived Patients") +
+      scale_size_continuous(range = c(1,4)) +
+      scale_fill_MountSinai() +
+      # General theme:
+      theme_void() + 
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 16),
+            plot.subtitle = element_text(hjust=0.5, size = 12, face = "italic"),
+            legend.position="none") +
+      coord_equal()
+    
+    # ggiraph(ggobj = p, width_svg = 7, height_svg = 7)
+    
+    girafe(ggobj = p)
+    
+    
+    
+    
+    # data <- dataArrived() %>%
+    #   group_by(Coverage) %>%
+    #   dplyr::summarise(total = n()) %>%
+    #   arrange(desc(total))
+    # 
+    # ggplot(data, aes(x=Coverage, y=total)) +
+    #   stat_pareto(point.color = "#d80b8c",
+    #               point.size = 3,
+    #               line.color = "#d80b8c",
+    #               #size.line = 1,
+    #               bars.fill = c("midnightblue"))+
+    #   ggtitle("Number and Cumulative Percent of Completed Appointments by Insurance Type")+
+    #   theme_new_line()+
+    #   theme(
+    #     legend.position = "none",
+    #     axis.title.y = element_blank(),
+    #     axis.title.x = element_blank(),
+    #     axis.text.x = element_text(size = "16", hjust=1, vjust=1, angle = 45),
+    #     axis.text.y = element_text(size = "16"))
+    # 
+  })
+  
+  output$ins_breakdown_tb <- function(){
+    
+    data <- dataArrived() %>%
+      group_by(Coverage) %>%
+      dplyr::summarise(`Total Arrived Patients` = n()) %>%
+      mutate(Percent = paste0(round((`Total Arrived Patients`/sum(`Total Arrived Patients`))*100, 1),"%")) %>%
+      arrange(desc(`Total Arrived Patients`))
+    
+    data$Coverage[is.na(data$Coverage)] <- "Unknown"
+    data$`Total Arrived Patients` <- prettyNum(data$`Total Arrived Patients`, big.mark = ',')
+    
+    data %>%
+      knitr::kable("html", align = "l") %>%
+      kable_styling(bootstrap_options = c("striped", "hover"), full_width=T, position="center", font_size = 14) %>%
+      row_spec(0, bold=T, background = "#dddedd", color = "black") %>%
+      column_spec(1, bold=T) %>%
+      scroll_box(height = "600px")
+    
+  }
+  
+  output$sex_breakdown <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    data <- dataArrived() %>% drop_na(Sex) %>%
+      group_by(Sex) %>% dplyr::summarise(total = n()) %>%
+      filter(Sex %in% c("Female","Male")) %>%
+      arrange(desc(total)) %>%
+      mutate(percent = round(total/sum(total)*100),1) %>%
+      mutate(ypos = cumsum(percent) - 0.5*percent)
+    
+    ggplot(data, aes(x="", y=percent, fill=Sex)) +
+      geom_bar(stat="identity", width=1, color="white") +
+      ggtitle(paste0("Total Number of Completed Appointments: ",sum(data$total))) +
+      coord_polar("y", start=0, direction = ifelse(data$Sex[1] == "Female",-1,1)) +
+      theme_void() + 
+      theme(
+        legend.position="none",
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 20)) +
+      geom_text(aes(y = ypos, label = paste(Sex,paste0(percent,"%"),sep="\n")), color = "white", size=6) +
+      scale_fill_manual(values = c("Male" = "midnightblue", "Female" = "#d80b8c"))
+    
+  })
+  
+  
+  output$pop_breakdown <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    arrived.data <- dataArrived()
+    
+    arrived.data$age <- round(age_calc(as.Date(arrived.data$Birth.Date, format="%Y-%m-%d"), units='years'),0)
+    arrived.data$age_group <- cut(arrived.data$age, breaks = c(10,20,30,40,50,60,70,80), na.rm=TRUE)
+    
+    age_data <- arrived.data %>% drop_na(Sex, age_group) %>%
+      group_by(Sex, age_group) %>% dplyr::summarise(total = n()) %>%
+      filter(Sex %in% c("Male","Female"))
+    
+    age_data <- reshape2::dcast(age_data, age_group ~ Sex) %>%
+      mutate(female_perc = Female / sum(Female)) %>%
+      mutate(male_perc = Male / sum(Male)) 
+    
+    g.mid<-ggplot(arrived.data %>% drop_na(age_group),aes(x=1,y=age_group))+geom_text(aes(label=age_group),size=5)+
+      geom_segment(aes(x=0.94,xend=0.96,yend=age_group))+
+      geom_segment(aes(x=1.04,xend=1.065,yend=age_group))+
+      ggtitle("")+
+      ylab(NULL)+
+      scale_x_continuous(expand=c(0,0),limits=c(0.94,1.065))+
+      theme(axis.title=element_blank(),
+            panel.grid=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank(),
+            panel.background=element_blank(),
+            axis.text.x=element_text(color=NA),
+            axis.ticks.x=element_line(color=NA),
+            plot.margin = unit(c(1,-1,1,-1), "mm"))
+    
+    g1 <- ggplot(age_data, aes(x = age_group, y = female_perc)) +
+      geom_bar(stat = "identity", fill="#d80b8c") + ggtitle("% of Female Visits by Age Group") +
+      theme(axis.title.x = element_blank(), 
+            axis.title.y = element_blank(), 
+            axis.text.y = element_blank(), 
+            axis.ticks.y = element_blank(), 
+            plot.margin = unit(c(1,-1,1,0), "mm")) +
+      scale_y_reverse(labels = scales::percent_format(accuracy = 1)) +
+      expand_limits(y = max(age_data$female_perc)*1.2)+
+      coord_flip()+
+      geom_text(aes(label=paste0(round(female_perc*100,0),"%")), vjust = .5, hjust =1.2, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
+    
+    g2 <- ggplot(age_data, aes(x = age_group, y = male_perc)) +xlab(NULL)+
+      geom_bar(stat = "identity", fill="midnightblue") + ggtitle("% of Male Visits by Age Group") +
+      theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+            axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+            plot.margin = unit(c(1,0,1,-1), "mm")) +
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+      expand_limits(y = max(age_data$male_perc)*1.2)+
+      coord_flip()+
+      geom_text(aes(label=paste0(round(male_perc*100,0),"%")), vjust = .5, hjust =-.2, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
+    
+    gg1 <- ggplot_gtable(ggplot_build(g1))
+    gg2 <- ggplot_gtable(ggplot_build(g2))
+    gg.mid <- ggplot_gtable(ggplot_build(g.mid))
+    
+    graph <- grid.arrange(gg1,gg.mid,gg2,ncol=3,widths=c(4/9,1/9,4/9))
+    
+    print(graph)
+    
+  })
+  
+  
+  output$population1 <- renderLeaflet({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    #data(zipcode)
+    zipcode <- read_feather(here::here("Data/zipcode.feather"))
+    
+    population.data <- 
+      dataArrived()[,c("Campus","Campus.Specialty","Department","MRN","Zip.Code","Sex","Coverage","uniqueId")]
+    
+    population.data$zip <- normalize_zip(population.data$Zip.Code)
+    
+    population.data <- merge(population.data, zipcode, by.x='zip', by.y='zip')
+    
+    newdata <- population.data %>% group_by(latitude, longitude) %>% dplyr::summarise(total = round(n(),0))
+    
+    # Create a color palette with handmade bins.
+    mybins <- round(seq(min(newdata$total), max(newdata$total), length.out=5),0)
+    mypalette <- colorBin(palette=MountSinai_palettes$pinkBlue, domain=quakes$mag, na.color="transparent", bins=mybins)
+    
+    # Prepare the text for the tooltip:
+    mytext <- paste(
+      "Total Visits: ", newdata$total, "<br/>", 
+      "Latitude: ", newdata$latitude, "<br/>", 
+      "Longitude: ", newdata$longitude, sep="") %>%
+      lapply(htmltools::HTML)
+    
+    # Set icons for each MSHS hospital
+    icons <- awesomeIcons(
+      icon = 'hospital-o',
+      lib = 'fa',
+      iconColor = "white",
+      markerColor = "lightgray")
+    
+    # Visit volume map 
+    leaflet(newdata) %>% 
+      addTiles()  %>% 
+      setView(lng = -73.98928, lat = 40.75042, zoom = 10) %>%
+      addProviderTiles("CartoDB.Positron", options = providerTileOptions(noWrap = TRUE)) %>%
+      addCircleMarkers(~longitude, ~latitude, 
+                       fillColor = ~mypalette(total), fillOpacity = 0.7, color="white", radius=8, stroke=FALSE,
+                       label = mytext,
+                       labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"), textsize = "13px", direction = "auto")
+      ) %>%
+      addLegend( pal=mypalette, values=~total, opacity=0.9, title = "Appointment Demand", position = "bottomright") %>%
+      addAwesomeMarkers(
+        lng=-73.943324, lat=40.79171,
+        label='Mount Sinai Hospital',
+        icon = icons,
+        labelOptions = labelOptions(noHide = T, textsize='15px', textOnly = TRUE,
+                                    style=list('font-weight'= 'bold'))) %>%
+      addAwesomeMarkers(
+        lng=-73.92606, lat=40.77084,
+        label='Mount Sinai Queens',
+        icon = icons,
+        labelOptions = labelOptions(noHide = T, textsize='15px', textOnly = TRUE,
+                                    style=list('font-weight'= 'bold'))) %>%
+      addAwesomeMarkers(
+        lng=-73.98840, lat=40.73139,
+        label='Mount Sinai Union Square',
+        icon = icons,
+        labelOptions = labelOptions(noHide = T, textsize='15px', textOnly = TRUE,
+                                    style=list('font-weight'= 'bold'))) %>%
+      addAwesomeMarkers(
+        lng=-73.99181, lat=40.76719,
+        label='Mount Sinai West',
+        icon = icons,
+        labelOptions = labelOptions(noHide = T, textsize='15px', textOnly = TRUE,
+                                    style=list('font-weight'= 'bold'))) %>%
+      addAwesomeMarkers(
+        lng=-73.96316, lat=40.79834,
+        label="Mount Sinai Morningside",
+        icon = icons,
+        labelOptions = labelOptions(noHide = T, textsize='15px', textOnly = TRUE,
+                                    style=list('font-weight'= 'bold')))
+    
+  })
+  
+  
+  ### [3. ] Volume Tab Output ---------------------------------------------------------------------------------------------------------
+  # Daily Patient Volume over Time ....................................................................................................
+  output$volume1 <- renderHighchart({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    data <- dataArrived()
+    
+    # data <- arrived.data %>% filter(!holiday %in% c("Christmas"))
+    pts.count <- aggregate(data$uniqueId,
+                           by=list(data$Appt.DateYear), FUN=NROW)
+    
+    # pts.count <- aggregate(arrived.data$uniqueId,
+    #                        by=list(arrived.data$Appt.DateYear), FUN=NROW)
+    
+    names(pts.count) <- c("Date","Volume")
+    pts.count$Date <- as.Date(pts.count$Date, format="%Y-%m-%d")
+    
+    model <- lm(Volume ~ Date, data = pts.count)
+    fit <- augment(model) %>% arrange(Date)
+    
+    # Visualization
+    pts.count %>% 
+      hchart('line', hcaes(x = Date, y = Volume)) %>%
+      hc_add_series(
+        fit, type = "line", hcaes(x = Date, y = .fitted),
+        name = "Linear Regression", id = "fit") %>%
+      hc_colors(c("#212070","red")) %>%
+      hc_title(text="Daily Arrived Patients over Time\n", align="center", style = list(color = "black", fontSize = "16px", fontWeight = "bold", useHTML = TRUE)) %>%
+      hc_add_theme(hc_theme_elementary()) %>%
+      hc_subtitle(text = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])) %>%
+      hc_xAxis(title = list(text = ''), labels = list(format = '{value:%Y-%m}', rotation = "310")) %>%
+      hc_yAxis(title = list(text = 'Patients'))
+    # ggplot(pts.count,  aes(x=Date, y=Volume))+
+    #   geom_line(color="midnightblue")+
+    #   #geom_point(color="midnightblue")+
+    #   geom_smooth(method='lm', col = "red", se=FALSE, size=0.5)+
+    #   scale_x_date(breaks = seq(min(pts.count$Date), 
+    #                             max(pts.count$Date), by = "1 month"), date_labels = "%b\n%Y")+
+    #   ggtitle("Daily Patient Volume over Time")+
+    #   theme_new_line()+
+    #   theme(
+    #     legend.position = "none",
+    #     axis.title.y = element_blank(),
+    #     axis.title.x = element_blank(),
+    #     axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
+    #     axis.text.y = element_text(size = "16"))
+    # 
+  })
+  
+  # Total Monthly Patient Volume
+  output$volume2 <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    pts.by.month <- aggregate(dataArrived()$uniqueId, 
+                              by=list(dataArrived()$Appt.MonthYear), FUN=NROW)
+    
+    # pts.by.month <- aggregate(arrived.data$uniqueId, 
+    #                           by=list(arrived.data$Appt.MonthYear), FUN=NROW)
+    
+    names(pts.by.month) <- c("Month","Volume")
+    pts.by.month$Volume <- as.numeric(pts.by.month$Volume)
+    pts.by.month$Month <- as.yearmon(pts.by.month$Month, format="%Y-%m")
+    pts.by.month$Month <- as.Date(pts.by.month$Month, format="%Y-%m")
+    
+    ggplot(pts.by.month, aes(x=Month, y=Volume))+
+      geom_bar(stat="identity",fill="midnightblue")+
+      labs(x = NULL, y = "Patients",
+           title = "Monthly Patient Volume",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      scale_x_date(breaks = seq(min(pts.by.month$Month), 
+                                max(pts.by.month$Month), by = "1 month"), date_labels = "%Y-%m")+
+      scale_y_continuous(limits=c(0,(max(pts.by.month$Volume))*1.2))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")
+      # theme(
+      #   legend.position = "none",
+      #   axis.title.y = element_blank(),
+      #   axis.title.x = element_blank(),
+      #   axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
+      #   axis.text.y = element_text(size = "16"))+
+      # geom_text(aes(label=Volume), vjust = -.5, color="black", fontface="bold",
+      #           position = position_dodge(1), size=5)
+    
+  })
+  
+  # Average Daily Patient Volume by Day of Week
+  output$volume3 <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    pts.by.day <- aggregate(dataArrived()$uniqueId, 
+                            by=list(dataArrived()$Appt.Day), FUN=NROW)
+    
+    names(pts.by.day) <- c("Day","Volume")
+    totalDates <- as.data.frame(seq(as.Date(min(arrived.data$Appt.DTTM)), as.Date(max(arrived.data$Appt.DTTM)),by="days"))
+    names(totalDates) <- c("Dates")
+    totalDates$day <- format(as.Date(totalDates$Dates, format="%Y-%m-%d"), "%a")
+    totalDates <- aggregate(totalDates$Dates,
+                            by=list(totalDates$day), FUN=NROW)
+    names(totalDates) <- c("Day","Count")
+    
+    pts.by.day$Day.Count <- totalDates$Count[match(pts.by.day$Day, totalDates$Day)]
+    pts.by.day$Avg.Volume <- as.numeric(round(pts.by.day$Volume/pts.by.day$Day.Count,1))
+    
+    ggplot(pts.by.day, aes(x=factor(Day, level = daysOfWeek.options), y=Avg.Volume))+
+      geom_bar(stat="identity",fill="midnightblue")+
+      labs(x = NULL, y = "Patients",
+           title = "Average Daily Patient Volume",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      scale_y_continuous(limits=c(0,(max(pts.by.day$Avg.Volume))*1.2))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")
+      # theme(
+      #   legend.position = "none",
+      #   axis.title.y = element_blank(),
+      #   axis.title.x = element_blank(),
+      #   axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
+      #   axis.text.y = element_text(size = "16"))+
+      # geom_text(aes(label=Avg.Volume), vjust = -.5, color="black", fontface="bold",
+      #           position = position_dodge(1), size=5)
+    
+  })
+  
+  # Daily Volume Distribution by Month
+  output$volume4 <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    pts.dist <- aggregate(dataArrived()$uniqueId, 
+                          by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date), FUN=NROW)
+    
+    # pts.dist <- aggregate(arrived.data$uniqueId, 
+    #                       by=list(arrived.data$Appt.MonthYear, arrived.data$Appt.Date), FUN=NROW)
+    
+    names(pts.dist) <- c("Month","Date","Volume")
+    pts.dist$Month <- as.yearmon(pts.dist$Month, format="%Y-%m")
+    pts.dist$Month <- as.Date(pts.dist$Month, format="%Y-%m")
+    pts.dist <- pts.dist[order(pts.dist$Month),]
+    
+    ggplot(pts.dist, aes(x=Month, y=Volume, group=Month))+
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+      stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      labs(x = NULL, y = "Patients",
+           title = "Daily Patient Volume Distribution by Month",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m")+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")
+
+    
+  })
+  
+  # Daily Volume Distribution by Month Table
+  output$volume4.1 <- function(){
+    
+    pts.dist <- aggregate(dataArrived()$uniqueId, 
+                          by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date), FUN=NROW)
+    
+    # pts.dist <- aggregate(arrived.data$uniqueId, 
+    #                       by=list(arrived.data$Appt.MonthYear, arrived.data$Appt.Date), FUN=NROW)
+    
+    names(pts.dist) <- c("Month","Date","Volume")
+    
+    pts.dist.summary <-
+      pts.dist %>%
+      group_by(Month) %>%
+      dplyr::summarise(Avg = round(mean(Volume),1), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
+    
+    pts.dist.summary <- 
+      pts.dist.summary[order(as.yearmon(pts.dist.summary$Month,format="%Y-%m")),]
+    
+    pts.dist.summary.t <-setNames(data.frame(t(pts.dist.summary[,-1])), pts.dist.summary[,1])
+    colnames(pts.dist.summary.t) <- pts.dist.summary$Month
+    
+    pts.dist.summary.t %>%
+      knitr::kable("html", align = "l") %>%
+      kable_styling(bootstrap_options = c("striped", "hover"), full_width=T, position="center", font_size = 15) %>%
+      row_spec(0, bold=T) %>%
+      column_spec(1, bold=T)
+    
+  }
+  
+  # Daily Volume Distribution by Day of Week
+  output$volume5 <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    
+    pts.dist <- aggregate(dataArrived()$uniqueId, 
+                          by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date, dataArrived()$Appt.Day), FUN=NROW)
+    
+    names(pts.dist) <- c("Month","Date","Day","Volume")
+    
+    ggplot(pts.dist, aes(x=factor(Day, level = daysOfWeek.options), y=Volume))+
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+ 
+      stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      labs(x = NULL, y = "Patients",
+           title = "Daily Patient Volume Distribution by Day of Week",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")
+    
+  })
+  
+  #Daily Volume Distribution by Day Table
+  output$volume5.1 <- function(){
+    
+    pts.dist <- aggregate(dataArrived()$uniqueId,
+                          by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date, dataArrived()$Appt.Day), FUN=NROW)
+    
+    names(pts.dist) <- c("Month","Date","Day","Volume")
+    
+    pts.dist.summary <-
+      pts.dist %>%
+      group_by(Day) %>%
+      dplyr::summarise(Avg = round(mean(Volume),1), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
+    
+    pts.dist.summary <- pts.dist.summary[match(daysOfWeek.options,pts.dist.summary$Day),]
+    pts.dist.summary <- pts.dist.summary[complete.cases(pts.dist.summary),]
+    
+    pts.dist.summary.t <-setNames(data.frame(t(pts.dist.summary[,-1])), pts.dist.summary[,1])
+    colnames(pts.dist.summary.t) <- pts.dist.summary$Day
+    
+    pts.dist.summary.t %>%
+      knitr::kable("html", align = "l") %>%
+      kable_styling(bootstrap_options = c("striped", "hover"), full_width=T, position="center", font_size = 15) %>%
+      row_spec(0, bold=T) %>%
+      column_spec(1, bold=T)
+    
+  }
 
 } # Close server 
 

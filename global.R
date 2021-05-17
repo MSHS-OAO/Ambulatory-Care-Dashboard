@@ -112,6 +112,7 @@ suppressMessages({
   library(feather)
   library(zipcodeR)
   library(formattable)
+  library(shinyjs)
 })
 
 # ### (0) Maximize R Memory Size 
@@ -227,8 +228,9 @@ graph_theme <- function(legend_pos) {
     plot.title = element_text(hjust=0.5, face = "bold", size = 20),
     plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
     legend.position = legend_pos,
-    legend.title = element_text(size = "14"),
+    #legend.title = element_text(size = "14"),
     legend.text = element_text(size = "14"),
+    legend.title = element_blank(),
     strip.text = element_text(size=14),
     axis.title = element_text(size = 16),
     axis.text.x = element_text(size = 16, angle=50, hjust=1),
@@ -302,22 +304,21 @@ data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-1
 
 
 
-# historical.data <- readRDS(here::here("Data/historical_data.rds")) ## Filter out historical data only
-# slot.data.subset <- readRDS(here::here("Data/slot_data_subset.rds"))
-# holid <- readRDS(here::here("/Data/holid.rds"))
+# historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
+# slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+# data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
+# data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
 
-#historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
 
 max_date <- max(historical.data$Appt.DateYear)
-
-#slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
 
 ## Slot datasets
 past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
 future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
 rm(slot.data.subset)
 
-#holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+
 
 
 
@@ -350,10 +351,6 @@ arrivedNoShow.data <- rbind(arrived.data,noShow.data) ## Arrived + No Show data:
 # Combine Utilization Data
 # data.hour.scheduled <- readRDS(here::here("Data/hour_scheduled.rds"))
 # data.hour.arrived <- readRDS(here::here("Data/hour_arrived.rds"))
-
-#data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
-
-#data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
 
 scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
 arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
@@ -454,6 +451,16 @@ groupByFilters_3 <- function(dt, apptType){
 ## Filtered Slot Data
 groupByFilters_4 <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
   result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource, Provider %in% provider,
+                          Visit.Method %in% visitMethod, 
+                          mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
+  return(result)
+}
+
+
+
+## Filtered Slot Data Test
+groupByFilters_4_Test <- function(dt, campus, specialty, department, resource, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
+  result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource,
                           Visit.Method %in% visitMethod, 
                           mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
   return(result)

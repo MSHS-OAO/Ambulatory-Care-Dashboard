@@ -30,11 +30,38 @@ dateRangeKpi_min = min(arrived.data$Appt.DateYear)
 dateRangeKpi_max = max(arrived.data$Appt.DateYear)
 
 
+
+header <- dashboardHeader()
+anchor <- tags$a(tags$img(src='MS_KO_Vrtl.png', height='60', width='80'),
+                 'Amb Care Analytics Tool')
+
+header$children[[2]]$children <- tags$div(
+  tags$head(tags$style(HTML(".name { width: 350px }"))),
+  anchor,
+  class = 'name')
+
+
+
+
+
+header <- dashboardHeader(title = "Amb Care Analytics Tool",
+                            tags$li(img(src = 'MS_KO_Vrtl.png',
+                                          height = "40px"),
+                                    class = "dropdown")
+                          )
+
+
+
 ui <- dashboardPage(
   
   ### UI start-----------------------------------------------------------
   dashboardHeader(title = "Amb Care Analytics Tool",
                   titleWidth = 250),
+  #header,
+  
+  # dashboardHeader(title = div(id="dummy", img(height = 100,
+  #                                             width = 100,
+  #                                             src = "MS_KO_Vrtl.png"))),
   dashboardSidebar(
     # Customize dashboard color scheme: title bar = .logo & .navbar; side bar = .main-sidebar; background = .content-wrapper
     tags$head(tags$style(HTML('.logo {
@@ -56,12 +83,15 @@ ui <- dashboardPage(
     width = 200,
     
     sidebarMenu(id = "sbm",
+                menuItem("Home", tabName = "homepage", icon= icon("home")),
                 menuItem("KPIs", tabName = "KPIs", icon = icon("tachometer-alt")),
                 menuItem("Site Overview", tabName = "systemOverview", icon = icon("hospital-symbol"),
                          menuSubItem("Site Overview", tabName = "system"),
                          menuSubItem("Site Comparison", tabName = "systemComparison")),
                 menuItem("Practice Overview", tabName = "profile", icon = icon("hospital")),
                 menuItem("Provider Overview", tabName = "provider", icon = icon("user-md")),
+                menuItem("Population", tabName = "population", icon = icon("users")),
+                menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
                 menuItem("Utilization", tabName = "utilization", icon = icon("percent"))
     ) # Close sidebarMenu
     
@@ -100,12 +130,55 @@ ui <- dashboardPage(
     tags$head(tags$style(".top-align { vertical-align: top;}  ")),
     
     tabItems(
+      # HomePage ------------------------------------------------------------------------------------------------------------------
+      tabItem(tabName = "homepage",
+              column(12,
+                     div("About Ambulatory Care Analytics Tool", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     
+                     tags$div( id = "home_text",
+                       HTML("<p>Version: 1.0 <br> Last Updated: 5/12/2021</p>")
+                     ),
+                     tags$head(tags$style("#home_text{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 15px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), 
+                     column(12,
+                            tags$div(id = "home_description",
+                            h3("Description"),
+                               p("This is a centralized analytics tool that inlcudes all necessary KPIs and metrics that will
+                                 allow the users to identify operatinal oppoutunities, make data-driven decisions, and
+                                 track improvements")
+                            )
+                            ),
+                     column(12,
+                            tags$div(id = "home_data",
+                                     h3("Data Sources"),
+                                     # HTML(
+                                     #   "<p> The data used in this dashboard is pulled from the Clarity database using the slot and access datatables.
+                                     #    The department mappings can be downloaded <a href = file:///www/Mappings/Ambulatory Department Mapping (Master).xlsx>here</a>, 
+                                     #   and the site mapping file can be downloaded <a href = Mappings/Department Site Crosswalk 8-24-2020>here</a> </p>"
+                                     # ),
+                                    p("The data used in this dashboard is pulled from the Clarity database using the slot and access datatables, named CRREPORT_REP.Y_DM_BOOKED_FILLED_RATE and CRREPORT_REP.MV_DM_PATIENT_ACCESS respectively.
+                                      The site and department mappings used in this analytics tool can be downloaded from the hyperlinks below."),
+                                    a(href = "Mappings/Ambulatory Department Mapping (Master).xlsx",target='blank', 'Ambulatory Department Mapping File', download = 'Department Mappings.xlsx'),
+                                    br(),
+                                    a(href = "Mappings/Department Site Crosswalk 8-24-2020.xlsx",target='blank', 'Ambulatory Site Mapping File', download = 'Site Mappings.xlsx')
+                                    )),
+                     column(12,
+                            tags$div(id = "home_usage",
+                                    h3("Usage"), 
+                                    #img(src = "homepage.png", width = "500px"),
+                                    br(),
+                                    p("Section 1 contains the sidebar menu where all the different tabs are listed"),
+                                    p("Section 2 includes the name of the tab currently being looked at as well as the date ranges that the tab is showing"),
+                                    p("Section 3 included the filter menu, it is hiearchical meaning the filter choices are based off the previously selected choices. The filters effect all the the outputs in the tab.  Below the filter dropdown menu is the download button which allows the user to save all the graphs and tables on the currently viewed tab as a PNG.")
+                                    
+                            ))
+                     )),
       # System Overview Tab ------------------------------------------------------------------------------------------------------------------
       tabItem(tabName = "system",
               column(11,
                      div("Site Overview: Analysis by Campus", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      textOutput("practiceName_siteOverview"),
-                     tags$head(tags$style("#practiceName_siteOverview{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     tags$head(tags$style("#practiceName_siteOverview{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")),
+                     hr(),
                      fluidRow(
                        column(3,
                               boxPlus(
@@ -135,13 +208,13 @@ ui <- dashboardPage(
                               plotOutput("siteWaitTime", height="800px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c")
                              ))
-                     # column(12, 
+                     # column(12,
                      #        boxPlus(
                      #          title = "Working FTE", width = 12, status = "primary",
                      #          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                     #          plotOutput("siteWorkingFTE", height="550px") %>% 
+                     #          plotOutput("siteWorkingFTE", height="550px") %>%
                      #            withSpinner(type = 5, color = "#d80b8c"), br(),
-                     #          plotOutput("sitePtsPerFTE", height="550px") %>% 
+                     #          plotOutput("sitePtsPerFTE", height="550px") %>%
                      #            withSpinner(type = 5, color = "#d80b8c")
                      #          ))
               )),
@@ -198,7 +271,8 @@ ui <- dashboardPage(
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonNoShow", height="550px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c")
+                                withSpinner(type = 5, color = "#d80b8c"),
+                              dataTableOutput("Testtable")
                               ),
                             boxPlus(
                               title = "Cycle Times", width = 12, status = "primary",
@@ -217,17 +291,17 @@ ui <- dashboardPage(
                             #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                             #   materialSwitch(
                             #     inputId = "bySpecialty7",
-                            #     label = "By week", 
+                            #     label = "By week",
                             #     right = TRUE,
                             #     status = "primary"),
-                            #   plotOutput("siteComparisonWorkingFTE", height="550px") %>% 
+                            #   plotOutput("siteComparisonWorkingFTE", height="550px") %>%
                             #     withSpinner(type = 5, color = "#d80b8c"), br(),
                             #   materialSwitch(
                             #     inputId = "bySpecialty8",
-                            #     label = "By week", 
+                            #     label = "By week",
                             #     right = TRUE,
                             #     status = "primary"),
-                            #   plotOutput("siteComparisonPtsPerFTE", height="550px") %>% 
+                            #   plotOutput("siteComparisonPtsPerFTE", height="550px") %>%
                             #     withSpinner(type = 5, color = "#d80b8c")
                             #   )
                             )
@@ -400,6 +474,72 @@ ui <- dashboardPage(
                      )
                      
               )),
+      # # Population Tab ------------------------------------------------------------------------------------------------------
+      tabItem(tabName = "population",
+              column(11,
+                     div("Population", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     tags$style("#practiceName1{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                     textOutput("practiceName_population"),
+                     tags$head(tags$style("#practiceName_siteComp{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     # column(12,
+                     #        boxPlus(
+                     #          title = "Patient Gender and Age Group", width = 12, status = "primary",
+                     #          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                     #          fluidRow(
+                     #            column(6, offset = 3, plotOutput("sex_breakdown", height = "300px") %>%
+                     #                     withSpinner(type = 5, color = "#d80b8c"))),
+                     #          fluidRow(
+                     #            plotOutput("pop_breakdown", width = "100%", height = "500px") %>%
+                     #              withSpinner(type = 5, color = "#d80b8c")))
+                     # ),
+                     column(12,
+                            boxPlus(
+                              title = "Insurance Types", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              column(8,girafeOutput(outputId = "ins_breakdown", height = "600px")),
+                              column(4, tableOutput("ins_breakdown_tb") %>%
+                                       withSpinner(type = 5, color = "#d80b8c")))
+                     ),
+                     column(12,
+                            boxPlus(
+                              title = "Geographical Analysis", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              leafletOutput("population1", height = "800px") %>%
+                                withSpinner(type = 5, color = "#d80b8c")))
+              )),
+      
+      # Volume Tab -----------------------------------------------------------------------------------------------------------
+      tabItem(tabName = "volume",
+              column(11,
+                     div("Volume", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     tags$style("#practiceName1{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                     textOutput("practiceName_volume"),
+                     tags$head(tags$style("#practiceName_volume{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     boxPlus(
+                       title = "Volume Over Time", width = 12, status = "primary",
+                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                       highchartOutput("volume1") %>%
+                         withSpinner(type = 5, color = "#d80b8c")),
+                     boxPlus(
+                       title = "Monthly Volume", width =12, status = "primary",
+                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                       plotOutput("volume2") %>%
+                         withSpinner(type = 5, color = "#d80b8c"),
+                       plotOutput("volume4") %>%
+                         withSpinner(type = 5, color = "#d80b8c"),
+                       tableOutput("volume4.1")),
+                     boxPlus(
+                       title = "Daily Volume", width = 12, status = "primary",
+                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                       column(2,""),
+                       column(8,
+                              plotOutput("volume3") %>%
+                                withSpinner(type = 5, color = "#d80b8c"),
+                              plotOutput("volume5") %>%
+                                withSpinner(type = 5, color = "#d80b8c"),
+                              tableOutput("volume5.1")),
+                       column(2,))
+              )),
       # Utilization Tab ------------------------------------------------------------------------------------------------------
       tabItem(tabName = "utilization",
               column(11,
@@ -479,6 +619,11 @@ ui <- dashboardPage(
     
     
     # Conditional Filters ------------------------------------------------------------------------------------------------------
+    conditionalPanel(
+      condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
+      input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
+      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
+      
     # Formatting Buttons
     tags$head(tags$style(HTML("#dropdownbutton1 {color: #212070;}"))),
     tags$head(
@@ -731,7 +876,8 @@ ui <- dashboardPage(
     icon = icon("filter"), width = "300px",
     tooltip = tooltipOptions(title = "Set additional filters for graphs/tables."),
     inputId = "dropdownbutton1"
-    ), #Close dropdown
+    ) #Close dropdown
+    ), #Close conditional Panel
     
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
