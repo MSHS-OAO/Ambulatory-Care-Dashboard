@@ -31,22 +31,22 @@ dateRangeKpi_max = max(arrived.data$Appt.DateYear)
 
 
 
-header <- dashboardHeader()
-anchor <- tags$a(tags$img(src='MS_KO_Vrtl.png', height='60', width='80'),
-                 'Amb Care Analytics Tool')
-
-header$children[[2]]$children <- tags$div(
-  tags$head(tags$style(HTML(".name { width: 350px }"))),
-  anchor,
-  class = 'name')
+# header <- dashboardHeader()
+# anchor <- tags$a(tags$img(src='MS_KO_Vrtl.png', height='60', width='80'),
+#                  'Amb Care Analytics Tool')
+# 
+# header$children[[2]]$children <- tags$div(
+#   tags$head(tags$style(HTML(".name { width: 350px }"))),
+#   anchor,
+#   class = 'name')
 
 
 
 
 
 header <- dashboardHeader(title = "Amb Care Analytics Tool",
-                            tags$li(img(src = 'MS_KO_Vrtl.png',
-                                          height = "40px"),
+                            tags$li(img(src = 'www/MS_KO_Vrtl.PNG',
+                                          height = "50px"),
                                     class = "dropdown")
                           )
 
@@ -63,18 +63,18 @@ ui <- dashboardPage(
   #                                             width = 100,
   #                                             src = "MS_KO_Vrtl.png"))),
   dashboardSidebar(
-    # Customize dashboard color scheme: title bar = .logo & .navbar; side bar = .main-sidebar; background = .content-wrapper
+    #Customize dashboard color scheme: title bar = .logo & .navbar; side bar = .main-sidebar; background = .content-wrapper
     tags$head(tags$style(HTML('.logo {
                               background-color: #221f72 !important;
                               }
                               .navbar {
                               background-color: #221f72 !important;
                               }
-                              
+
                               .content-wrapper {
                               background-color: white !important;
                               }'
-                              
+
     ))),
     
     # Overwrite fixed height of dashboard sidebar
@@ -92,7 +92,15 @@ ui <- dashboardPage(
                 menuItem("Provider Overview", tabName = "provider", icon = icon("user-md")),
                 menuItem("Population", tabName = "population", icon = icon("users")),
                 menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
-                menuItem("Utilization", tabName = "utilization", icon = icon("percent"))
+                menuItem("Scheduling", tabName = "scheduling", icon = icon("calendar-day"),
+                         menuSubItem("Scheduled/Arrived", tabName = "arrived"),
+                         menuSubItem("No Shows/Overbooks", tabName = "noshows"),
+                         menuSubItem("Bumps/Cancellations", tabName = "cancellations")),
+                menuItem("Utilization", tabName = "utilization", icon = icon("percent")),
+                menuItem("Access", tabName = "access", icon = icon("location-arrow"),
+                         menuSubItem("New Patients", tabName = "newPatients"),
+                         # menuSubItem("Upcoming Demand", tabName = "upcomingDemand"),
+                         menuSubItem("Slot Usage", tabName = "slotUsage"))
     ) # Close sidebarMenu
     
   ), # Close dashboardSidebar
@@ -134,9 +142,8 @@ ui <- dashboardPage(
       tabItem(tabName = "homepage",
               column(12,
                      div("About Ambulatory Care Analytics Tool", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     
                      tags$div( id = "home_text",
-                       HTML("<p>Version: 1.0 <br> Last Updated: 5/12/2021</p>")
+                       HTML("<p>Version: 1.0 <br> Last Updated: 5/18/2021</p>")
                      ),
                      tags$head(tags$style("#home_text{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 15px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), 
                      column(12,
@@ -144,31 +151,26 @@ ui <- dashboardPage(
                             h3("Description"),
                                p("This is a centralized analytics tool that inlcudes all necessary KPIs and metrics that will
                                  allow the users to identify operatinal oppoutunities, make data-driven decisions, and
-                                 track improvements")
+                                 track improvements", style = "font-size:16px")
                             )
                             ),
                      column(12,
                             tags$div(id = "home_data",
                                      h3("Data Sources"),
-                                     # HTML(
-                                     #   "<p> The data used in this dashboard is pulled from the Clarity database using the slot and access datatables.
-                                     #    The department mappings can be downloaded <a href = file:///www/Mappings/Ambulatory Department Mapping (Master).xlsx>here</a>, 
-                                     #   and the site mapping file can be downloaded <a href = Mappings/Department Site Crosswalk 8-24-2020>here</a> </p>"
-                                     # ),
                                     p("The data used in this dashboard is pulled from the Clarity database using the slot and access datatables, named CRREPORT_REP.Y_DM_BOOKED_FILLED_RATE and CRREPORT_REP.MV_DM_PATIENT_ACCESS respectively.
-                                      The site and department mappings used in this analytics tool can be downloaded from the hyperlinks below."),
-                                    a(href = "Mappings/Ambulatory Department Mapping (Master).xlsx",target='blank', 'Ambulatory Department Mapping File', download = 'Department Mappings.xlsx'),
+                                      The site and department mappings used in this analytics tool can be downloaded from the hyperlinks below.", style = "font-size:16px"),
+                                    a(href = "Mappings/Ambulatory Department Mapping (Master).xlsx",target='blank', 'Ambulatory Department Mapping File', download = 'Department Mappings.xlsx', style = "font-size:16px"),
                                     br(),
-                                    a(href = "Mappings/Department Site Crosswalk 8-24-2020.xlsx",target='blank', 'Ambulatory Site Mapping File', download = 'Site Mappings.xlsx')
+                                    a(href = "Mappings/Department Site Crosswalk 8-24-2020.xlsx",target='blank', 'Ambulatory Site Mapping File', download = 'Site Mappings.xlsx', style = "font-size:16px")
                                     )),
                      column(12,
                             tags$div(id = "home_usage",
                                     h3("Usage"), 
-                                    #img(src = "homepage.png", width = "500px"),
+                                    img(src = "homepage.PNG", width = "500px"),
                                     br(),
-                                    p("Section 1 contains the sidebar menu where all the different tabs are listed"),
-                                    p("Section 2 includes the name of the tab currently being looked at as well as the date ranges that the tab is showing"),
-                                    p("Section 3 included the filter menu, it is hiearchical meaning the filter choices are based off the previously selected choices. The filters effect all the the outputs in the tab.  Below the filter dropdown menu is the download button which allows the user to save all the graphs and tables on the currently viewed tab as a PNG.")
+                                    p("Section 1 contains the sidebar menu where all the different tabs are listed", style = "font-size:16px"),
+                                    p("Section 2 includes the name of the tab currently being looked at as well as the date ranges that the tab is showing", style = "font-size:16px"),
+                                    p("Section 3 included the filter menu, it is hiearchical meaning the filter choices are based off the previously selected choices. The filters effect all the the outputs in the tab.  Below the filter dropdown menu is the download button which allows the user to save all the graphs and tables on the currently viewed tab as a PNG.", style = "font-size:16px")
                                     
                             ))
                      )),
@@ -271,8 +273,8 @@ ui <- dashboardPage(
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonNoShow", height="550px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c"),
-                              dataTableOutput("Testtable")
+                                withSpinner(type = 5, color = "#d80b8c")
+                              #dataTableOutput("Testtable")
                               ),
                             boxPlus(
                               title = "Cycle Times", width = 12, status = "primary",
@@ -540,6 +542,129 @@ ui <- dashboardPage(
                               tableOutput("volume5.1")),
                        column(2,))
               )),
+      # Scheduling Tab -------------------------------------------------------------------------------------------------------
+      tabItem(tabName = "arrived",
+              column(11,
+                     div("Scheduling | Scheduled/Arrived", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                     textOutput("scheduled_arrived"),
+                     tags$head(tags$style("#scheduled_arrived{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     fluidRow(
+                       boxPlus(
+                         title = "Scheduled Patients", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         plotOutput("scheduledPts", height = "600px") %>% 
+                           withSpinner(type = 5, color = "#d80b8c"))
+                     ),
+                     fluidRow(
+                       boxPlus(
+                         title = "Arrived Patients", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         plotOutput("arrivedPts", height = "600px") %>% 
+                           withSpinner(type = 5, color = "#d80b8c"))
+                     ))),
+      
+      tabItem(tabName = "noshows",
+              column(11,
+                     div("Scheduling | No Shows/Overbooks", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                     textOutput("scheduled_noshow"),
+                     tags$head(tags$style("#scheduled_noshow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     fluidRow(
+                       boxPlus(
+                         title = "No Show Summary", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         br(),
+                         fluidRow(
+                           column(3, uiOutput("apptTypeControl")),
+                           column(3, uiOutput("insuranceControl")),
+                           column(3, valueBoxOutput("avgDailyNoShow_Count", width = 12) %>%
+                                    withSpinner(type = 5, color = "#d80b8c")),
+                           column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
+                         h5("No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")
+                       ),
+                       boxPlus(
+                         title = "No Shows by Time of Day", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         fluidRow(
+                           column(6, plotOutput("avgNoShowCount", height="800px") %>% 
+                                    withSpinner(type = 5, color = "#d80b8c")),
+                           column(6, plotOutput("avgNoShowPercent", height = "800px") %>% 
+                                    withSpinner(type = 5, color = "#d80b8c")))
+                       ),
+                       boxPlus(
+                         title = "No Shows by Lead Days to Appointment", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         br(),
+                         plotOutput("noShowLeadDays", height = "600px") %>% 
+                           withSpinner(type = 5, color = "#d80b8c"))
+                     )
+              )),
+      
+      tabItem(tabName = "cancellations",
+              column(11,
+                     div("Scheduling | Bumps/Cancellations", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                     textOutput("scheduled_cancel"),
+                     tags$head(tags$style("#scheduled_cancel{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     boxPlus(
+                       title = "Bumped/Canceled/Recheduled Summary", width = 12, status = "primary",
+                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
+                       fluidRow(valueBoxOutput("totalBumpedCanceledRescheduledBox", width = 3),
+                                valueBoxOutput("totalBumpedBox", width = 3), 
+                                valueBoxOutput("totalCanceledBox", width = 3) %>%
+                                  withSpinner(type = 5, color = "#d80b8c"),
+                                valueBoxOutput("totalRescheduledBox", width = 3)),
+                       fluidRow(valueBoxOutput("avgDailyBumpedCanceledRescheduledBox", width = 3),
+                                valueBoxOutput("avgDailyBumpedBox", width = 3), 
+                                valueBoxOutput("avgDailyCanceledBox", width = 3),
+                                valueBoxOutput("avgDailyRescheduledBox", width = 3))),
+                     fluidRow(
+                       column(5,
+                              boxPlus(
+                                title = "Same-Day Bumped/Canceled/Rescheduled", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                plotOutput("sameDayBumpedCanceledRescheduled", height = "500px") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c"))),
+                       column(7,
+                              boxPlus(
+                                title = "Top 10 Bumped Reasons", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                plotOutput("bumpedReasonsLeadDays", height = "500px") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c")))),
+                     fluidRow(
+                       column(5,
+                              boxPlus(
+                                title = "Bumped/Canceled/Rescheduled Lead Days", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                plotOutput("bumpedCanceledRescheduledLeadDays", height = "500px") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c"))),
+                       column(7,
+                              boxPlus(
+                                title = "Top 10 Canceled Reasons", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                plotOutput("canceledReasonsLeadDays", height = "500px") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c"))))
+              )),
+      
+      
+      #        #textOutput("practiceName_utilization"),
+      #        # fluidRow(
+      #        #   boxPlus(
+      #        #     title = "Cancellations", width = 12, status = "primary",
+      #        #     solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+      #        #     column(6, plotOutput("canceledLeadDays")),
+      #        #     column(6, "placeholder for cancellation reason graph"))
+      #        # ),
+      #        fluidRow(
+      #          boxPlus(
+      #            title = "Bumps", width = 12, status = "primary",
+      #            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+      #            column(6, plotOutput("bumpedLeadDays")),
+      #            column(6, "placeholder for bumped reason graph"))
+      #        )
+      # )),
+      
       # Utilization Tab ------------------------------------------------------------------------------------------------------
       tabItem(tabName = "utilization",
               column(11,
@@ -613,7 +738,132 @@ ui <- dashboardPage(
                             
                             
                      )) 
-      )
+      ),
+      # Access Tab ------------------------------------------------------------------------------------------------------------
+      # tabItem(tabName = "access"),
+      tabItem(tabName = "newPatients",
+              column(11,
+                     div("Access | New Patients", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                     textOutput("newpatients"),
+                     tags$head(tags$style("#newpatients{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
+                     fluidRow(
+                       boxPlus(
+                         title = "New Patient Visit Ratio", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         tabBox(
+                           title = NULL,
+                           id = "tabset4", width = "100%",
+                           tabPanel("Total", 
+                                    plotOutput("newPtRatioByDept", height = "550px") %>% 
+                                      withSpinner(type = 5, color = "#d80b8c")),
+                           tabPanel("By Provider",
+                                    "*Select Fewer Providers for Better Visibility",
+                                    plotOutput("newPtRatioByProv", height = "550px") %>% 
+                                      withSpinner(type = 5, color = "#d80b8c"))))),
+                     fluidRow(
+                       boxPlus(
+                         title = "New Patient Wait Time", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         tabBox(
+                           title = NULL,
+                           id = "tabset5", width = "100%",
+                           tabPanel("Total", 
+                                    plotOutput("newPtWaitTimeByDept", height = "550px") %>% 
+                                      withSpinner(type = 5, color = "#d80b8c")),
+                           tabPanel("By Provider",
+                                    "*Select Fewer Providers for Better Visibility",
+                                    plotOutput("newPtWaitTimeByProv", height = "550px") %>% 
+                                      withSpinner(type = 5, color = "#d80b8c"))))),
+                     fluidRow(
+                       boxPlus(
+                         title = "New Patient Source", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         plotOutput("newPtApptSourceByDept", height = "550px") %>% 
+                           withSpinner(type = 5, color = "#d80b8c")))
+              )),
+      
+      # tabItem(tabName = "upcomingDemand",
+      #         column(10,
+      #                div("Access | Upcoming Demand", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+      #                tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+      #                #textOutput("practiceName_utilization"),
+      #                fluidRow(
+      #                  boxPlus(
+      #                    title = "Daily Slot Booked Rate (%) - Upcoming 2 Weeks", width = 12, status = "primary",
+      #                    solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+      #                    materialSwitch(
+      #                      inputId = "byProvider2",
+      #                      label = "By Provider", 
+      #                      right = TRUE,
+      #                      status = "primary"),
+      #                    #div(style='height:800px; overflow-y: scroll',  plotOutput("demandWeeksGraph", height = "1500px"))
+      #                    plotOutput("demandWeeksGraph", height = "900px"),
+      #                    br()
+      #                    #tableOutput("slotUsageTb")
+      #                  )),
+      #                
+      #                fluidRow(
+      #                  boxPlus(
+      #                    title = "Daily Slot Booked Rate (%) - Upcoming 3 Months", width = 12, status = "primary",
+      #                    solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+      #                    materialSwitch(
+      #                      inputId = "byProvider3",
+      #                      label = "By Provider", 
+      #                      right = TRUE,
+      #                      status = "primary"),
+      #                    plotOutput("demandMonthsGraph", height = "900px"), class = 'top-align',
+      #                    br()
+      #                    #tableOutput("slotUsageTb")
+      #                  ))
+      #         )),
+      
+      
+      tabItem(tabName = "slotUsage",
+              column(11,
+                     div("Access | Slot Usage", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                     textOutput("slot_usage"),
+                     tags$head(tags$style("#slot_usage{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
+                     fluidRow(
+                       boxPlus(
+                         title = "Booked vs. Filled Rate", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         radioButtons("slotUsageChoice", label = NULL, inline=T,
+                                      choices = list("Available Hours " = 1, "Booked Hours " = 2, "Filled Hours " = 3, 
+                                                     "Booked Rate (%) " = 4, "Filled Rate (%) " = 5), selected = 1),
+                         "*Select Fewer Providers for Better Visibility",
+                         plotOutput("slotUsageGraph", height = "800px") %>% 
+                           withSpinner(type = 5, color = "#d80b8c"),
+                         br(),
+                         materialSwitch(
+                           inputId = "byProvider2",
+                           label = "By Provider",
+                           right = TRUE,
+                           status = "primary"),
+                         tableOutput("slotUsageTb")))
+                     
+              ))
+      
+      # tabItem(tabName = "slotUsage",
+      #         column(10,
+      #                div("Access | Slot Usage", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+      #                tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+      #                #textOutput("practiceName_utilization"),
+      #                fluidRow(
+      #                  boxPlus(
+      #                    title = "Booked vs. Filled Rate", width = 12, status = "primary",
+      #                    solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+      #                    materialSwitch(
+      #                      inputId = "byProvider1",
+      #                      label = "By Provider", 
+      #                      right = TRUE,
+      #                      status = "primary"),
+      #                    plotOutput("slotUsageGraph", height = "800px"),
+      #                    br(),
+      #                    tableOutput("slotUsageTb")))
+      #                
+      #         )),
     ), #Close Tab Items
 
     
