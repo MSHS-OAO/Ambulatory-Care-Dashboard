@@ -170,7 +170,7 @@ ui <- dashboardPage(
                      column(12,
                             tags$div(id = "home_usage",
                                     h3("Usage"), 
-                                    img(src = "homepage.PNG", width = "500px"),
+                                    img(src = "homepage.PNG", width = "650px"),
                                     br(),
                                     p("Section 1 contains the sidebar menu where all the different tabs are listed", style = "font-size:16px"),
                                     p("Section 2 includes the name of the tab currently being looked at as well as the date ranges that the tab is showing", style = "font-size:16px"),
