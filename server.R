@@ -1473,6 +1473,12 @@ server <- function(input, output, session) {
   
   output$slot_usage <- renderText({
     paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+  
+  output$cycle_time <- renderText({
+    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+  
+  output$room_time <- renderText({
+    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
  
   
   ### (4) Analysis Output ==============================================================================================================
@@ -1722,19 +1728,13 @@ server <- function(input, output, session) {
       geom_histogram(aes(y = (..count..)/sum(..count..)),
                      bins = 22,
                      color="#212070", fill="#c7c6ef") +
-      labs(title = "Distribution of Check-in to Visit-end Time\n", 
-           y = "\n% of Patients",
-           x = "\nMinutes")+
-      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.text = element_text(size="12"),
-            legend.direction = "horizontal",
-            legend.key.size = unit(1.0,"cm"),
-            legend.title = element_blank(),
-            axis.title = element_text(size="14"),
-            axis.text = element_text(size="14"),
-            axis.line = element_line(size = 0.3, colour = "black"))+
+      labs(title = "Distribution of Check-in to Visit-end Time", 
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
       scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
       scale_y_continuous(labels = scales::percent)
     
@@ -1792,19 +1792,13 @@ server <- function(input, output, session) {
       geom_histogram(aes(y = (..count..)/sum(..count..)),
                      bins = 14,
                      color="#212070", fill="#c7c6ef") +
-      labs(title = "Distribution of Check-in to Room-in Time\n", 
-           y = "\n% of Patients",
-           x = "\nMinutes")+
-      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-            plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-            legend.position = "top",
-            legend.text = element_text(size="12"),
-            legend.direction = "horizontal",
-            legend.key.size = unit(1.0,"cm"),
-            legend.title = element_blank(),
-            axis.title = element_text(size="14"),
-            axis.text = element_text(size="14"),
-            axis.line = element_line(size = 0.3, colour = "black"))+
+      labs(title = "Distribution of Check-in to Room-in Time", 
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
       scale_x_continuous(breaks = seq(0, 210, 30), lim = c(0, 210))+
       scale_y_continuous(labels = scales::percent)
     
@@ -3317,9 +3311,10 @@ server <- function(input, output, session) {
       stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
       scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits = c(0,max(noShows$noShow_perc)*1.2))+
       labs(x=NULL, y = "Percent",
-           title = "Distribution of No Show Rate by Lead Days to Appointment",
+           title = "Distribution of No Show Rate by Lead Days to Appointment*",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]), 
-           caption = "No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")+
+           caption = "*No Show includes no show and same-day bumped, 
+           canceled, and rescheduled appointments.")+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -3342,8 +3337,9 @@ server <- function(input, output, session) {
       ggplot(noShows_bar_tb, aes(x=factor(apptLeadDays, levels = status), y=value,fill=variable)) +
       geom_bar(stat="identity", position=position_dodge(), width = 0.8, fill="midnightblue") +
       labs(x=NULL, y = "Percent",
-           caption = "No Show includes no show and same-day bumped, canceled, and rescheduled appointments.",
-           title = "Average No Show Rate by Lead Days to Appointment",
+           caption = "*No Show includes no show and same-day bumped, 
+           canceled, and rescheduled appointments.",
+           title = "Average No Show Rate by Lead Days to Appointment*",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1],
                                         " to ",input$dateRangeKpi[2]))+
       scale_y_continuous(labels=scales::percent_format(accuracy=1),limits = c(0,max(noShows_bar_tb$value)*1.2))+
@@ -3416,10 +3412,11 @@ server <- function(input, output, session) {
     #noShow_count.df$avgNoShows[is.na(noShow_count$avgNoShows)] <- 0
     ggplot(noShow_count.df, aes(x=factor(Day, levels = daysOfWeek.options), y=Time))+
       labs(x=NULL, y=NULL,
-           title = "Average Daily No Shows",
+           title = "Average Daily No Shows*",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",
                              input$dateRangeKpi[2]), 
-           caption = "No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")+
+           caption = "*No Show includes no show and same-day bumped,
+           canceled, and rescheduled appointments.")+
       geom_tile(aes(fill=avgNoShows), colour = "black", size=0.5)+
       scale_fill_gradient(low = "white", high = "red", space = "Lab", na.value = "#dddedd", guide = "colourbar", name="No Shows ")+
       scale_y_discrete(limits = rev(unique(sort(noShow_count.df$Time))))+
@@ -3475,10 +3472,11 @@ server <- function(input, output, session) {
     
     ggplot(noShow_perc.df, aes(x=factor(Day, levels = daysOfWeek.options), y=Time))+
       labs(x=NULL, y=NULL,
-           title = "Average No Show %",
+           title = "Average No Show %*",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",
                              input$dateRangeKpi[2]),
-           caption = "No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")+
+           caption = "*No Show includes no show and same-day bumped, 
+           canceled, and rescheduled appointments.")+
       geom_tile(aes(fill=percentage), colour = "black", size=0.5)+
       scale_fill_gradient(low = "white", high = "red", space = "Lab", na.value = "#dddedd", guide = "colourbar", name="No Show % ")+
       scale_y_discrete(limits = rev(unique(sort(noShow_perc.df$Time))))+
@@ -5040,9 +5038,9 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('purple')+
       labs(x=NULL, y=NULL, 
-           title = "New Patient Ratio",
+           title = "New Patient Ratio*",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-           caption = "Based on arrived patients")+
+           caption = "*Based on arrived patients")+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -5076,9 +5074,9 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('pink')+
       labs(x=NULL, y=NULL, 
-           title = "New Appointment Lead Days",
+           title = "New Appointment Lead Days*",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-           caption = "Based on all of scheduled patients")+
+           caption = "*Based on all of scheduled patients")+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -5118,9 +5116,9 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
-           title = "New Patient No Show Rate",
+           title = "New Patient No Show Rate*",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-           caption = "Based on all of scheduled patients")+
+           caption = "*Based on all of scheduled patients")+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -5653,6 +5651,898 @@ server <- function(input, output, session) {
         scroll_box(height = "800px")
     }
   }
+  
+  ### [3. ] Day of Visit Tab -----------------------------------------------------------------------------------------------------------
+  
+  # Reactive Filters for Scheduling Tab: Appointment Type & Insurance 
+  output$apptTypeControl2 <- renderUI({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    box(
+      title = NULL,
+      width = 12, 
+      solidHeader = FALSE,
+      pickerInput("selectedApptType2", label = h4("Select Appointment Type for Comparison:"), 
+                  choices = sort(unique(historical.data[
+                    historical.data$New.PT3 == FALSE &
+                      historical.data$Campus %in% input$selectedCampus &
+                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                      historical.data$Department %in% input$selectedDepartment & 
+                      historical.data$Resource %in% input$selectedResource &
+                      historical.data$Provider %in% input$selectedProvider, "Appt.Type"])),
+                  multiple=TRUE,
+                  options = pickerOptions(
+                    liveSearch = TRUE,
+                    actionsBox = TRUE,
+                    selectedTextFormat = "count > 1", 
+                    countSelectedText = "{0}/{1} Types", 
+                    dropupAuto = FALSE),
+                  selected = sort(unique(historical.data[
+                    historical.data$New.PT3 == FALSE &
+                      historical.data$Campus %in% input$selectedCampus &
+                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                      historical.data$Department %in% input$selectedDepartment & 
+                      historical.data$Resource %in% input$selectedResource &
+                      historical.data$Provider %in% input$selectedProvider, "Appt.Type"]))[[1]]))
+    
+  })
+  
+  
+  output$apptTypeControl3 <- renderUI({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    box(
+      title = NULL,
+      width = 12, 
+      solidHeader = FALSE,
+      pickerInput("selectedApptType3", label = h4("Select Appointment Type for Comparison:"), 
+                  choices = sort(unique(historical.data[
+                    historical.data$New.PT3 == FALSE &
+                      historical.data$Campus %in% input$selectedCampus &
+                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                      historical.data$Department %in% input$selectedDepartment & 
+                      historical.data$Resource %in% input$selectedResource &
+                      historical.data$Provider %in% input$selectedProvider, "Appt.Type"])),
+                  multiple=TRUE,
+                  options = pickerOptions(
+                    liveSearch = TRUE,
+                    actionsBox = TRUE,
+                    selectedTextFormat = "count > 1", 
+                    countSelectedText = "{0}/{1} Types", 
+                    dropupAuto = FALSE),
+                  selected = sort(unique(historical.data[
+                    historical.data$New.PT3 == FALSE &
+                      historical.data$Campus %in% input$selectedCampus &
+                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
+                      historical.data$Department %in% input$selectedDepartment & 
+                      historical.data$Resource %in% input$selectedResource &
+                      historical.data$Provider %in% input$selectedProvider, "Appt.Type"]))[[1]]))
+    
+  })
+  
+  
+  # Arrived Data with Additional Filters (Appointment Type)
+  dataNewComparison <- reactive({
+    groupByFilters_3(dataArrived(),
+                     input$selectedApptType2)
+  })
+  
+  # Arrived Data with Additional Filters (Appointment Type)
+  dataNewComparison2 <- reactive({
+    groupByFilters_3(dataArrived(),
+                     input$selectedApptType3)
+  })
+  
+  
+  # (1) Cycle Times --------------------------------------------------------------------------
+  
+  output$cycleTimeCompNew <- renderValueBox({
+    
+    valueBoxSpark(
+      value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
+      title = toupper("Avg NEW Appointments Check-in to Visit-end Time"),
+      subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(cycleTime > 0))/nrow(dataArrived()),2)*100,"% of total arrived patients"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
+  output$cycleTimeCompOther <- renderValueBox({
+    
+    valueBoxSpark(
+      value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
+      title = toupper(ifelse(length(unique(dataNewComparison()$Appt.Type)) == 1,
+                             paste0("Avg ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
+                             "Avg Other* Appointments Check-in to Visit-end Time")),
+      subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived patients"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
+  output$cycleTimeTrend <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data_new <- dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE)
+    # data_new <- arrived.data %>% filter(cycleTime > 0 & New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
+    
+    data_other <- dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE)
+    # data_other <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    
+    if(nrow(data_other) == 0){
+      
+      data <- data_new
+    } else{
+      
+      data <- rbind(data_new, data_other)
+    }
+    
+    data <- data %>%
+      mutate(New.PT3 = ifelse(New.PT3 == TRUE, "NEW", Appt.Type)) %>%
+      filter(!is.na(New.PT3))
+    
+    
+    ggplot(data, aes(x=cycleTime, fill=New.PT3, color=New.PT3)) +
+      geom_histogram(aes(y = (..count..)/sum(..count..)),
+                     # position = "identity",
+                     alpha = 0.8)+
+      scale_color_MountSinai()+
+      scale_fill_MountSinai()+
+      labs(title = "Check-in to Visit-end Time Comparison by Appointment Type",
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("top")+
+      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+      scale_y_continuous(labels = scales::percent)
+    
+  })
+  
+  output$newCycleTimeBoxPlot <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrived() %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
+    # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
+    
+    ggplot(data, aes(x=cycleTime)) + 
+      geom_histogram(aes(y = (..count..)/sum(..count..)),
+                     bins = 22,
+                     color="#d80b8c", fill="#fcc9e9") +
+      labs(title = "Distribution of NEW Appointment\nCheck-in to Visit-end Time*", 
+           y = "% of Patients",
+           x = "Minutes",
+           caption = "-",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+      scale_y_continuous(labels = scales::percent)
+    
+    
+  })
+  
+  output$establishedCycleTimeBoxPlot <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data_other <- dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE)
+    # data_other <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type %in% c("NEW PATIENT", "FOLLOW UP"))
+    
+    data <- data_other
+    
+    if(length(unique(data$Appt.Type)) == 1){
+      appt.type <- unique(data$Appt.Type)
+    } else{
+      appt.type <- "Other*"
+    }
+    
+    ggplot(data, aes(x=cycleTime)) + 
+      geom_histogram(aes(y = (..count..)/sum(..count..)),
+                     bins = 22,
+                     color="#d80b8c", fill="#fcc9e9") +
+      labs(title = paste0("Distribution of ",appt.type," Appointments\nCheck-in to Visit-end Time*"), 
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
+           caption = paste0("*Includes following appointment types: ", paste(unique(data$Appt.Type),sep="", collapse=", ")))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
+      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+      scale_y_continuous(labels = scales::percent)
+  })
+  
+  
+  output$cycleTimeByHour <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrived() %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
+    # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
+    
+    data_other <- dataNewComparison() %>% filter(New.PT3 == FALSE, cycleTime > 0)
+    # data_other <- arrived.data %>% filter(New.PT3 == FALSE, cycleTime > 0)
+    
+    names <- paste(unique(data_other$Appt.Type),sep="", collapse=", ")
+    
+    if(input$median2 == TRUE){
+      
+      data <- data %>%
+        group_by(Appt.Day, Appt.TM.Hr) %>%
+        summarise(avg = median(cycleTime)) %>%
+        filter(Appt.TM.Hr %in% timeOptionsHr_filter)
+      
+      data_other <- data_other %>%
+        group_by(Appt.Day, Appt.TM.Hr) %>%
+        summarise(avg = median(cycleTime)) %>%
+        filter(Appt.TM.Hr %in% timeOptionsHr_filter)
+      
+      input <- "Median"
+    } else{
+      
+      data <- data %>%
+        group_by(Appt.Day, Appt.TM.Hr) %>%
+        summarise(avg = mean(cycleTime)) %>%
+        filter(Appt.TM.Hr %in% timeOptionsHr_filter)
+      
+      data_other <- data_other %>%
+        group_by(Appt.Day, Appt.TM.Hr) %>%
+        summarise(avg = mean(cycleTime)) %>%
+        filter(Appt.TM.Hr %in% timeOptionsHr_filter)
+      
+      input <- "Average"
+    }
+    
+    if(length(unique(data_other$Appt.Type)) == 1){
+      appt.type <- unique(data_other$Appt.Type)
+    } else{
+      appt.type <- "Other*"
+    }
+    
+    new <- ggplot(data, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
+      geom_tile(colour = "white") + 
+      scale_fill_gradient(low="white", high="#d80b8c")+
+      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour"),
+           y = NULL,
+           #subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
+           fill = "Minutes")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "right",
+            legend.direction = "vertical",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_text(color="black"),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(avg),"", round(avg))), color="black", size=5, fontface="bold")
+    
+    other <- ggplot(data_other, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
+      geom_tile(colour = "white") + 
+      scale_fill_gradient(low="white", high="#00aeef")+
+      labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
+           y = NULL,
+           caption = paste0("*Includes following appointment types: ", names),
+           fill = "Minutes")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
+            legend.position = "right",
+            legend.direction = "vertical",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_text(color="black"),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(avg),"", round(avg))), color="black", size=5, fontface="bold")
+    
+    grid.arrange(new, other, ncol = 1)
+    
+  })
+  
+  
+  output$newCycleTimeByProv <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrived() %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
+    # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
+    
+    cycle.df <- data %>%
+      select(Provider, New.PT3, cycleTime) %>%
+      group_by(Provider, New.PT3)
+    
+    avg.cycleTime <- data.frame(New.PT3 = c("Avg"),
+                                target =  round(mean(cycle.df$cycleTime)))
+    
+    ggplot(cycle.df, aes(x = Provider, y = cycleTime)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+      stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      scale_y_continuous(limits = c(0,quantile(cycle.df$cycleTime,0.75)*1.5))+
+      geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+      annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+      labs(title = "Distribution of NEW Appointment Check-in to Visit-end Time by Provider", 
+           y = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
+           caption = "-")+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")
+    
+  })
+  
+  output$establishedCycleTimeByProv <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data_other <- dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE)
+    # data_other <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    
+    data <- data_other
+    
+    if(length(unique(data$Appt.Type)) == 1){
+      appt.type <- unique(data$Appt.Type)
+    } else{
+      appt.type <- "Other*"
+    }
+    
+    cycle.df <- data %>%
+      select(Provider, New.PT3, cycleTime) %>%
+      group_by(Provider, New.PT3)
+    
+    avg.cycleTime <- data.frame(New.PT3 = c("Avg"),
+                                target =  round(mean(cycle.df$cycleTime)))
+    
+    ggplot(cycle.df, aes(x = Provider, y = cycleTime)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+      stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      scale_y_continuous(limits = c(0,quantile(cycle.df$cycleTime,0.75)*1.5))+
+      geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+      annotate("text",x=length(unique(cycle.df$Provider))/2,y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+      labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Visit-end Time by Provider"), 
+           y = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
+           caption = paste0("*Includes following appointment types: ",paste(unique(data$Appt.Type),sep="", collapse=", ")))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
+    
+  })
+  
+  # (2) Room-in Times ----------------------------------------------------------------------
+  
+  output$roomInTimeCompNew <- renderValueBox({
+    
+    valueBoxSpark(
+      value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
+      title = toupper("Avg NEW Appointments Check-in to Room-in Time"),
+      subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived patients"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
+  output$roomInTimeCompOther <- renderValueBox({
+    
+    valueBoxSpark(
+      value =  paste0(round(mean((dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
+      title = toupper(ifelse(length(unique(dataNewComparison2()$Appt.Type)) == 1,
+                             paste0("Avg ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
+                             "Avg Other* Appointments Check-in to Room-in Time")),
+      subtitle = paste0("*Based on ",round(nrow(dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived patients"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
+  output$roomInTimeTrend <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data_new <- dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE)
+    # data_new <- arrived.data %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE)
+    
+    data_other <- dataNewComparison2() %>% filter(checkinToRoomin >= 0,  New.PT3 == FALSE)
+    # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    
+    if(nrow(data_other) == 0){
+      data <- data_new
+    } else{
+      data <- rbind(data_new, data_other)
+    }
+    
+    data <- data %>%
+      mutate(New.PT3 = ifelse(New.PT3 == TRUE, "NEW", Appt.Type)) %>%
+      filter(!is.na(New.PT3))
+    
+    
+    ggplot(data, aes(x=checkinToRoomin, fill=New.PT3, color=New.PT3)) +
+      geom_histogram(aes(y = (..count..)/sum(..count..)),
+                     # position = "identity",
+                     alpha = 0.8)+
+      scale_color_MountSinai()+
+      scale_fill_MountSinai()+
+      labs(title = "Check-in to Room-in Time Comparison by Appointment Type",
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("top")+
+      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+      scale_y_continuous(labels = scales::percent)
+    
+  })
+  
+  output$newRoomInTimeBoxPlot <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrived() %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE)
+    # data <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE)
+    
+    ggplot(data, aes(x=checkinToRoomin)) + 
+      geom_histogram(aes(y = (..count..)/sum(..count..)),
+                     bins = 22,
+                     color="#d80b8c", fill="#fcc9e9") +
+      labs(title = "Distribution of NEW Appointment\nCheck-in to Room-in Time", 
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
+           caption = "-")+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+      scale_y_continuous(labels = scales::percent)
+    
+  })
+  
+  output$establishedRoomInTimeBoxPlot <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data_other <- dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE)
+    # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    
+    data <- data_other
+    
+    if(length(unique(data$Appt.Type)) == 1){
+      appt.type <- unique(data$Appt.Type)
+    } else{
+      appt.type <- "Other*"
+    }
+    
+    ggplot(data, aes(x=checkinToRoomin)) + 
+      geom_histogram(aes(y = (..count..)/sum(..count..)),
+                     bins = 22,
+                     color="#d80b8c", fill="#fcc9e9") +
+      labs(title = paste0("Distribution of ",appt.type,"Appointments\nCheck-in to Room-in Time"), 
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
+           caption = paste0("*Includes following appointment types: ", paste(unique(data$Appt.Type),sep="", collapse=", ")))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
+      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+      scale_y_continuous(labels = scales::percent)
+    
+  })
+  
+  output$roomInTimeByHour <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrived() %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
+    # data <- arrived.data %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
+    
+    data_other <- dataNewComparison() %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
+    # data_other <- arrived.data %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
+    
+    names <- paste(unique(data_other$Appt.Type),sep="", collapse=", ")
+    
+    if(input$median3 == TRUE){
+      
+      data <- data %>%
+        group_by(Appt.Day, Appt.TM.Hr) %>%
+        summarise(avg = median(checkinToRoomin)) %>%
+        filter(Appt.TM.Hr %in% timeOptionsHr_filter)
+      
+      data_other <- data_other %>%
+        group_by(Appt.Day, Appt.TM.Hr) %>%
+        summarise(avg = median(checkinToRoomin)) %>%
+        filter(Appt.TM.Hr %in% timeOptionsHr_filter)
+      
+      input <- "Median"
+    } else{
+      
+      data <- data %>%
+        group_by(Appt.Day, Appt.TM.Hr) %>%
+        summarise(avg = mean(checkinToRoomin)) %>%
+        filter(Appt.TM.Hr %in% timeOptionsHr_filter)
+      
+      data_other <- data_other %>%
+        group_by(Appt.Day, Appt.TM.Hr) %>%
+        summarise(avg = mean(checkinToRoomin)) %>%
+        filter(Appt.TM.Hr %in% timeOptionsHr_filter)
+      
+      input <- "Average"
+    }
+    
+    if(length(unique(data_other$Appt.Type)) == 1){
+      appt.type <- unique(data_other$Appt.Type)
+    } else{
+      appt.type <- "Other*"
+    }
+    
+    new <- ggplot(data, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
+      geom_tile(colour = "white") + 
+      scale_fill_gradient(low="white", high="#d80b8c")+
+      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour"),
+           y = NULL,
+           fill = "Minutes")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "right",
+            legend.direction = "vertical",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_text(color="black"),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(avg),"", round(avg))), color="black", size=5, fontface="bold")
+    
+    other <- ggplot(data_other, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
+      geom_tile(colour = "white") + 
+      scale_fill_gradient(low="white", high="#00aeef")+
+      labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
+           y = NULL,
+           caption = paste0("*Includes following appointment types: ", names),
+           fill = "Minutes")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "right",
+            legend.direction = "vertical",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_text(color="black"),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(avg),"", round(avg))), color="black", size=5, fontface="bold")
+    
+    grid.arrange(new, other, ncol = 1)
+    
+  })
+  
+  
+  output$newRoomInTimeByProv <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataArrived() %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE)
+    # data <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
+    
+    roomin.df <- data %>%
+      select(Provider, New.PT3, checkinToRoomin) %>%
+      group_by(Provider, New.PT3)
+    
+    avg.roomInTime <- data.frame(New.PT3 = c("Avg"),
+                                 target =  round(mean(roomin.df$checkinToRoomin)))
+    
+    ggplot(roomin.df, aes(x = Provider, y = checkinToRoomin)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+      stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      scale_y_continuous(limits = c(0,quantile(roomin.df$checkinToRoomin,0.75)*1.5))+
+      geom_hline(yintercept= round(mean(roomin.df$checkinToRoomin)), linetype="dashed", color = "red")+
+      annotate("text",x=length(unique(roomin.df$Provider))/2,y=round(mean(roomin.df$checkinToRoomin))+3,size=5,color="red",label=c('Average'))+
+      labs(title = "Distribution of NEW Appointment Check-in to Room-in Time by Provider", 
+           y = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")
+    
+  })
+  
+  output$establishedRoomInTimeByProv <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data_other <- dataNewComparison() %>% filter(checkinToRoomin >= 0)
+    # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    
+    data <- data_other
+    
+    if(length(unique(data$Appt.Type)) == 1){
+      appt.type <- unique(data$Appt.Type)
+    } else{
+      appt.type <- "Other*"
+    }
+    
+    roomIn.df <- data %>%
+      select(Provider, New.PT3, checkinToRoomin) %>%
+      group_by(Provider, New.PT3)
+    
+    avg.roomInTime <- data.frame(New.PT3 = c("Avg"),
+                                 target =  round(mean(roomIn.df$checkinToRoomin)))
+    
+    ggplot(roomIn.df, aes(x = Provider, y = checkinToRoomin)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+      stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      scale_y_continuous(limits = c(0,quantile(roomIn.df$checkinToRoomin,0.75)*1.5))+
+      geom_hline(yintercept= round(mean(roomIn.df$checkinToRoomin)), linetype="dashed", color = "red")+
+      annotate("text",x=length(unique(roomIn.df$Provider))/2,y=round(mean(roomIn.df$checkinToRoomin))+3,size=5,color="red",label=c('Average'))+
+      labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Room-in Time by Provider\n"), 
+           y = "Minutes",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
+           caption = paste0("*Includes following appointment types: ",paste(unique(data$Appt.Type),sep="", collapse=", ")))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
+    
+  })
+  
+  # # Example Event Log Dataset 
+  # 
+  # ex_pts_throughput <- as.data.frame(ex_patients %>% throughput_time("case"))
+  # ex_pts_processing <- as.data.frame(ex_patients %>% processing_time("case"))
+  # ex_pts_idle <- as.data.frame(ex_patients %>% idle_time("case"))
+  # ex_pts_df <- merge(ex_pts_throughput, ex_pts_processing)
+  # ex_pts_df <- merge(ex_pts_df, ex_pts_idle)
+  # 
+  # ex_pts_df_melt <- ex_pts_df
+  # colnames(ex_pts_df_melt) <- c("patient","Cycle Time (Hrs.)","Value Added Time (Hrs.)","Non-Value Added Time (Hrs.)")
+  # ex_pts_df_melt <- reshape2::melt(ex_pts_df_melt, id=c("patient"))
+  # 
+  # # Average Cycle Time
+  # output$avgCycleTime2 <- renderValueBox({
+  # 
+  #   valueBox(
+  #     paste0(round(mean(ex_pts_df$throughput_time, na.rm = TRUE),1)," hour(s)"),
+  #     subtitle = tags$p("Avg Cycle Time", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+  #   )
+  # 
+  # })
+  
+  # # Average Value Added Time
+  # output$avgValueAdded <- renderValueBox({
+  #   
+  #   valueBox(
+  #     paste0(round(mean(ex_pts_df$processing_time, na.rm = TRUE),1)," hour(s) (",
+  #            round(mean(ex_pts_df$processing_time, na.rm = TRUE)/mean(ex_pts_df$throughput_time, na.rm = TRUE)*100,0),"%)"),
+  #     subtitle = tags$p("Avg Value Added Time", style = "font-size: 130%;"), icon = NULL, color = "aqua"
+  #   )
+  #   
+  # })
+  # 
+  # # Average Non-Value Added Time
+  # output$avgNonValueAdded <- renderValueBox({
+  #   
+  #   valueBox(
+  #     paste0(round(mean(ex_pts_df$idle_time, na.rm = TRUE),1)," hour(s) (",
+  #            round(mean(ex_pts_df$idle_time, na.rm = TRUE)/mean(ex_pts_df$throughput_time, na.rm = TRUE)*100,0),"%)"),
+  #     subtitle = tags$p("Avg Non-Value Added Time", style = "font-size: 130%;"), icon = NULL, color = "fuchsia"
+  #   )
+  #   
+  # })
+  # 
+  # # throughput_tb <- ex_patients %>% throughput_time("log")
+  # # processing_tb <- ex_patients %>% processing_time("log")
+  # # idle_tb <- ex_patients %>% idle_time("log")
+  # 
+  # # Distribution of cycle, value added, non-value added times 
+  # output$cycleTimeDis <- renderPlot ({
+  #   
+  #   ggplot(ex_pts_df_melt, aes(x=variable, y=value, fill=variable))+ 
+  #     scale_fill_manual(values = c("#dddedd", "#5cd3ff", "#f75dbe"))+
+  #     stat_summary(fun=mean, geom="point", shape=18, size=5, color="red", fill="red")+
+  #     theme_new_line()+
+  #     theme_bw()+
+  #     theme(
+  #       plot.title = element_blank(),
+  #       legend.title = element_blank(),
+  #       legend.position = "none",
+  #       axis.title.y = element_blank(),
+  #       axis.title.x = element_blank(),
+  #       axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
+  #       axis
+  # })
+  # 
+  # # Patient flow by frequency count
+  # output$vsm_freqCount <- renderGrViz({
+  #   process_map(ex_patients, type = frequency("absolute"))
+  # })
+  # 
+  # # Patient flow by relative frequency (%) (Total count of activity / Total count of prior activity)
+  # output$vsm_freqPerc <- renderGrViz({
+  #   process_map(ex_patients, type = frequency("relative_case"))
+  # })
+  # 
+  # # Patient flow by duration (average)
+  # output$vsm_durAvg <- renderGrViz({
+  #   process_map(ex_patients, performance(FUN=mean, "hours"))
+  # })
+  # 
+  # # Patient flow by duration (median)
+  # output$vsm_durMed<- renderGrViz({
+  #   process_map(ex_patients, performance(FUN=median, "hours"))
+  # })
+  # 
+  # 
+  # 
+  # 
+  # 
+  # 
+  
+  ### [3. ] Data Tab Output -----------------------------------------------------------------------------------------------------------
+  # dataDisplay <- reactive({
+  #   groupByFilters(historical.data[,c("Campus","Campus.Specialty","Department","Resource","Provider","MRN","Appt.DTTM","Appt.Day","Appt.Type","Appt.Status","holiday")],
+  #                  input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+  #                  input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+  # })
+  # 
+  # output$dTableAll <- DT::renderDataTable({
+  #   DT::datatable(dataDisplay()[,c("Campus","Campus.Specialty","Department","Provider","MRN","Appt.DTTM","Appt.Day","Appt.Type","Appt.Status","holiday")])
+  # })
+
+  output$dTableAll <- DT::renderDT(
+    historical.data[,c("Campus","Campus.Specialty","Department","Resource","Provider","MRN","Appt.DTTM","Appt.Day","Appt.Type","Appt.Status","holiday")],
+    filter = "top",
+    server = FALSE,
+    extensions = 'Buttons',
+    options = list(
+      dom = 'Bfrtip',
+      buttons = c('csv','excel')
+    )
+  )
 
 } # Close server 
 

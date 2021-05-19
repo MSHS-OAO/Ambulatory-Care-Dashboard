@@ -295,20 +295,20 @@ setwd(wdpath)
 
 ### RStudio COnnect Data Read In
 
-historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
-slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
-holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
-data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
-data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
+# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
+# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
+# holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
+# data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
+# data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
 
 
 
 
-# historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
-# slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-# data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
-# data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
+historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
+slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
+data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
 
 
 max_date <- max(historical.data$Appt.DateYear)
@@ -427,6 +427,9 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
                           mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
   return(result)
 }
+
+
+
 
 ## Filtered No Show Data
 groupByFilters_1 <- function(dt, apptType, insurance){
