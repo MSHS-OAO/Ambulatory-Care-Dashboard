@@ -165,7 +165,11 @@ MountSinai_palettes <- list(
                             "med purple","med pink","med blue","med grey", 
                             "light purple","light pink","light blue","light grey"),
   
-  `main`  = MountSinai_cols("dark purple","dark grey","dark pink","med blue","light pink","light blue","med purple"),
+  `dark`  = MountSinai_cols("dark purple","dark grey",
+                            "yellow","med pink","dark pink","dark blue",
+                            "med purple","med grey","med blue"),
+  
+  `main`  = MountSinai_cols("dark purple","dark grey","dark pink","dark blue","med purple","med pink","med blue","med grey"),
   
   `purple`  = MountSinai_cols("dark purple","med purple","light purple"),
   

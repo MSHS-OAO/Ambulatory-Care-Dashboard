@@ -486,7 +486,7 @@ ui <- dashboardPage(
                      div("Population", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$style("#practiceName1{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                      textOutput("practiceName_population"),
-                     tags$head(tags$style("#practiceName_siteComp{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     tags$head(tags$style("#practiceName_population{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      # column(12,
                      #        boxPlus(
                      #          title = "Patient Gender and Age Group", width = 12, status = "primary",
@@ -502,8 +502,7 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Insurance Types", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              column(8,girafeOutput(outputId = "ins_breakdown", height = "600px")),
-                              column(4, tableOutput("ins_breakdown_tb") %>%
+                              column(12, tableOutput("ins_breakdown_tb") %>%
                                        withSpinner(type = 5, color = "#d80b8c")))
                      ),
                      column(12,
@@ -600,6 +599,11 @@ ui <- dashboardPage(
                          title = "No Shows by Lead Days to Appointment", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                          br(),
+                         materialSwitch(
+                           inputId = "distribution",
+                           label = "Distribution", 
+                           right = TRUE,
+                           status = "primary"),
                          plotOutput("noShowLeadDays", height = "600px") %>% 
                            withSpinner(type = 5, color = "#d80b8c"))
                      )
@@ -846,7 +850,8 @@ ui <- dashboardPage(
                            label = "By Provider",
                            right = TRUE,
                            status = "primary"),
-                         tableOutput("slotUsageTb")))
+                         DT::dataTableOutput("slotUsageTb") %>% 
+                          withSpinner(type = 5, color = "#d80b8c")))
                      
               )),
       
@@ -1010,8 +1015,10 @@ ui <- dashboardPage(
               div("Data", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
               tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"), 
               hr(),
-              DT::dataTableOutput(outputId = "dTableAll") %>%
-                withSpinner(type = 5, color = "#d80b8c")
+              column(11,
+                DT::dataTableOutput(outputId = "dTableAll") %>%
+                  withSpinner(type = 5, color = "#d80b8c")
+              )
               )
   
     ), #Close Tab Items
@@ -1022,7 +1029,7 @@ ui <- dashboardPage(
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
+      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='data'",
       
     # Formatting Buttons
     tags$head(tags$style(HTML("#dropdownbutton1 {color: #212070;}"))),
@@ -1049,7 +1056,7 @@ ui <- dashboardPage(
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
+      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
             br(),
              box(
                title = "Select Campus:",
@@ -1182,7 +1189,7 @@ ui <- dashboardPage(
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
-      input.sbm=='newPatients' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
+      input.sbm=='newPatients' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
              box(
                title = "Select Date Range:",
                width = 12, 
