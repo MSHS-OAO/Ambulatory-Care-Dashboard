@@ -113,6 +113,8 @@ suppressMessages({
   library(zipcodeR)
   library(formattable)
   library(shinyjs)
+  library(janitor)
+  library(patchwork)
 })
 
 # ### (0) Maximize R Memory Size 
@@ -283,6 +285,20 @@ theme_new_line <- function(base_size = 12,
     )
 }
 
+
+table_theme <- function(){
+  theme(
+    panel.grid.minor = element_line(size = 0.3, colour = "black"),
+    panel.grid.major = element_blank(),
+    axis.title.x = element_text(size = 14, angle = 0, colour = "black", face= "bold"),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 14, colour = "black", face= "bold"),
+    legend.position = "none",
+    plot.title = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size=0.5),
+    axis.line.x = element_line(colour = "black", size=0.5),
+    plot.margin=unit(c(-0.5,1,1,1), "cm"))
+}
 
 
 
@@ -470,6 +486,17 @@ groupByFilters_4_Test <- function(dt, campus, specialty, department, resource, v
   result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource,
                           Visit.Method %in% visitMethod, 
                           mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
+  return(result)
+}
+
+
+## Unique Patients Functions  -----------------------------------------------------------------
+uniquePts_df_system <- function(data){
+  
+  result <- data %>%
+    arrange(MRN, Appt.DTTM) %>% group_by(MRN) %>% mutate(uniqueSystem = row_number()) %>% ungroup() %>%
+    filter(uniqueSystem == 1)
+  
   return(result)
 }
 

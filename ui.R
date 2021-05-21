@@ -147,7 +147,7 @@ ui <- dashboardPage(
               column(12,
                      div("About Ambulatory Care Analytics Tool", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$div( id = "home_text",
-                       HTML("<p>Version: 1.0 <br> Last Updated: 5/18/2021</p>")
+                       HTML("<p>Version: 1.0 <br> Last Updated: 5/20/2021</p>")
                      ),
                      tags$head(tags$style("#home_text{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 15px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), 
                      column(12,
@@ -509,8 +509,11 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Geographical Analysis", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              leafletOutput("population1", height = "800px") %>%
-                                withSpinner(type = 5, color = "#d80b8c")))
+                              fluidRow(
+                                column(4, tableOutput("zipCode_tb") %>%
+                                         withSpinner(type = 5, color = "#d80b8c")),
+                                column(8, leafletOutput("population1", height = "800px") %>%
+                                        withSpinner(type = 5, color = "#d80b8c")))))
               )),
       
       # Volume Tab -----------------------------------------------------------------------------------------------------------
@@ -531,8 +534,8 @@ ui <- dashboardPage(
                        plotOutput("volume2") %>%
                          withSpinner(type = 5, color = "#d80b8c"),
                        plotOutput("volume4") %>%
-                         withSpinner(type = 5, color = "#d80b8c"),
-                       tableOutput("volume4.1")),
+                         withSpinner(type = 5, color = "#d80b8c")),
+                       #tableOutput("volume4.1")),
                      boxPlus(
                        title = "Daily Volume", width = 12, status = "primary",
                        solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -541,8 +544,8 @@ ui <- dashboardPage(
                               plotOutput("volume3") %>%
                                 withSpinner(type = 5, color = "#d80b8c"),
                               plotOutput("volume5") %>%
-                                withSpinner(type = 5, color = "#d80b8c"),
-                              tableOutput("volume5.1")),
+                                withSpinner(type = 5, color = "#d80b8c")),
+                              #tableOutput("volume5.1")),
                        column(2,))
               )),
       # Scheduling Tab -------------------------------------------------------------------------------------------------------

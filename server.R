@@ -4310,6 +4310,92 @@ server <- function(input, output, session) {
     
   })
   
+  ## Breakdown of Arrived Visits by Zip Code
+  output$zipCode_tb <- function(){
+    
+    zipcode_ref <- read_csv(here::here("Oncology System Data - Zip Code Groupings 4.13.2021.csv"))
+    zipcode_ref <- zipcode_ref[1:(length(zipcode_ref)-7)]
+    zipcode_ref$`Zip Code Layer: A`[which(zipcode_ref$`Zip Code Layer: A` == "Long island")] <- "Long Island"
+    
+    zipcode <- read_csv(here::here("zipcode_data.csv"))
+    
+    population.data <- arrived.data
+    population.data$new_zip <- normalize_zip(population.data$Zip.Code)
+    population.data <- merge(population.data, zipcode_ref, by.x="new_zip", by.y="Zip Code", all.x = TRUE)
+    
+    population.data <- merge(population.data, zipcode, by.x="new_zip", by.y="zip", all.x = TRUE)
+    
+    population.data$`Zip Code Layer: A`[(is.na(population.data$`Zip Code Layer: A`) & 
+                                           (!is.na(population.data$state) | population.data$state != "NY"))] <- "Out of NYS"
+    population.data <- population.data %>%
+      mutate(`Zip Code Layer: B` = ifelse(`Zip Code Layer: A` == "Out of NYS" & is.na(`Zip Code Layer: B`),
+                                          ifelse(state == "NJ", "New Jersey",
+                                                 ifelse(state == "CT", "Connecticut",
+                                                        ifelse(state == "FL", "Florida",
+                                                               ifelse(state == "PA", "Pennsylvania", "Other")))), `Zip Code Layer: B`))
+    
+    
+    population.data_filtered <- population.data %>% filter(!is.na(`Zip Code Layer: A`))
+    
+    
+    
+    newdata <- uniquePts_df_system(population.data_filtered)
+    
+    
+    a_table <- newdata %>% 
+      filter(`Zip Code Layer: A` != "EXCLUDE") %>%
+      group_by(`Zip Code Layer: A`) %>% summarise(total = n()) %>%
+      arrange(-total) %>%
+      mutate(perc = round(total/sum(total),2)*100) %>%
+      adorn_totals("row") %>%
+      mutate(perc = paste0(perc,"%")) %>%
+      `colnames<-` (c("Zip Code Layer", "total", "perc")) %>%
+      mutate(Layer = `Zip Code Layer`)
+    
+    b_table <- newdata %>% 
+      filter(`Zip Code Layer: A` != "EXCLUDE") %>%
+      group_by(`Zip Code Layer: A`, `Zip Code Layer: B`) %>% summarise(total = n()) %>%
+      arrange(-total)
+    
+    b_table <- b_table %>%
+      mutate(perc = round(total/sum(b_table$total),2)*100) %>%
+      mutate(perc = paste0(perc,"%")) %>%
+      `colnames<-` (c("Layer", "Zip Code Layer", "total", "perc")) %>%
+      filter(`Layer` %in% c("Manhattan", "Out of NYS", "Long Island", "Northern New York")) 
+    
+    zip_table <- bind_rows(a_table, b_table)
+    zip_table <- zip_table[order(factor(zip_table$Layer, levels = unique(a_table$Layer))),]
+    zip_table$Layer <- NULL
+    
+    
+    # Table subtitle based on date range filter
+    manhattan_ref <- which(zip_table$`Zip Code Layer` == "Manhattan")
+    out_state_ref <-  which(zip_table$`Zip Code Layer` == "Out of NYS")
+    long_is_ref <-  which(zip_table$`Zip Code Layer` == "Long Island")
+    northern_ny_ref <-  which(zip_table$`Zip Code Layer` == "Northern New York")
+    header_above <- c("Subtitle" = 3)
+    names(header_above) <- paste0(c("Based on data from "),c(input$dateRange[1]),c(" to "),c(input$dateRange[2]))
+    
+    zip_table %>%
+      kable(escape = F, 
+            col.names = c("Zip Code Layer", "Total Unique Patients", "Percent of Total")) %>%
+      kable_styling(bootstrap_options = c("hover","bordered"), full_width = FALSE, position = "center", row_label_position = "l", font_size = 16) %>%
+      add_header_above(header_above, color = "black", font_size = 16, align = "center", italic = TRUE) %>%
+      add_header_above(c("Total Unique Patients by Zipcode" = length(zip_table)),
+                       color = "black", font_size = 20, align = "center", line = FALSE) %>%
+      add_indent(c(manhattan_ref+1, manhattan_ref+2, manhattan_ref+3,
+                   out_state_ref+1, out_state_ref+2, out_state_ref+3, out_state_ref+4, out_state_ref+5,
+                   long_is_ref+1, long_is_ref+2, 
+                   northern_ny_ref+1, northern_ny_ref+2, northern_ny_ref+3, northern_ny_ref+4, northern_ny_ref+5),
+                 level_of_indent = 2) %>%
+      row_spec(0, background = "#d80b8c", color = "white", bold = T) %>%
+      row_spec(c(manhattan_ref+1, manhattan_ref+2, manhattan_ref+3, out_state_ref+1, out_state_ref+2, 
+                 out_state_ref+3, out_state_ref+4, out_state_ref+5, long_is_ref+1, long_is_ref+2, 
+                 northern_ny_ref+1, northern_ny_ref+2, northern_ny_ref+3, northern_ny_ref+4, northern_ny_ref+5), font_size = 14) %>%
+      row_spec(nrow(zip_table), background = "#d80b8c", color = "white", bold = T)
+    
+  }
+  
   
   output$population1 <- renderLeaflet({
     
@@ -4545,7 +4631,7 @@ server <- function(input, output, session) {
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      theme(axis.text.x = element_text(size = 16, angle=0, hjust=1))
+      theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
     
   })
   
@@ -4574,22 +4660,67 @@ server <- function(input, output, session) {
     pts.dist$Month <- as.Date(pts.dist$Month, format="%Y-%m")
     pts.dist <- pts.dist[order(pts.dist$Month),]
     
-    ggplot(pts.dist, aes(x=Month, y=Volume, group=Month))+
-      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
-      stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-      labs(x = NULL, y = "Patients",
-           title = "Daily Patient Volume Distribution by Month",
-           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-      scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m")+
-      theme_new_line()+
-      theme_bw()+
-      graph_theme("none")
-
+    g1 <- ggplot(pts.dist, aes(x=Month, y=Volume, group=Month))+
+            geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+            stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+            labs(x = NULL, y = "Patients",
+                 title = "Daily Patient Volume Distribution by Month",
+                 subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+            scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m")+
+            theme_new_line()+
+            theme_bw()+
+            graph_theme("none")
+    
+    
+    
+    
+    
+    pts.dist <- aggregate(dataArrived()$uniqueId, 
+                          by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date), FUN=NROW)
+    
+    # pts.dist <- aggregate(arrived.data$uniqueId,
+    #                       by=list(arrived.data$Appt.MonthYear, arrived.data$Appt.Date), FUN=NROW)
+    
+    names(pts.dist) <- c("Month","Date","Volume")
+    
+    pts.dist.summary <-
+      pts.dist %>%
+      group_by(Month) %>%
+      dplyr::summarise(Avg = round(mean(Volume),1), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
+    
+    pts.dist.summary <- 
+      pts.dist.summary[order(as.yearmon(pts.dist.summary$Month,format="%Y-%m")),]
+    
+    pts.dist.summary.t <-setNames(data.frame(t(pts.dist.summary[,-1])), pts.dist.summary[,1])
+    colnames(pts.dist.summary.t) <- pts.dist.summary$Month
+    
+    data_melt <- reshape2::melt(pts.dist.summary, id = "Month")
+    
+    n <- length(unique(data_melt$variable)) - 1
+    if(n==0){
+      hline_y <- 0
+    } else{
+      hline_y <- seq(1.5, 0.5+n, by= 1)
+    }
+    
+    g2 <- ggplot(data_melt, aes(x = Month, y = variable, label = value))+
+      scale_color_MountSinai('dark' )+
+      geom_text(size = 5, vjust = "center", hjust = "center", fontface  = "bold")+
+      geom_hline(yintercept = hline_y, colour='black')+
+      geom_vline(xintercept = 0, colour = 'black')+
+      scale_x_discrete(position = "top") + 
+      labs(y = NULL, x = NULL, fill = "AssociationListA")+
+      theme_minimal() +
+      table_theme()
+    
+    
+    g1 + g2 + plot_layout(ncol = 1, heights = c(7, 0.67 * length(unique(data_melt$variable))))
     
   })
   
   # Daily Volume Distribution by Month Table
   output$volume4.1 <- function(){
+    
     
     pts.dist <- aggregate(dataArrived()$uniqueId, 
                           by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date), FUN=NROW)
@@ -4637,16 +4768,16 @@ server <- function(input, output, session) {
     
     names(pts.dist) <- c("Month","Date","Day","Volume")
     
-    ggplot(pts.dist, aes(x=factor(Day, level = daysOfWeek.options), y=Volume))+
-            geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+ 
-            stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-            labs(x = NULL, y = "Patients",
-                 title = "Daily Patient Volume Distribution by Day of Week",
-                 subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-            theme_new_line()+
-            theme_bw()+
-            graph_theme("none")+
-            theme(axis.text.x = element_text(size = 16, angle=50, hjust=1))
+    g1 <- ggplot(pts.dist, aes(x=factor(Day, level = daysOfWeek.options), y=Volume))+
+              geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+ 
+              stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+              labs(x = NULL, y = "Patients",
+                   title = "Daily Patient Volume Distribution by Day of Week",
+                   subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+              theme_new_line()+
+              theme_bw()+
+              graph_theme("none")+
+              theme(axis.text.x = element_text(size = 16, angle=0, hjust = 0.5))
     
     
     # data <- filter(arrived.data, Campus == "MSUS")
@@ -4654,21 +4785,42 @@ server <- function(input, output, session) {
     #                       by=list(data$Appt.MonthYear, data$Appt.Date, data$Appt.Day), FUN=NROW)
     
     
-    # pts.dist <- aggregate(dataArrived()$uniqueId,
-    #                       by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date, dataArrived()$Appt.Day), FUN=NROW)
-    # 
-    # names(pts.dist) <- c("Month","Date","Day","Volume")
-    # 
-    # pts.dist.summary <-
-    #   pts.dist %>%
-    #   group_by(Day) %>%
-    #   dplyr::summarise(Avg = round(mean(Volume),1), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
-    # 
-    # pts.dist.summary <- pts.dist.summary[match(daysOfWeek.options,pts.dist.summary$Day),]
-    # pts.dist.summary <- pts.dist.summary[complete.cases(pts.dist.summary),]
-    # 
-    # pts.dist.summary.t <-setNames(data.frame(t(pts.dist.summary[,-1])), pts.dist.summary[,1])
-    # colnames(pts.dist.summary.t) <- pts.dist.summary$Day
+    pts.dist <- aggregate(dataArrived()$uniqueId,
+                          by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date, dataArrived()$Appt.Day), FUN=NROW)
+
+    names(pts.dist) <- c("Month","Date","Day","Volume")
+
+    pts.dist.summary <-
+      pts.dist %>%
+      group_by(Day) %>%
+      dplyr::summarise(Avg = round(mean(Volume),1), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
+
+    pts.dist.summary <- pts.dist.summary[match(daysOfWeek.options,pts.dist.summary$Day),]
+    pts.dist.summary <- pts.dist.summary[complete.cases(pts.dist.summary),]
+
+    pts.dist.summary.t <-setNames(data.frame(t(pts.dist.summary[,-1])), pts.dist.summary[,1])
+    colnames(pts.dist.summary.t) <- pts.dist.summary$Day
+    
+    data_melt <- reshape2::melt(pts.dist.summary, id = "Day")
+    
+    n <- length(unique(data_melt$variable)) - 1
+    if(n==0){
+      hline_y <- 0
+    } else{
+      hline_y <- seq(1.5, 0.5+n, by= 1)
+    }
+    
+    g2 <- ggplot(data_melt, aes(x = Day, y = variable, label = value))+
+      scale_color_MountSinai('dark' )+
+      geom_text(size = 5, vjust = "center", hjust = "center", fontface  = "bold")+
+      geom_hline(yintercept = hline_y, colour='black')+
+      geom_vline(xintercept = 0, colour = 'black')+
+      scale_x_discrete(position = "top") + 
+      labs(y = NULL, x = NULL, fill = "AssociationListA")+
+      theme_minimal() +
+      table_theme()
+    
+    g1 + g2 + plot_layout(ncol = 1, heights = c(7, 0.67 * length(unique(data_melt$variable))))
     
     
   })
