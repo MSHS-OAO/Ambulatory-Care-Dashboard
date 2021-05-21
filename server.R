@@ -2258,7 +2258,7 @@ server <- function(input, output, session) {
       geom_col()+
       geom_text(aes(label = prettyNum(avg, big.mark = ",")),
                 position = position_stack(vjust = 0.5), color="white", fontface="bold", size = 7)+
-      stat_summary(fun.y = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",..y..), group =name), geom="text", color="black", 
+      stat_summary(fun.y = sum, vjust = .5, hjust = -0.5, aes(label=ifelse(..y.. == 0,"",..y..), group =name), geom="text", color="black", 
                    size=7, fontface="bold.italic")+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       scale_y_continuous(limits=c(0,sum(noShows$avg)*1.2))+
@@ -2336,7 +2336,7 @@ server <- function(input, output, session) {
     )
     
     data <- dataBumped()
-    data <- bumped.data
+    # data <- bumped.data
     
     lead.days.df <- data %>%
       filter(Lead.Days >= 0) %>%
@@ -2356,9 +2356,9 @@ server <- function(input, output, session) {
                 position = position_stack(vjust = 0.5), color="white", fontface="bold", size=7)+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
-      # labs(x=NULL, y=NULL,
-      #      title = "% of Bumps by Lead Days",
-      #      subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+      labs(x=NULL, y=NULL,
+           title = "% of Bumps by Lead Days",
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
       theme_new_line()+
       theme_bw()+
       theme(
