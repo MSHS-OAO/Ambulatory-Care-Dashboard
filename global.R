@@ -320,6 +320,7 @@ setwd(wdpath)
 # holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
 # data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
 # data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
+# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
 
 
 
@@ -329,7 +330,7 @@ slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
 holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
 data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
 data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
-
+population.data_filtered <- readRDS(paste0(wdpath,"/Data/population.data_filtered.rds"))
 
 max_date <- max(historical.data$Appt.DateYear)
 
@@ -369,12 +370,36 @@ arrivedNoShow.data <- rbind(arrived.data,noShow.data) ## Arrived + No Show data:
 # Filter utilization data in last 60 days
 
 # Combine Utilization Data
-# data.hour.scheduled <- readRDS(here::here("Data/hour_scheduled.rds"))
-# data.hour.arrived <- readRDS(here::here("Data/hour_arrived.rds"))
 
 scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
 arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
 
+
+### Zip Code Analysis--------------------------------------------------------------------------------------
+
+# zipcode_ref <- read_csv(here::here("Oncology System Data - Zip Code Groupings 4.13.2021.csv"))
+# zipcode_ref <- zipcode_ref[1:(length(zipcode_ref)-7)]
+# zipcode_ref$`Zip Code Layer: A`[which(zipcode_ref$`Zip Code Layer: A` == "Long island")] <- "Long Island"
+# 
+# zipcode <- read_csv(here::here("zipcode_data.csv"))
+# 
+# population.data <- arrived.data
+# population.data$new_zip <- normalize_zip(population.data$Zip.Code)
+# population.data <- merge(population.data, zipcode_ref, by.x="new_zip", by.y="Zip Code", all.x = TRUE)
+# 
+# population.data <- merge(population.data, zipcode, by.x="new_zip", by.y="zip", all.x = TRUE)
+# 
+# population.data$`Zip Code Layer: A`[(is.na(population.data$`Zip Code Layer: A`) & 
+#                                        (!is.na(population.data$state) | population.data$state != "NY"))] <- "Out of NYS"
+# population.data <- population.data %>%
+#   mutate(`Zip Code Layer: B` = ifelse(`Zip Code Layer: A` == "Out of NYS" & is.na(`Zip Code Layer: B`),
+#                                       ifelse(state == "NJ", "New Jersey",
+#                                              ifelse(state == "CT", "Connecticut",
+#                                                     ifelse(state == "FL", "Florida",
+#                                                            ifelse(state == "PA", "Pennsylvania", "Other")))), `Zip Code Layer: B`))
+# 
+# 
+# population.data_filtered <- population.data %>% filter(!is.na(`Zip Code Layer: A`))
 
 ### (6) Shiny App Components Set-up -------------------------------------------------------------------------------
 

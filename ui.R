@@ -103,8 +103,8 @@ ui <- dashboardPage(
                          menuSubItem("Slot Usage", tabName = "slotUsage")),
                 menuItem("Day of Visit", tabName = "day", icon = icon("hand-holding-medical"),
                          menuSubItem("Cycle Time", tabName = "cycleTime"),
-                         menuSubItem("Room-in Time", tabName = "roomInTime")),
-                menuItem("Data", tabName = "data", icon = icon("table"))
+                         menuSubItem("Room-in Time", tabName = "roomInTime"))#,
+                #menuItem("Data", tabName = "data", icon = icon("table"))
     ) # Close sidebarMenu
     
   ), # Close dashboardSidebar
@@ -502,7 +502,8 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Insurance Types", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              column(12, tableOutput("ins_breakdown_tb") %>%
+                              column(2),
+                              column(8, tableOutput("ins_breakdown_tb") %>%
                                        withSpinner(type = 5, color = "#d80b8c")))
                      ),
                      column(12,
