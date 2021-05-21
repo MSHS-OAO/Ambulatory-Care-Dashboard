@@ -589,7 +589,16 @@ server <- function(input, output, session) {
                      input$dateRange[1], input$dateRange[2],
                      input$daysOfWeek,
                      input$excludeHolidays)
-  }) 
+  })
+  
+  # [2.4] Arrived Population Data --------------------------------------------------------------------------------------
+  
+  dataArrivedPop <- reactive({
+    groupByFilters(population.data_filtered,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+  })
   
   ### (3) Dashboard Layout ============================================================================================================
   ### [3.1] Title of  Dashboard -------------------------------------------------------------------------------------------------------
@@ -4561,34 +4570,9 @@ server <- function(input, output, session) {
   
   ## Breakdown of Arrived Visits by Zip Code
   output$zipCode_tb <- function(){
-    
-    zipcode_ref <- read_csv(here::here("Oncology System Data - Zip Code Groupings 4.13.2021.csv"))
-    zipcode_ref <- zipcode_ref[1:(length(zipcode_ref)-7)]
-    zipcode_ref$`Zip Code Layer: A`[which(zipcode_ref$`Zip Code Layer: A` == "Long island")] <- "Long Island"
-    
-    zipcode <- read_csv(here::here("zipcode_data.csv"))
-    
-    population.data <- arrived.data
-    population.data$new_zip <- normalize_zip(population.data$Zip.Code)
-    population.data <- merge(population.data, zipcode_ref, by.x="new_zip", by.y="Zip Code", all.x = TRUE)
-    
-    population.data <- merge(population.data, zipcode, by.x="new_zip", by.y="zip", all.x = TRUE)
-    
-    population.data$`Zip Code Layer: A`[(is.na(population.data$`Zip Code Layer: A`) & 
-                                           (!is.na(population.data$state) | population.data$state != "NY"))] <- "Out of NYS"
-    population.data <- population.data %>%
-      mutate(`Zip Code Layer: B` = ifelse(`Zip Code Layer: A` == "Out of NYS" & is.na(`Zip Code Layer: B`),
-                                          ifelse(state == "NJ", "New Jersey",
-                                                 ifelse(state == "CT", "Connecticut",
-                                                        ifelse(state == "FL", "Florida",
-                                                               ifelse(state == "PA", "Pennsylvania", "Other")))), `Zip Code Layer: B`))
-    
-    
-    population.data_filtered <- population.data %>% filter(!is.na(`Zip Code Layer: A`))
-    
-    
-    
-    newdata <- uniquePts_df_system(population.data_filtered)
+
+    data <- dataArrivedPop()
+    newdata <- uniquePts_df_system(data)
     
     
     a_table <- newdata %>% 
@@ -4659,15 +4643,17 @@ server <- function(input, output, session) {
     )
     
     
-    #data(zipcode)
-    zipcode <- read_feather(here::here("Data/zipcode.feather"))
+    # #data(zipcode)
+    # zipcode <- read_feather(here::here("Data/zipcode.feather"))
+    # 
+    # population.data <- 
+    #   dataArrived()[,c("Campus","Campus.Specialty","Department","MRN","Zip.Code","Sex","Coverage","uniqueId")]
+    # 
+    # population.data$zip <- normalize_zip(population.data$Zip.Code)
+    # 
+    # population.data <- merge(population.data, zipcode, by.x='zip', by.y='zip')
     
-    population.data <- 
-      dataArrived()[,c("Campus","Campus.Specialty","Department","MRN","Zip.Code","Sex","Coverage","uniqueId")]
-    
-    population.data$zip <- normalize_zip(population.data$Zip.Code)
-    
-    population.data <- merge(population.data, zipcode, by.x='zip', by.y='zip')
+    population.data <- dataArrivedPop()
     
     newdata <- population.data %>% group_by(latitude, longitude) %>% dplyr::summarise(total = round(n(),0))
     
@@ -6537,7 +6523,7 @@ server <- function(input, output, session) {
     data <- dataArrived() %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
     # data <- arrived.data %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
     
-    data_other <- dataNewComparison() %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
+    data_other <- dataNewComparison2() %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
     # data_other <- arrived.data %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
     
     names <- paste(unique(data_other$Appt.Type),sep="", collapse=", ")
@@ -6679,7 +6665,7 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data_other <- dataNewComparison() %>% filter(checkinToRoomin >= 0)
+    data_other <- dataNewComparison2() %>% filter(checkinToRoomin >= 0)
     # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
     data <- data_other
