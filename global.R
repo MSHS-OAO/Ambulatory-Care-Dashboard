@@ -227,10 +227,10 @@ graph_theme <- function(legend_pos) {
   theme(
     plot.title = element_text(hjust=0.5, face = "bold", size = 20),
     plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
+    plot.caption = element_text(size = 12, face = "italic"),
     legend.position = legend_pos,
-    #legend.title = element_text(size = "14"),
+    legend.title = element_text(size = "14"),
     legend.text = element_text(size = "14"),
-    legend.title = element_blank(),
     strip.text = element_text(size=14),
     axis.title = element_text(size = 16),
     axis.text.x = element_text(size = 16, angle=50, hjust=1),

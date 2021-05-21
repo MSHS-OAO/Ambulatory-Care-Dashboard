@@ -335,41 +335,45 @@ ui <- dashboardPage(
                               ))
                      ),
                      fluidRow(
-                       column(8, 
-                              boxPlus(
-                                title = "Day of Visit", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                fluidRow(
-                                  column(4,
-                                         fluidRow(valueBoxOutput("avgCycleTime", width = 12)), 
-                                         fluidRow(valueBoxOutput("medCycleTime", width = 12))),
-                                  column(8,
-                                         plotOutput("cycleTimeBoxPlot") %>% 
-                                           withSpinner(type = 5, color = "#d80b8c")
-                                  )), 
-                                hr(),
-                                fluidRow(
-                                  column(4,
-                                         fluidRow(valueBoxOutput("avgCheckinToRoomin", width = 12)), 
-                                         fluidRow(valueBoxOutput("medCheckinToRoomin", width = 12))),
-                                  column(8,
-                                         plotOutput("checkInRoomInBoxPlot") %>% 
-                                           withSpinner(type = 5, color = "#d80b8c")
-                                  )))
-                              ),
                        column(4,
                               boxPlus(
-                                title = "Access", width = 12, status = "primary",
+                                title = "New Patient Access", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 fluidRow(infoBoxOutput("newPtRatio", width =12) %>% 
                                            withSpinner(type = 5, color = "#d80b8c")),
                                 fluidRow(infoBoxOutput("newApptWaitTime", width=12)),
-                                fluidRow(infoBoxOutput("newNoShow", width=12))),
+                                fluidRow(infoBoxOutput("newNoShow", width=12)))),
+                       column(4,
+                              boxPlus(
+                                title = "Booked and Filled Rates", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                plotOutput("pracBookedFilledRate") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c"))),
+                       column(4,
                               boxPlus(
                                 title = "Scheduling", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                fluidRow(tableOutput("fillRate_tb") %>% 
-                                           withSpinner(type = 5, color = "#d80b8c"))))))
+                                plotOutput("pracApptStatus") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c")))),
+                     column(12,
+                       boxPlus(
+                         title = "Day of Visit", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         fluidRow(
+                           column(4,
+                                  fluidRow(valueBoxOutput("avgCycleTime", width = 12)), 
+                                  fluidRow(valueBoxOutput("medCycleTime", width = 12))),
+                           column(8,
+                                  plotOutput("cycleTimeBoxPlot") %>% 
+                                    withSpinner(type = 5, color = "#d80b8c"))), hr(),
+                         fluidRow(
+                           column(4,
+                                  fluidRow(valueBoxOutput("avgCheckinToRoomin", width = 12)), 
+                                  fluidRow(valueBoxOutput("medCheckinToRoomin", width = 12))),
+                           column(8,
+                                  plotOutput("checkInRoomInBoxPlot") %>% 
+                                    withSpinner(type = 5, color = "#d80b8c")))))
+                     )
       ), # Close Practice Overview Tab
                      
       
@@ -564,7 +568,7 @@ ui <- dashboardPage(
                        boxPlus(
                          title = "Arrived Patients", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                         plotOutput("arrivedPts", height = "600px") %>% 
+                         plotOutput("arrivedPts", height = "700px") %>% 
                            withSpinner(type = 5, color = "#d80b8c"))
                      ))),
       
@@ -605,70 +609,55 @@ ui <- dashboardPage(
                      )
               )),
       
+      ## Bumps/Cancellations Tab 
       tabItem(tabName = "cancellations",
               column(11,
                      div("Scheduling | Bumps/Cancellations", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                      textOutput("scheduled_cancel"),
-                     tags$head(tags$style("#scheduled_cancel{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     tags$head(tags$style("#scheduled_cancel{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}"))), hr(),
+              column(11,
                      boxPlus(
-                       title = "Bumped/Canceled/Recheduled Summary", width = 12, status = "primary",
-                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
-                       fluidRow(valueBoxOutput("totalBumpedCanceledRescheduledBox", width = 3),
-                                valueBoxOutput("totalBumpedBox", width = 3), 
-                                valueBoxOutput("totalCanceledBox", width = 3) %>%
-                                  withSpinner(type = 5, color = "#d80b8c"),
-                                valueBoxOutput("totalRescheduledBox", width = 3)),
-                       fluidRow(valueBoxOutput("avgDailyBumpedCanceledRescheduledBox", width = 3),
-                                valueBoxOutput("avgDailyBumpedBox", width = 3), 
-                                valueBoxOutput("avgDailyCanceledBox", width = 3),
-                                valueBoxOutput("avgDailyRescheduledBox", width = 3))),
-                     fluidRow(
-                       column(5,
-                              boxPlus(
-                                title = "Same-Day Bumped/Canceled/Rescheduled", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("sameDayBumpedCanceledRescheduled", height = "500px") %>% 
-                                  withSpinner(type = 5, color = "#d80b8c"))),
-                       column(7,
-                              boxPlus(
-                                title = "Top 10 Bumped Reasons", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("bumpedReasonsLeadDays", height = "500px") %>% 
-                                  withSpinner(type = 5, color = "#d80b8c")))),
-                     fluidRow(
-                       column(5,
-                              boxPlus(
-                                title = "Bumped/Canceled/Rescheduled Lead Days", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("bumpedCanceledRescheduledLeadDays", height = "500px") %>% 
-                                  withSpinner(type = 5, color = "#d80b8c"))),
-                       column(7,
-                              boxPlus(
-                                title = "Top 10 Canceled Reasons", width = 12, status = "primary",
-                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("canceledReasonsLeadDays", height = "500px") %>% 
-                                  withSpinner(type = 5, color = "#d80b8c"))))
-              )),
+                       title = "Summary", width = 12, status = "primary",
+                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                       fluidRow(
+                         valueBoxOutput("avgDailyBumpedBox", width = 4) %>%
+                           withSpinner(type = 5, color = "#d80b8c"),
+                         valueBoxOutput("avgDailyCanceledBox", width = 4) %>%
+                           withSpinner(type = 5, color = "#d80b8c"),
+                         valueBoxOutput("avgDailyRescheduledBox", width = 4) %>%
+                           withSpinner(type = 5, color = "#d80b8c")), hr(),
+                       column(4, 
+                              plotOutput("avgBumpsCancRescRate", height = "450px") %>%
+                                withSpinner(type = 5, color = "#d80b8c")),
+                       column(4,
+                              plotOutput("leadDaysBumpsCancResc", height = "450px") %>%
+                                withSpinner(type = 5, color = "#d80b8c")),
+                       column(4,
+                              plotOutput("sameDayBumpedCanceledRescheduled", height = "450px") %>%
+                                withSpinner(type = 5, color = "#d80b8c"))),
+                     boxPlus(
+                       title = "Top Reasons to Bumps and Cancellations", width = 12, status = "primary",
+                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                       fluidRow(
+                         materialSwitch(
+                           inputId = "percent",
+                           label = "Percent (%)", 
+                           right = TRUE,
+                           status = "primary")), br(),
+                       column(6, 
+                              plotOutput("reasonsBumps", height = "700px") %>%
+                                withSpinner(type = 5, color = "#d80b8c")),
+                       column(6, 
+                              plotOutput("reasonsCanc", height = "700px") %>%
+                                withSpinner(type = 5, color = "#d80b8c"))
+                       
+                     )
+              )
+              
+      ), # Close Bumps/Cancellations Tab
       
-      
-      #        #textOutput("practiceName_utilization"),
-      #        # fluidRow(
-      #        #   boxPlus(
-      #        #     title = "Cancellations", width = 12, status = "primary",
-      #        #     solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-      #        #     column(6, plotOutput("canceledLeadDays")),
-      #        #     column(6, "placeholder for cancellation reason graph"))
-      #        # ),
-      #        fluidRow(
-      #          boxPlus(
-      #            title = "Bumps", width = 12, status = "primary",
-      #            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-      #            column(6, plotOutput("bumpedLeadDays")),
-      #            column(6, "placeholder for bumped reason graph"))
-      #        )
-      # )),
-      
+     
       # Utilization Tab ------------------------------------------------------------------------------------------------------
       tabItem(tabName = "utilization",
               column(11,

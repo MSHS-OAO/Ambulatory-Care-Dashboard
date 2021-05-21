@@ -702,28 +702,28 @@ server <- function(input, output, session) {
       ggplot(waitTime, 
              aes(reorder(Campus.Specialty, -medWaitTime), medWaitTime, fill = medWaitTime <= 14))+
         geom_bar(stat="identity", width = 0.8) +
-        scale_fill_manual("New Access Target: <= 14 Days", values = c("#f8696b", "#63be7b"))+
+        scale_fill_manual("Meets New Patient Access Target: <= 14 Days", values = c("#d80b8c", "#212070"))+
         scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.2), expand = c(0,0))+
         labs(x=NULL, y="Days",
              title = "Median New Appointment Lead Days by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
-        graph_theme("top")
+        graph_theme("top")+ theme(legend.title = element_text(size = "14"))
       
     }else{ # Average Wait Time 
       
       ggplot(waitTime, 
              aes(reorder(Campus.Specialty, -avgWaitTime), avgWaitTime, fill = avgWaitTime <= 14))+
         geom_bar(stat="identity", width = 0.8) +
-        scale_fill_manual("New Access Target:\n <= 14 Days", values = c("#f8696b", "#63be7b"))+
+        scale_fill_manual("Meets New Patient Access Target: <= 14 Days", values = c("#d80b8c", "#212070"))+
         scale_y_continuous(limits=c(0,max(waitTime$avgWaitTime)*1.2), expand = c(0,0))+
         labs(x=NULL, y="Days",
              title = "Average New Appointment Lead Days by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
-        graph_theme("top")
+        graph_theme("top")+ theme(legend.title = element_text(size = "14"))
       
     }
   })
@@ -1605,7 +1605,7 @@ server <- function(input, output, session) {
   output$newNoShow <- renderInfoBox({
     infoBox(
       title = tags$p("Avg New Patient No Show %", style = "font-size: 130%;"), subtitle = NULL,
-      value = paste0(round(nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status != "Arrived"))/ nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE)),2)*100,"%"), icon = icon("clock")
+      value = paste0(round(nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status != "Arrived"))/ nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE)),2)*100,"%"), icon = icon("user-times")
     )
   })
   
@@ -1618,9 +1618,9 @@ server <- function(input, output, session) {
     )
   })
   
-  ### Scheduling Section
-  output$fillRate_tb <- function(){
-
+  ## Booked and Filled Rate  
+  output$pracBookedFilledRate <- renderPlot({
+    
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1630,49 +1630,119 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-
+    
     # Booked and Filled Rate
     data <- dataPastSlot()
     # data <- past.slot.data
-
-      daily.booked <- data %>%
+    
+    daily.booked <- data %>%
       dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
                        `Booked Hours` = round(sum(BOOKED_MINUTES),0),
                        `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
                        `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
                        `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-      mutate(`Booked Rate` = paste0(round((`Booked Hours`/`Available Hours`),2)*100, "%"),
-             `Filled Rate` = paste0(round((`Arrived Hours`/`Available Hours`),2)*100, "%")) %>%
+      mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
+             `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
       gather(variable, value, 1:7) %>%
       filter(variable %in% c("Booked Rate","Filled Rate")) %>%
       select(variable, value)
-
     
-    # Scheduling Activity 
-      
-      data2 <- dataAll()
-      # data2 <- all.data
-      
-      apptsCanceled <- data2 %>% 
-        group_by(Appt.Status) %>%
-        summarise(value = n()) %>%
-        arrange(desc(value)) %>%
-        mutate(percent = paste0(round((value/sum(value))*100),"%")) %>%
-        select(Appt.Status, percent) %>%
-        `colnames<-` (c("variable", "value"))
-      
-      # apptsCanceled$percent[apptsCanceled$Status == "No Show"] <- round((apptsCanceled$Total[apptsCanceled$Status == "No Show"] / (apptsCanceled$Total[apptsCanceled$Status == "Arrived"] + apptsCanceled$Total[apptsCanceled$Status == "No Show"])),2)
-      
-      scheduling_tb <- bind_rows(daily.booked, apptsCanceled)
-      
-      
-      kable(scheduling_tb, col.names = NULL) %>%
-        pack_rows("Slot Usage", 1, 2, label_row_css = "background-color: #fcc9e9;") %>%
-        pack_rows("Scheduling Activity", 3, nrow(scheduling_tb), label_row_css = "background-color: #fcc9e9;") %>%
-        kable_styling(bootstrap_options = c("hover","bordered"), full_width = FALSE,
-                      position = "center", row_label_position = "l", font_size = 18) %>%
-        column_spec(1,  background = "#d80b8c", color = "white")
-  }
+    ggplot(daily.booked, aes(reorder(variable, -value), value, fill=variable)) +
+      geom_bar(stat="identity", width = 0.8) +
+      scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits=c(0,(max(daily.booked$value))*1.5))+
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      labs(x=NULL, y=NULL,
+           title = "Booked and Filled Rate",
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+
+      geom_text(aes(label=paste0(round(value*100),"%")), hjust = 0.5, vjust = -1, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
+    
+    
+  })
+  
+  output$pracApptStatus <- renderPlot({
+    
+    data <- dataNoShow()
+    # data <- noShow.data
+    
+    sameDay <- data %>%
+      group_by(Appt.Status) %>%
+      summarise(value = round(n()/length(unique(all.data$Appt.DateYear)))) %>%
+      arrange(desc(value)) 
+    
+    ggplot(sameDay, aes(reorder(Appt.Status, -value), value, fill=Appt.Status)) +
+      geom_bar(stat="identity", width = 0.8) +
+      scale_y_continuous(limits=c(0,(max(sameDay$value))*1.5))+
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      labs(x=NULL, y=NULL,
+           title = "Avg Daily No Shows and Same-day \nBumped/Canceled/Rescheduled Appointments",
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+
+      geom_text(aes(label=value), hjust = 0.5, vjust = -1, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
+    
+  })
+  
+  # ### Scheduling Section
+  # output$fillRate_tb <- function(){
+  # 
+  #   validate(
+  #     need(input$selectedCampus != "", "Please select a Campus"),
+  #     need(input$selectedSpecialty != "", "Please select a Specialty"),
+  #     need(input$selectedDepartment != "", "Please select a Department"),
+  #     need(input$selectedResource != "", "Please select a Resource"),
+  #     need(input$selectedProvider != "", "Please select a Provider"),
+  #     need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+  #     need(input$selectedPRCName != "", "Please select a Visit Type")
+  #   )
+  # 
+  #   # Booked and Filled Rate
+  #   data <- dataPastSlot()
+  #   # data <- past.slot.data
+  # 
+  #     daily.booked <- data %>%
+  #     dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
+  #                      `Booked Hours` = round(sum(BOOKED_MINUTES),0),
+  #                      `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
+  #                      `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
+  #                      `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
+  #     mutate(`Booked Rate` = paste0(round((`Booked Hours`/`Available Hours`),2)*100, "%"),
+  #            `Filled Rate` = paste0(round((`Arrived Hours`/`Available Hours`),2)*100, "%")) %>%
+  #     gather(variable, value, 1:7) %>%
+  #     filter(variable %in% c("Booked Rate","Filled Rate")) %>%
+  #     select(variable, value)
+  # 
+  #   
+  #   # Scheduling Activity 
+  #     
+  #     data2 <- dataAll()
+  #     # data2 <- all.data
+  #     
+  #     apptsCanceled <- data2 %>% 
+  #       group_by(Appt.Status) %>%
+  #       summarise(value = n()) %>%
+  #       arrange(desc(value)) %>%
+  #       mutate(percent = paste0(round((value/sum(value))*100),"%")) %>%
+  #       select(Appt.Status, percent) %>%
+  #       `colnames<-` (c("variable", "value"))
+  #     
+  #     # apptsCanceled$percent[apptsCanceled$Status == "No Show"] <- round((apptsCanceled$Total[apptsCanceled$Status == "No Show"] / (apptsCanceled$Total[apptsCanceled$Status == "Arrived"] + apptsCanceled$Total[apptsCanceled$Status == "No Show"])),2)
+  #     
+  #     scheduling_tb <- bind_rows(daily.booked, apptsCanceled)
+  #     
+  #     
+  #     kable(scheduling_tb, col.names = NULL) %>%
+  #       pack_rows("Slot Usage", 1, 2, label_row_css = "background-color: #fcc9e9;") %>%
+  #       pack_rows("Scheduling Activity", 3, nrow(scheduling_tb), label_row_css = "background-color: #fcc9e9;") %>%
+  #       kable_styling(bootstrap_options = c("hover","bordered"), full_width = FALSE,
+  #                     position = "center", row_label_position = "l", font_size = 18) %>%
+  #       column_spec(1,  background = "#d80b8c", color = "white")
+  # }
   
   
   ### Day of Visit Section
@@ -1734,7 +1804,7 @@ server <- function(input, output, session) {
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
       theme_new_line()+
       theme_bw()+
-      graph_theme("none")+
+      graph_theme("none")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+
       scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
       scale_y_continuous(labels = scales::percent)
     
@@ -1798,7 +1868,7 @@ server <- function(input, output, session) {
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
       theme_new_line()+
       theme_bw()+
-      graph_theme("none")+
+      graph_theme("none")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+
       scale_x_continuous(breaks = seq(0, 210, 30), lim = c(0, 210))+
       scale_y_continuous(labels = scales::percent)
     
@@ -3101,8 +3171,9 @@ server <- function(input, output, session) {
       geom_bar(position="stack",stat="identity", width=0.7)+
       scale_fill_MountSinai(reverse = TRUE)+
       labs(x = NULL, y = "Pateints",
-           title = "Average Patients Arrived",
-              subtitle = paste0("Based on scheduled appointment time from ",input$dateRange[1]," to ",input$dateRange[2]))+
+           title = "Average Patients Arrived* by Time of Day",
+           subtitle = paste0("Based on scheduled appointment time from ",input$dateRange[1]," to ",input$dateRange[2]),
+           caption = "*Based on scheduled appointment time.")+
       scale_y_continuous(expand = c(0, 0), limits = c(0,max(data$value)*1.2))+
       theme_new_line()+
       theme_bw()+
@@ -3128,8 +3199,10 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
+    data <- dataArrived()
+    # data <- arrived.data
     
-    arrived <- dataArrived() %>%
+    arrived <- data %>%
       group_by(Appt.DateYear, Appt.Day, Appt.TM.Hr) %>%
       dplyr::summarise(total = n()) %>%
       group_by(Appt.Day, Appt.TM.Hr) %>%
@@ -3142,37 +3215,45 @@ server <- function(input, output, session) {
     
     arrived <- arrived %>% filter(Time %in% timeOptionsHr_filter)
     
-    ggplot(arrived, aes(x=Time, y=avg, col=factor(Day,level = daysOfWeek.options), group=Day))+
+    graph <- 
+      ggplot(arrived, aes(x=Time, y=avg, col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
-      #scale_color_manual(values=c("deepskyblue","maroon1","midnightblue"))+
       scale_y_continuous(expand = c(0, 0), limits = c(0,max(arrived$avg)*1.2))+
-      
-      labs(x = NULL, y = "Pateints", 
-           title = "Average Patients Arrived",
-           subtitle = paste0("Based on scheduled appointment time from ",input$dateRange[1]," to ",input$dateRange[2]))+
+      labs(x = NULL, y = "Pateints",
+           title = "Average Patients Arrived* by Time of Day and Day of Week",
+           subtitle = paste0("Based on scheduled appointment time from ",input$dateRange[1]," to ",input$dateRange[2]),
+           caption = "*Based on scheduled appointment time.")+
       scale_color_MountSinai("main")+
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      # theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-      #       plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-      #       legend.position = "top",
-      #       legend.text = element_text(size="12"),
-      #       legend.direction = "horizontal",
-      #       legend.key.size = unit(1.0,"cm"),
-      #       legend.title = element_blank(),
-      #       axis.title = element_text(size="14"),
-      #       axis.text = element_text(size="14"),
-      #       axis.title.x = element_blank(),
-      #       axis.title.y = element_blank(),
-      #       axis.text.x = element_text(angle = 35,hjust = 1),
-      #       axis.text.y = element_text(margin = margin(l=5, r=5)),
-      #       panel.grid.minor = element_blank(),
-      #       panel.border = element_blank(),
-      #       panel.background = element_blank(),
-      #       axis.line = element_line(size = 0.3, colour = "black"),
-      #       plot.margin = margin(30,30,30,30))+
       guides(colour = guide_legend(nrow = 1))
+    
+    
+    table <- 
+      ggplot(arrived, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
+      labs(x=NULL, y=NULL)+
+      geom_tile(aes(fill=avg), colour = "black", size=0.5)+
+      coord_flip()+
+      scale_fill_gradient2(midpoint = median(unique(arrived$avg)), low = "#5a8ac6", mid = "white", high = "#f8696b", space = "Lab", na.value = "black", guide = "colourbar", name="Patients\nArrived")+
+      scale_x_discrete(position = "bottom")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "top",
+            legend.direction = "horizontal",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_blank(),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(avg),"", round(avg,1))), color="black", size=5, fontface="bold")
+    
+    grid.arrange(graph, table, ncol = 1, heights = c(5,3))
     
   })
   
@@ -3526,58 +3607,6 @@ server <- function(input, output, session) {
     )
   })
   
-  # Average Bumped Appointments 
-  output$totalBumpedBox<- renderValueBox({
-    
-    data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
-    
-    valueBox(
-      prettyNum(nrow(data %>% filter(Appt.Status == "Bumped")),big.mark=","), 
-      subtitle = tags$p("Total Bumped Appointments", style = "font-size: 160%;"), icon = NULL,
-      color = "yellow"
-    )
-  })
-  
-  # Average Canceled Appointments 
-  output$totalCanceledBox<- renderValueBox({
-    
-    data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
-    
-    valueBox(
-      prettyNum(nrow(data %>% filter(Appt.Status == "Canceled")),big.mark=","), 
-      subtitle = tags$p("Total Canceled Appointments", style = "font-size: 160%;"), icon = NULL,
-      color = "yellow"
-    )
-  })
-  
-  # Average Daily Rescheduled Appointments 
-  output$totalRescheduledBox<- renderValueBox({
-    
-    data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
-    
-    valueBox(
-      prettyNum(nrow(data %>% filter(Appt.Status == "Rescheduled")),big.mark=","), 
-      subtitle = tags$p("Total Rescheduled Appointments", style = "font-size: 160%;"), icon = NULL,
-      color = "yellow"
-    )
-  })
-  
-  # Avg Daily Canceled/Bumped/Rescheduled Appointments 
-  output$avgDailyBumpedCanceledRescheduledBox <- renderValueBox({
-    
-    data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
-    
-    valueBox(
-      prettyNum(round(nrow(data)/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
-      subtitle = tags$p("Avg Daily Bumped/Canceled/Rescheduled Appointments", style = "font-size: 160%;"), icon = NULL,
-      color = "fuchsia"
-    )
-  })
-  
   # Avg Daily Canceled/Bumped/Rescheduled Appointments 
   output$avgDailyBumpedBox <- renderValueBox({
     
@@ -3587,7 +3616,7 @@ server <- function(input, output, session) {
     valueBox(
       prettyNum(round(nrow(data %>% filter(Appt.Status == "Bumped"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
       subtitle = tags$p("Avg Daily Bumped Appointments", style = "font-size: 160%;"), icon = NULL,
-      color = "fuchsia"
+      color = "yellow"
     )
   })
   
@@ -3600,7 +3629,7 @@ server <- function(input, output, session) {
     valueBox(
       prettyNum(round(nrow(data %>% filter(Appt.Status == "Canceled"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
       subtitle = tags$p("Avg Daily Canceled Appointments", style = "font-size: 160%;"), icon = NULL,
-      color = "fuchsia"
+      color = "yellow"
     )
   })
   
@@ -3613,10 +3642,97 @@ server <- function(input, output, session) {
     valueBox(
       prettyNum(round(nrow(data %>% filter(Appt.Status == "Rescheduled"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
       subtitle = tags$p("Avg Daily Rescheduled Appointments", style = "font-size: 160%;"), icon = NULL,
-      color = "fuchsia"
+      color = "yellow"
     )
   })
   
+  
+  ## Average Bumps/Canc/Resc Rate 
+  output$avgBumpsCancRescRate <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataAll()
+    # data <- all.data
+    
+    apptsCanceled <- data %>%
+      group_by(Appt.Status) %>%
+      summarise(value = n()) %>%
+      arrange(desc(value)) %>%
+      mutate(percent = round((value/sum(value)), 2)) %>%
+      select(Appt.Status, percent) %>%
+      filter(Appt.Status %in% c("Bumped", "Canceled", "Rescheduled"))
+    
+    ggplot(apptsCanceled, aes(reorder(Appt.Status, -percent), percent, fill=Appt.Status)) +
+      geom_bar(stat="identity", width = 0.8) +
+      scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits=c(0,(max(apptsCanceled$percent))*1.5))+
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      labs(x=NULL, y=NULL,
+           title = "Bumped/Canceled/Rescheduled Rate*",
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+           caption = "*% of Total Appointments Scheduled.")+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+
+      geom_text(aes(label=paste0(round(percent*100),"%")), hjust = 0.5, vjust = -1, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
+    
+  })
+  
+  ## Lead Days to Bumps/Canc/Resc 
+  output$leadDaysBumpsCancResc <- renderPlot({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    data <- dataAll() %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
+    # data <- canceled.bumped.rescheduled.data %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
+    
+    lead.days.df <- data %>%
+      filter(Lead.Days >= 0) %>%
+      mutate(leadDays = ifelse(Lead.Days> 14, "> 14 days", 
+                               ifelse(Lead.Days <= 14 & Lead.Days >= 8, "8-14 days",
+                                      ifelse(Lead.Days < 8 & Lead.Days >= 1, "1-7 days",
+                                             ifelse(Lead.Days < 0, "0 day","0 day"))))) %>%
+      group_by(leadDays,Appt.Status) %>%
+      dplyr::summarise(total = n()) %>%
+      group_by(Appt.Status) %>%
+      mutate(perc = total/sum(total))
+    
+    ggplot(lead.days.df, aes(x=Appt.Status, y=perc, fill=factor(leadDays, levels=c("0 day","1-7 days","8-14 days","> 14 days"))))+
+      geom_bar(position="stack",stat="identity", width=0.7)+
+      scale_fill_manual(values=c("grey","#00aeef","#d80b8c","midnightblue"))+
+      labs(x=NULL, y=NULL,
+           title = "% of Bumped/Canceled/Rescheduled \nAppointments by Lead Days*",
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+           caption = "*Time from appointment scheduled to status changed.")+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
+      guides(colour = guide_legend(nrow = 1))+
+      geom_text(aes(label=paste0(round(perc*100),"%")), color="white", 
+                size=5, fontface="bold", position = position_stack(vjust = 0.5))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+    
+  })
+  
+  
+  ## Average Daily Same-day Bumps/Canc/Resc Rate 
   output$sameDayBumpedCanceledRescheduled <- renderPlot({
     
     validate(
@@ -3634,158 +3750,31 @@ server <- function(input, output, session) {
     
     sameDay <- data %>%
       group_by(Appt.Status) %>%
-      summarise(total = n())
+      summarise(total = n()) %>%
+      mutate(avg = round(total/length(unique(all.data$Appt.DateYear))))
     
-    sameDay$avg <- round(sameDay$total / length(unique(dataAll()$Appt.DateYear)),1)
-    
-    ggplot(sameDay, aes(x = "", y = avg, fill = Appt.Status))+
-      geom_bar(stat = "identity", color = "white")+
-      scale_fill_MountSinai('blue')+
-      labs(title = "Average Daily Appointments by Status",
-           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-      geom_text(aes(x = 1.6, label = paste0(Appt.Status,"\n",avg), size=10, fontface="bold"), position = position_stack(vjust = .5))+
-      coord_polar("y")+
-      theme_void()+
-      theme(plot.title = element_text(face = "bold", size = 20, hjust=0.5),
-            plot.subtitle = element_text(size = 15, face = "italic",hjust=0.5),
-            legend.position = "none",
-            axis.title = element_text(size="14"),
-            axis.text = element_text(size="14"),
-            axis.title.x = element_blank(),
-            axis.title.y = element_blank(),
-            axis.text.x = element_blank(),
-            axis.text.y = element_text(margin = margin(l=5, r=5)),
-            panel.grid.minor = element_blank(),
-            panel.border = element_blank(),
-            panel.background = element_blank(),
-            axis.line = element_blank())
-    
-  })
-  
-  
-  # Appt Status by Lead Days
-  output$bumpedCanceledRescheduledLeadDays <- renderPlot({
-    
-    validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
-    )
-    
-    data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
-    
-    lead.days.df <- data %>%
-      filter(Lead.Days >= 0) %>%
-      mutate(leadDays = ifelse(Lead.Days> 14, "> 14 days", 
-                               ifelse(Lead.Days <= 14 & Lead.Days >= 8, "8-14 days",
-                                      ifelse(Lead.Days < 8 & Lead.Days >= 1, "1-7 days",
-                                             ifelse(Lead.Days < 0, "0 day","0 day"))))) %>%
-      group_by(leadDays,Appt.Status) %>%
-      dplyr::summarise(total = n()) %>%
-      group_by(Appt.Status) %>%
-      mutate(perc = total/sum(total))
-    
-    ggplot(lead.days.df, aes(x=Appt.Status, y=perc, fill=factor(leadDays, levels=c("> 14 days","8-14 days","1-7 days","0 day"))))+
-      geom_bar(position="stack",stat="identity", width=0.7)+
-      scale_fill_manual(values=c("grey","#00aeef","#d80b8c","midnightblue"))+
-      labs(x = NULL, y = "Percent",
-           title = "Status by Lead Days to Appointment",
-           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
+    ggplot(sameDay, aes(reorder(Appt.Status, -avg), avg, fill=Appt.Status)) +
+      geom_bar(stat="identity", width = 0.8) +
+      scale_y_continuous(limits=c(0,(max(sameDay$avg))*1.5))+
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      labs(x=NULL, y=NULL,
+           title = "Average Daily Same-day \nBumped/Canceled/Rescheduled Appointments",
+           # subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+           caption = "*Appointment status changed on the day of appoinment.")+
       theme_new_line()+
       theme_bw()+
-      graph_theme("top")+
-      guides(colour = guide_legend(nrow = 1))+
-      geom_text(aes(label=paste0(round(perc*100),"%")), color="white", 
-                size=5, fontface="bold", position = position_stack(vjust = 0.5))
+      graph_theme("none")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+
+      geom_text(aes(label=avg), hjust = 0.5, vjust = -1, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
     
   })
+
   
-  
-  # Canceled Reasons by Lead Days
-  output$canceledReasonsLeadDays <- renderPlot({
+  ## Bumped Reasons by Lead Days
+  output$reasonsBumps <- renderPlot({
     
-    validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
-    )
-    
-    #### TEMPORARY DATASET #### 
-    # canceled.data <- historical.data %>% filter(Appt.Status %in% c("Canceled")) 
-    
-    canceled.data <- dataCanceled()
-    total <- nrow(canceled.data)
-    
-    cancellations <- 
-      canceled.data %>%
-      mutate(leadDays = as.numeric(round(difftime(Appt.DTTM, Appt.Cancel.DTTM,  units = "days"),2))) %>% #(REMOVE)
-      mutate(leadDays = ifelse(is.na(leadDays),0,leadDays)) %>%
-      mutate(leadDays = ifelse(leadDays > 14, "> 14 days", 
-                               ifelse(leadDays <= 14 & leadDays>= 8, "8-14 days",
-                                      ifelse(leadDays < 8 & leadDays >= 1, "1-7 days",
-                                             ifelse(leadDays < 0, "0 day","0 day"))))) %>%
-      group_by(leadDays,Cancel.Reason) %>%
-      dplyr::summarise(total = n()) %>%
-      arrange(leadDays,desc(total))
-    
-    cancellations$percent <- round(cancellations$total/total,2)
-    
-    top10 <- cancellations %>% 
-      group_by(Cancel.Reason) %>% 
-      dplyr::summarise(total = sum(total)) %>% 
-      arrange(desc(total)) %>%
-      head(10)
-    
-    top10 <- as.vector(top10$Cancel.Reason)
-    
-    # Create the heatmap
-    ggplot(cancellations %>% filter(Cancel.Reason %in% top10), 
-           aes(Cancel.Reason, factor(leadDays, levels=c("> 14 days","8-14 days","1-7 days","0 day")), fill = percent))+
-      geom_tile(color = "grey")+
-      labs(title = "Canceled Reasons by Lead Days",
-           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-      scale_fill_gradient2(low = "#d80b8c", high = "#212070", mid = "white", 
-                           midpoint = median(cancellations$percent), limit = c(min(cancellations$percent),max(cancellations$percent)), space = "Lab",
-                           name="Percent of\nTotal Canceled\n") + # Change gradient color
-      #scale_x_discrete(labels = wrap_format(20))+
-      theme_minimal()+ # minimal theme
-      theme(plot.title = element_text(face = "bold", size = 20, hjust=0.5),
-            plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
-            axis.title.x = element_blank(),
-            axis.title.y = element_blank(),
-            axis.text.x = element_text(angle = 50, vjust = 1, size = 16, hjust = 1),
-            axis.text.y = element_text(size = 14))+
-      coord_fixed()
-    
-  })
-  
-  
-  
-  # Bumped Reasons by Lead Days
-  output$bumpedReasonsLeadDays <- renderPlot({
-    
-    validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
-    )
-    
-    #### TEMPORARY DATASET #### 
-    bumped.data <- historical.data %>% filter(Appt.Status %in% c("Bumped")) 
+    data <- dataBumped()
+    # data <- bumped.data
     
     total <- nrow(bumped.data)
     
@@ -3801,7 +3790,7 @@ server <- function(input, output, session) {
       dplyr::summarise(total = n()) %>%
       arrange(leadDays,desc(total))
     
-    bumps$percent <- round(bumps$total/total,2)
+    bumps$percent <- round(bumps$total/total,2)*100
     
     top10 <- bumps %>% 
       group_by(Cancel.Reason) %>% 
@@ -3811,26 +3800,123 @@ server <- function(input, output, session) {
     
     top10 <- as.vector(top10$Cancel.Reason)
     
-    # Create the heatmap
-    ggplot(bumps %>% filter(Cancel.Reason %in% top10), 
-           aes(Cancel.Reason, factor(leadDays, levels=c("> 14 days","8-14 days","1-7 days","0 day")), fill = percent))+
-      geom_tile(color = "grey")+
-      labs(title = "Bumped Reasons by Lead Days",
-           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-      scale_fill_gradient2(low = "#212070", high = "#d80b8c", mid = "white", 
-                           midpoint = median(bumps$percent), limit = c(min(bumps$percent),max(bumps$percent)), space = "Lab",
-                           name="Percent of\nTotal Bumped\n") + # Change gradient color
-      #scale_x_discrete(labels = wrap_format(20))+
+    if(input$percent == FALSE){
+      
+      graph <- 
+        ggplot(bumps %>% filter(Cancel.Reason %in% top10), 
+               aes(Cancel.Reason, factor(leadDays, levels=c("0 day","1-7 days","8-14 days","> 14 days")), fill = total))+
+        geom_tile(color = "black")+
+        coord_flip()+
+        labs(x=NULL, y=NULL,
+             title = "Top 10 Bumped Reasons by Lead Days",
+             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+        scale_fill_gradient(low = "white", high = "#d80b8c", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
+                            name="Total Bumped Appointments\n by Lead Days")+
+        geom_text(aes(label= ifelse(is.na(total),"",total)), color="black", size=5)
+      
+    }else{
+      
+      graph <- 
+        ggplot(bumps %>% filter(Cancel.Reason %in% top10), 
+               aes(Cancel.Reason, factor(leadDays, levels=c("0 day","1-7 days","8-14 days","> 14 days")), fill = percent))+
+        geom_tile(color = "black")+
+        coord_flip()+
+        labs(x=NULL, y=NULL,
+             title = "Top 10 Bumped Reasons by Lead Days",
+             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+        scale_fill_gradient(low = "white", high = "#d80b8c", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
+                            name="Total % of Bumped \nAppointments by Lead Days")+
+        geom_text(aes(label= ifelse(is.na(percent),"",paste0(percent,"%"))), color="black", size=5, fontface="bold")
+      
+    }
+    
+    graph +
+      scale_x_discrete(labels = wrap_format(25))+
       theme_minimal()+ # minimal theme
       theme(plot.title = element_text(face = "bold", size = 20, hjust=0.5),
             plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
+            legend.position = "top",
             axis.title.x = element_blank(),
             axis.title.y = element_blank(),
-            axis.text.x = element_text(angle = 50, vjust = 1, size = 16, hjust = 1),
-            axis.text.y = element_text(size = 14))+
-      coord_fixed()
+            axis.text.x = element_text(angle = 0, hjust = 0.5, size = 14, colour = "black"),
+            axis.text.y = element_text(size = 14, colour = "black"))
     
   })
+  
+  
+  ## Canceled Reasons by Lead Days
+  output$reasonsCanc <- renderPlot({
+    
+    data <- dataCanceled()
+    # data <- canceled.data
+    
+    total <- nrow(canceled.data)
+    
+    cancellations <- 
+      data %>%
+      mutate(leadDays = as.numeric(round(difftime(Appt.DTTM, Appt.Cancel.DTTM,  units = "days"),2))) %>% #(REMOVE)
+      mutate(leadDays = ifelse(is.na(leadDays),0,leadDays)) %>%
+      mutate(leadDays = ifelse(leadDays > 14, "> 14 days", 
+                               ifelse(leadDays <= 14 & leadDays>= 8, "8-14 days",
+                                      ifelse(leadDays < 8 & leadDays >= 1, "1-7 days",
+                                             ifelse(leadDays < 0, "0 day","0 day"))))) %>%
+      group_by(leadDays,Cancel.Reason) %>%
+      dplyr::summarise(total = n()) %>%
+      arrange(leadDays,desc(total))
+    
+    cancellations$percent <- round(cancellations$total/total,2)*100
+    cancellations$Cancel.Reason[which(is.na(cancellations$Cancel.Reason))] <- "No Reasons Recorded"
+    
+    top10 <- cancellations %>% 
+      group_by(Cancel.Reason) %>% 
+      dplyr::summarise(total = sum(total)) %>% 
+      arrange(desc(total)) %>%
+      head(10)
+    
+    top10 <- as.vector(top10$Cancel.Reason)
+    
+    if(input$percent == FALSE){
+      
+      graph <- 
+        ggplot(cancellations %>% filter(Cancel.Reason %in% top10), 
+               aes(Cancel.Reason, factor(leadDays, levels=c("0 day","1-7 days","8-14 days","> 14 days")), fill = total))+
+        geom_tile(color = "black")+
+        coord_flip()+
+        labs(x=NULL, y=NULL,
+             title = "Top 10 Canceled Reasons by Lead Days",
+             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+        scale_fill_gradient(low = "white", high = "#00aeef", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
+                            name="Total Canceled Appointments\n by Lead Days")+
+        geom_text(aes(label= ifelse(is.na(total),"",total)), color="black", size=5)
+      
+    }else{
+      
+      graph <- 
+        ggplot(cancellations %>% filter(Cancel.Reason %in% top10), 
+               aes(Cancel.Reason, factor(leadDays, levels=c("0 day","1-7 days","8-14 days","> 14 days")), fill = percent))+
+        geom_tile(color = "black")+
+        coord_flip()+
+        labs(x=NULL, y=NULL,
+             title = "Top 10 Canceled Reasons by Lead Days",
+             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+        scale_fill_gradient(low = "white", high = "#00aeef", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
+                            name="% of Total Canceled \nAppointments by Lead Days")+
+        geom_text(aes(label= ifelse(is.na(percent),"",paste0(percent,"%"))), color="black", size=5)
+    }
+    
+    graph +
+      scale_x_discrete(labels = wrap_format(25))+
+      theme_minimal()+ # minimal theme
+      theme(plot.title = element_text(face = "bold", size = 20, hjust=0.5),
+            plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
+            legend.position = "top",
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.x = element_text(angle = 0, hjust = 0.5, size = 14, colour = "black"),
+            axis.text.y = element_text(size = 14, colour = "black"))
+    
+  })
+  
 
   ### Utilization Tab -----------------------------------------------------------------------------------------------------------------
   # Average Rooms Required --------------------------------------------------------------------------------------------
