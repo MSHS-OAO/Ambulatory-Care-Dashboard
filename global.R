@@ -339,6 +339,9 @@ past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >
 future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
 rm(slot.data.subset)
 
+past.slot.data <- past.slot.data[0,]
+future.slot.data <- future.slot.data[0,]
+
 
 
 
