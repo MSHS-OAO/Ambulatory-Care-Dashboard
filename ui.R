@@ -1,28 +1,31 @@
 default_campus <- "MSUS"
-default_specialty <- sort(unique(historical.data[historical.data$Campus %in% "MSUS", "Campus.Specialty"]))
-default_departments <- sort(unique(historical.data[historical.data$Campus %in% "MSUS" &
-                                                     historical.data$Campus.Specialty %in% default_specialty, "Department"])) 
+default_specialty <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS", "Campus.Specialty"]))
+default_departments <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS" &
+                                                     kpi.all.data$Campus.Specialty %in% default_specialty, "Department"])) 
 default_resource_type <- c("Provider","Resource")
-default_provider <- sort(unique(historical.data[
-  historical.data$Campus %in% default_campus &
-    historical.data$Campus.Specialty %in% default_specialty &
-    historical.data$Department %in% default_departments & 
-    historical.data$Resource %in% default_resource_type, "Provider"]))
+default_provider <- sort(unique(kpi.all.data[
+  kpi.all.data$Campus %in% default_campus &
+    kpi.all.data$Campus.Specialty %in% default_specialty &
+    kpi.all.data$Department %in% default_departments & 
+    kpi.all.data$Resource %in% default_resource_type, "Provider"]))
 
-default_visit_method <- sort(unique(historical.data[
-  historical.data$Campus %in% default_campus &
-    historical.data$Campus.Specialty %in% default_specialty &
-    historical.data$Department %in% default_departments & 
-    historical.data$Resource %in% default_resource_type &
-    historical.data$Provider %in% default_provider, "Visit.Method"]))
+default_visit_method <- sort(unique(kpi.all.data[
+  kpi.all.data$Campus %in% default_campus &
+    kpi.all.data$Campus.Specialty %in% default_specialty &
+    kpi.all.data$Department %in% default_departments & 
+    kpi.all.data$Resource %in% default_resource_type &
+    kpi.all.data$Provider %in% default_provider, "Visit.Method"]))
 
-default_PRC_name <- sort(unique(historical.data[
-  historical.data$Campus %in% default_campus &
-    historical.data$Campus.Specialty %in% default_specialty &
-    historical.data$Department %in% default_departments & 
-    historical.data$Resource %in% default_resource_type &
-    historical.data$Provider %in% default_provider &
-    historical.data$Visit.Method %in% default_visit_method, "Appt.Type"]))
+default_PRC_name <- sort(unique(kpi.all.data[
+  kpi.all.data$Campus %in% default_campus &
+    kpi.all.data$Campus.Specialty %in% default_specialty &
+    kpi.all.data$Department %in% default_departments & 
+    kpi.all.data$Resource %in% default_resource_type &
+    kpi.all.data$Provider %in% default_provider &
+    kpi.all.data$Visit.Method %in% default_visit_method, "Appt.Type"]))
+
+kpi.arrived.data <- kpi.all.data %>% filter(Appt.Status %in% c("Arrived"))
+arrived.data <- all.data %>% filter(Appt.Status %in% c("Arrived"))
 
 dateRangeKpi_start = min(kpi.arrived.data$Appt.DateYear) 
 dateRangeKpi_end = max(kpi.arrived.data$Appt.DateYear)
@@ -103,8 +106,8 @@ ui <- dashboardPage(
                          menuSubItem("Slot Usage", tabName = "slotUsage")),
                 menuItem("Day of Visit", tabName = "day", icon = icon("hand-holding-medical"),
                          menuSubItem("Cycle Time", tabName = "cycleTime"),
-                         menuSubItem("Room-in Time", tabName = "roomInTime")),
-                menuItem("Data", tabName = "data", icon = icon("table"))
+                         menuSubItem("Room-in Time", tabName = "roomInTime"))
+                #menuItem("Data", tabName = "data", icon = icon("table"))
     ) # Close sidebarMenu
     
   ), # Close dashboardSidebar
@@ -161,7 +164,7 @@ ui <- dashboardPage(
               column(12,
                      div("About Ambulatory Care Analytics Tool", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$div( id = "home_text",
-                       HTML("<p>Version: 1.0 <br> Last Updated: 5/20/2021</p>")
+                       HTML("<p>Version: 1.0 <br> Last Updated: 5/21/2021</p>")
                      ),
                      tags$head(tags$style("#home_text{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 15px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), 
                      column(12,
@@ -533,7 +536,8 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Insurance Types", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              column(12, tableOutput("ins_breakdown_tb") %>%
+                              column(2),
+                              column(8, tableOutput("ins_breakdown_tb") %>%
                                        withSpinner(type = 5, color = "#d80b8c")))
                      ),
                      column(12,
@@ -1085,7 +1089,7 @@ ui <- dashboardPage(
                height = "100px",
                solidHeader = FALSE,
                pickerInput("selectedCampus",label=NULL,
-                           choices=sort(unique(historical.data$Campus)),
+                           choices=sort(unique(kpi.all.data$Campus)),
                            multiple=TRUE,
                            options = pickerOptions(
                              liveSearch = TRUE,
@@ -1197,13 +1201,13 @@ ui <- dashboardPage(
     #            width = 12,
     #            solidHeader = FALSE,
     #            pickerInput("selectedVisitMethod",label=NULL,
-    #                        choices=sort(unique(historical.data$Visit.Method)),
+    #                        choices=sort(unique(kpi.all.data$Visit.Method)),
     #                        multiple=TRUE,
     #                        options = pickerOptions(
     #                          liveSearch = TRUE,
     #                          actionsBox = TRUE,
     #                          dropupAuto = FALSE),
-    #                        selected = unique(historical.data$Visit.Method)))
+    #                        selected = unique(kpi.all.data$Visit.Method)))
     #   )),
     
     

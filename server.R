@@ -440,6 +440,12 @@ server <- function(input, output, session) {
   })
   
   dataArrivedNoShow <- reactive({
+    arrived.data <- all.data %>% filter(Appt.Status %in% c("Arrived"))
+    noShow.data <- all.data %>% filter(Appt.Status %in% c("No Show"))
+    sameDay <- all.data %>% filter(Appt.Status %in% c("Canceled","Bumped","Rescheduled") & Lead.Days == 0)
+    noShow.data <- rbind(noShow.data,sameDay)
+    arrivedNoShow.data <- rbind(arrived.data,noShow.data)
+    
     groupByFilters(arrivedNoShow.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -447,6 +453,8 @@ server <- function(input, output, session) {
   })
   
   dataArrived <- reactive({
+    arrived.data <- all.data %>% filter(Appt.Status %in% c("Arrived"))
+    
     groupByFilters(arrived.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -454,6 +462,10 @@ server <- function(input, output, session) {
   })
   
   dataNoShow <- reactive({
+    noShow.data <- all.data %>% filter(Appt.Status %in% c("No Show"))
+    sameDay <- all.data %>% filter(Appt.Status %in% c("Canceled","Bumped","Rescheduled") & Lead.Days == 0)
+    noShow.data <- rbind(noShow.data,sameDay)
+    
     groupByFilters(noShow.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -461,6 +473,8 @@ server <- function(input, output, session) {
   })
   
   dataCanceledBumpedRescheduled<- reactive({
+    canceled.bumped.rescheduled.data <- all.data %>% filter(Appt.Status %in% c("Canceled","Bumped","Rescheduled"))
+    
     groupByFilters(canceled.bumped.rescheduled.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -468,6 +482,8 @@ server <- function(input, output, session) {
   })
   
   dataCanceled<- reactive({
+    canceled.data <- all.data %>% filter(Appt.Status %in% c("Canceled"))
+    
     groupByFilters(canceled.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -475,6 +491,8 @@ server <- function(input, output, session) {
   })
   
   dataBumped<- reactive({
+    bumped.data <- all.data %>% filter(Appt.Status %in% c("Bumped"))
+    
     groupByFilters(bumped.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -482,6 +500,8 @@ server <- function(input, output, session) {
   })
   
   dataRescheduled<- reactive({
+    rescheduled.data <- all.data %>% filter(Appt.Status %in% c("Rescheduled"))
+    
     groupByFilters(rescheduled.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -490,6 +510,8 @@ server <- function(input, output, session) {
   
   # [2.2] All pre-processed data for kpi tabs --------------------------------------------------------------------------------------
   dataAllKpi <- reactive({
+    #kpi.all.data <- historical.data %>% filter(Appt.DTTM >= max_date - 3*365)
+    
     groupByFilters(kpi.all.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -497,6 +519,8 @@ server <- function(input, output, session) {
   })
   
   dataArrivedNoShowKpi <- reactive({
+    kpi.arrivedNoShow.data <- kpi.all.data %>% filter(Appt.Status %in% c("Arrived","No Show")) 
+    
     groupByFilters(kpi.arrivedNoShow.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -504,6 +528,8 @@ server <- function(input, output, session) {
   })
   
   dataArrivedKpi <- reactive({
+    kpi.arrived.data <- kpi.all.data %>% filter(Appt.Status %in% c("Arrived"))
+    
     groupByFilters(kpi.arrived.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -511,6 +537,8 @@ server <- function(input, output, session) {
   })
   
   dataCanceledBumpedKpi <- reactive({
+    kpi.canceled.bumped.data <- kpi.all.data %>% filter(Appt.Status %in% c("Canceled","Bumped"))
+    
     groupByFilters(kpi.canceled.bumped.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -518,6 +546,8 @@ server <- function(input, output, session) {
   })
   
   dataCanceledKpi <- reactive({
+    kpi.canceled.data <- kpi.all.data %>% filter(Appt.Status %in% c("Canceled"))
+    
     groupByFilters(kpi.canceled.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -525,6 +555,8 @@ server <- function(input, output, session) {
   })
   
   dataBumpedKpi <- reactive({
+    kpi.bumped.data <- kpi.all.data %>% filter(Appt.Status %in% c("Bumped"))
+    
     groupByFilters(kpi.bumped.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
