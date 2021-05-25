@@ -315,22 +315,22 @@ setwd(wdpath)
 
 ### RStudio COnnect Data Read In
 
-# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
-# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
-# holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
-# data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
-# data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
-# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
+historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
+slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
+holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
+data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
+data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
+population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
 
 
 
 
-historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
-slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
-data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
-population.data_filtered <- readRDS(paste0(wdpath,"/Data/population.data_filtered.rds"))
+# historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
+# slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+# data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
+# data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
+# population.data_filtered <- readRDS(paste0(wdpath,"/Data/population.data_filtered.rds"))
 
 max_date <- max(historical.data$Appt.DateYear)
 

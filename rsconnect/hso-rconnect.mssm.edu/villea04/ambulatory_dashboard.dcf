@@ -5,9 +5,9 @@ account: villea04
 server: hso-rconnect.mssm.edu
 hostUrl: https://hso-rconnect.mssm.edu/__api__
 appId: 12
-bundleId: 63
+bundleId: 76
 url: https://hso-rconnect.mssm.edu/ambulatory/analytics-tool/
-when: 1621546593.0176
-lastSyncTime: 1621546593.0176
+when: 1621973345.20301
+lastSyncTime: 1621973345.20301
 asMultiple: FALSE
 asStatic: FALSE

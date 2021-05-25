@@ -103,8 +103,8 @@ ui <- dashboardPage(
                          menuSubItem("Slot Usage", tabName = "slotUsage")),
                 menuItem("Day of Visit", tabName = "day", icon = icon("hand-holding-medical"),
                          menuSubItem("Cycle Time", tabName = "cycleTime"),
-                         menuSubItem("Room-in Time", tabName = "roomInTime")),
-                menuItem("Data", tabName = "data", icon = icon("table"))
+                         menuSubItem("Room-in Time", tabName = "roomInTime"))
+                #menuItem("Data", tabName = "data", icon = icon("table"))
     ) # Close sidebarMenu
     
   ), # Close dashboardSidebar
