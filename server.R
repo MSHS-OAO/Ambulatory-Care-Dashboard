@@ -80,193 +80,193 @@ server <- function(input, output, session) {
     ignoreInit = TRUE,
     ignoreNULL = FALSE)
   
-  # observeEvent(input$selectedSpecialty,{
-  #   department_choices <- sort(unique(historical.data[
-  #     kpi.all.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedDepartment",
-  #                     choices = department_choices,
-  #                     selected = department_choices
-  #   )
-  # 
-  #   provider_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% department_choices, "Provider"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedProvider",
-  #                     choices = provider_choices,
-  #                     selected = provider_choices
-  #   )
-  # 
-  # 
-  #   visit_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% department_choices &
-  #       historical.data$Resource %in% input$selectedResource &
-  #       historical.data$Provider %in% provider_choices, "Visit.Method"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedVisitMethod",
-  #                     choices = visit_choices,
-  #                     selected = visit_choices
-  #   )
-  # 
-  #   prc_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% department_choices &
-  #       historical.data$Resource %in% input$selectedResource &
-  #       historical.data$Provider %in% provider_choices &
-  #       historical.data$Visit.Method %in% visit_choices, "Appt.Type"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedPRCName",
-  #                     choices = prc_choices,
-  #                     selected = prc_choices
-  #   )
-  # },
-  # ignoreInit = TRUE,
-  # ignoreNULL = FALSE)
-  #  
-  # observeEvent(input$selectedDepartment,{
-  #   provider_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% input$selectedDepartment &
-  #       historical.data$Resource %in% input$selectedResource, "Provider"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedProvider",
-  #                     choices = provider_choices,
-  #                     selected = provider_choices
-  #   )
-  # 
-  #   visit_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% input$selectedDepartment &
-  #       historical.data$Resource %in% input$selectedResource &
-  #       historical.data$Provider %in% provider_choices, "Visit.Method"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedVisitMethod",
-  #                     choices = visit_choices,
-  #                     selected = visit_choices
-  #   )
-  # 
-  #   prc_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% input$selectedDepartment &
-  #       historical.data$Resource %in% input$selectedResource &
-  #       historical.data$Provider %in% provider_choices &
-  #       historical.data$Visit.Method %in% visit_choices, "Appt.Type"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedPRCName",
-  #                     choices = prc_choices,
-  #                     selected = prc_choices
-  #   )
-  # },
-  # ignoreInit = TRUE,
-  # ignoreNULL = FALSE)
-  # 
-  # observeEvent(input$selectedResource,{
-  #   provider_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% input$selectedDepartment &
-  #       historical.data$Resource %in% input$selectedResource, "Provider"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedProvider",
-  #                     choices = provider_choices,
-  #                     selected = provider_choices
-  #   )
-  # 
-  #   visit_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% input$selectedDepartment &
-  #       historical.data$Resource %in% input$selectedResource &
-  #       historical.data$Provider %in% provider_choices, "Visit.Method"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedVisitMethod",
-  #                     choices = visit_choices,
-  #                     selected = visit_choices
-  #   )
-  # 
-  #   prc_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% input$selectedDepartment &
-  #       historical.data$Resource %in% input$selectedResource &
-  #       historical.data$Provider %in% provider_choices &
-  #       historical.data$Visit.Method %in% visit_choices, "Appt.Type"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedPRCName",
-  #                     choices = prc_choices,
-  #                     selected = prc_choices
-  #   )
-  # },
-  # ignoreInit = TRUE,
-  # ignoreNULL = FALSE)
-  # 
-  # observeEvent(input$selectedProvider, {
-  #   visit_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% input$selectedDepartment &
-  #       historical.data$Resource %in% input$selectedResource &
-  #       historical.data$Provider %in% input$selectedProvider, "Visit.Method"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedVisitMethod",
-  #                     choices = visit_choices,
-  #                     selected = visit_choices
-  #   )
-  # 
-  #   prc_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% input$selectedDepartment &
-  #       historical.data$Resource %in% input$selectedResource &
-  #       historical.data$Provider %in% input$selectedProvider &
-  #       historical.data$Visit.Method %in% visit_choices, "Appt.Type"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedPRCName",
-  #                     choices = prc_choices,
-  #                     selected = prc_choices
-  #   )
-  # },
-  # ignoreInit = TRUE,
-  # ignoreNULL = FALSE)
-  # 
-  # observeEvent(input$selectedVisitMethod, {
-  #   prc_choices <- sort(unique(historical.data[
-  #     historical.data$Campus %in% input$selectedCampus &
-  #       historical.data$Campus.Specialty %in% input$selectedSpecialty &
-  #       historical.data$Department %in% input$selectedDepartment &
-  #       historical.data$Resource %in% input$selectedResource &
-  #       historical.data$Provider %in% input$selectedProvider &
-  #       historical.data$Visit.Method %in% input$selectedVisitMethod, "Appt.Type"]))
-  # 
-  #   updatePickerInput(session,
-  #                     inputId = "selectedPRCName",
-  #                     choices = prc_choices,
-  #                     selected = prc_choices
-  #   )
-  # },
-  # ignoreInit = TRUE,
-  # ignoreNULL = FALSE)
+  observeEvent(input$selectedSpecialty,{
+    department_choices <- sort(unique(historical.data[
+      kpi.all.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedDepartment",
+                      choices = department_choices,
+                      selected = department_choices
+    )
+
+    provider_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% department_choices, "Provider"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedProvider",
+                      choices = provider_choices,
+                      selected = provider_choices
+    )
+
+
+    visit_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% department_choices &
+        historical.data$Resource %in% input$selectedResource &
+        historical.data$Provider %in% provider_choices, "Visit.Method"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_choices,
+                      selected = visit_choices
+    )
+
+    prc_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% department_choices &
+        historical.data$Resource %in% input$selectedResource &
+        historical.data$Provider %in% provider_choices &
+        historical.data$Visit.Method %in% visit_choices, "Appt.Type"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedPRCName",
+                      choices = prc_choices,
+                      selected = prc_choices
+    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+
+  observeEvent(input$selectedDepartment,{
+    provider_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% input$selectedDepartment &
+        historical.data$Resource %in% input$selectedResource, "Provider"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedProvider",
+                      choices = provider_choices,
+                      selected = provider_choices
+    )
+
+    visit_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% input$selectedDepartment &
+        historical.data$Resource %in% input$selectedResource &
+        historical.data$Provider %in% provider_choices, "Visit.Method"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_choices,
+                      selected = visit_choices
+    )
+
+    prc_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% input$selectedDepartment &
+        historical.data$Resource %in% input$selectedResource &
+        historical.data$Provider %in% provider_choices &
+        historical.data$Visit.Method %in% visit_choices, "Appt.Type"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedPRCName",
+                      choices = prc_choices,
+                      selected = prc_choices
+    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+
+  observeEvent(input$selectedResource,{
+    provider_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% input$selectedDepartment &
+        historical.data$Resource %in% input$selectedResource, "Provider"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedProvider",
+                      choices = provider_choices,
+                      selected = provider_choices
+    )
+
+    visit_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% input$selectedDepartment &
+        historical.data$Resource %in% input$selectedResource &
+        historical.data$Provider %in% provider_choices, "Visit.Method"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_choices,
+                      selected = visit_choices
+    )
+
+    prc_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% input$selectedDepartment &
+        historical.data$Resource %in% input$selectedResource &
+        historical.data$Provider %in% provider_choices &
+        historical.data$Visit.Method %in% visit_choices, "Appt.Type"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedPRCName",
+                      choices = prc_choices,
+                      selected = prc_choices
+    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+
+  observeEvent(input$selectedProvider, {
+    visit_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% input$selectedDepartment &
+        historical.data$Resource %in% input$selectedResource &
+        historical.data$Provider %in% input$selectedProvider, "Visit.Method"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_choices,
+                      selected = visit_choices
+    )
+
+    prc_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% input$selectedDepartment &
+        historical.data$Resource %in% input$selectedResource &
+        historical.data$Provider %in% input$selectedProvider &
+        historical.data$Visit.Method %in% visit_choices, "Appt.Type"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedPRCName",
+                      choices = prc_choices,
+                      selected = prc_choices
+    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+
+  observeEvent(input$selectedVisitMethod, {
+    prc_choices <- sort(unique(historical.data[
+      historical.data$Campus %in% input$selectedCampus &
+        historical.data$Campus.Specialty %in% input$selectedSpecialty &
+        historical.data$Department %in% input$selectedDepartment &
+        historical.data$Resource %in% input$selectedResource &
+        historical.data$Provider %in% input$selectedProvider &
+        historical.data$Visit.Method %in% input$selectedVisitMethod, "Appt.Type"]))
+
+    updatePickerInput(session,
+                      inputId = "selectedPRCName",
+                      choices = prc_choices,
+                      selected = prc_choices
+    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
   
   output$specialtyControl <- renderUI({
