@@ -1,5 +1,11 @@
 default_campus <- "MSUS"
 default_specialty <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS", "Campus.Specialty"]))
+
+# default_specialty <- sort(unique(kpi.all.data[Campus == default_campus], 
+#                                   by = "Campus.Specialty"
+#                                  )[,Campus.Specialty]
+#                           )
+
 default_departments <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS" &
                                                      kpi.all.data$Campus.Specialty %in% default_specialty, "Department"])) 
 default_resource_type <- c("Provider","Resource")
@@ -25,7 +31,7 @@ default_PRC_name <- sort(unique(kpi.all.data[
     kpi.all.data$Visit.Method %in% default_visit_method, "Appt.Type"]))
 
 kpi.arrived.data <- kpi.all.data %>% filter(Appt.Status %in% c("Arrived"))
-arrived.data <- all.data %>% filter(Appt.Status %in% c("Arrived"))
+arrived.data <- kpi.all.data[all.data.rows,] %>% filter(Appt.Status %in% c("Arrived"))
 
 dateRangeKpi_start = min(kpi.arrived.data$Appt.DateYear) 
 dateRangeKpi_end = max(kpi.arrived.data$Appt.DateYear)
@@ -463,7 +469,8 @@ ui <- dashboardPage(
               # KPIs Tab --------------------------------------------------------------------------------------------------------------------
               column(11,
                      div("KPIs", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     textOutput("practiceName_KPIs"),
+                     #textOutput("practiceName_KPIs"),
+                     textOutput("kpis_mem"),
                      tags$head(tags$style("#practiceName_KPIs{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      column(2,
                             box(
