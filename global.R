@@ -316,12 +316,12 @@ setwd(wdpath)
 
 ### RStudio COnnect Data Read In
 
-historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
-slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
-holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
-data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
-data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
-population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
+# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
+# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
+# holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
+# data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
+# data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
+# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
 
 
 
@@ -382,18 +382,11 @@ sameDay.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 &
                                Lead.Days == 0, which = TRUE
                              ]
 noshow.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 &
-                                  Appt.Status %in% c("No Show","Canceled","Bumped","Rescheduled") &
-                                  Lead.Days == 0,
+                                  Appt.Status %in% c("No Show"),
                                   which = TRUE
                                 ]
-
-arrivedNoShow.data.rows <-  kpi.all.data[Appt.DTTM >= max_date - 365 &
-                                           Appt.Status %in% c("No Show","Canceled","Bumped","Rescheduled", "Arrived") &
-                                           Lead.Days == 0,
-                                           which = TRUE
-                                         ]
-
-
+noshow.data.rows <- c(sameDay.rows,noshow.data.rows)
+arrivedNoShow.data.rows <-  c(noshow.data.rows,arrived.data.rows)
 
 ## KPI datasets
 # kpi.all.data <- historical.data %>% filter(Appt.DTTM >= max_date - 3*365) ## All data: Arrived, No Show, Canceled, Bumped, Rescheduled

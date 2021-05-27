@@ -445,6 +445,7 @@ server <- function(input, output, session) {
   ### (2) Prepare datasets for analysis ===============================================================================================
   # [2.1] All pre-processed data for non-kpi tabs --------------------------------------------------------------------------------------
   dataAll <- reactive({
+    input$sbm
     groupByFilters(kpi.all.data[all.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -452,6 +453,7 @@ server <- function(input, output, session) {
   })
   
   dataArrivedNoShow <- reactive({
+    input$sbm
     groupByFilters(kpi.all.data[arrivedNoShow.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -459,6 +461,7 @@ server <- function(input, output, session) {
   })
   
   dataArrived <- reactive({
+    input$sbm
     groupByFilters(kpi.all.data[arrived.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -466,6 +469,7 @@ server <- function(input, output, session) {
   })
   
   dataNoShow <- reactive({
+    input$sbm
     groupByFilters(kpi.all.data[noShow.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -473,6 +477,7 @@ server <- function(input, output, session) {
   })
   
   dataCanceledBumpedRescheduled<- reactive({
+    input$sbm
     groupByFilters(kpi.all.data[canceled.bumped.rescheduled.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -480,6 +485,7 @@ server <- function(input, output, session) {
   })
   
   dataCanceled<- reactive({
+    input$sbm
     groupByFilters(kpi.all.data[canceled.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -487,6 +493,7 @@ server <- function(input, output, session) {
   })
   
   dataBumped<- reactive({
+    input$sbm
     groupByFilters(kpi.all.data[bumped.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -494,6 +501,7 @@ server <- function(input, output, session) {
   })
   
   dataRescheduled<- reactive({
+    input$sbm
     groupByFilters(kpi.all.data[rescheduled.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -502,8 +510,7 @@ server <- function(input, output, session) {
   
   # [2.2] All pre-processed data for kpi tabs --------------------------------------------------------------------------------------
   dataAllKpi <- reactive({
-    #kpi.all.data <- historical.data %>% filter(Appt.DTTM >= max_date - 3*365)
-    
+    input$sbm
     groupByFilters(kpi.all.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -511,8 +518,7 @@ server <- function(input, output, session) {
   })
   
   dataArrivedNoShowKpi <- reactive({
-    #kpi.arrivedNoShow.data <- kpi.all.data %>% filter(Appt.Status %in% c("Arrived","No Show")) 
-    
+    input$sbm    
     groupByFilters(kpi.all.data[kpi.arrivedNoShow.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -520,8 +526,7 @@ server <- function(input, output, session) {
   })
   
   dataArrivedKpi <- reactive({
-    #kpi.arrived.data <- kpi.all.data %>% filter(Appt.Status %in% c("Arrived"))
-    
+    input$sbm    
     groupByFilters(kpi.all.data[kpi.arrived.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -529,8 +534,7 @@ server <- function(input, output, session) {
   })
   
   dataCanceledBumpedKpi <- reactive({
-    #kpi.canceled.bumped.data <- kpi.all.data %>% filter(Appt.Status %in% c("Canceled","Bumped"))
-    
+    input$sbm    
     groupByFilters(kpi.all.data[kpi.canceled.bumped.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -538,8 +542,7 @@ server <- function(input, output, session) {
   })
   
   dataCanceledKpi <- reactive({
-    #kpi.canceled.data <- kpi.all.data %>% filter(Appt.Status %in% c("Canceled"))
-    
+    input$sbm    
     groupByFilters(kpi.all.data[kpi.canceled.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -547,8 +550,7 @@ server <- function(input, output, session) {
   })
   
   dataBumpedKpi <- reactive({
-    #kpi.bumped.data <- kpi.all.data %>% filter(Appt.Status %in% c("Bumped"))
-    
+    input$sbm    
     groupByFilters(kpi.all.data[kpi.bumped.data,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -558,6 +560,7 @@ server <- function(input, output, session) {
   # [2.2] All pre-processed data for utilization tabs --------------------------------------------------------------------------------------
   
   dataScheduledUtilization <- reactive({
+    input$sbm
     groupByFilters_2(scheduled.utilization.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod, input$selectedPRCName, 
@@ -565,6 +568,7 @@ server <- function(input, output, session) {
   }) 
   
   dataArrivedUtilization <- reactive({
+    input$sbm
     groupByFilters_2(arrived.utilization.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod, input$selectedPRCName, 
@@ -572,6 +576,7 @@ server <- function(input, output, session) {
   }) 
   
   dataHourScheduled <- reactive({
+    input$sbm
     groupByFilters(data.hour.scheduled,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -579,6 +584,7 @@ server <- function(input, output, session) {
   }) 
   
   dataHourArrived <- reactive({
+    input$sbm
     groupByFilters(data.hour.arrived,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -587,6 +593,7 @@ server <- function(input, output, session) {
   
   # [2.3] All pre-processed data for access tabs --------------------------------------------------------------------------------------
   dataFutureSlot <- reactive({
+    input$sbm
     groupByFilters_4(future.slot.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, 
@@ -594,6 +601,7 @@ server <- function(input, output, session) {
   }) 
   
   dataPastSlot <- reactive({
+    input$sbm
     groupByFilters_4(past.slot.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod,
@@ -618,6 +626,7 @@ server <- function(input, output, session) {
   # [2.4] Arrived Population Data --------------------------------------------------------------------------------------
   
   dataArrivedPop <- reactive({
+    input$sbm
     groupByFilters(population.data_filtered,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
@@ -1470,7 +1479,9 @@ server <- function(input, output, session) {
   # Date Range Header --------------------------------------------------------------------------
   observeEvent(input$sbm,{
     output$kpis_mem <- renderText({
-      mem_used()/1000000000})
+      mem_used()/1000000000
+      #object_size(dataArrivedKpi())
+      })
   })
   
   

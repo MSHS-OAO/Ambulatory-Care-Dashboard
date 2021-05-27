@@ -469,8 +469,8 @@ ui <- dashboardPage(
               # KPIs Tab --------------------------------------------------------------------------------------------------------------------
               column(11,
                      div("KPIs", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     textOutput("practiceName_KPIs"),
-                     #textOutput("kpis_mem"),
+                     #textOutput("practiceName_KPIs"),
+                     textOutput("kpis_mem"),
                      tags$head(tags$style("#practiceName_KPIs{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      column(2,
                             box(
