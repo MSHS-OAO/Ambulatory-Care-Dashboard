@@ -319,29 +319,33 @@ setwd(wdpath)
 # historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
 # slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
 # holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
+<<<<<<< HEAD
 # data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
 # data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
 # population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
 
 
+=======
+# utilization.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/utilization_data.feather"))
+# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
+>>>>>>> 14a348b8cb37cbcd6994b219fafaf8817379129d
 
 
 historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
-slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+slot.data.subset <- readRDS(paste0(wdpath,"/Data/new_slot_data_subset.rds"))
 holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-data.hour.scheduled <- readRDS(paste0(wdpath,"/Data/hour_scheduled.rds"))
-data.hour.arrived <- readRDS(paste0(wdpath,"/Data/hour_arrived.rds"))
+utilization.data <- readRDS(paste0(wdpath,"/Data/new_utilization_data.rds"))
 population.data_filtered <- readRDS(paste0(wdpath,"/Data/population.data_filtered.rds"))
 
 max_date <- max(historical.data$Appt.DateYear)
 
 ## Slot datasets
-past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
-future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
-rm(slot.data.subset)
+# past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
+# future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
+# rm(slot.data.subset)
 
-
-
+setDT(utilization.data)
+setDT(slot.data.subset)
 setDT(historical.data)
 kpi.all.data <- historical.data[Appt.DTTM >= max_date - 3*365]
 #rm(historical.data)
@@ -359,34 +363,46 @@ kpi.bumped.data.rows <- kpi.all.data[Appt.Status %in% c("Bumped"), which = TRUE]
 
 # ## Other datasets Rows DataTable
 all.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365, which = TRUE]
-arrived.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 & Appt.Status %in%
-                                    c("Arrived"), which = TRUE
-                                  ]
+
+arrived.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 & 
+                                    Appt.Status %in% c("Arrived"), which = TRUE]
+
 canceled.bumped.rescheduled.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 &
-                                                        Appt.Status %in%
-                                                        c("Canceled","Bumped","Rescheduled"),
-                                                        which = TRUE
-                                                      ]
-canceled.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 & Appt.Status %in%
-                                     c("Canceled"), which = TRUE
-                                   ]
+                                                        Appt.Status %in% c("Canceled","Bumped","Rescheduled"), which = TRUE]
+
+canceled.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 & 
+                                     Appt.Status %in% c("Canceled"), which = TRUE]
+
 bumped.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 &
-                                   Appt.Status %in% c("Bumped"), which = TRUE
-                                 ]
+                                   Appt.Status %in% c("Bumped"), which = TRUE]
+
 rescheduled.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 &
-                                        Appt.Status %in% c("Rescheduled"), which = TRUE
-                                      ]
+                                        Appt.Status %in% c("Rescheduled"), which = TRUE]
+
 sameDay.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 &
-                               Appt.Status %in%
-                               c("Canceled","Bumped","Rescheduled") &
-                               Lead.Days == 0, which = TRUE
-                             ]
+                               Appt.Status %in% c("Canceled","Bumped","Rescheduled") &
+                               Lead.Days == 0, which = TRUE]
+
 noshow.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 365 &
                                   Appt.Status %in% c("No Show"),
                                   which = TRUE
                                 ]
-noshow.data.rows <- c(sameDay.rows,noshow.data.rows)
-arrivedNoShow.data.rows <-  c(noshow.data.rows,arrived.data.rows)
+
+noshow.data.rows <- c(sameDay.rows, noshow.data.rows)
+
+arrivedNoShow.data.rows <-  c(noshow.data.rows, arrived.data.rows)
+
+past.slot.data.rows <- slot.data.subset[Appt.DateYear <= max_date, which = TRUE]
+
+future.slot.data.rows <- slot.data.subset[Appt.DateYear > max_date, which = TRUE]
+
+scheduled.utilization.data.rows <- utilization.data[util.type == "scheduled", which = TRUE]
+
+arrived.utilization.data.rows <- utilization.data[util.type == "arrived", which = TRUE]
+
+
+
+>>>>>>> 14a348b8cb37cbcd6994b219fafaf8817379129d
 
 ## KPI datasets
 # kpi.all.data <- historical.data %>% filter(Appt.DTTM >= max_date - 3*365) ## All data: Arrived, No Show, Canceled, Bumped, Rescheduled
@@ -410,21 +426,29 @@ arrivedNoShow.data.rows <-  c(noshow.data.rows,arrived.data.rows)
 # noShow.data <- rbind(noShow.data,sameDay) # No Shows + Same day canceled, bumped, rescheduled
 # arrivedNoShow.data <- rbind(arrived.data,noShow.data) ## Arrived + No Show data: Arrived and No Show
 
-
-
-
-
 kpi.all.data <- as.data.frame(kpi.all.data)
 historical.data <- as.data.frame(historical.data)
+slot.data.subset <- as.data.frame(slot.data.subset)
+utilization.data <- as.data.frame(utilization.data)
 
 
 ### (5) Pre-processing Space Utilization Dataframe --------------------------------------------------------------------------------------
 # Filter utilization data in last 60 days
 
-# Combine Utilization Data
-
-scheduled.utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
-arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
+#Combine Utilization Data
+# timeOptionsHr_filter <- c("07:00","08:00","09:00",
+#                           "10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00",
+#                           "20:00") ## Time Range by Hour Filter
+# utilization.data <- rbind(data.hour.scheduled, data.hour.arrived)
+# utilization.data <- utilization.data %>%
+#   select(Campus, Campus.Specialty, Department, Resource, Provider,
+#          Visit.Method, Appt.Type,
+#          Appt.DateYear, Appt.MonthYear, Appt.Year, Appt.Week, Appt.Day, Appt.TM.Hr, holiday, sum, util.type,
+#          timeOptionsHr_filter)
+# 
+# saveRDS(utilization.data, "new_utilization_data.rds")
+# 
+# arrived.utilization.data <- rbind(data.hour.scheduled %>% filter(Appt.Status == "Arrived"), data.hour.arrived)
 
 
 ### Zip Code Analysis--------------------------------------------------------------------------------------

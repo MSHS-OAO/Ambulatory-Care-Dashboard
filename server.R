@@ -360,8 +360,8 @@ server <- function(input, output, session) {
       width = 12, 
       solidHeader = FALSE, 
       dateRangeInput("dateRange", label = NULL,
-                     start = min(arrived.data$Appt.DateYear), end = max(arrived.data$Appt.DateYear),
-                     min = min(arrived.data$Appt.DateYear), max = max(arrived.data$Appt.DateYear)))
+                     start = min((kpi.all.data[arrived.data.rows,])$Appt.DateYear), end = max((kpi.all.data[arrived.data.rows,])$Appt.DateYear),
+                     min = min((kpi.all.data[arrived.data.rows,])$Appt.DateYear), max = max((kpi.all.data[arrived.data.rows,])$Appt.DateYear)))
   })
   
   output$daysOfWeekControl <- renderUI({
@@ -384,7 +384,7 @@ server <- function(input, output, session) {
       solidHeader = FALSE, 
       dateRangeInput("dateRangeUtil", label = NULL,
                      start = min(data.hour.arrived$Appt.DateYear), end = max(data.hour.arrived$Appt.DateYear),
-                     min = min(arrived.data$Appt.DateYear), max = max(arrived.data$Appt.DateYear)))
+                     min = min((kpi.all.data[arrived.data.rows,])$Appt.DateYear), max = max((kpi.all.data[arrived.data.rows,])$Appt.DateYear)))
   })
   
   output$daysOfWeekControlUtil <- renderUI({
@@ -428,7 +428,7 @@ server <- function(input, output, session) {
       solidHeader = FALSE, 
       dateRangeInput("dateRangeFutureSlot", label = NULL,
                      start = min(future.slot.data$Appt.DateYear), end = max(future.slot.data$Appt.DateYear),
-                     min = min(arrived.data$Appt.DateYear), max = max(arrived.data$Appt.DateYear)))
+                     min = min((kpi.all.data[arrived.data.rows,])$Appt.DateYear), max = max((kpi.all.data[arrived.data.rows,])$Appt.DateYear)))
   })
   
   output$daysOfWeekControlFutureSlot <- renderUI({
@@ -470,7 +470,7 @@ server <- function(input, output, session) {
   
   dataNoShow <- reactive({
     input$sbm
-    groupByFilters(kpi.all.data[noShow.data.rows,],
+    groupByFilters(kpi.all.data[noshow.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
@@ -558,43 +558,46 @@ server <- function(input, output, session) {
   }) 
   
   # [2.2] All pre-processed data for utilization tabs --------------------------------------------------------------------------------------
-  
-  dataScheduledUtilization <- reactive({
+
+  dataUtilization <- reactive({
     input$sbm
-    groupByFilters_2(scheduled.utilization.data,
+    groupByFilters_2(utilization.data[scheduled.utilization.data.rows,],
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod, input$selectedPRCName, 
                      input$dateRange[1], nput$dateRange[2], input$daysOfWeek, input$excludeHolidays, input$utilType)
   }) 
   
-  dataArrivedUtilization <- reactive({
-    input$sbm
-    groupByFilters_2(arrived.utilization.data,
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays, input$utilType)
-  }) 
+  # dataScheduledUtilization <- reactive({
+  #   groupByFilters_2(utilization.data[scheduled.utilization.data.rows,],
+  #                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+  #                    input$selectedVisitMethod, input$selectedPRCName, 
+  #                    input$dateRange[1], nput$dateRange[2], input$daysOfWeek, input$excludeHolidays, input$utilType)
+  # }) 
+  # 
+  # dataArrivedUtilization <- reactive({
+  #   groupByFilters_2(utilization.data[arrived.utilization.data.rows,],
+  #                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+  #                    input$selectedVisitMethod, input$selectedPRCName, 
+  #                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays, input$utilType)
+  # }) 
   
-  dataHourScheduled <- reactive({
-    input$sbm
-    groupByFilters(data.hour.scheduled,
-                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$selectedPRCName, 
-                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
-  }) 
-  
-  dataHourArrived <- reactive({
-    input$sbm
-    groupByFilters(data.hour.arrived,
-                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$selectedPRCName, 
-                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
-  }) 
+  # dataHourScheduled <- reactive({
+  #   groupByFilters(data.hour.scheduled,
+  #                  input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+  #                  input$selectedVisitMethod, input$selectedPRCName, 
+  #                  input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+  # }) 
+  # 
+  # dataHourArrived <- reactive({
+  #   groupByFilters(data.hour.arrived,
+  #                  input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+  #                  input$selectedVisitMethod, input$selectedPRCName, 
+  #                  input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+  # }) 
   
   # [2.3] All pre-processed data for access tabs --------------------------------------------------------------------------------------
   dataFutureSlot <- reactive({
-    input$sbm
-    groupByFilters_4(future.slot.data,
+    groupByFilters_4(slot.data.subset[future.slot.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, 
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
@@ -602,7 +605,7 @@ server <- function(input, output, session) {
   
   dataPastSlot <- reactive({
     input$sbm
-    groupByFilters_4(past.slot.data,
+    groupByFilters_4(slot.data.subset[past.slot.data.rows,],
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod,
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
@@ -610,18 +613,18 @@ server <- function(input, output, session) {
   
   
   
-  dataPastSlotTest <- reactive({
-    groupByFilters_4_Test(past.slot.data,
-                     input$selectedCampus, 
-                     input$selectedSpecialty, 
-                     input$selectedDepartment,
-                     input$selectedResource,
-                     #input$selectedProvider,
-                      input$selectedVisitMethod,
-                     input$dateRange[1], input$dateRange[2],
-                     input$daysOfWeek,
-                     input$excludeHolidays)
-  })
+  # dataPastSlotTest <- reactive({
+  #   groupByFilters_4_Test(past.slot.data,
+  #                    input$selectedCampus, 
+  #                    input$selectedSpecialty, 
+  #                    input$selectedDepartment,
+  #                    input$selectedResource,
+  #                    #input$selectedProvider,
+  #                     input$selectedVisitMethod,
+  #                    input$dateRange[1], input$dateRange[2],
+  #                    input$daysOfWeek,
+  #                    input$excludeHolidays)
+  # })
   
   # [2.4] Arrived Population Data --------------------------------------------------------------------------------------
   
@@ -770,77 +773,77 @@ server <- function(input, output, session) {
     }
   })
   
-  output$siteWorkingFTE <- renderPlot({
-    
-    validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
-    )
-    
-    data <- dataPastSlot()
-    # data <- past.slot.data %>% filter(Campus == "MSUS")
-    
-    summary <- data %>%
-      group_by(Campus.Specialty, Appt.DateYear) %>%
-      dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES)/60,0)) %>%
-      gather(variable, value, 3) %>%
-      group_by(Campus.Specialty, variable) %>%
-      dplyr::summarise(avgHrs = mean(value),
-                       avgFTE = avgHrs/7.5*7.5)
-    
-    
-    ggplot(summary, aes(x=Campus.Specialty)) +
-      geom_bar(aes(y=avgHrs),stat="identity", width = 0.8, fill="#d80b8c")+
-      scale_y_continuous(sec.axis = sec_axis(~./7.5, name = "Provider FTE\n"), limits=c(0,max(summary$avgHrs)*1.3))+
-      labs(x=NULL, y="Hours\n",
-           title = "Daily Avg Provider Hours and FTE Available by Specialty",
-           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-           caption = "1 FTE = 7.5 patient care hours per day")+
-      theme_bw() + graph_theme(legend_pos="none") + theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
-                                                          strip.background = element_rect(fill="#dddedd"))
-    
-  })
+  # output$siteWorkingFTE <- renderPlot({
+  #   
+  #   validate(
+  #     need(input$selectedCampus != "", "Please select a Campus"),
+  #     need(input$selectedSpecialty != "", "Please select a Specialty"),
+  #     need(input$selectedDepartment != "", "Please select a Department"),
+  #     need(input$selectedResource != "", "Please select a Resource"),
+  #     need(input$selectedProvider != "", "Please select a Provider"),
+  #     need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+  #     need(input$selectedPRCName != "", "Please select a Visit Type")
+  #   )
+  #   
+  #   data <- dataPastSlot()
+  #   # data <- past.slot.data %>% filter(Campus == "MSUS")
+  #   
+  #   summary <- data %>%
+  #     group_by(Campus.Specialty, Appt.DateYear) %>%
+  #     dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES)/60,0)) %>%
+  #     gather(variable, value, 3) %>%
+  #     group_by(Campus.Specialty, variable) %>%
+  #     dplyr::summarise(avgHrs = mean(value),
+  #                      avgFTE = avgHrs/7.5*7.5)
+  #   
+  #   
+  #   ggplot(summary, aes(x=Campus.Specialty)) +
+  #     geom_bar(aes(y=avgHrs),stat="identity", width = 0.8, fill="#d80b8c")+
+  #     scale_y_continuous(sec.axis = sec_axis(~./7.5, name = "Provider FTE\n"), limits=c(0,max(summary$avgHrs)*1.3))+
+  #     labs(x=NULL, y="Hours\n",
+  #          title = "Daily Avg Provider Hours and FTE Available by Specialty",
+  #          subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+  #          caption = "1 FTE = 7.5 patient care hours per day")+
+  #     theme_bw() + graph_theme(legend_pos="none") + theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
+  #                                                         strip.background = element_rect(fill="#dddedd"))
+  #   
+  # })
   
   
-  output$sitePtsPerFTE <- renderPlot({
-    
-    validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
-    )
-    
-    data <- dataPastSlot()
-    # data <- past.slot.data %>% filter(Campus == "MSUS")
-    
-    summary <- data %>%
-      group_by(Campus.Specialty) %>%
-      dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES)/60,0),
-                       `Arrived Slots` = sum(ARRIVED_SLOTS)) %>%
-      mutate(avgFTE = `Available Hours`/7.5,
-             avgPtsPerFTE = `Arrived Slots`/avgFTE)
-    
-    summary$avgPtsPerFTE[which(!is.finite(summary$avgPtsPerFTE))] <- 0
-    
-    ggplot(summary, aes(x=Campus.Specialty, y=avgPtsPerFTE)) +
-      geom_bar(stat="identity", width = 0.8, fill="#00aeef")+
-      scale_y_continuous(limits=c(0,max(summary$avgPtsPerFTE)*1.3))+
-      labs(x=NULL, y="Patientss\n",
-           title = "Daily Avg Patients Arrived per Provider FTE",
-           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-           caption = "1 FTE = 7.5 patient care hours per day")+
-      theme_bw()+ graph_theme(legend_pos="none") + theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"), strip.background = element_rect(fill="#dddedd"))
-  })
-  
+  # output$sitePtsPerFTE <- renderPlot({
+  #   
+  #   validate(
+  #     need(input$selectedCampus != "", "Please select a Campus"),
+  #     need(input$selectedSpecialty != "", "Please select a Specialty"),
+  #     need(input$selectedDepartment != "", "Please select a Department"),
+  #     need(input$selectedResource != "", "Please select a Resource"),
+  #     need(input$selectedProvider != "", "Please select a Provider"),
+  #     need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+  #     need(input$selectedPRCName != "", "Please select a Visit Type")
+  #   )
+  #   
+  #   data <- dataPastSlot()
+  #   # data <- past.slot.data %>% filter(Campus == "MSUS")
+  #   
+  #   summary <- data %>%
+  #     group_by(Campus.Specialty) %>%
+  #     dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES)/60,0),
+  #                      `Arrived Slots` = sum(ARRIVED_SLOTS)) %>%
+  #     mutate(avgFTE = `Available Hours`/7.5,
+  #            avgPtsPerFTE = `Arrived Slots`/avgFTE)
+  #   
+  #   summary$avgPtsPerFTE[which(!is.finite(summary$avgPtsPerFTE))] <- 0
+  #   
+  #   ggplot(summary, aes(x=Campus.Specialty, y=avgPtsPerFTE)) +
+  #     geom_bar(stat="identity", width = 0.8, fill="#00aeef")+
+  #     scale_y_continuous(limits=c(0,max(summary$avgPtsPerFTE)*1.3))+
+  #     labs(x=NULL, y="Patientss\n",
+  #          title = "Daily Avg Patients Arrived per Provider FTE",
+  #          subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+  #          caption = "1 FTE = 7.5 patient care hours per day")+
+  #     theme_bw()+ graph_theme(legend_pos="none") + theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"), strip.background = element_rect(fill="#dddedd"))
+  # })
+  # 
   # Site Comparison Tab -------------------------------------------------------------------------------------------------
   
   output$siteComparisonPts <- renderPlot({
@@ -1110,24 +1113,24 @@ server <- function(input, output, session) {
     
   })
   
-  testdataset <- reactive({
-    slotData <- dataPastSlot()
-    slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
-    bookedFilledRate <- slotData %>%
-      group_by(siteSpecialty, Appt.Week) %>%
-      dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-                       `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-                       `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-                       `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-                       `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-      mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
-             `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
-      gather(variable, value, 3:9)
-    
-    bookedFilledRate <- bookedFilledRate %>% filter(variable %in% c("Booked Rate","Filled Rate"))
-  })
-  
-  output$Testtable <- renderDataTable(testdataset(), filter = "top")
+  # testdataset <- reactive({
+  #   slotData <- dataPastSlot()
+  #   slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
+  #   bookedFilledRate <- slotData %>%
+  #     group_by(siteSpecialty, Appt.Week) %>%
+  #     dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
+  #                      `Booked Hours` = round(sum(BOOKED_MINUTES),0),
+  #                      `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
+  #                      `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
+  #                      `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
+  #     mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
+  #            `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
+  #     gather(variable, value, 3:9)
+  #   
+  #   bookedFilledRate <- bookedFilledRate %>% filter(variable %in% c("Booked Rate","Filled Rate"))
+  # })
+  # 
+  # output$Testtable <- renderDataTable(testdataset(), filter = "top")
   
   output$siteComparisonBookedRate <- renderPlot({
     
@@ -1143,28 +1146,22 @@ server <- function(input, output, session) {
     
     # Slot Data
     slotData <- dataPastSlot()
-    #slotData <- dataPastSlotTest()
-     #slotData <- past.slot.data %>% filter(Campus == "MSUS")
-    #slotData_maternal <- slotData %>% filter(Campus.Specialty == "Maternal Fetal Medicine")
-
-    slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
-
+    # slotData <- slot.data.subset[past.slot.data.rows,]
+    # slotData <- slotData %>% filter(Campus == "MSUS")
+    
     if(input$bySpecialty4 == TRUE) {
       # Booked Rate and Filled Rate
       bookedFilledRate <- slotData %>%
         group_by(siteSpecialty, Appt.Week) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-                         `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-                         `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-                         `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-                         `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-        mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
-               `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
-        gather(variable, value, 3:9)
+        summarise(`Available Hours` = sum(`Available Hours`),
+                  `Booked Hours` = sum(`Booked Hours`),
+                  `Arrived Hours` = sum(`Arrived Hours`)) %>%
+        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2),
+               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2)) %>%
+        gather(variable, value, 3:7)
       
       bookedFilledRate <- bookedFilledRate %>% filter(variable %in% c("Booked Rate","Filled Rate"))
-      #bookedFilledRate_maternal <- bookedFilledRate %>% filter(siteSpecialty == "MSUS - Maternal Fetal Medicine")
-      
+
       ggplot(bookedFilledRate, aes(Appt.Week, value, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
         geom_point(size=2)+
@@ -1185,18 +1182,16 @@ server <- function(input, output, session) {
       # Booked Rate and Filled Rate
       bookedFilledRate <- slotData %>%
         group_by(siteSpecialty, Appt.MonthYear) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-                         `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-                         `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-                         `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-                         `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-        mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
-               `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
-        gather(variable, value, 3:9)
+        summarise(`Available Hours` = sum(`Available Hours`),
+                  `Booked Hours` = sum(`Booked Hours`),
+                  `Arrived Hours` = sum(`Arrived Hours`)) %>%
+        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2),
+               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2)) %>%
+        gather(variable, value, 3:7)
       
       bookedFilledRate <- bookedFilledRate %>% filter(variable %in% c("Booked Rate","Filled Rate"))
       
-      #bookedFilledRate_maternal <- bookedFilledRate %>% filter(siteSpecialty == "MSUS - Maternal Fetal Medicine")
+      bookedFilledRate <- bookedFilledRate %>% filter(variable %in% c("Booked Rate","Filled Rate"))
       
       ggplot(bookedFilledRate, aes(Appt.MonthYear, value, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
@@ -1208,7 +1203,7 @@ server <- function(input, output, session) {
         labs(x="Site - Specialty", y=NULL,
              title = "Avg Daily Booked vs. Filled Rate (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        #scale_y_continuous(expand = c(0,0), limits = c(0,max(bookedFilledRate$value)*1.2))+
+        scale_y_continuous(expand = c(0,0), limits = c(0,max(bookedFilledRate$value)*1.2))+
         theme_new_line()+
         theme_bw()+
         graph_theme("bottom") + theme(legend.title = element_blank())
@@ -1349,131 +1344,131 @@ server <- function(input, output, session) {
     }
   })
   
-  output$siteComparisonWorkingFTE <- renderPlot({
-    
-    validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
-    )
-    
-    # Slot Data
-    slotData <- dataPastSlot()
-    # slotData <- past.slot.data %>% filter(Campus == "MSUS")
-    slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
-    
-    
-    if(input$bySpecialty7 == TRUE) {
-      # Total Provider Hours Available
-      provAvail <- slotData %>%
-        group_by(siteSpecialty, Appt.Week) %>%
-        dplyr::summarise(avgHrs = round(sum(AVAIL_MINUTES)/60,0)) %>%
-        mutate(avgFTE = avgHrs/7.5*7.5)
-      
-      
-      ggplot(provAvail, aes(x=Appt.Week, y=avgHrs, group=siteSpecialty, col=siteSpecialty)) +
-        geom_line()+
-        geom_point(size=2)+
-        scale_y_continuous(sec.axis = sec_axis(~./7.5, name = "Provider FTE\n"))+
-        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-        labs(x=NULL, y="Hours\n",
-             title = "Daily Avg Provider Hours and FTE Available by Specialty",
-             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-             caption = "1 FTE = 7.5 patient care hours per day")+
-        theme_new_line()+
-        theme_bw()+
-        graph_theme("bottom")+
-        scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
-    } else{
-      
-      # Total Provider Hours Available
-      provAvail <- slotData %>%
-        group_by(siteSpecialty, Appt.MonthYear) %>%
-        dplyr::summarise(avgHrs = round(sum(AVAIL_MINUTES)/60,0)) %>%
-        mutate(avgFTE = avgHrs/7.5*7.5)
-      
-      
-      ggplot(provAvail, aes(x=Appt.MonthYear, y=avgHrs, group=siteSpecialty, col=siteSpecialty)) +
-        geom_line()+
-        geom_point(size=2)+
-        scale_y_continuous(sec.axis = sec_axis(~./7.5, name = "Provider FTE\n"))+
-        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-        labs(x=NULL, y="Hours\n",
-             title = "Daily Avg Provider Hours and FTE Available by Specialty",
-             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-             caption = "1 FTE = 7.5 patient care hours per day")+
-        theme_new_line()+
-        theme_bw()+
-        graph_theme("bottom")
-      
-    }
-  })
+  # output$siteComparisonWorkingFTE <- renderPlot({
+  #   
+  #   validate(
+  #     need(input$selectedCampus != "", "Please select a Campus"),
+  #     need(input$selectedSpecialty != "", "Please select a Specialty"),
+  #     need(input$selectedDepartment != "", "Please select a Department"),
+  #     need(input$selectedResource != "", "Please select a Resource"),
+  #     need(input$selectedProvider != "", "Please select a Provider"),
+  #     need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+  #     need(input$selectedPRCName != "", "Please select a Visit Type")
+  #   )
+  #   
+  #   # Slot Data
+  #   slotData <- dataPastSlot()
+  #   # slotData <- past.slot.data %>% filter(Campus == "MSUS")
+  #   slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
+  #   
+  #   
+  #   if(input$bySpecialty7 == TRUE) {
+  #     # Total Provider Hours Available
+  #     provAvail <- slotData %>%
+  #       group_by(siteSpecialty, Appt.Week) %>%
+  #       dplyr::summarise(avgHrs = round(sum(AVAIL_MINUTES)/60,0)) %>%
+  #       mutate(avgFTE = avgHrs/7.5*7.5)
+  #     
+  #     
+  #     ggplot(provAvail, aes(x=Appt.Week, y=avgHrs, group=siteSpecialty, col=siteSpecialty)) +
+  #       geom_line()+
+  #       geom_point(size=2)+
+  #       scale_y_continuous(sec.axis = sec_axis(~./7.5, name = "Provider FTE\n"))+
+  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+  #       labs(x=NULL, y="Hours\n",
+  #            title = "Daily Avg Provider Hours and FTE Available by Specialty",
+  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+  #            caption = "1 FTE = 7.5 patient care hours per day")+
+  #       theme_new_line()+
+  #       theme_bw()+
+  #       graph_theme("bottom")+
+  #       scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
+  #   } else{
+  #     
+  #     # Total Provider Hours Available
+  #     provAvail <- slotData %>%
+  #       group_by(siteSpecialty, Appt.MonthYear) %>%
+  #       dplyr::summarise(avgHrs = round(sum(AVAIL_MINUTES)/60,0)) %>%
+  #       mutate(avgFTE = avgHrs/7.5*7.5)
+  #     
+  #     
+  #     ggplot(provAvail, aes(x=Appt.MonthYear, y=avgHrs, group=siteSpecialty, col=siteSpecialty)) +
+  #       geom_line()+
+  #       geom_point(size=2)+
+  #       scale_y_continuous(sec.axis = sec_axis(~./7.5, name = "Provider FTE\n"))+
+  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+  #       labs(x=NULL, y="Hours\n",
+  #            title = "Daily Avg Provider Hours and FTE Available by Specialty",
+  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+  #            caption = "1 FTE = 7.5 patient care hours per day")+
+  #       theme_new_line()+
+  #       theme_bw()+
+  #       graph_theme("bottom")
+  #     
+  #   }
+  # })
   
-  output$siteComparisonPtsPerFTE <- renderPlot({
-    
-    validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
-    )
-    
-    # Slot Data
-    slotData <- dataPastSlot()
-    # slotData <- past.slot.data %>% filter(Campus == "MSUS")
-    slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
-    
-    if(input$bySpecialty8 == TRUE) {
-      summary <- slotData %>%
-        group_by(siteSpecialty, Appt.Week) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES)/60),
-                         `Arrived Slots` = sum(ARRIVED_SLOTS)) %>%
-        mutate(avgFTE = `Available Hours`/7.5,
-               avgPtsPerFTE = `Arrived Slots`/avgFTE)
-      
-      ggplot(summary, aes(x=Appt.Week, y=avgPtsPerFTE, group=siteSpecialty, col=siteSpecialty)) +
-        geom_line()+
-        geom_point(size=2)+
-        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-        labs(x=NULL, y="Patients per Provider FTE\n",
-             title = "Daily Avg Arrived Patients per Provider FTE by Site and Specialty",
-             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-             caption = "1 FTE = 7.5 patient care hours per day")+
-        theme_new_line()+
-        theme_bw()+
-        graph_theme("bottom")+
-        scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
-    } else{
-      
-      summary <- slotData %>%
-        group_by(siteSpecialty, Appt.MonthYear) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES)/60),
-                         `Arrived Slots` = sum(ARRIVED_SLOTS)) %>%
-        mutate(avgFTE = `Available Hours`/7.5,
-               avgPtsPerFTE = `Arrived Slots`/avgFTE)
-      
-      ggplot(summary, aes(x=Appt.MonthYear, y=avgPtsPerFTE, group=siteSpecialty, col=siteSpecialty)) +
-        geom_line()+
-        geom_point(size=2)+
-        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-        labs(x=NULL, y="Patients per Provider FTE\n",
-             title = "Daily Avg Arrived Patients per Provider FTE by Site and Specialty",
-             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-             caption = "1 FTE = 7.5 patient care hours per day")+
-        theme_new_line()+
-        theme_bw()+
-        graph_theme("bottom")
-      
-    }
-    
-  })
+  # output$siteComparisonPtsPerFTE <- renderPlot({
+  #   
+  #   validate(
+  #     need(input$selectedCampus != "", "Please select a Campus"),
+  #     need(input$selectedSpecialty != "", "Please select a Specialty"),
+  #     need(input$selectedDepartment != "", "Please select a Department"),
+  #     need(input$selectedResource != "", "Please select a Resource"),
+  #     need(input$selectedProvider != "", "Please select a Provider"),
+  #     need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+  #     need(input$selectedPRCName != "", "Please select a Visit Type")
+  #   )
+  #   
+  #   # Slot Data
+  #   slotData <- dataPastSlot()
+  #   # slotData <- past.slot.data %>% filter(Campus == "MSUS")
+  #   slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
+  #   
+  #   if(input$bySpecialty8 == TRUE) {
+  #     summary <- slotData %>%
+  #       group_by(siteSpecialty, Appt.Week) %>%
+  #       dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES)/60),
+  #                        `Arrived Slots` = sum(ARRIVED_SLOTS)) %>%
+  #       mutate(avgFTE = `Available Hours`/7.5,
+  #              avgPtsPerFTE = `Arrived Slots`/avgFTE)
+  #     
+  #     ggplot(summary, aes(x=Appt.Week, y=avgPtsPerFTE, group=siteSpecialty, col=siteSpecialty)) +
+  #       geom_line()+
+  #       geom_point(size=2)+
+  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+  #       labs(x=NULL, y="Patients per Provider FTE\n",
+  #            title = "Daily Avg Arrived Patients per Provider FTE by Site and Specialty",
+  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+  #            caption = "1 FTE = 7.5 patient care hours per day")+
+  #       theme_new_line()+
+  #       theme_bw()+
+  #       graph_theme("bottom")+
+  #       scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
+  #   } else{
+  #     
+  #     summary <- slotData %>%
+  #       group_by(siteSpecialty, Appt.MonthYear) %>%
+  #       dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES)/60),
+  #                        `Arrived Slots` = sum(ARRIVED_SLOTS)) %>%
+  #       mutate(avgFTE = `Available Hours`/7.5,
+  #              avgPtsPerFTE = `Arrived Slots`/avgFTE)
+  #     
+  #     ggplot(summary, aes(x=Appt.MonthYear, y=avgPtsPerFTE, group=siteSpecialty, col=siteSpecialty)) +
+  #       geom_line()+
+  #       geom_point(size=2)+
+  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+  #       labs(x=NULL, y="Patients per Provider FTE\n",
+  #            title = "Daily Avg Arrived Patients per Provider FTE by Site and Specialty",
+  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+  #            caption = "1 FTE = 7.5 patient care hours per day")+
+  #       theme_new_line()+
+  #       theme_bw()+
+  #       graph_theme("bottom")
+  #     
+  #   }
+  #   
+  # })
   
   
   # Date Range Header --------------------------------------------------------------------------
@@ -1669,7 +1664,7 @@ server <- function(input, output, session) {
     )
   })
   
-  ## Booked and Filled Rate  
+  ## Booked and Filled Rate
   output$pracBookedFilledRate <- renderPlot({
     
     validate(
@@ -1684,19 +1679,11 @@ server <- function(input, output, session) {
     
     # Booked and Filled Rate
     data <- dataPastSlot()
-    # data <- past.slot.data
+    # data <- slot.data.subset[past.slot.data.rows,]
     
-    daily.booked <- data %>%
-      dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-                       `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-                       `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-                       `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-                       `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-      mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
-             `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
-      gather(variable, value, 1:7) %>%
-      filter(variable %in% c("Booked Rate","Filled Rate")) %>%
-      select(variable, value)
+    daily.booked <- data.frame(variable = c("Booked Rate", "Filled Rate"),
+                               value = c(round((sum(data$`Booked Hours`)/sum(data$`Available Hours`)),2),
+                                         round((sum(data$`Arrived Hours`/sum(data$`Available Hours`))),2)))
     
     ggplot(daily.booked, aes(reorder(variable, -value), value, fill=variable)) +
       geom_bar(stat="identity", width = 0.8) +
@@ -1711,7 +1698,6 @@ server <- function(input, output, session) {
       geom_text(aes(label=paste0(round(value*100),"%")), hjust = 0.5, vjust = -1, color="black", fontface="bold",
                 position = position_dodge(1), size=5)
     
-    
   })
   
   output$pracApptStatus <- renderPlot({
@@ -1721,7 +1707,7 @@ server <- function(input, output, session) {
     
     sameDay <- data %>%
       group_by(Appt.Status) %>%
-      summarise(value = round(n()/length(unique(all.data$Appt.DateYear)))) %>%
+      summarise(value = round(n()/length(unique(dataAll()$Appt.DateYear)))) %>%
       arrange(desc(value)) 
     
     ggplot(sameDay, aes(reorder(Appt.Status, -value), value, fill=Appt.Status)) +
@@ -1983,22 +1969,22 @@ server <- function(input, output, session) {
   output$vbox4 <- renderValueBox({
     
     valueBox(
-      prettyNum(round((sum(dataPastSlot()$AVAIL_MINUTES) / length(unique(dataPastSlot()$Appt.DateYear)))/60), big.mark=','),
+      prettyNum(round((sum(dataPastSlot()$`Available Hours`) / length(unique(dataPastSlot()$Appt.DateYear)))), big.mark=','),
       subtitle = tags$p("Avg Hrs Available per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox5 <- renderValueBox({
     
     valueBox(
-      round((sum(dataPastSlot()$AVAIL_MINUTES) / length(unique(dataPastSlot()$Appt.DateYear)))/
-                     (length(unique(dataArrived()$uniqueId)) / length(unique(dataArrived()$Appt.DateYear))), 1),
+      round(((sum(dataPastSlot()$`Available Hours`)*60) / length(unique(dataPastSlot()$Appt.DateYear))) /
+              (length(unique(dataArrived()$uniqueId)) / length(unique(dataArrived()$Appt.DateYear))), 1),
       subtitle = tags$p("Avg Worked Mins per Patient", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox6 <- renderValueBox({
     
     valueBox(
-      prettyNum(round(nrow(bumped.data) / length(unique(arrived.data$Appt.DateYear))), big.mark=','),
+      prettyNum(round(nrow(dataBumped()) / length(unique(dataArrived()$Appt.DateYear))), big.mark=','),
       subtitle = tags$p("Avg Same-day Bumps per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
   
@@ -2150,18 +2136,14 @@ server <- function(input, output, session) {
       
       data <- dataPastSlot()
       # data <- past.slot.data %>% filter(Campus == "MSUS")
-      # nrow(data)
       
-      # TEMPORARY SLOT DATE
       daily.booked <- data %>%
         group_by(Appt.Day, Appt.TM.Hr) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-                         `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-                         `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-                         `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-                         `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-        mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`)*100),
-               `Filled Rate` = round((`Arrived Hours`/`Available Hours`)*100))
+        summarise(`Available Hours` = sum(`Available Hours`),
+                  `Booked Hours` = sum(`Booked Hours`),
+                  `Arrived Hours` = sum(`Arrived Hours`)) %>%
+        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2),
+               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2)) 
       
       daily.booked.df <- byDayTime.df %>% filter(Day %in% unique(daily.booked$Appt.Day))
       daily.booked.df <- merge(daily.booked.df, daily.booked, by.x = c("Day","Time"), by.y = c("Appt.Day","Appt.TM.Hr"), all = TRUE)
@@ -2192,19 +2174,17 @@ server <- function(input, output, session) {
         geom_text(aes(label= ifelse(is.na(`Booked Rate`),"",paste0(`Booked Rate`,"%"))), color="black", size=6)
       
     } else { # Filled Rate (%)
-      data <- dataPastSlot()
-      # data <- past.slot.data
       
-      # TEMPORARY SLOT DATE
+      data <- dataPastSlot()
+      # data <- past.slot.data %>% filter(Campus == "MSUS")
+      
       daily.filled <- data %>%
         group_by(Appt.Day, Appt.TM.Hr) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-                         `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-                         `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-                         `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-                         `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-        mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`)*100),
-               `Filled Rate` = round((`Arrived Hours`/`Available Hours`)*100))
+        summarise(`Available Hours` = sum(`Available Hours`),
+                  `Booked Hours` = sum(`Booked Hours`),
+                  `Arrived Hours` = sum(`Arrived Hours`)) %>%
+        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2),
+               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2)) 
       
       daily.filled.df <- byDayTime.df %>% filter(Day %in% unique(daily.filled$Appt.Day))
       daily.filled.df <- merge(daily.filled.df, daily.filled, by.x = c("Day","Time"), by.y = c("Appt.Day","Appt.TM.Hr"), all = TRUE)
@@ -2289,7 +2269,7 @@ server <- function(input, output, session) {
     noShows <- data %>%
       group_by(Appt.Status) %>%
       summarise(total = n()) %>%
-      mutate(avg = round(total/length(unique(arrived.data$Appt.DateYear))),
+      mutate(avg = round(total/length(unique(dataArrived()$Appt.DateYear))),
              name = "appt.status")
     
     noShows$Appt.Status[which(noShows$Appt.Status == "Bumped")] <- "Same-day Bumped"
@@ -3480,12 +3460,7 @@ server <- function(input, output, session) {
       width = 12, 
       solidHeader = FALSE,
       pickerInput("selectedApptType", label=h4("Select Appointment Type:"),
-                  choices = sort(unique(historical.data[
-                    historical.data$Campus %in% input$selectedCampus &
-                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
-                      historical.data$Department %in% input$selectedDepartment & 
-                      historical.data$Resource %in% input$selectedResource &
-                      historical.data$Provider %in% input$selectedProvider, "Appt.Type"])),
+                  choices = sort(unique(dataAll()$Appt.Type)),
                   # choices=sort(unique(dataAll()$Appt.Type)),
                   multiple=TRUE,
                   options = pickerOptions(
@@ -3502,13 +3477,7 @@ server <- function(input, output, session) {
       width = 12, 
       solidHeader = FALSE,
       pickerInput("selectedInsurance", label=h4("Select Insurance Type:"),
-                  choices = sort(unique(historical.data[
-                    historical.data$Campus %in% input$selectedCampus &
-                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
-                      historical.data$Department %in% input$selectedDepartment & 
-                      historical.data$Resource %in% input$selectedResource &
-                      historical.data$Provider %in% input$selectedProvider, "Coverage"])),
-                  # choices=sort(unique(dataAll()$Coverage)),
+                  choices = sort(unique(dataAll()$Coverage)),
                   multiple=TRUE,
                   options = pickerOptions(
                     liveSearch = TRUE,
@@ -3582,7 +3551,7 @@ server <- function(input, output, session) {
     )
     
     data <- dataArrivedNoShow_1()
-    # data <- arrivedNoShow.data
+    # data <- kpi.all.data[arrivedNoShow.data.rows,]
     
     data$Appt.Status <- ifelse(data$Appt.Status == "Arrived","Arrived","No Show")
     
@@ -3608,7 +3577,7 @@ server <- function(input, output, session) {
         scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits = c(0,max(noShows$noShow_perc)*1.2))+
         labs(x=NULL, y = "Percent",
              title = "Distribution of No Show Rate by Lead Days to Appointment*",
-             subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]), 
+             subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
              caption = "*No Show includes no show and same-day bumped, 
              canceled, and rescheduled appointments.")+
         theme_new_line()+
@@ -3949,7 +3918,7 @@ server <- function(input, output, session) {
     sameDay <- data %>%
       group_by(Appt.Status) %>%
       summarise(total = n()) %>%
-      mutate(avg = round(total/length(unique(all.data$Appt.DateYear))))
+      mutate(avg = round(total/length(unique((kpi.all.data[all.data.rows,])$Appt.DateYear))))
     
     ggplot(sameDay, aes(reorder(Appt.Status, -avg), avg, fill=Appt.Status)) +
       geom_bar(stat="identity", width = 0.8) +
@@ -3974,10 +3943,10 @@ server <- function(input, output, session) {
     data <- dataBumped()
     # data <- bumped.data
     
-    total <- nrow(bumped.data)
+    total <- nrow(kpi.all.data[bumped.data.rows,])
     
     bumps <- 
-      bumped.data %>%
+      data %>%
       mutate(leadDays = as.numeric(round(difftime(Appt.DTTM, Appt.Cancel.DTTM,  units = "days"),2))) %>% #(REMOVE)
       mutate(leadDays = ifelse(is.na(leadDays),0,leadDays)) %>%
       mutate(leadDays = ifelse(leadDays > 14, "> 14 days", 
@@ -4048,7 +4017,7 @@ server <- function(input, output, session) {
     data <- dataCanceled()
     # data <- canceled.data
     
-    total <- nrow(canceled.data)
+    total <- nrow(kpi.all.data[canceled.data.rows,])
     
     cancellations <- 
       data %>%
@@ -4138,7 +4107,7 @@ server <- function(input, output, session) {
   
   output$avgRoomsRequired <- renderValueBox({
     
-    max((dataArrivedUtilization() %>%
+    max((dataUtilization() %>%
            select(Appt.DateYear, timeOptionsHr_filter) %>%
            gather(Time, sum, 2:15) %>%
            group_by(Time) %>%
@@ -4150,8 +4119,8 @@ server <- function(input, output, session) {
   # Scheduled and Avg Utilization --------------------------------------------------------------------------------------------------------
   output$avgScheduledUtilization <- renderValueBox({
     
-    data <- dataHourScheduled()
-    # data <- data.hour.scheduled
+    data <- dataUtilization()
+    # data <- utilization.data[scheduled.utilization.data.rows,]
     
     paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
       valueBox(
@@ -4160,9 +4129,10 @@ server <- function(input, output, session) {
   
   output$avgUtilization <- renderValueBox({
     
-    data <- dataArrivedUtilization()
+    data <- dataUtilization()
+    # data <- utilization.data[arrived.utilization.data.rows,]
     
-    paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100)," %") %>%
+    paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
       valueBox(
         subtitle = tags$p("Average Daily Filled Utilization", style = "font-size: 160%;"), icon = NULL, color = "aqua")
   })
@@ -4180,7 +4150,8 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataArrivedUtilization()
+    data <- dataUtilization()
+    # data <- as.data.frame(utilization.data[arrived.utilization.data.rows,])
     
     # Days of Week Table
     daysOfWeek.Table <- 
@@ -4190,8 +4161,8 @@ server <- function(input, output, session) {
       group_by(Appt.Day) %>%
       dplyr::summarise(count = n())
     
-    c.start <- which(colnames(data)=="00:00")
-    c.end <- which(colnames(data)=="23:00")
+    c.start <- which(colnames(data)=="07:00")
+    c.end <- which(colnames(data)=="20:00")
     
     space.hour.day <- aggregate(data[c(c.start:c.end)], list(data$Appt.Day),FUN = sum)
     space.hour.day <- reshape2::melt(space.hour.day, id=c("Group.1"))
@@ -4257,9 +4228,8 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataArrivedUtilization()
-    
-    #data <- filter(arrived.utilization.data, Campus == "MSUS")
+    data <- dataUtilization()
+    # data <- utilization.data[arrived.utilization.data.rows,]
     
     # Days of Week Table
     daysOfWeek.Table <- 
@@ -4269,8 +4239,8 @@ server <- function(input, output, session) {
       group_by(Appt.Day) %>%
       dplyr::summarise(count = n())
     
-    c.start <- which(colnames(data)=="00:00")
-    c.end <- which(colnames(data)=="23:00")
+    c.start <- which(colnames(data)=="07:00")
+    c.end <- which(colnames(data)=="20:00")
     
     space.hour.day <- aggregate(data[c(c.start:c.end)], list(data$Appt.Day),FUN = sum)
     space.hour.day <- reshape2::melt(space.hour.day, id=c("Group.1"))
@@ -4341,10 +4311,10 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataArrivedUtilization()
+    data <- dataUtilization()
     
-    c.start <- which(colnames(data)=="00:00")
-    c.end <- which(colnames(data)=="23:00")
+    c.start <- which(colnames(data)=="07:00")
+    c.end <- which(colnames(data)=="20:00")
     
     space.hour <- aggregate(data[c(c.start:c.end)], list(data$Appt.DateYear),FUN = sum)
     space.hour <- reshape2::melt(space.hour, id=c("Group.1"))
@@ -4415,10 +4385,10 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataArrivedUtilization()
+    data <- dataUtilization()
     
-    c.start <- which(colnames(data)=="00:00")
-    c.end <- which(colnames(data)=="23:00")
+    c.start <- which(colnames(data)=="07:00")
+    c.end <- which(colnames(data)=="20:00")
     
     space.hour <- aggregate(data[c(c.start:c.end)], list(data$Appt.DateYear),FUN = sum)
     space.hour <- reshape2::melt(space.hour, id=c("Group.1"))
@@ -4889,7 +4859,8 @@ server <- function(input, output, session) {
                             by=list(dataArrived()$Appt.Day), FUN=NROW)
     
     names(pts.by.day) <- c("Day","Volume")
-    totalDates <- as.data.frame(seq(as.Date(min(arrived.data$Appt.DTTM)), as.Date(max(arrived.data$Appt.DTTM)),by="days"))
+    totalDates <- as.data.frame(seq(as.Date(min((kpi.all.data[arrived.data.rows,])$Appt.DTTM)), 
+                                    as.Date(max((kpi.all.data[arrived.data.rows,])$Appt.DTTM)),by="days"))
     names(totalDates) <- c("Dates")
     totalDates$day <- format(as.Date(totalDates$Dates, format="%Y-%m-%d"), "%a")
     totalDates <- aggregate(totalDates$Dates,
@@ -5650,132 +5621,132 @@ server <- function(input, output, session) {
   
   # Upcoming Demand -  Months - by Practice and Provider ------------------------------------------------
   # Slot Usage Graph by Practice and Provider 
-  output$demandMonthsGraph <-  renderPlot({
-    
-    validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
-    )
-    
-    if(input$byProvider3 == TRUE){ # By Provider
-      
-      # Future Booked Rate by Month and Day Table
-      summary.tb <- dataPastSlot() %>%
-        group_by(Campus, Department, Provider, Date) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-                         `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-                         `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-                         `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-                         `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-        mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
-               `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
-        gather(variable, value, 5:11)
-      
-      summary.tb$Date <- format(as.Date(summary.tb$Date, format="%Y-%m-%d"), "%m/%d/%Y")
-      summary.tb$Month <- format(as.Date(summary.tb$Date, format="%m/%d/%Y"), "%m")
-      summary.tb$DateD <- format(as.Date(summary.tb$Date, format="%m/%d/%Y"), "%d")
-      
-      dept <- summary.tb %>% filter(variable == "Booked Rate")
-      dept$unique <- paste0(dept$Department, dept$Provider, dept$Month, dept$DateD)
-      
-      # Dataframe for dates, month, date as number
-      DateD <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24",
-                 "25", "26", "27", "28", "29", "30", "31")
-      DateD <- data.frame(DateD = rep(DateD, length(unique(summary.tb$Month))*nrow(unique(summary.tb[,c("Department","Provider")]))))
-      prov <- as.data.frame(unique(summary.tb[,c("Department", "Provider")]))
-      final_df <- prov[rep(seq_len(nrow(prov)), length(unique(summary.tb$Month))*31), ]
-      final_df <- final_df %>% arrange(Department, Provider)
-      Month <- data.frame(Month = rep(unique(summary.tb$Month), nrow(final_df)))
-      Month <- Month %>% arrange(Month)
-      
-      final_df <- cbind(final_df, Month, DateD)
-      final_df$unique <-  paste0(final_df$Department, final_df$Provider, final_df$Month, final_df$DateD)
-      
-      final_df$value <- dept$value[match(final_df$unique, dept$unique)]
-      
-      is.nan.data.frame <- function(x) do.call(cbind, lapply(x, is.nan))
-      final_df[is.nan(final_df)] <- NA
-      
-      
-      ggplot(final_df, aes(y=Month, x=DateD))+
-        geom_tile(aes(fill=value), colour = "black", size=0.5)+
-        scale_fill_gradientn("Fill Rate", colors = c("#5a8ac6","white","#f8696b","#ff0000"), breaks = c(0.4,0.6,0.8,1.0))+
-        facet_grid(Provider~., switch = "y")+
-        coord_fixed(ratio=1/3)+
-        labs(title = paste0("\n","Booked Rate (%) by Provider - Upcoming 3 Months\n"), x = "\nDay", y = "Provider\nby Month\n")+
-        theme_bw()+
-        theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-              plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-              axis.text.x = element_text(size = 12),
-              axis.text.y = element_text(size = 12),
-              strip.text.y.left = element_text(angle = 0),
-              panel.background = element_rect(colour = "black", size=0.5),
-              axis.line = element_line(size = 0.3, colour = "black"),
-              strip.placement = "outside")
-      
-    } else{ # By Practice 
-      
-      # Future Booked Rate by Month and Day Table
-      summary.dept.tb <- dataPastSlot() %>%
-        group_by(Campus, Department, Date) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-                         `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-                         `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-                         `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-                         `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-        mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
-               `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
-        gather(variable, value, 4:10)
-      
-      summary.dept.tb$Date <- format(as.Date(summary.dept.tb$Date, format="%Y-%m-%d"), "%m/%d/%Y")
-      summary.dept.tb$Month <- format(as.Date(summary.dept.tb$Date, format="%m/%d/%Y"), "%m")
-      summary.dept.tb$DateD <- format(as.Date(summary.dept.tb$Date, format="%m/%d/%Y"), "%d")
-      
-      dept <- summary.dept.tb %>% filter(variable == "Booked Rate")
-      dept$unique <- paste0(dept$Department, dept$Month, dept$DateD)
-      
-      # Dataframe for dates, month, date as number
-      DateD <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24",
-                 "25", "26", "27", "28", "29", "30", "31")
-      DateD <- data.frame(DateD = rep(DateD, length(unique(summary.dept.tb$Month))*length(unique(summary.dept.tb$Department))))
-      prov <- as.vector(unique(summary.dept.tb$Department))
-      final_df <- data.frame(Department = rep(prov, length(unique(summary.dept.tb$Month))*31))
-      final_df <- final_df %>% arrange(Department)
-      Month <- data.frame(Month = rep(unique(summary.dept.tb$Month), nrow(final_df)))
-      Month <- Month %>% arrange(Month)
-      
-      final_df <- cbind(final_df, Month, DateD)
-      final_df$unique <-  paste0(final_df$Department, final_df$Month, final_df$DateD)
-      
-      final_df$value <- dept$value[match(final_df$unique, dept$unique)]
-      
-      is.nan.data.frame <- function(x) do.call(cbind, lapply(x, is.nan))
-      final_df[is.nan(final_df)] <- NA
-      
-      
-      ggplot(final_df, aes(y=Month, x=DateD))+
-        geom_tile(aes(fill=value), colour = "black", size=0.5)+
-        scale_fill_gradientn("Fill Rate", colors = c("#5a8ac6","white","#f8696b","#ff0000"), breaks = c(0.4,0.6,0.8,1.0))+
-        facet_grid(Department~., switch = "y")+
-        coord_fixed(ratio=1/3)+
-        labs(title = paste0("\n","Booked Rate (%) by Practice - Upcoming 3 Months\n"), x = "\nDay", y = "Department\nby Month\n")+
-        theme_bw()+
-        theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-              plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-              axis.text.x = element_text(size = 12),
-              axis.text.y = element_text(size = 12),
-              strip.text.y.left = element_text(angle = 0),
-              #anel.background = element_rect(colour = "black", size=0.5),
-              axis.line = element_line(size = 0.3, colour = "black"),
-              strip.placement = "outside")
-    }
-    
-  })
+  # output$demandMonthsGraph <-  renderPlot({
+  #   
+  #   validate(
+  #     need(input$selectedCampus != "", "Please select a Campus"),
+  #     need(input$selectedSpecialty != "", "Please select a Specialty"),
+  #     need(input$selectedDepartment != "", "Please select a Department"),
+  #     need(input$selectedResource != "", "Please select a Resource"),
+  #     need(input$selectedProvider != "", "Please select a Provider"),
+  #     need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+  #     need(input$selectedPRCName != "", "Please select a Visit Type")
+  #   )
+  #   
+  #   if(input$byProvider3 == TRUE){ # By Provider
+  #     
+  #     # Future Booked Rate by Month and Day Table
+  #     summary.tb <- dataPastSlot() %>%
+  #       group_by(Campus, Department, Provider, Date) %>%
+  #       dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
+  #                        `Booked Hours` = round(sum(BOOKED_MINUTES),0),
+  #                        `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
+  #                        `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
+  #                        `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
+  #       mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
+  #              `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
+  #       gather(variable, value, 5:11)
+  #     
+  #     summary.tb$Date <- format(as.Date(summary.tb$Date, format="%Y-%m-%d"), "%m/%d/%Y")
+  #     summary.tb$Month <- format(as.Date(summary.tb$Date, format="%m/%d/%Y"), "%m")
+  #     summary.tb$DateD <- format(as.Date(summary.tb$Date, format="%m/%d/%Y"), "%d")
+  #     
+  #     dept <- summary.tb %>% filter(variable == "Booked Rate")
+  #     dept$unique <- paste0(dept$Department, dept$Provider, dept$Month, dept$DateD)
+  #     
+  #     # Dataframe for dates, month, date as number
+  #     DateD <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24",
+  #                "25", "26", "27", "28", "29", "30", "31")
+  #     DateD <- data.frame(DateD = rep(DateD, length(unique(summary.tb$Month))*nrow(unique(summary.tb[,c("Department","Provider")]))))
+  #     prov <- as.data.frame(unique(summary.tb[,c("Department", "Provider")]))
+  #     final_df <- prov[rep(seq_len(nrow(prov)), length(unique(summary.tb$Month))*31), ]
+  #     final_df <- final_df %>% arrange(Department, Provider)
+  #     Month <- data.frame(Month = rep(unique(summary.tb$Month), nrow(final_df)))
+  #     Month <- Month %>% arrange(Month)
+  #     
+  #     final_df <- cbind(final_df, Month, DateD)
+  #     final_df$unique <-  paste0(final_df$Department, final_df$Provider, final_df$Month, final_df$DateD)
+  #     
+  #     final_df$value <- dept$value[match(final_df$unique, dept$unique)]
+  #     
+  #     is.nan.data.frame <- function(x) do.call(cbind, lapply(x, is.nan))
+  #     final_df[is.nan(final_df)] <- NA
+  #     
+  #     
+  #     ggplot(final_df, aes(y=Month, x=DateD))+
+  #       geom_tile(aes(fill=value), colour = "black", size=0.5)+
+  #       scale_fill_gradientn("Fill Rate", colors = c("#5a8ac6","white","#f8696b","#ff0000"), breaks = c(0.4,0.6,0.8,1.0))+
+  #       facet_grid(Provider~., switch = "y")+
+  #       coord_fixed(ratio=1/3)+
+  #       labs(title = paste0("\n","Booked Rate (%) by Provider - Upcoming 3 Months\n"), x = "\nDay", y = "Provider\nby Month\n")+
+  #       theme_bw()+
+  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
+  #             axis.text.x = element_text(size = 12),
+  #             axis.text.y = element_text(size = 12),
+  #             strip.text.y.left = element_text(angle = 0),
+  #             panel.background = element_rect(colour = "black", size=0.5),
+  #             axis.line = element_line(size = 0.3, colour = "black"),
+  #             strip.placement = "outside")
+  #     
+  #   } else{ # By Practice 
+  #     
+  #     # Future Booked Rate by Month and Day Table
+  #     summary.dept.tb <- dataPastSlot() %>%
+  #       group_by(Campus, Department, Date) %>%
+  #       dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
+  #                        `Booked Hours` = round(sum(BOOKED_MINUTES),0),
+  #                        `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
+  #                        `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
+  #                        `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
+  #       mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
+  #              `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
+  #       gather(variable, value, 4:10)
+  #     
+  #     summary.dept.tb$Date <- format(as.Date(summary.dept.tb$Date, format="%Y-%m-%d"), "%m/%d/%Y")
+  #     summary.dept.tb$Month <- format(as.Date(summary.dept.tb$Date, format="%m/%d/%Y"), "%m")
+  #     summary.dept.tb$DateD <- format(as.Date(summary.dept.tb$Date, format="%m/%d/%Y"), "%d")
+  #     
+  #     dept <- summary.dept.tb %>% filter(variable == "Booked Rate")
+  #     dept$unique <- paste0(dept$Department, dept$Month, dept$DateD)
+  #     
+  #     # Dataframe for dates, month, date as number
+  #     DateD <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24",
+  #                "25", "26", "27", "28", "29", "30", "31")
+  #     DateD <- data.frame(DateD = rep(DateD, length(unique(summary.dept.tb$Month))*length(unique(summary.dept.tb$Department))))
+  #     prov <- as.vector(unique(summary.dept.tb$Department))
+  #     final_df <- data.frame(Department = rep(prov, length(unique(summary.dept.tb$Month))*31))
+  #     final_df <- final_df %>% arrange(Department)
+  #     Month <- data.frame(Month = rep(unique(summary.dept.tb$Month), nrow(final_df)))
+  #     Month <- Month %>% arrange(Month)
+  #     
+  #     final_df <- cbind(final_df, Month, DateD)
+  #     final_df$unique <-  paste0(final_df$Department, final_df$Month, final_df$DateD)
+  #     
+  #     final_df$value <- dept$value[match(final_df$unique, dept$unique)]
+  #     
+  #     is.nan.data.frame <- function(x) do.call(cbind, lapply(x, is.nan))
+  #     final_df[is.nan(final_df)] <- NA
+  #     
+  #     
+  #     ggplot(final_df, aes(y=Month, x=DateD))+
+  #       geom_tile(aes(fill=value), colour = "black", size=0.5)+
+  #       scale_fill_gradientn("Fill Rate", colors = c("#5a8ac6","white","#f8696b","#ff0000"), breaks = c(0.4,0.6,0.8,1.0))+
+  #       facet_grid(Department~., switch = "y")+
+  #       coord_fixed(ratio=1/3)+
+  #       labs(title = paste0("\n","Booked Rate (%) by Practice - Upcoming 3 Months\n"), x = "\nDay", y = "Department\nby Month\n")+
+  #       theme_bw()+
+  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
+  #             axis.text.x = element_text(size = 12),
+  #             axis.text.y = element_text(size = 12),
+  #             strip.text.y.left = element_text(angle = 0),
+  #             #anel.background = element_rect(colour = "black", size=0.5),
+  #             axis.line = element_line(size = 0.3, colour = "black"),
+  #             strip.placement = "outside")
+  #   }
+  #   
+  # })
   
   
   # Slot Usage Graph by Practice and Provider -----------------------------------------------------------------
@@ -5798,25 +5769,28 @@ server <- function(input, output, session) {
     
     summary.md <- data %>%
       group_by(Provider, Appt.Week) %>%
-      dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES)/60,0),
-                       `Booked Hours` = round(sum(BOOKED_MINUTES)/60,0),
-                       `Filled Hours` = round(sum(ARRIVED_MINUTES)/60,0),
-                       `Canceled Hours` = round(sum(CANCELED_MINUTES)/60,0)) %>%
+      summarise(`Available Hours` = sum(`Available Hours`),
+                `Booked Hours` = sum(`Booked Hours`),
+                `Arrived Hours` = sum(`Arrived Hours`)) %>%
       mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`),2),
-             `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`),2)) 
+             `Filled Rate (%)` = round((`Arrived Hours`/`Available Hours`),2)) 
+    
+    summary.md$`Booked Rate (%)`[which(!is.finite(summary.md$`Booked Rate (%)`))] <- 1
+    summary.md$`Filled Rate (%)`[which(!is.finite(summary.md$`Filled Rate (%)`))] <- 1
     
     if(input$slotUsageChoice == 1) { # Available Hours
       
       ggplot(summary.md, aes(x=Appt.Week, y=`Available Hours`, group=Provider, col=Provider)) +
         geom_line()+
         geom_point(size=2)+
-        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+        scale_color_MountSinai("main", reverse = TRUE, labels = wrap_format(25))+
         labs(x=NULL, y="Hours",
              title = "Available Hours by Provider per Week",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
         graph_theme("bottom")
+      
     } else if(input$slotUsageChoice == 2) { # Booked Hours
       
       ggplot(summary.md, aes(x=Appt.Week, y=`Booked Hours`, group=Provider, col=Provider)) +
@@ -5849,7 +5823,7 @@ server <- function(input, output, session) {
         scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x=NULL, y="Percent",
-             title = "Average Booked Rate by Provider per Week",
+             title = "Booked Rate (%) by Provider per Week",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_bw()+
         graph_theme("bottom")
@@ -5865,7 +5839,7 @@ server <- function(input, output, session) {
         #scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x=NULL, y="Percent\n",
-             title = "Average Filled Rate (%) by Provider per Week",
+             title = "Filled Rate (%) by Provider per Week",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_bw()+
         graph_theme("bottom")
@@ -5886,14 +5860,11 @@ server <- function(input, output, session) {
       
       summary.prov <- data %>%
         group_by(Campus, Campus.Specialty, Provider, Appt.DateYear) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),1),
-                         `Booked Hours` = round(sum(BOOKED_MINUTES),1),
-                         `Filled Hours` = round(sum(ARRIVED_MINUTES),1)) %>%
+        dplyr::summarise(`Available Hours` = round(sum(`Available Hours`),1),
+                         `Booked Hours` = round(sum(`Booked Hours`),1),
+                         `Filled Hours` = round(sum(`Arrived Hours`),1)) %>%
         mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100),
                `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100)) %>%
-        dplyr::mutate(`Available Hours` = round(`Available Hours`/60,1),
-                      `Booked Hours` = round(`Booked Hours`/60,1),
-                      `Filled Hours` = round(`Filled Hours`/60,1)) %>%
         gather(variable, value, 5:9) %>%
         spread(Appt.DateYear, value)
       
@@ -5921,14 +5892,11 @@ server <- function(input, output, session) {
       
       summary.dept <- data %>%
         group_by(Campus, Campus.Specialty, Appt.DateYear) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),1),
-                         `Booked Hours` = round(sum(BOOKED_MINUTES),1),
-                         `Filled Hours` = round(sum(ARRIVED_MINUTES),1)) %>%
+        dplyr::summarise(`Available Hours` = round(sum(`Available Hours`),1),
+                         `Booked Hours` = round(sum(`Booked Hours`),1),
+                         `Filled Hours` = round(sum(`Arrived Hours`),1)) %>%
         mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100),
                `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100)) %>%
-        dplyr::mutate(`Available Hours` = round(`Available Hours`/60,1),
-                      `Booked Hours` = round(`Booked Hours`/60,1),
-                      `Filled Hours` = round(`Filled Hours`/60,1)) %>%
         gather(variable, value, 4:8) %>%
         spread(Appt.DateYear, value)
       
@@ -5956,9 +5924,9 @@ server <- function(input, output, session) {
   output$slotUsageTb <- DT::renderDT(slotUsageTb_data(),
                                      extensions = 'Buttons',
                                      options = list(scrollX = TRUE,
-                                                      dom = 'Bfrtip',
-                                                      buttons = c('csv','excel'),
-                                                      sDom  = '<"top">lrt<"bottom">ip'))
+                                                    dom = 'Bfrtip',
+                                                    buttons = c('csv','excel'),
+                                                    sDom  = '<"top">lrt<"bottom">ip'))
   
   ### [3. ] Day of Visit Tab -----------------------------------------------------------------------------------------------------------
   
@@ -5980,13 +5948,7 @@ server <- function(input, output, session) {
       width = 12, 
       solidHeader = FALSE,
       pickerInput("selectedApptType2", label = h4("Select Appointment Type for Comparison:"), 
-                  choices = sort(unique(historical.data[
-                    historical.data$New.PT3 == FALSE &
-                      historical.data$Campus %in% input$selectedCampus &
-                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
-                      historical.data$Department %in% input$selectedDepartment & 
-                      historical.data$Resource %in% input$selectedResource &
-                      historical.data$Provider %in% input$selectedProvider, "Appt.Type"])),
+                  choices = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type)),
                   multiple=TRUE,
                   options = pickerOptions(
                     liveSearch = TRUE,
@@ -5994,14 +5956,7 @@ server <- function(input, output, session) {
                     selectedTextFormat = "count > 1", 
                     countSelectedText = "{0}/{1} Types", 
                     dropupAuto = FALSE),
-                  selected = sort(unique(historical.data[
-                    historical.data$New.PT3 == FALSE &
-                      historical.data$Campus %in% input$selectedCampus &
-                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
-                      historical.data$Department %in% input$selectedDepartment & 
-                      historical.data$Resource %in% input$selectedResource &
-                      historical.data$Provider %in% input$selectedProvider, "Appt.Type"]))[[1]]))
-    
+                  selected = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type))))
   })
   
   
@@ -6022,13 +5977,7 @@ server <- function(input, output, session) {
       width = 12, 
       solidHeader = FALSE,
       pickerInput("selectedApptType3", label = h4("Select Appointment Type for Comparison:"), 
-                  choices = sort(unique(historical.data[
-                    historical.data$New.PT3 == FALSE &
-                      historical.data$Campus %in% input$selectedCampus &
-                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
-                      historical.data$Department %in% input$selectedDepartment & 
-                      historical.data$Resource %in% input$selectedResource &
-                      historical.data$Provider %in% input$selectedProvider, "Appt.Type"])),
+                  choices = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type)),
                   multiple=TRUE,
                   options = pickerOptions(
                     liveSearch = TRUE,
@@ -6036,13 +5985,7 @@ server <- function(input, output, session) {
                     selectedTextFormat = "count > 1", 
                     countSelectedText = "{0}/{1} Types", 
                     dropupAuto = FALSE),
-                  selected = sort(unique(historical.data[
-                    historical.data$New.PT3 == FALSE &
-                      historical.data$Campus %in% input$selectedCampus &
-                      historical.data$Campus.Specialty %in% input$selectedSpecialty &
-                      historical.data$Department %in% input$selectedDepartment & 
-                      historical.data$Resource %in% input$selectedResource &
-                      historical.data$Provider %in% input$selectedProvider, "Appt.Type"]))[[1]]))
+                  selected = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type))))
     
   })
   
