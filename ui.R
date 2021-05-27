@@ -30,13 +30,10 @@ default_PRC_name <- sort(unique(kpi.all.data[
     kpi.all.data$Provider %in% default_provider &
     kpi.all.data$Visit.Method %in% default_visit_method, "Appt.Type"]))
 
-kpi.arrived.data <- kpi.all.data %>% filter(Appt.Status %in% c("Arrived"))
-arrived.data <- kpi.all.data[all.data.rows,] %>% filter(Appt.Status %in% c("Arrived"))
-
-dateRangeKpi_start = min(kpi.arrived.data$Appt.DateYear) 
-dateRangeKpi_end = max(kpi.arrived.data$Appt.DateYear)
-dateRangeKpi_min = min(arrived.data$Appt.DateYear) 
-dateRangeKpi_max = max(arrived.data$Appt.DateYear)
+dateRangeKpi_start = min((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
+dateRangeKpi_end = max((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
+dateRangeKpi_min = min((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
+dateRangeKpi_max = max((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
 
 
 
@@ -1266,8 +1263,8 @@ ui <- dashboardPage(
         width = 12, 
         solidHeader = FALSE, 
         dateRangeInput("dateRangeUtil", label = NULL,
-                       start = min(data.hour.arrived$Appt.DateYear), end = max(data.hour.arrived$Appt.DateYear),
-                       min = min(arrived.data$Appt.DateYear), max = max(arrived.data$Appt.DateYear))),
+                       start = min(utilization.data$Appt.DateYear), end = max(utilization.data$Appt.DateYear),
+                       min = min(utilization.data$Appt.DateYear), max = max(utilization.data$Appt.DateYear))),
       
       box(
         title = "Select Days of Week:",
