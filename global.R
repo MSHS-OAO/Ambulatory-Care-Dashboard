@@ -316,26 +316,18 @@ setwd(wdpath)
 
 ### RStudio COnnect Data Read In
 
-# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
-# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
-# holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
-<<<<<<< HEAD
-# data.hour.scheduled <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_scheduled.feather"))
-# data.hour.arrived  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/hour_arrived.feather"))
-# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
+historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
+slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
+holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
+utilization.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/utilization_data.feather"))
+population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
 
 
-=======
-# utilization.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/utilization_data.feather"))
-# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
->>>>>>> 14a348b8cb37cbcd6994b219fafaf8817379129d
-
-
-historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
-slot.data.subset <- readRDS(paste0(wdpath,"/Data/new_slot_data_subset.rds"))
-holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-utilization.data <- readRDS(paste0(wdpath,"/Data/new_utilization_data.rds"))
-population.data_filtered <- readRDS(paste0(wdpath,"/Data/population.data_filtered.rds"))
+# historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
+# slot.data.subset <- readRDS(paste0(wdpath,"/Data/new_slot_data_subset.rds"))
+# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+# utilization.data <- readRDS(paste0(wdpath,"/Data/new_utilization_data.rds"))
+# population.data_filtered <- readRDS(paste0(wdpath,"/Data/population.data_filtered.rds"))
 
 max_date <- max(historical.data$Appt.DateYear)
 
@@ -348,7 +340,7 @@ setDT(utilization.data)
 setDT(slot.data.subset)
 setDT(historical.data)
 kpi.all.data <- historical.data[Appt.DTTM >= max_date - 3*365]
-#rm(historical.data)
+rm(historical.data)
 
 
 
@@ -402,7 +394,6 @@ arrived.utilization.data.rows <- utilization.data[util.type == "arrived", which 
 
 
 
->>>>>>> 14a348b8cb37cbcd6994b219fafaf8817379129d
 
 ## KPI datasets
 # kpi.all.data <- historical.data %>% filter(Appt.DTTM >= max_date - 3*365) ## All data: Arrived, No Show, Canceled, Bumped, Rescheduled
@@ -427,7 +418,6 @@ arrived.utilization.data.rows <- utilization.data[util.type == "arrived", which 
 # arrivedNoShow.data <- rbind(arrived.data,noShow.data) ## Arrived + No Show data: Arrived and No Show
 
 kpi.all.data <- as.data.frame(kpi.all.data)
-historical.data <- as.data.frame(historical.data)
 slot.data.subset <- as.data.frame(slot.data.subset)
 utilization.data <- as.data.frame(utilization.data)
 
@@ -518,8 +508,8 @@ Time <- rep(timeOptionsHr, 7)
 Day <- rep(daysOfWeek.options, each = 24)
 byDayTime.df <- as.data.frame(cbind(Day,Time)) ## Empty data frame for day of week by time (hour)
 
-dateInData <- length(unique(data.hour.arrived$Appt.DateYear))
-Date <- rep(unique(data.hour.arrived$Appt.DateYear), each = 24)
+dateInData <- length(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear))
+Date <- rep(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear), each = 24)
 Time <- rep(timeOptionsHr, dateInData)
 byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (hour)
 
@@ -527,8 +517,8 @@ Time <- rep(timeOptions30m, 7)
 Day <- rep(daysOfWeek.options, each = 48)
 byDayTime30m.df <- as.data.frame(cbind(Day,Time)) ## Empty data frame for day of week by time (30-min)
 
-dateInData <- length(unique(data.hour.arrived$Appt.DateYear))
-Date <- rep(unique(data.hour.arrived$Appt.DateYear), each = 24)
+dateInData <- length(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear))
+Date <- rep(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear), each = 24)
 Time <- rep(timeOptionsHr, dateInData)
 byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (30-min)
 
