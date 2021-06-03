@@ -4121,7 +4121,7 @@ server <- function(input, output, session) {
   # Scheduled and Avg Utilization --------------------------------------------------------------------------------------------------------
   output$avgScheduledUtilization <- renderValueBox({
     
-    data <- dataUtilization()
+    data <- dataUtilization() 
     # data <- utilization.data[scheduled.utilization.data.rows,]
     
     paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
@@ -4131,7 +4131,7 @@ server <- function(input, output, session) {
   
   output$avgUtilization <- renderValueBox({
     
-    data <- dataUtilization()
+    data <- dataUtilization() %>% filter(Appt.Status == "Arrived")
     # data <- utilization.data[arrived.utilization.data.rows,]
     
     paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
