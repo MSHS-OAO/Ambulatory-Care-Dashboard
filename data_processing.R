@@ -521,7 +521,7 @@ singleday_path_part <- function(singleday){
 
 
 readin_data_all <- function(){
-  data_all <<- list.files(path = monthly_path,     # Identify all csv files in folder
+  data_all <- list.files(path = monthly_path,     # Identify all csv files in folder
                           pattern = "*.csv", full.names = TRUE) %>%   
     lapply(read_csv) %>%                                            # Store all files in list
     bind_rows()
@@ -571,7 +571,7 @@ max_date <- function(singleday,monthly){
 check_singleday <- function(singleday,monthly){
   filein_singleday = !is_empty(singleday_path_part(singleday))
   if(filein_singleday == 'TRUE'){
-    singleday_data <<- read_singleday(singleday)
+    singleday_data <- read_singleday(singleday)
     max_month_monthly <- max_date(singleday,monthly)[[2]]
     max_month_singleday <- max_date(singleday,monthly)[[3]]
     curr_year <- format(Sys.Date(), "%Y")
