@@ -561,7 +561,7 @@ server <- function(input, output, session) {
 
   dataUtilization <- reactive({
     input$sbm
-    groupByFilters_2(utilization.data[scheduled.utilization.data.rows,],
+    groupByFilters_2(utilization.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod, input$selectedPRCName, 
                      input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays, input$utilType)
