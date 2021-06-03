@@ -561,7 +561,7 @@ server <- function(input, output, session) {
 
   dataUtilization <- reactive({
     input$sbm
-    groupByFilters_2(utilization.data[scheduled.utilization.data.rows,],
+    groupByFilters_2(utilization.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod, input$selectedPRCName, 
                      input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays, input$utilType)
@@ -2135,15 +2135,15 @@ server <- function(input, output, session) {
     } else if(input$provSchedulingChoice == 4) { # Booked Rate (%)
       
       data <- dataPastSlot()
-      # data <- past.slot.data %>% filter(Campus == "MSUS")
+      # data <- slot.data.subset[past.slot.data.rows,] %>% filter(Campus == "MSUS")
       
       daily.booked <- data %>%
         group_by(Appt.Day, Appt.TM.Hr) %>%
         summarise(`Available Hours` = sum(`Available Hours`),
                   `Booked Hours` = sum(`Booked Hours`),
                   `Arrived Hours` = sum(`Arrived Hours`)) %>%
-        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2),
-               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2)) 
+        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2) * 100,
+               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2) * 100) 
       
       daily.booked.df <- byDayTime.df %>% filter(Day %in% unique(daily.booked$Appt.Day))
       daily.booked.df <- merge(daily.booked.df, daily.booked, by.x = c("Day","Time"), by.y = c("Appt.Day","Appt.TM.Hr"), all = TRUE)
@@ -2183,8 +2183,8 @@ server <- function(input, output, session) {
         summarise(`Available Hours` = sum(`Available Hours`),
                   `Booked Hours` = sum(`Booked Hours`),
                   `Arrived Hours` = sum(`Arrived Hours`)) %>%
-        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2),
-               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2)) 
+        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2) * 100,
+               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2) * 100) 
       
       daily.filled.df <- byDayTime.df %>% filter(Day %in% unique(daily.filled$Appt.Day))
       daily.filled.df <- merge(daily.filled.df, daily.filled, by.x = c("Day","Time"), by.y = c("Appt.Day","Appt.TM.Hr"), all = TRUE)
