@@ -545,6 +545,8 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
 ## Filtered No Show Data
 groupByFilters_1 <- function(dt, apptType, insurance){
   result <- dt %>% filter(Appt.Type %in% apptType, Coverage %in% insurance)
+  # na_result <- dt[is.na(dt$Coverage),]
+  # result <- rbind(result,na_result)
   return(result)
 }
 

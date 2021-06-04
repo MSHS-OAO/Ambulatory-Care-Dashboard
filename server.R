@@ -17,6 +17,9 @@ server <- function(input, output, session) {
   #         )
   # 
   # })
+  
+
+  
 
   observeEvent(input$selectedCampus,{
     print(class(input$selectedCampus))
@@ -1704,7 +1707,13 @@ server <- function(input, output, session) {
   output$pracApptStatus <- renderPlot({
     
     data <- dataNoShow()
-    # data <- noShow.data
+    # data <- kpi.all.data[noshow.data.rows,]
+    
+    # sameDay <- data %>%
+    #   group_by(Appt.Status) %>%
+    #   summarise(value = round(n()/length(unique(kpi.all.data[arrived.data.rows,]$Appt.DateYear)))) %>%
+    #   arrange(desc(value)) 
+
     
     sameDay <- data %>%
       group_by(Appt.Status) %>%
@@ -2234,7 +2243,8 @@ server <- function(input, output, session) {
     )
     
     valueBox(
-      prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
+      #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
+      prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique((dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
       subtitle = tags$p("Average No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -3465,13 +3475,19 @@ server <- function(input, output, session) {
       solidHeader = FALSE,
       pickerInput("selectedApptType", label=h4("Select Appointment Type:"),
                   choices = sort(unique(dataAll()$Appt.Type)),
+                  #choices = sort(unique(dataAll()$Appt.Type), na.last = TRUE),
                   # choices=sort(unique(dataAll()$Appt.Type)),
                   multiple=TRUE,
                   options = pickerOptions(
                     liveSearch = TRUE,
                     actionsBox = TRUE,
+                    selectedTextFormat = "count > 1",
+                    countSelectedText = "{0}/{1} Appointment Types",
                     dropupAuto = FALSE),
-                  selected = unique(dataAll()$Appt.Type)))
+                  selected = unique(dataAll()$Appt.Type)
+                  #selected = sort(unique(dataAll()$Appt.Type), na.last = TRUE)
+                  )
+      )
   })
   
   output$insuranceControl <- renderUI({
@@ -3481,24 +3497,35 @@ server <- function(input, output, session) {
       width = 12, 
       solidHeader = FALSE,
       pickerInput("selectedInsurance", label=h4("Select Insurance Type:"),
-                  choices = sort(unique(dataAll()$Coverage)),
+                  #choices = sort(unique(dataAll()$Coverage)),
+                  choices = sort(unique(dataAll()$Coverage), na.last = TRUE),
                   multiple=TRUE,
                   options = pickerOptions(
                     liveSearch = TRUE,
                     actionsBox = TRUE,
+                    selectedTextFormat = "count > 1",
+                    countSelectedText = "{0}/{1} Insurance Types",
                     dropupAuto = FALSE),
-                  selected = unique(dataAll()$Coverage)))
+                  #selected = unique(dataAll()$Coverage)
+                  selected = sort(unique(dataAll()$Coverage), na.last = TRUE)
+                  )
+      )
   })
   
   # Arrived No Show Data with Additional Filters (Appointment Type and Insurance)
   dataArrivedNoShow_1 <- reactive({
-    groupByFilters_1(dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived", "No Show")),
+    data <- dataArrivedNoShow()
+    data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
+    groupByFilters_1(data %>% filter(Appt.Status %in% c("Arrived", "No Show")),
                      input$selectedApptType, input$selectedInsurance)
   })
   
   dataNoShow_1 <- reactive({
-    groupByFilters_1(dataNoShow() %>% filter(Appt.Status %in% c("No Show")),
-                     input$selectedApptType, input$selectedInsurance)
+    data <- dataNoShow()
+    data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
+    groupByFilters_1(data %>% filter(Appt.Status %in% c("No Show")),
+                     input$selectedApptType, input$selectedInsurance
+                     )
   })
   
   # Total No Shows per Day
@@ -3515,8 +3542,7 @@ server <- function(input, output, session) {
     )
     
     valueBox(
-      round(nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
-              length(unique((dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show")))$Appt.DateYear)),0),
+      prettyNum(round(nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / length(unique((dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
       subtitle = tags$p("Average No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     

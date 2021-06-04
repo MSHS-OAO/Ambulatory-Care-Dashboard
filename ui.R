@@ -1,5 +1,5 @@
 default_campus <- "MSUS"
-default_specialty <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS", "Campus.Specialty"]))
+default_specialty <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS", "Campus.Specialty"]), na.last = TRUE)
 
 # default_specialty <- sort(unique(kpi.all.data[Campus == default_campus], 
 #                                   by = "Campus.Specialty"
@@ -7,20 +7,20 @@ default_specialty <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS", "
 #                           )
 
 default_departments <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS" &
-                                                     kpi.all.data$Campus.Specialty %in% default_specialty, "Department"])) 
+                                                     kpi.all.data$Campus.Specialty %in% default_specialty, "Department"]), na.last = TRUE) 
 default_resource_type <- c("Provider","Resource")
 default_provider <- sort(unique(kpi.all.data[
   kpi.all.data$Campus %in% default_campus &
     kpi.all.data$Campus.Specialty %in% default_specialty &
     kpi.all.data$Department %in% default_departments & 
-    kpi.all.data$Resource %in% default_resource_type, "Provider"]))
+    kpi.all.data$Resource %in% default_resource_type, "Provider"]), na.last = TRUE)
 
 default_visit_method <- sort(unique(kpi.all.data[
   kpi.all.data$Campus %in% default_campus &
     kpi.all.data$Campus.Specialty %in% default_specialty &
     kpi.all.data$Department %in% default_departments & 
     kpi.all.data$Resource %in% default_resource_type &
-    kpi.all.data$Provider %in% default_provider, "Visit.Method"]))
+    kpi.all.data$Provider %in% default_provider, "Visit.Method"]), na.last = TRUE)
 
 default_PRC_name <- sort(unique(kpi.all.data[
   kpi.all.data$Campus %in% default_campus &
@@ -28,7 +28,7 @@ default_PRC_name <- sort(unique(kpi.all.data[
     kpi.all.data$Department %in% default_departments & 
     kpi.all.data$Resource %in% default_resource_type &
     kpi.all.data$Provider %in% default_provider &
-    kpi.all.data$Visit.Method %in% default_visit_method, "Appt.Type"]))
+    kpi.all.data$Visit.Method %in% default_visit_method, "Appt.Type"]), na.last = TRUE)
 
 dateRangeKpi_start = min((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
 dateRangeKpi_end = max((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
