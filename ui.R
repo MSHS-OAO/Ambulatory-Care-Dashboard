@@ -625,8 +625,8 @@ ui <- dashboardPage(
                            column(3, uiOutput("insuranceControl")),
                            column(3, valueBoxOutput("avgDailyNoShow_Count", width = 12) %>%
                                     withSpinner(type = 5, color = "#d80b8c")),
-                           column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
-                         h5("No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")
+                           column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12)))
+                         # h5("No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")
                        ),
                        boxPlus(
                          title = "No Shows by Time of Day", width = 12, status = "primary",
@@ -719,7 +719,7 @@ ui <- dashboardPage(
                                                   inputId = "utilType",
                                                   label = h4("Analysis based on:"),
                                                   size = "lg",
-                                                  choices = list("SCHEDULED time and duration" = "scheduled", "ACTUAL time and duration" = "arrived"),
+                                                  choices = list("SCHEDULED time and duration" = "scheduled", "ACTUAL time and duration" = "actual"),
                                                   # choices = util_choices,
                                                   # selected = util_choices[1],
                                                   checkIcon = list(

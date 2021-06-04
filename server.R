@@ -1651,7 +1651,8 @@ server <- function(input, output, session) {
   output$newNoShow <- renderInfoBox({
     infoBox(
       title = tags$p("Avg New Patient No Show %", style = "font-size: 130%;"), subtitle = NULL,
-      value = paste0(round(nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status != "Arrived"))/ nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE)),2)*100,"%"), icon = icon("user-times")
+      value = paste0(round(nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status == "No Show"))/ 
+                             nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status %in% c("Arrived", "No Show"))),2)*100,"%"), icon = icon("user-times")
     )
   })
   
@@ -1707,7 +1708,7 @@ server <- function(input, output, session) {
     
     sameDay <- data %>%
       group_by(Appt.Status) %>%
-      summarise(value = round(n()/length(unique(dataAll()$Appt.DateYear)))) %>%
+      summarise(value = round(n()/length(unique(dataArrived()$Appt.DateYear)))) %>%
       arrange(desc(value)) 
     
     ggplot(sameDay, aes(reorder(Appt.Status, -value), value, fill=Appt.Status)) +
@@ -2039,7 +2040,7 @@ server <- function(input, output, session) {
       
     } else if(input$provSchedulingChoice == 2) { # No Show
       
-      data <- dataArrivedNoShow() 
+      data <- dataArrivedNoShow() %>% filter(Appt.Status %in% c("No Show"))
       
       daily.arrivedNoShow <- data %>%
         group_by(Appt.Day, Appt.TM.Hr, Appt.Status) %>%
@@ -2233,7 +2234,7 @@ server <- function(input, output, session) {
     )
     
     valueBox(
-      prettyNum(round(nrow(dataNoShow()) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
+      prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
       subtitle = tags$p("Average No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -2254,7 +2255,8 @@ server <- function(input, output, session) {
     )
     
     valueBox(
-      paste0(round((nrow(dataNoShow())) / (nrow(dataNoShow())+nrow(dataArrived())), 2) *100, "%"),
+      paste0(round((nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show")))) / 
+                     (nrow(dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived", "No Show")))), 2) *100, "%"),
       subtitle = tags$p("No Show Rate (%)", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -2309,7 +2311,7 @@ server <- function(input, output, session) {
   
   output$provCoverage <- function(){
     
-    data <- dataArrivedNoShow()
+    data <- dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived", "No Show"))
     # data <- arrivedNoShow.data
     
     major <- data %>% 
@@ -3488,14 +3490,14 @@ server <- function(input, output, session) {
                   selected = unique(dataAll()$Coverage)))
   })
   
-  # Arrived No Show Data with Additional Filteres (Appointment Type and Insurance)
+  # Arrived No Show Data with Additional Filters (Appointment Type and Insurance)
   dataArrivedNoShow_1 <- reactive({
-    groupByFilters_1(dataArrivedNoShow(),
+    groupByFilters_1(dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived", "No Show")),
                      input$selectedApptType, input$selectedInsurance)
   })
   
   dataNoShow_1 <- reactive({
-    groupByFilters_1(dataNoShow(),
+    groupByFilters_1(dataNoShow() %>% filter(Appt.Status %in% c("No Show")),
                      input$selectedApptType, input$selectedInsurance)
   })
   
@@ -3513,7 +3515,8 @@ server <- function(input, output, session) {
     )
     
     valueBox(
-      round(nrow(dataNoShow_1()) / length(unique(dataArrivedNoShow_1()$Appt.DateYear)),0),
+      round(nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
+              length(unique((dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show")))$Appt.DateYear)),0),
       subtitle = tags$p("Average No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -3533,7 +3536,8 @@ server <- function(input, output, session) {
     )
     
     valueBox(
-      paste0(round((nrow(dataNoShow_1()) / nrow(dataArrivedNoShow_1()))*100,1), "%"),
+      paste0(round((nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
+                      nrow(dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))))*100,1), "%"),
       subtitle = tags$p("No Show Rate (%)", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -3552,7 +3556,7 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataArrivedNoShow_1()
+    data <- dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))
     # data <- kpi.all.data[arrivedNoShow.data.rows,]
     
     data$Appt.Status <- ifelse(data$Appt.Status == "Arrived","Arrived","No Show")
@@ -3579,9 +3583,9 @@ server <- function(input, output, session) {
         scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits = c(0,max(noShows$noShow_perc)*1.2))+
         labs(x=NULL, y = "Percent",
              title = "Distribution of No Show Rate by Lead Days to Appointment*",
-             subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
-             caption = "*No Show includes no show and same-day bumped, 
-             canceled, and rescheduled appointments.")+
+             subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+             # caption = "*No Show includes no show and same-day bumped, 
+             # canceled, and rescheduled appointments.")+
         theme_new_line()+
         theme_bw()+
         graph_theme("none")+
@@ -3605,8 +3609,8 @@ server <- function(input, output, session) {
       ggplot(noShows_bar_tb, aes(x=factor(apptLeadDays, levels = status), y=value,fill=variable)) +
       geom_bar(stat="identity", position=position_dodge(), width = 0.8, fill="midnightblue") +
       labs(x=NULL, y = "Percent",
-           caption = "*No Show includes no show and same-day bumped, 
-           canceled, and rescheduled appointments.",
+           # caption = "*No Show includes no show and same-day bumped, 
+           # canceled, and rescheduled appointments.",
            title = "Average No Show Rate by Lead Days to Appointment*",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1],
                                         " to ",input$dateRangeKpi[2]))+
@@ -3638,7 +3642,7 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataArrivedNoShow_1()
+    data <- dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))
     # data <- arrivedNoShow.data
     
     data$Appt.Status <- ifelse(data$Appt.Status == "Arrived","Arrived","No Show")
@@ -3664,9 +3668,9 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            title = "Average Daily No Shows*",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",
-                             input$dateRangeKpi[2]), 
-           caption = "*No Show includes no show and same-day bumped,
-           canceled, and rescheduled appointments.")+
+                             input$dateRangeKpi[2]))+
+           # caption = "*No Show includes no show and same-day bumped,
+           # canceled, and rescheduled appointments.")+
       geom_tile(aes(fill=avgNoShows), colour = "black", size=0.5)+
       scale_fill_gradient(low = "white", high = "red", space = "Lab", na.value = "#dddedd", guide = "colourbar", name="No Shows ")+
       scale_y_discrete(limits = rev(unique(sort(noShow_count.df$Time))))+
@@ -3703,7 +3707,7 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataArrivedNoShow_1()
+    data <- dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))
     # data <- arrivedNoShow.data
     
     data$Appt.Status <- ifelse(data$Appt.Status == "Arrived","Arrived","No Show")
@@ -3724,9 +3728,9 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            title = "Average No Show %*",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",
-                             input$dateRangeKpi[2]),
-           caption = "*No Show includes no show and same-day bumped, 
-           canceled, and rescheduled appointments.")+
+                             input$dateRangeKpi[2]))+
+           # caption = "*No Show includes no show and same-day bumped, 
+           # canceled, and rescheduled appointments.")+
       geom_tile(aes(fill=percentage), colour = "black", size=0.5)+
       scale_fill_gradient(low = "white", high = "red", space = "Lab", na.value = "#dddedd", guide = "colourbar", name="No Show % ")+
       scale_y_discrete(limits = rev(unique(sort(noShow_perc.df$Time))))+
@@ -4132,7 +4136,7 @@ server <- function(input, output, session) {
   output$avgUtilization <- renderValueBox({
     
     data <- dataUtilization() %>% filter(Appt.Status == "Arrived")
-    # data <- utilization.data[arrived.utilization.data.rows,]
+    # data <- utilization.data %>% filter(util.type == "actual") %>% filter(Appt.Status == "Arrived")
     
     paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
       valueBox(
@@ -5367,7 +5371,7 @@ server <- function(input, output, session) {
     
     # No Show Rate
     
-    data.noShow <- dataArrivedNoShow()
+    data.noShow <- dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived", "No Show"))
     # data.noShow <- arrivedNoShow.data
     
     noShows <- data.noShow %>%

@@ -746,7 +746,8 @@ data.hour.scheduled$`23:00` <- util.function("23:00:00", data.hour.scheduled)
 
 # Data Validation
 # colnames(data.hour.scheduled[89])
-data.hour.scheduled$sum <- rowSums(data.hour.scheduled [,66:89])
+data.hour.scheduled$sum <- rowSums(data.hour.scheduled[,which(colnames(data.hour.scheduled)=="00:00"):which(colnames(data.hour.scheduled)=="23:00")])
+# data.hour.scheduled$sum <- rowSums(data.hour.scheduled [,66:89])
 data.hour.scheduled$actual <- as.numeric(difftime(data.hour.scheduled$Appt.End.Time, data.hour.scheduled$Appt.Start.Time, units = "mins"))
 data.hour.scheduled$comparison <- ifelse(data.hour.scheduled$sum ==data.hour.scheduled$actual, 0, 1)
 # nrow(data.hour.scheduled %>% filter(comparison == 1))/nrow(data.hour.scheduled)
@@ -769,9 +770,9 @@ data.hour.arrived.all$Appt.End.Time <- data.hour.arrived.all$Appt.End
 
 data.hour.arrived.all$time.interval <- interval(data.hour.arrived.all$Appt.Start.Time, data.hour.arrived.all$Appt.End.Time)
 
+data.hour.arrived <- data.hour.arrived.all
 # Excluding visits without Roomin or Visit End Tines 
-data.hour.arrived <- data.hour.arrived.all %>% filter(actual.visit.dur > 0)
-
+# data.hour.arrived <- data.hour.arrived.all %>% filter(actual.visit.dur > 0)
 data.hour.arrived$`00:00` <- util.function("00:00:00", data.hour.arrived)
 data.hour.arrived$`01:00` <- util.function("01:00:00", data.hour.arrived)
 data.hour.arrived$`02:00` <- util.function("02:00:00", data.hour.arrived)
@@ -799,9 +800,10 @@ data.hour.arrived$`23:00` <- util.function("23:00:00", data.hour.arrived)
 
 # Data Validation
 # colnames(data.hour.arrived[89])
-data.hour.arrived$sum <- rowSums(data.hour.arrived [,66:89])
+data.hour.arrived$sum <- rowSums(data.hour.arrived[,which(colnames(data.hour.arrived)=="00:00"):which(colnames(data.hour.arrived)=="23:00")])
+# data.hour.arrived$sum <- rowSums(data.hour.arrived [,66:89])
 data.hour.arrived$actual <- as.numeric(difftime(data.hour.arrived$Appt.End.Time, data.hour.arrived$Appt.Start.Time, units = "mins"))
-data.hour.arrived$comparison <- ifelse(data.hour.arrived$sum ==data.hour.arrived$actual, 0, 1)
+data.hour.arrived$comparison <- ifelse(data.hour.arrived$sum == data.hour.arrived$actual, 0, 1)
 data.hour.arrived <- data.hour.arrived %>% filter(comparison == 0)
 
 # Combine Utilization Data
