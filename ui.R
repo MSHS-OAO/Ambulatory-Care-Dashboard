@@ -728,24 +728,39 @@ ui <- dashboardPage(
                                                 hr(),
                                                 h5("SCHEDULED: Utilization of all arrived appointments based on scheduled appointment start and end time."),
                                                 h5("ACTUAL: Utilization of all arrived appointments based on actual appointment start and end time."))),
-                                     column(9,
-                                            fluidRow(
-                                              column(4,
-                                                     box(title = NULL, width = 12, solidHeader = FALSE,
-                                                         sliderInput("setRooms", label = h4("Set Rooms Available:"), min = 1, max = 24, value = 8))),
-                                              column(4,
-                                                     valueBoxOutput("roomStat1", width=12) %>%
-                                                       withSpinner(type = 5, color = "#d80b8c")),
-                                              column(4,
-                                                     valueBoxOutput("avgRoomsRequired", width=12))),
-                                            fluidRow(
-                                              column(4,
-                                                     box(title = NULL, width = 12, solidHeader = FALSE,
-                                                         sliderInput("setHours", label = h4("Set Daily Open Hours:"), min = 1, max = 24, value = 8))),
-                                              column(4,
-                                                     valueBoxOutput("avgScheduledUtilization", width=12)),
-                                              column(4,
-                                                     valueBoxOutput("avgUtilization", width=12)))))),
+                                     column(3,
+                                            box(title = NULL, width = 12, solidHeader = FALSE,
+                                                sliderInput("setRooms", label = h4("Set Rooms Available:"), min = 1, max = 24, value = 8)),
+                                            box(title = NULL, width = 12, solidHeader = FALSE,
+                                                sliderInput("setHours", label = h4("Set Daily Open Hours:"), min = 1, max = 24, value = 8))),
+                                     column(6,
+                                            valueBoxOutput("roomStat1", width=12) %>%
+                                              withSpinner(type = 5, color = "#d80b8c"),
+                                            valueBoxOutput("avgUtilization", width=12),
+                                            valueBoxOutput("maxUtilization", width=12),
+                                            valueBoxOutput("maxRoomsRequired", width=12))
+                                     
+                                     
+                                     # column(9,
+                                     #        fluidRow(
+                                     #          column(4,
+                                     #                 box(title = NULL, width = 12, solidHeader = FALSE,
+                                     #                     sliderInput("setRooms", label = h4("Set Rooms Available:"), min = 1, max = 24, value = 8))),
+                                     #          column(4,
+                                     #                 valueBoxOutput("roomStat1", width=12) %>%
+                                     #                   withSpinner(type = 5, color = "#d80b8c")),
+                                     #          column(4,
+                                     #                 valueBoxOutput("avgRoomsRequired", width=12))),
+                                     #        fluidRow(
+                                     #          column(4,
+                                     #                 box(title = NULL, width = 12, solidHeader = FALSE,
+                                     #                     sliderInput("setHours", label = h4("Set Daily Open Hours:"), min = 1, max = 24, value = 8))),
+                                     #          column(4,
+                                     #                 valueBoxOutput("avgScheduledUtilization", width=12)),
+                                     #          column(4,
+                                     #                 valueBoxOutput("avgUtilization", width=12))))
+                                     
+                                     )),
                             boxPlus(
                               title = "Space Utilization", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,

@@ -706,7 +706,7 @@ util.function <- function(time, df){
 
 
 # Pre-process Utilization by Hour based on Scheduled Appointment Times --------------------------------------------------
-data.hour.scheduled <- scheduled.data
+data.hour.scheduled <- scheduled.data %>% filter(Appt.Status == "Arrived")
 data.hour.scheduled$actual.visit.dur <- data.hour.scheduled$Appt.Dur
 
 data.hour.scheduled$Appt.Start <- as.POSIXct(data.hour.scheduled$Appt.DTTM, format = "%H:%M")
@@ -755,7 +755,7 @@ data.hour.scheduled <- data.hour.scheduled %>% filter(comparison == 0)
 
 
 # Pre-process Utilization by Hour based on Actual Room in to Visit End Times ---------------------------------------------------
-data.hour.arrived.all <- scheduled.data 
+data.hour.arrived.all <- scheduled.data %>% filter(Appt.Status == "Arrived")
 data.hour.arrived.all$actual.visit.dur <- round(difftime(data.hour.arrived.all$Visitend.DTTM, data.hour.arrived.all$Roomin.DTTM, units = "mins"))
 
 ########### Analysis of % of visits with actual visit start and end times ############
@@ -804,7 +804,8 @@ data.hour.arrived$sum <- rowSums(data.hour.arrived[,which(colnames(data.hour.arr
 # data.hour.arrived$sum <- rowSums(data.hour.arrived [,66:89])
 data.hour.arrived$actual <- as.numeric(difftime(data.hour.arrived$Appt.End.Time, data.hour.arrived$Appt.Start.Time, units = "mins"))
 data.hour.arrived$comparison <- ifelse(data.hour.arrived$sum == data.hour.arrived$actual, 0, 1)
-data.hour.arrived <- data.hour.arrived %>% filter(comparison == 0)
+data.hour.arrived$comparison[is.na(data.hour.arrived$comparison)] <- "No Data"
+data.hour.arrived <- data.hour.arrived %>% filter(comparison != 1)
 
 # Combine Utilization Data
 data.hour.scheduled$util.type <- "scheduled"
@@ -819,9 +820,9 @@ utilization.data <- utilization.data %>%
   select(Campus, Campus.Specialty, Department, Resource, Provider,
          Visit.Method, Appt.Type, Appt.Status,
          Appt.DateYear, Appt.MonthYear, Appt.Year, Appt.Week, Appt.Day, Appt.TM.Hr, holiday, util.type,
-         timeOptionsHr_filter, sum)
+         timeOptionsHr_filter, sum, comparison)
 
-
+# saveRDS(utilization.data, "new_utilization_data.rds")
 ### (6) Shiny App Components Set-up -------------------------------------------------------------------------------
 
 # Mater Filters 
