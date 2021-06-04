@@ -6859,6 +6859,10 @@ server <- function(input, output, session) {
       buttons = c('csv','excel')
     )
   )
+  
+  observeEvent(input$download1, {
+    screenshot(filename = "Ambulatory Care Dashboard")
+  })
 
 } # Close server 
 
