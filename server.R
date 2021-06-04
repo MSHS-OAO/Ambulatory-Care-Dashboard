@@ -4111,37 +4111,65 @@ server <- function(input, output, session) {
     )
   })
   
-  output$avgRoomsRequired <- renderValueBox({
+  output$maxRoomsRequired <- renderValueBox({
     
-    max((dataUtilization() %>%
-           select(Appt.DateYear, timeOptionsHr_filter) %>%
-           gather(Time, sum, 2:15) %>%
-           group_by(Time) %>%
-           summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg) %>%
-      valueBox(
-        subtitle = tags$p("Max Rooms Required During the Day", style = "font-size: 160%;"), icon = NULL, color = "fuchsia")
-  })
-  
-  # Scheduled and Avg Utilization --------------------------------------------------------------------------------------------------------
-  output$avgScheduledUtilization <- renderValueBox({
-    
-    data <- dataUtilization() 
-    # data <- utilization.data[scheduled.utilization.data.rows,]
-    
-    paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
-      valueBox(
-        subtitle = tags$p("Average Daily Booked Utilization", style = "font-size: 160%;"), icon = NULL, color = "aqua")
+    valueBox(NULL,
+             subtitle = tags$p(paste0("Max rooms required during the day: ",
+                                      max((dataUtilization() %>%
+                                             filter(comparison == 0) %>%
+                                             select(Appt.DateYear, timeOptionsHr_filter) %>%
+                                             gather(Time, sum, 2:15) %>%
+                                             group_by(Time) %>%
+                                             summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg)), 
+                               style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "aqua"
+    )
   })
   
   output$avgUtilization <- renderValueBox({
     
-    data <- dataUtilization() %>% filter(Appt.Status == "Arrived")
-    # data <- utilization.data %>% filter(util.type == "actual") %>% filter(Appt.Status == "Arrived")
-    
-    paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
-      valueBox(
-        subtitle = tags$p("Average Daily Filled Utilization", style = "font-size: 160%;"), icon = NULL, color = "aqua")
+    valueBox(NULL,
+             subtitle = tags$p(paste0("Avg utilization per day: ",
+                                      paste0(round((sum((dataUtilization() %>% filter(comparison == 0))$sum))/
+                                                     (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%")), 
+                               style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "fuchsia"
+    )
   })
+  
+  output$maxUtilization <- renderValueBox({
+    
+    valueBox(NULL,
+             subtitle = tags$p(paste0("Peak utilization during the day: ",
+                                      max((dataUtilization() %>%
+                                             filter(comparison == 0) %>%
+                                             select(Appt.DateYear, timeOptionsHr_filter) %>%
+                                             gather(Time, sum, 2:15) %>%
+                                             group_by(Time) %>%
+                                             summarise(avg = round((sum(sum)/ 
+                                                                      (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setRooms)))*100)))$avg),"%"), 
+                               style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "fuchsia"
+    )
+  })
+  
+  # # Scheduled and Avg Utilization --------------------------------------------------------------------------------------------------------
+  # output$avgScheduledUtilization <- renderValueBox({
+  #   
+  #   data <- dataUtilization() 
+  #   # data <- utilization.data[scheduled.utilization.data.rows,]
+  #   
+  #   paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
+  #     valueBox(
+  #       subtitle = tags$p("Average Daily Booked Utilization", style = "font-size: 160%;"), icon = NULL, color = "aqua")
+  # })
+  # 
+  # output$avgUtilization <- renderValueBox({
+  #   
+  #   data <- dataUtilization() %>% filter(Appt.Status == "Arrived")
+  #   # data <- utilization.data %>% filter(util.type == "actual") %>% filter(Appt.Status == "Arrived")
+  #   
+  #   paste0(round((sum(data$sum))/(length(unique(data$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%") %>%
+  #     valueBox(
+  #       subtitle = tags$p("Average Daily Filled Utilization", style = "font-size: 160%;"), icon = NULL, color = "aqua")
+  # })
   
   # Average Number of Rooms Required -----------------------------------------------
   output$spaceUsed <- renderPlot({
@@ -4156,7 +4184,8 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataUtilization()
+    data <- dataUtilization() %>% filter(comparison == 0)
+
     # data <- as.data.frame(utilization.data[arrived.utilization.data.rows,])
     
     # Days of Week Table
@@ -4234,7 +4263,7 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataUtilization()
+    data <- dataUtilization() %>% filter(comparison == 0)
     # data <- utilization.data[arrived.utilization.data.rows,]
     
     # Days of Week Table
@@ -4317,7 +4346,7 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataUtilization()
+    data <- dataUtilization() %>% filter(comparison == 0)
     
     c.start <- which(colnames(data)=="07:00")
     c.end <- which(colnames(data)=="20:00")
@@ -4391,7 +4420,7 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     
-    data <- dataUtilization()
+    data <- dataUtilization() %>% filter(comparison == 0)
     
     c.start <- which(colnames(data)=="07:00")
     c.end <- which(colnames(data)=="20:00")
