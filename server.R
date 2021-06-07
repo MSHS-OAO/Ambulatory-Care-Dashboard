@@ -2248,14 +2248,14 @@ server <- function(input, output, session) {
     
   })
   
-  # Average Daily Incompleted Appts
-  output$provIncompletedAppts <- renderValueBox({
+  # Average Daily Incomplete Appts
+  output$provIncompleteAppts <- renderValueBox({
     
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
       paste0(prettyNum(round(nrow(dataArrivedNoShow() %>% filter(Appt.Status != "Arrived")) / 
                         nrow(dataArrivedNoShow()), 2)*100, big.mark = ","),"%"),
-      subtitle = tags$p("% of Incompleted Appointments", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("% of Incomplete Appointments", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
   })
@@ -2328,7 +2328,7 @@ server <- function(input, output, session) {
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       scale_y_continuous(limits=c(0,sum(noShows$avg)*1.2))+
       labs(x=NULL, y=NULL,
-           title = "Average Daily Incompleted Appointments Breakdown",
+           title = "Average Daily Incomplete Appointments Breakdown",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
       theme_new_line()+
       theme_bw()+
@@ -3393,14 +3393,14 @@ server <- function(input, output, session) {
     
   })
   
-  # Average Daily Incompleted Appts
-  output$incompletedAppts <- renderValueBox({
+  # Average Daily Incomplete Appts
+  output$incompleteAppts <- renderValueBox({
     
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
       prettyNum(round(nrow(dataArrivedNoShow() %>% filter(Appt.Status != "Arrived")) / 
                         nrow(dataArrivedNoShow()), 2)*100, big.mark = ","),
-      subtitle = tags$p("% of Incompleted Appointments", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("% of Incomplete Appointments", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
   })

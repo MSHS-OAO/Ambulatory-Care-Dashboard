@@ -420,13 +420,14 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Scheduling Status", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              valueBoxOutput("provScheduledAppts", width = 6),
-                              valueBoxOutput("provIncompletedAppts", width = 6),
-                              tags$em("*Incompleted Appts = No Show + Same-day Bumpled/Canceled/Rescheduled."),
+                              fluidRow(
+                                valueBoxOutput("provScheduledAppts", width = 6),
+                                valueBoxOutput("provIncompleteAppts", width = 6)),
                               hr(),
                               fluidRow(plotOutput("provNoShowPie", height = "200px") %>%
                                          withSpinner(type = 5, color = "#d80b8c")),
-                              br(), br(), br(), br(), br(), br()), 
+                              tags$em("*Incomplete Appts = No Show + Same-day Bumped/Canceled/Rescheduled Appts"),
+                              br(), br()), 
                             boxPlus(
                               title = "Daily Scheduling", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -448,12 +449,13 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "No Shows", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              valueBoxOutput("provNoShow", width = 6),
-                              valueBoxOutput("provNoShowPerc", width = 6),
-                              tags$em("*No Show Rate = No Show / (Arrived + No Show)"),
+                              fluidRow(
+                                valueBoxOutput("provNoShow", width = 6),
+                                valueBoxOutput("provNoShowPerc", width = 6)),
                               hr(),
                               fluidRow(tableOutput("provCoverage") %>%
-                                         withSpinner(type = 5, color = "#d80b8c")))
+                                         withSpinner(type = 5, color = "#d80b8c")),
+                              tags$em("*No Show Rate = No Show / (Arrived + No Show)"))
                             
                             # # boxPlus(
                             # #   title = "Slot Usage", width = 12, status = "primary",
@@ -613,8 +615,8 @@ ui <- dashboardPage(
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                          column(3,
                                 valueBoxOutput("scheduledAppts", width = 12),
-                                valueBoxOutput("incompletedAppts", width = 12),
-                                tags$em("*Incompleted Appts = No Show + Same-day Bumpled/Canceled/Rescheduled.")),
+                                valueBoxOutput("incompleteAppts", width = 12),
+                                tags$em("*Incomplete Appts = No Show + Same-day Bumped/Canceled/Rescheduled Appts")),
                          column(9,
                                 plotOutput("schedulingStatusSummary") %>% 
                                   withSpinner(type = 5, color = "#d80b8c")))
