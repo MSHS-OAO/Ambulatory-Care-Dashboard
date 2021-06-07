@@ -1169,7 +1169,6 @@ server <- function(input, output, session) {
         geom_line()+
         geom_point(size=2)+
         facet_wrap(variable~., dir ="v")+
-        #scale_y_continuous(labels= percent_format(), limits = c(0,1))+
         scale_y_continuous(expand = c(0, 0), limits = c(0,max(bookedFilledRate$value)*1.2),
                            labels=scales::percent_format(accuracy = 1)) +
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
@@ -2228,6 +2227,38 @@ server <- function(input, output, session) {
     
   })
   
+  # Average Daily Appts Scheduled
+  output$provScheduledAppts <- renderValueBox({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    valueBox(
+      #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
+      prettyNum(round(nrow(dataArrivedNoShow())/length(unique(dataArrivedNoShow()$Appt.DateYear))), big.mark = ","),
+      subtitle = tags$p("Avg Appointments Scheduled per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+    )
+    
+  })
+  
+  # Average Daily Incompleted Appts
+  output$provIncompletedAppts <- renderValueBox({
+    
+    valueBox(
+      #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
+      paste0(prettyNum(round(nrow(dataArrivedNoShow() %>% filter(Appt.Status != "Arrived")) / 
+                        nrow(dataArrivedNoShow()), 2)*100, big.mark = ","),"%"),
+      subtitle = tags$p("% of Incompleted Appointments", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+    )
+    
+  })
   
   # Total No Shows per Day
   output$provNoShow <- renderValueBox({
@@ -2245,7 +2276,7 @@ server <- function(input, output, session) {
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
       prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique((dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
-      subtitle = tags$p("Average No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("Average No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "fuchsia"
     )
     
   })
@@ -2267,7 +2298,7 @@ server <- function(input, output, session) {
     valueBox(
       paste0(round((nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show")))) / 
                      (nrow(dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived", "No Show")))), 2) *100, "%"),
-      subtitle = tags$p("No Show Rate (%)", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("No Show Rate (%)", style = "font-size: 130%;"), icon = NULL, color = "fuchsia"
     )
     
   })
@@ -2297,7 +2328,7 @@ server <- function(input, output, session) {
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       scale_y_continuous(limits=c(0,sum(noShows$avg)*1.2))+
       labs(x=NULL, y=NULL,
-           title = "Average Daily No Show Breakdown",
+           title = "Average Daily Incompleted Appointments Breakdown",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
       theme_new_line()+
       theme_bw()+
@@ -2356,18 +2387,31 @@ server <- function(input, output, session) {
   }
   
   
-  ## Lead Days to Bumps/Canc/Resc 
-  output$provBumpLeadDays <- renderPlot({
+  
+  # Total Bumps per Day
+  output$provBumps <- renderValueBox({
     
-    validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
+    valueBox(
+      #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
+      prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("Bumped"))) / length(unique((dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
+      subtitle = tags$p("Average Same-day Bumps per Day", style = "font-size: 130%;"), icon = NULL, color = "aqua"
     )
+    
+  })
+  
+  # % No Shows per Day
+  output$provBumpsPerc <- renderValueBox({
+    
+    valueBox(
+      paste0(round((nrow(dataNoShow() %>% filter(Appt.Status %in% c("Bumps")))) / 
+                     (nrow(dataArrivedNoShow())), 2) *100, "%"),
+      subtitle = tags$p("Bumped Rate (%)", style = "font-size: 130%;"), icon = NULL, color = "aqua"
+    )
+    
+  })
+  
+  ## Lead Days to Bumps
+  output$provBumpLeadDays <- renderPlot({
     
     data <- dataBumped()
     # data <- bumped.data
@@ -2691,7 +2735,7 @@ server <- function(input, output, session) {
       summarise(total = n()) %>%
       `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
     
-    # statusData <- all.data %>% 
+    # statusData <- kpi.all.data[all.data.rows,] %>%
     #   group_by(Appt.Year, Appt.Quarter, Appt.Month, Appt.Date, Appt.Status, Appt.MonthYear, Appt.DateYear) %>%
     #   summarise(total = n()) %>%
     #   `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
@@ -2745,7 +2789,7 @@ server <- function(input, output, session) {
         ggplot(statusDataYear, aes(x=Year, y=value,col=variable, group=variable)) +
           geom_line() +
           geom_point() +
-          facet_wrap(variable~., dir = "v")+
+          facet_wrap(variable~., dir = "v", scales = "free")+
           labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
@@ -2766,7 +2810,7 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v")+
+          facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+ 
@@ -2781,7 +2825,7 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v")+
+          facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+ 
@@ -2795,7 +2839,7 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v")+
+          facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+ 
@@ -2813,7 +2857,7 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v")+
+          facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
@@ -2828,7 +2872,7 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v")+
+          facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("top")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
@@ -2843,7 +2887,7 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v")+
+          facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
@@ -2857,7 +2901,7 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
                )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v")+
+          facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("top")+ 
@@ -3327,6 +3371,76 @@ server <- function(input, output, session) {
   })
   
   ### Scheduling Tab -------------------------------------------------------------------------------------------------------------------
+  # Scheduling Summary
+  # Average Daily Appts Scheduled
+  output$scheduledAppts <- renderValueBox({
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    
+    valueBox(
+      #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
+      prettyNum(round(nrow(dataArrivedNoShow())/length(unique(dataArrivedNoShow()$Appt.DateYear))), big.mark = ","),
+      subtitle = tags$p("Avg Appointments Scheduled per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+    )
+    
+  })
+  
+  # Average Daily Incompleted Appts
+  output$incompletedAppts <- renderValueBox({
+    
+    valueBox(
+      #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
+      prettyNum(round(nrow(dataArrivedNoShow() %>% filter(Appt.Status != "Arrived")) / 
+                        nrow(dataArrivedNoShow()), 2)*100, big.mark = ","),
+      subtitle = tags$p("% of Incompleted Appointments", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+    )
+    
+  })
+  
+  output$schedulingStatusSummary <- renderPlot({
+    
+    data <- dataArrivedNoShow()
+    # data <- kpi.all.data[arrivedNoShow.data.rows,]
+    
+    # sameDay <- data %>%
+    #   group_by(Appt.Status) %>%
+    #   summarise(value = round(n()/length(unique(kpi.all.data[arrived.data.rows,]$Appt.DateYear)))) %>%
+    #   arrange(desc(value)) 
+    
+    
+    sameDay <- data %>%
+      group_by(Appt.Status) %>%
+      summarise(value = round(n()/length(unique(dataArrived()$Appt.DateYear)))) %>%
+      arrange(desc(value)) 
+    
+    sameDay$Appt.Status <- as.character(sameDay$Appt.Status)
+    
+    sameDay$Appt.Status[which(sameDay$Appt.Status == "Bumped")] <- "Same-day Bumped"
+    sameDay$Appt.Status[which(sameDay$Appt.Status == "Canceled")] <- "Same-day Canceled"
+    sameDay$Appt.Status[which(sameDay$Appt.Status == "Rescheduled")] <- "Same-day Rescheduled"
+    
+    ggplot(sameDay, aes(reorder(Appt.Status, -value), value, fill=Appt.Status)) +
+      geom_bar(stat="identity", width = 0.8) +
+      scale_y_continuous(limits=c(0,(max(sameDay$value))*1.3))+
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      labs(x=NULL, y=NULL,
+           title = "Avg Daily No Shows and Same-day \nBumped/Canceled/Rescheduled Appointments",
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+
+      geom_text(aes(label=prettyNum(value, big.mark = ',')), hjust = 0.5, vjust = -1, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
+    
+  })
   
   # Scheduled Patients
   output$scheduledPts <- renderPlot({
@@ -4140,7 +4254,7 @@ server <- function(input, output, session) {
   output$maxRoomsRequired <- renderValueBox({
     
     valueBox(NULL,
-             subtitle = tags$p(paste0("Max rooms required during the day: ",
+             subtitle = tags$p(paste0("Max # of rooms required during the day: ",
                                       max((dataUtilization() %>%
                                              filter(comparison == 0) %>%
                                              select(Appt.DateYear, timeOptionsHr_filter) %>%
@@ -4270,7 +4384,7 @@ server <- function(input, output, session) {
             panel.grid.minor = element_blank(),
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
-      geom_text(aes(label= ifelse(is.na(Average_Req),"", round(Average_Req,1))), color="black", size=5, fontface="bold")
+      geom_text(aes(label= ifelse(is.na(Average_Req),"", round(Average_Req))), color="black", size=5, fontface="bold")
     
     grid.arrange(graph, table, ncol = 1, heights = c(5,3))
     
@@ -5354,7 +5468,7 @@ server <- function(input, output, session) {
     )
     
     data <- dataArrived()
-    # data <- arrived.data
+    # data <- kpi.all.data[arrivedNoShow.data.rows,]
     
     newpatients.ratio <- data %>%
       group_by(Appt.Source.New, New.PT3) %>%
@@ -5383,7 +5497,7 @@ server <- function(input, output, session) {
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
         axis.text.y = element_text(size = "14"))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, max(newpatients.ratio$ratio)*1.3))+
       geom_text(aes(label=paste(ratio*100,"%")), color="black", 
                 size=5, position = position_dodge(1), hjust=-.5)
     
@@ -5401,7 +5515,7 @@ server <- function(input, output, session) {
       ggplot(waitTime, aes(x=factor(Appt.Source.New, levels = c("Zocdoc","StayWell","Other","MyChart","Access Center")), y=medWaitTime, group=Appt.Source.New, fill=Appt.Source.New)) +
       geom_bar(stat="identity", width = 0.8) +
       geom_hline(aes(yintercept=target), linetype="dashed", color = "red", size=1)+
-      scale_y_continuous(limits=c(0,max(max(waitTime$medWaitTime)*1.2,14*1.2)))+
+      scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.3))+
       coord_flip() +
       scale_fill_MountSinai('pink')+
       labs(x=NULL, y=NULL, 
@@ -5443,7 +5557,7 @@ server <- function(input, output, session) {
     newNoShow <-
       ggplot(noShows, aes(x=factor(Appt.Source.New, levels = c("Zocdoc","StayWell","Other","MyChart","Access Center")), y=`No Show Perc`, group=Appt.Source.New, fill=Appt.Source.New)) +
       geom_bar(stat="identity", width = 0.8) +
-      scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.2)+
+      scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.3)+
       coord_flip() +
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
@@ -5468,14 +5582,6 @@ server <- function(input, output, session) {
     grid.arrange(newRatio, newWaitTime, newNoShow, ncol=3)
     
   })
-  
-  
-  
-  
-  
-  
-  
-  
   
   
   # Upcoming Demand - 2 Weeks - by Practice and Provider ---------------------------------------------------------

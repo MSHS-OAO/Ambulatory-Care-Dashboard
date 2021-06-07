@@ -416,7 +416,17 @@ ui <- dashboardPage(
                                 valueBoxOutput("vbox4"),
                                 valueBoxOutput("vbox5"),
                                 valueBoxOutput("vbox6")))),
-                     column(7,
+                     column(6,
+                            boxPlus(
+                              title = "Scheduling Status", width = 12, status = "primary",
+                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              valueBoxOutput("provScheduledAppts", width = 6),
+                              valueBoxOutput("provIncompletedAppts", width = 6),
+                              tags$em("*Incompleted Appts = No Show + Same-day Bumpled/Canceled/Rescheduled."),
+                              hr(),
+                              fluidRow(plotOutput("provNoShowPie", height = "200px") %>%
+                                         withSpinner(type = 5, color = "#d80b8c")),
+                              br(), br(), br(), br(), br(), br()), 
                             boxPlus(
                               title = "Daily Scheduling", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -425,24 +435,26 @@ ui <- dashboardPage(
                               plotOutput("provDailySchedule", height = "890px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c")
                             )),
-                     column(5,
+                     column(6,
                             boxPlus(
                               title = "Bumps", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              valueBoxOutput("provBumps", width = 6),
+                              valueBoxOutput("provBumpsPerc", width = 6),
+                              hr(),
                               plotOutput("provBumpLeadDays", height = "200px") %>%
-                                withSpinner(type = 5, color = "#d80b8c")),
+                                withSpinner(type = 5, color = "#d80b8c"),
+                              br(), br(), br(), br(), br(), br()), 
                             boxPlus(
                               title = "No Shows", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                               valueBoxOutput("provNoShow", width = 6),
                               valueBoxOutput("provNoShowPerc", width = 6),
+                              tags$em("*No Show Rate = No Show / (Arrived + No Show)"),
                               hr(),
-                              fluidRow(plotOutput("provNoShowPie", height = "200px") %>%
-                                withSpinner(type = 5, color = "#d80b8c")), 
-                              br(), br(), br(), br(), br(), hr(),
                               fluidRow(tableOutput("provCoverage") %>%
-                                withSpinner(type = 5, color = "#d80b8c")))
-
+                                         withSpinner(type = 5, color = "#d80b8c")))
+                            
                             # # boxPlus(
                             # #   title = "Slot Usage", width = 12, status = "primary",
                             # #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -458,7 +470,8 @@ ui <- dashboardPage(
                             #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                             #   tableOutput("provCoverage") %>%
                             #     withSpinner(type = 5, color = "#d80b8c"))
-                            )
+                     )
+
 
               )),
       
@@ -596,6 +609,18 @@ ui <- dashboardPage(
                      tags$head(tags$style("#scheduled_arrived{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      fluidRow(
                        boxPlus(
+                         title = "Scheduling Summary", width = 12, status = "primary",
+                         solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         column(3,
+                                valueBoxOutput("scheduledAppts", width = 12),
+                                valueBoxOutput("incompletedAppts", width = 12),
+                                tags$em("*Incompleted Appts = No Show + Same-day Bumpled/Canceled/Rescheduled.")),
+                         column(9,
+                                plotOutput("schedulingStatusSummary") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c")))
+                     ),
+                     fluidRow(
+                       boxPlus(
                          title = "Scheduled Patients", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                          plotOutput("scheduledPts", height = "600px") %>% 
@@ -625,7 +650,8 @@ ui <- dashboardPage(
                            column(3, uiOutput("insuranceControl")),
                            column(3, valueBoxOutput("avgDailyNoShow_Count", width = 12) %>%
                                     withSpinner(type = 5, color = "#d80b8c")),
-                           column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12)))
+                           column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
+                         tags$em("*No Show Rate = No Show / (Arrived + No Show)")
                          # h5("No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")
                        ),
                        boxPlus(
@@ -808,7 +834,7 @@ ui <- dashboardPage(
                                     plotOutput("newPtRatioByDept", height = "550px") %>% 
                                       withSpinner(type = 5, color = "#d80b8c")),
                            tabPanel("By Provider",
-                                    h3("*Select Fewer Providers for Better Visibility"),
+                                    h3("*Select fewer providers for better visibility"),
                                     plotOutput("newPtRatioByProv", height = "550px") %>% 
                                       withSpinner(type = 5, color = "#d80b8c"))))),
                      fluidRow(
@@ -938,7 +964,7 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Cycle Time by Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              
+                              h3("*Select fewer appointment types for better visibility"),
                               br(),
                               fluidRow(column(12, plotOutput("cycleTimeTrend", height = "600px") %>% 
                                                 withSpinner(type = 5, color = "#d80b8c"))),
@@ -961,6 +987,7 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Cycle Time by Provider and Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              h3("*Select fewer providers for better visibility"),
                               plotOutput("newCycleTimeByProv", height = "800px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"),
                               plotOutput("establishedCycleTimeByProv", height = "800px") %>% 
@@ -986,6 +1013,7 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Room-in Time by Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              h3("*Select fewer appointment types for better visibility"),
                               br(),
                               fluidRow(column(12, plotOutput("roomInTimeTrend", height = "600px") %>% 
                                                 withSpinner(type = 5, color = "#d80b8c"))),                   
@@ -1008,6 +1036,7 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Room-in Time by Provider and Appointment Type", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                              h3("*Select fewer providers for better visibility"),
                               plotOutput("newRoomInTimeByProv", height = "800px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"),
                               plotOutput("establishedRoomInTimeByProv", height = "800px") %>% 
