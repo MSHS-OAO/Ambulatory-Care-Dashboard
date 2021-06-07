@@ -567,7 +567,7 @@ server <- function(input, output, session) {
     groupByFilters_2(utilization.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays, input$utilType)
+                     input$dateRange[1], input$dateRange[2], input$daysOfWeekUtil, input$excludeHolidays, input$utilType)
   }) 
   
   # dataScheduledUtilization <- reactive({
@@ -5866,7 +5866,7 @@ server <- function(input, output, session) {
       
     } else if(input$slotUsageChoice == 3) { # Filled Hours
       
-      ggplot(summary.md, aes(x=Appt.Week, y=`Filled Hours`, group=Provider, col=Provider)) +
+      ggplot(summary.md, aes(x=Appt.Week, y=`Arrived Hours`, group=Provider, col=Provider)) +
         geom_line()+
         geom_point(size=2)+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
@@ -5964,6 +5964,7 @@ server <- function(input, output, session) {
       summary.dept[is.na(summary.dept)] <- 0
       level.order <- c("Available Hours", "Booked Hours","Filled Hours","Booked Rate (%)","Filled Rate (%)")
       summary.dept <- summary.dept[order(match(summary.dept$variable, level.order)),]
+      summary.dept <- summary.dept %>% arrange(Campus, Campus.Specialty, variable)
       
       names(summary.dept)[names(summary.dept) == "Campus.Specialty"] <- "Specialty"
       names(summary.dept)[names(summary.dept) == "variable"] <- "Status"

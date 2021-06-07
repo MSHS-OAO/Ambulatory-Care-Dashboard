@@ -637,27 +637,3 @@ valueBoxSpark <- function(value, title, subtitle, sparkobj = NULL, info = NULL,
     boxContent
   )
 }
-
-
-
-# Set filter to Null function ---------------------------------------------------------------------------------
-
-filter_null <- function(campus_filt, specialty_filt, department_filt, resource_filt, provider_filt, visitMethod_filt, visitType_filt, mindateRange_filt, maxdateRange_filt, daysofweek_filt, holidays_filt){
-  
-  max_length <- max(c(length(campus_filt), length(specialty_filt),length(department_filt), length(resource_filt),length(provider_filt), length(visitMethod_filt),length(visitType_filt), length(mindateRange_filt),
-                      length(maxdateRange_filt), length(daysofweek_filt), length(holidays_filt))) 
-  
-  filter_df <- data.frame(campus = c(campus_filt, rep(NA, max_length - length(campus_filt))), 
-                            specialty = c(specialty_filt, rep(NA, max_length - length(specialty_filt))), 
-                            department = c(department_filt, rep(NA, max_length - length(department_filt))),
-                            resource = c(resource_filt, rep(NA, max_length - length(resource_filt))), 
-                            provider = c(provider_filt, rep(NA, max_length - length(provider_filt))), 
-                            visitMethod = c(visitMethod_filt, rep(NA, max_length - length(visitMethod_filt))),
-                            visitType = c(visitType_filt, rep(NA, max_length - length(visitType_filt))), 
-                            mindateRange = c(mindateRange_filt, rep(NA, max_length - length(mindateRange_filt))), 
-                            maxdateRange = c(maxdateRange_filt, rep(NA, max_length - length(maxdateRange_filt))),
-                            daysofweek = c(daysofweek_filt, rep(NA, max_length - length(daysofweek_filt))), 
-                            holidays = c(holidays_filt, rep(NA, max_length - length(holidays_filt)))
-                          )
-  return(filter_df)
-}
