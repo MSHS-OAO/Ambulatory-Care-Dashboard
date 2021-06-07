@@ -1138,7 +1138,7 @@ ui <- dashboardPage(
                solidHeader = FALSE,
                pickerInput("selectedCampus",label=NULL,
                            choices=sort(unique(kpi.all.data$Campus)),
-                           multiple=TRUE,
+                           multiple=FALSE,
                            options = pickerOptions(
                              liveSearch = TRUE,
                              actionsBox = TRUE,
