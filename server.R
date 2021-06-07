@@ -4422,15 +4422,20 @@ server <- function(input, output, session) {
     space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$Appt.Day,space.hour.day$Group.1)]
     
     space.hour.day$utilization <- round(space.hour.day$value/(space.hour.day$days*60*input$setRooms), 1)
-    names(space.hour.day) <- c("Day","Time","Total_Dur","Days","Average_Util")
+    #space.hour.day$utilization <- round(space.hour.day$value/(space.hour.day$days*60*8), 1)
     
+    names(space.hour.day) <- c("Day","Time","Total_Dur","Days","Average_Util")
+    #space.hour.day$Average_Util <- space.hour.day$Average_Util*100
+
     byDayTime.df <- byDayTime.df[which(byDayTime.df$Day %in% unique(space.hour.day$Day)),]
     
     space.hour.day <- as.data.frame(merge(byDayTime.df,space.hour.day, by.x = c("Day","Time"), by.y = c("Day","Time"), all = TRUE))
     space.hour.day[is.na(space.hour.day)] <- 0
     
     space.hour.day <- space.hour.day %>% filter(Time %in% timeOptionsHr_filter)
+    #space.hour.day$target <- 80
     space.hour.day$target <- 0.8
+    
     
     graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Util, col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
@@ -4446,12 +4451,15 @@ server <- function(input, output, session) {
       graph_theme("top")+
       theme(legend.title = element_blank(), legend.direction = "horizontal", legend.key.size = unit(1.0,"cm"))+
       guides(colour = guide_legend(nrow = 1))
+    
+    space.hour.day$Average_Util <- space.hour.day$Average_Util*100
       
     table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
       labs(x=NULL, y=NULL)+
       geom_tile(aes(fill=Average_Util), colour = "black", size=0.5)+
       coord_flip()+
-      scale_fill_gradient2(midpoint = median(unique(space.hour.day$Average_Util)), low = "#5a8ac6", mid = "white", high = "#f8696b", space = "Lab", na.value = "black", guide = "colourbar", name="Space Utilization ")+
+      scale_fill_gradient2(midpoint = median(unique(space.hour.day$Average_Util)), low = "#5a8ac6", mid = "white", high = "#f8696b", space = "Lab", na.value = "black", guide = "colourbar", name="Space Utilization")+
+      #scale_fill_gradient2(midpoint = median(unique(space.hour.day$Average_Util_tble)), low = "#5a8ac6", mid = "white", high = "#f8696b", space = "Lab", na.value = "black", guide = "colourbar", name="Space Utilization %", labels = scales::percent)+
       scale_x_discrete(position = "bottom")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             legend.position = "top",
@@ -4467,7 +4475,8 @@ server <- function(input, output, session) {
             panel.grid.minor = element_blank(),
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
-      geom_text(aes(label= ifelse(is.na(Average_Util),"",paste0(round(Average_Util,2)*100,"%"))), color="black", size=5, fontface="bold")
+      geom_text(aes(label= ifelse(is.na(Average_Util),"",paste0(round(Average_Util,2),"%"))), color="black", size=5, fontface="bold")
+      #geom_text(aes(label= ifelse(is.na(Average_Util),"",paste0(round(Average_Util*100,2)*100,"%"))), color="black", size=5, fontface="bold")
     
     grid.arrange(graph, table, ncol = 1, heights = c(5,3))
     
@@ -4561,6 +4570,7 @@ server <- function(input, output, session) {
     )
     
     data <- dataUtilization() %>% filter(comparison == 0)
+    #data <- utilization.data %>% filter(comparison == 0)
     
     c.start <- which(colnames(data)=="07:00")
     c.end <- which(colnames(data)=="20:00")
@@ -4574,6 +4584,14 @@ server <- function(input, output, session) {
         Median = quantile(value, probs=0.5)/(60*input$setRooms),
         `70th Percentile`= quantile(value, probs=0.75)/(60*input$setRooms),
         `90th Percentile`= quantile(value, probs=0.90)/(60*input$setRooms))
+    
+    # space.hour <- space.hour %>%
+    #   group_by(variable) %>%
+    #   dplyr::summarise( 
+    #     Median = quantile(value, probs=0.5)/(60*8),
+    #     `70th Percentile`= quantile(value, probs=0.75)/(60*8),
+    #     `90th Percentile`= quantile(value, probs=0.90)/(60*8))
+    
     
     colnames(space.hour)[1] <- "Time"
     space.hour <- as.data.frame(reshape2::melt(space.hour, id=c("Time")))
@@ -4592,6 +4610,7 @@ server <- function(input, output, session) {
       graph_theme("top") + theme(legend.title = element_blank(), legend.direction = "horizontal", legend.key.size = unit(1.0,"cm"))
         guides(colour = guide_legend(nrow = 1))
     
+    space.hour$value <- space.hour$value*100
     
     table <- ggplot(space.hour, aes(x=variable, y=Time))+
       labs(x=NULL, y=NULL)+
@@ -4614,7 +4633,7 @@ server <- function(input, output, session) {
             panel.grid.minor = element_blank(),
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
-      geom_text(aes(label= ifelse(is.na(value),"",paste0(round(value,2)*100,"%"))), color="black", size=5, fontface="bold")
+      geom_text(aes(label= ifelse(is.na(value),"",paste0(round(value,2),"%"))), color="black", size=5, fontface="bold")
     
     
     grid.arrange(graph, table, ncol = 1, heights = c(5,2))
