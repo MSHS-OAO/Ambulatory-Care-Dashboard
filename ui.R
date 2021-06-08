@@ -1352,8 +1352,10 @@ ui <- dashboardPage(
                              liveSearch = TRUE,
                              actionsBox = TRUE,
                              dropupAuto = FALSE),
-                           selected = unique(holid$holiday)))
+                           selected = unique(holid$holiday))),
+      actionButton("update_filters", "Update", width = "80%"),
       ),
+  
     style = "material-circle", size = "lg", right = TRUE, status = "default",
     icon = icon("filter"), width = "300px",
     tooltip = tooltipOptions(title = "Set additional filters for graphs/tables."),
