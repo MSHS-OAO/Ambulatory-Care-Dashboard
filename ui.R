@@ -261,7 +261,10 @@ ui <- dashboardPage(
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonPts", height="550px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c")
+                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                              div("Total Arrived Patients by Site and Specialty", style = "text-align: center; 
+                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                              reactableOutput("siteComparisonPtsTb")
                               ),
                             boxPlus(
                               title = "New Patients", width = 12, status = "primary",
@@ -272,14 +275,20 @@ ui <- dashboardPage(
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonNewPtRatio", height="550px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c"), hr(),
+                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                              div("New Patient Ratio by Site and Specialty", style = "text-align: center; 
+                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                              reactableOutput("siteComparisonNewPtRatioTb"), hr(),
                               materialSwitch(
                                 inputId = "bySpecialty3",
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonNewPtWaitTime", height="550px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c")
+                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                              div("Median New Appointment Lead Days by Site and Specialty", style = "text-align: center; 
+                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                              reactableOutput("siteComparisonNewPtWaitTimeTb")
                               ),
                             boxPlus(
                               title = "Scheduling", width = 12, status = "primary",
@@ -290,14 +299,20 @@ ui <- dashboardPage(
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonBookedRate", height="900px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c"), hr(),
+                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                              div("Avg Booked vs. Filled Rate (%) by Site and Specialty", style = "text-align: center; 
+                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                              reactableOutput("siteComparisonBookedRateTb"), hr(),
                               materialSwitch(
                                 inputId = "bySpecialty5",
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonNoShow", height="550px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c")
+                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                              div("Avg No Show Rate by Site and Specialty", style = "text-align: center; 
+                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                              reactableOutput("siteComparisonNoShowTb")
                               #dataTableOutput("Testtable")
                               ),
                             boxPlus(
@@ -309,9 +324,15 @@ ui <- dashboardPage(
                                 right = TRUE,
                                 status = "primary"),
                               plotOutput("siteComparisonMedianCheckInCycleTime", height="550px") %>% 
-                                withSpinner(type = 5, color = "#d80b8c"), hr(),
+                                withSpinner(type = 5, color = "#d80b8c"), br(),
+                              div("Median Check-in to Visit-end Time by Site and Specialty", style = "text-align: center; 
+                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                              reactableOutput("siteComparisonMedianCheckInCycleTimeTb"), hr(),
                             plotOutput("siteComparisonMedianCycleTime", height="550px") %>% 
-                              withSpinner(type = 5, color = "#d80b8c"))
+                              withSpinner(type = 5, color = "#d80b8c"), br(),
+                            div("Median Check-in to Room-in Time by Site and Specialty", style = "text-align: center; 
+                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                            reactableOutput("siteComparisonMedianCycleTimeTb"))
                             # boxPlus(
                             #   title = "Working FTE", width = 12, status = "primary",
                             #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,

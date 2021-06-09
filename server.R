@@ -863,7 +863,7 @@ server <- function(input, output, session) {
     
     # Scheduling Arrived Data
     arrivedPts <- dataArrived()
-    # arrivedPts <- arrived.data %>% filter(Campus.Specialty == "Cardiology")
+    # arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
     arrivedPts$siteSpecialty <- paste0(arrivedPts$Campus," - ",arrivedPts$Campus.Specialty)
     
     if(input$bySpecialty1 == TRUE) {
@@ -883,7 +883,6 @@ server <- function(input, output, session) {
         graph_theme("bottom")+ theme(legend.title = element_blank())+
         scale_x_date(date_labels = "%Y-%m-%d", date_breaks = "1 week", expand = c(0,0.2))
       
-      
     } else{
       
       arrivedPts.tb <- arrivedPts %>% group_by(siteSpecialty, Appt.MonthYear) %>% dplyr::summarise(`Total Patients Arrived` = n())
@@ -901,6 +900,59 @@ server <- function(input, output, session) {
         graph_theme("bottom") +theme(legend.title = element_blank())
     }
     
+  })
+  
+  output$siteComparisonPtsTb <- renderReactable({
+    
+    # Scheduling Arrived Data
+    arrivedPts <- dataArrived()
+    # arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty == "Cardiology")
+    
+    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+                         borderRight = "1px solid #eee")
+    
+    if(input$bySpecialty1 == TRUE) {
+      
+      table <- arrivedPts %>% 
+        group_by(Campus, Campus.Specialty, Appt.Week) %>% 
+        dplyr::summarise(total = n()) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.Week", "total")) %>%
+        pivot_wider(names_from = Appt.Week,
+                    values_from = total,
+                    values_fill = 0)
+      
+    } else{
+      
+      table <- arrivedPts %>% 
+        group_by(Campus, Campus.Specialty, Appt.MonthYear) %>% 
+        dplyr::summarise(total = n()) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "total")) %>%
+        pivot_wider(names_from = Appt.MonthYear,
+                    values_from = total,
+                    values_fill = 0)
+    }
+    
+    reactable(table,
+              style = list(fontFamily = "Calibri"),
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              ),
+              defaultColDef = colDef(
+                header = function(value) gsub(".", " ", value, fixed = TRUE),
+                cell = function(value) format(value, nsmall = 1),
+                align = "center",
+                minWidth = 120,
+                headerStyle = list(background = "#dddedd")
+              ),
+              defaultSorted = c("Campus", "Specialty"),
+              bordered = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              height = 300)
+   
   })
   
   output$siteComparisonNewPtRatio <- renderPlot({
@@ -976,6 +1028,75 @@ server <- function(input, output, session) {
     
   })
   
+  output$siteComparisonNewPtRatioTb <- renderReactable({
+    
+    # Scheduling Arrived Data
+    arrivedPts <- dataArrived()
+    # arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty == "Cardiology")
+    
+    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+                         borderRight = "1px solid #eee")
+    
+    if(input$bySpecialty2 == TRUE) {
+      
+      # Total Arrived Patients
+      arrivedPts.tb <- arrivedPts %>% group_by(Campus, Campus.Specialty, Appt.Week) %>% dplyr::summarise(`Total Patients Arrived` = n())
+      # Total Arrived New Patients
+      arrivedNewPts.tb <- arrivedPts %>% filter(New.PT3 == TRUE) %>% group_by(Campus, Campus.Specialty, Appt.Week) %>% dplyr::summarise(`Total New Patients Arrived` = n())
+      
+      newPts <- merge(arrivedPts.tb, arrivedNewPts.tb, all.x=TRUE)
+      newPts[is.na(newPts)] <- 0
+      
+      newPts$newRatio <- paste0(round(newPts$`Total New Patients Arrived` / newPts$`Total Patients Arrived`, 2)*100, "%")
+      
+      table <- newPts %>% 
+        select(Campus, Campus.Specialty, Appt.Week, newRatio) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.Week", "ratio"))
+      
+      table <- dcast(table, Campus + Specialty ~ Appt.Week)
+      
+    } else{
+      
+      # Total Arrived Patients
+      arrivedPts.tb <- arrivedPts %>% group_by(Campus, Campus.Specialty, Appt.MonthYear) %>% dplyr::summarise(`Total Patients Arrived` = n())
+      # Total Arrived New Patients
+      arrivedNewPts.tb <- arrivedPts %>% filter(New.PT3 == TRUE) %>% group_by(Campus, Campus.Specialty, Appt.MonthYear) %>% dplyr::summarise(`Total New Patients Arrived` = n())
+      
+      newPts <- merge(arrivedPts.tb, arrivedNewPts.tb, all.x=TRUE)
+      newPts[is.na(newPts)] <- 0
+      
+      newPts$newRatio <- paste0(round(newPts$`Total New Patients Arrived` / newPts$`Total Patients Arrived`, 2)*100, "%")
+      
+      table <- newPts %>% 
+        select(Campus, Campus.Specialty, Appt.MonthYear, newRatio) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "ratio"))
+      
+      table <- dcast(table, Campus + Specialty ~ Appt.MonthYear)
+    }
+    
+    reactable(table,
+              style = list(fontFamily = "Calibri"),
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              ),
+              defaultColDef = colDef(
+                header = function(value) gsub(".", " ", value, fixed = TRUE),
+                cell = function(value) format(value, nsmall = 1),
+                align = "center",
+                minWidth = 120,
+                headerStyle = list(background = "#dddedd")
+              ),
+              defaultSorted = c("Campus", "Specialty"),
+              bordered = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              height = 300)
+    
+  })
+  
   
   output$siteComparisonNewPtWaitTime <- renderPlot({
     
@@ -1040,6 +1161,67 @@ server <- function(input, output, session) {
         graph_theme("bottom") + theme(legend.title = element_blank())
       
     }
+  })
+  
+  output$siteComparisonNewPtWaitTimeTb <- renderReactable({
+    
+    # Scheduling Arrived Data
+    arrivedPts <- dataArrived()
+    # arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
+
+    # Median New Patient Wait Time 
+    newWaitTime <- arrivedPts %>% filter(New.PT3 == TRUE) %>% 
+      mutate(wait.time = as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2))) %>%
+      filter(wait.time >= 0)
+    
+    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+                         borderRight = "1px solid #eee")
+
+    if(input$bySpecialty3 == TRUE) {
+      
+      newWaitTime.tb <- newWaitTime %>% 
+        group_by(Campus, Campus.Specialty, Appt.Week) %>%
+        dplyr::summarise(waitTime = paste0(round(median(wait.time)), " days")) 
+      
+      table <-  newWaitTime.tb %>% 
+        select(Campus, Campus.Specialty, Appt.Week, waitTime) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.Week", "waitTime")) %>%
+        pivot_wider(names_from = Appt.Week, values_from = waitTime)
+      
+    } else{
+      
+      newWaitTime.tb <- newWaitTime %>% 
+        group_by(Campus, Campus.Specialty, Appt.MonthYear) %>%
+        dplyr::summarise(waitTime = paste0(round(median(wait.time)), " days")) 
+      
+      table <-  newWaitTime.tb %>% 
+        select(Campus, Campus.Specialty, Appt.MonthYear, waitTime) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "waitTime")) %>%
+        pivot_wider(names_from = Appt.MonthYear, values_from = waitTime)
+      
+    }
+    
+    reactable(table,
+              style = list(fontFamily = "Calibri"),
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              ),
+              defaultColDef = colDef(
+                header = function(value) gsub(".", " ", value, fixed = TRUE),
+                cell = function(value) format(value, nsmall = 1),
+                align = "center",
+                minWidth = 120,
+                headerStyle = list(background = "#dddedd")
+              ),
+              defaultSorted = c("Campus", "Specialty"),
+              bordered = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              height = 300)
+    
   })
   
   
@@ -1116,6 +1298,75 @@ server <- function(input, output, session) {
     
   })
   
+  output$siteComparisonNoShowTb <- renderReactable({
+
+    # Scheduling Arrived and No Show Data
+    arrivedNoShowPts <- dataArrivedNoShow()
+    # arrivedNoShowPts <- kpi.all.data[arrivedNoShow.data.rows,] %>% filter(Campus.Specialty == "Cardiology")
+    
+    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+                         borderRight = "1px solid #eee")
+    
+    if(input$bySpecialty5 == TRUE) {
+      
+      # No Show Rate
+      noShows <- arrivedNoShowPts %>%
+        group_by(Campus, Campus.Specialty, Appt.Week, Appt.Status) %>%
+        dplyr::summarise(Total = n()) %>%
+        spread(Appt.Status, Total)
+      
+      noShows[is.na(noShows)] <- 0
+      
+      noShows$`noShow` <- paste0(round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)*100, "%")
+      
+      table <-  noShows %>% 
+        select(Campus, Campus.Specialty, Appt.Week, noShow) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.Week", "noShow")) %>%
+        pivot_wider(names_from = Appt.Week, 
+                    values_from = noShow)
+      
+    } else{
+      
+      # No Show Rate
+      noShows <- arrivedNoShowPts %>%
+        group_by(Campus, Campus.Specialty, Appt.MonthYear, Appt.Status) %>%
+        dplyr::summarise(Total = n()) %>%
+        spread(Appt.Status, Total)
+      
+      noShows[is.na(noShows)] <- 0
+      
+      noShows$`noShow` <- paste0(round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)*100, "%")
+      
+      table <-  noShows %>% 
+        select(Campus, Campus.Specialty, Appt.MonthYear, noShow) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "noShow")) %>%
+        pivot_wider(names_from = Appt.MonthYear, 
+                    values_from = noShow)
+      
+      }
+    
+    reactable(table,
+              style = list(fontFamily = "Calibri"),
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              ),
+              defaultColDef = colDef(
+                header = function(value) gsub(".", " ", value, fixed = TRUE),
+                cell = function(value) format(value, nsmall = 1),
+                align = "center",
+                minWidth = 120,
+                headerStyle = list(background = "#dddedd")
+              ),
+              defaultSorted = c("Campus", "Specialty"),
+              bordered = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              height = 300)
+  })
+  
   # testdataset <- reactive({
   #   slotData <- dataPastSlot()
   #   slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
@@ -1173,7 +1424,7 @@ server <- function(input, output, session) {
                            labels=scales::percent_format(accuracy = 1)) +
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y=NULL,
-             title = "Avg Daily Booked vs. Filled Rate (%) by Site and Specialty",
+             title = "Avg Booked vs. Filled Rate (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
@@ -1203,7 +1454,7 @@ server <- function(input, output, session) {
                            labels=scales::percent_format(accuracy = 1)) +
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y=NULL,
-             title = "Avg Daily Booked vs. Filled Rate (%) by Site and Specialty",
+             title = "Avg Booked vs. Filled Rate (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(bookedFilledRate$value)*1.2))+
         theme_new_line()+
@@ -1212,6 +1463,77 @@ server <- function(input, output, session) {
       
     }
     
+  })
+  
+  output$siteComparisonBookedRateTb <- renderReactable({
+    
+    # Slot Data
+    slotData <- dataPastSlot()
+    # slotData <- slot.data.subset[past.slot.data.rows,]
+
+    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+                         borderRight = "1px solid #eee")
+    
+    if(input$bySpecialty4 == TRUE) {
+      
+      # Booked Rate and Filled Rate
+      bookedFilledRate <- slotData %>%
+        group_by(Campus, Campus.Specialty, Appt.Week) %>%
+        summarise(`Available Hours` = sum(`Available Hours`),
+                  `Booked Hours` = sum(`Booked Hours`),
+                  `Arrived Hours` = sum(`Arrived Hours`)) %>%
+        mutate(`Booked Rate` = paste0(round(`Booked Hours`/`Available Hours`, 2)*100, "%"),
+               `Filled Rate` = paste0(round(`Arrived Hours`/`Available Hours`, 2)*100, "%")) %>%
+        select(Campus, Campus.Specialty, Appt.Week, `Booked Rate`, `Filled Rate`) %>%
+        gather(variable, value, 4:5) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.Week", "Status", "value")) 
+      
+      table <- bookedFilledRate %>%
+        pivot_wider(names_from = Appt.Week,
+                    values_from = value) %>%
+        arrange(Campus, Specialty)
+      
+    } else{
+      
+      # Booked Rate and Filled Rate
+      bookedFilledRate <- slotData %>%
+        group_by(Campus, Campus.Specialty, Appt.MonthYear) %>%
+        summarise(`Available Hours` = sum(`Available Hours`),
+                  `Booked Hours` = sum(`Booked Hours`),
+                  `Arrived Hours` = sum(`Arrived Hours`)) %>%
+        mutate(`Booked Rate` = paste0(round(`Booked Hours`/`Available Hours`, 2)*100, "%"),
+               `Filled Rate` = paste0(round(`Arrived Hours`/`Available Hours`, 2)*100, "%")) %>%
+        select(Campus, Campus.Specialty, Appt.MonthYear, `Booked Rate`, `Filled Rate`) %>%
+        gather(variable, value, 4:5) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "Status", "value")) 
+        
+      table <- bookedFilledRate %>%
+        pivot_wider(names_from = Appt.MonthYear,
+                    values_from = value) %>%
+        arrange(Campus, Specialty)
+      
+    }
+    
+    reactable(table,
+              style = list(fontFamily = "Calibri"),
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              ),
+              defaultColDef = colDef(
+                header = function(value) gsub(".", " ", value, fixed = TRUE),
+                cell = function(value) format(value, nsmall = 1),
+                align = "center",
+                minWidth = 120,
+                headerStyle = list(background = "#dddedd")
+              ),
+              defaultSorted = c("Campus", "Specialty"),
+              bordered = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              height = 300)
   })
   
   
@@ -1272,6 +1594,58 @@ server <- function(input, output, session) {
         theme_bw()+
         graph_theme("bottom") + theme(legend.title = element_blank())
     }
+  })
+  
+  output$siteComparisonMedianCheckInCycleTimeTb <- renderReactable({
+    
+    # Scheduling Arrived Data
+    arrivedPts <- dataArrived()
+    # arrivedPts <- kpi.all.data[arrived.data.rows,]
+    
+    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+                         borderRight = "1px solid #eee")
+    
+    if(input$bySpecialty6 == TRUE) {
+      
+      table <- arrivedPts %>% filter(cycleTime > 0) %>% 
+        group_by(Campus, Campus.Specialty, Appt.Week) %>% 
+        dplyr::summarise(cycleTime = paste0(round(median(cycleTime)), " min")) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.Week", "cycleTime")) %>%
+        pivot_wider(names_from = Appt.Week,
+                    values_from = cycleTime)
+
+    } else{
+      
+      
+      table <- arrivedPts %>% filter(cycleTime > 0) %>% 
+        group_by(Campus, Campus.Specialty, Appt.MonthYear) %>% 
+        dplyr::summarise(cycleTime = paste0(round(median(cycleTime)), " min")) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "cycleTime")) %>%
+        pivot_wider(names_from = Appt.MonthYear,
+                    values_from = cycleTime)
+      
+    }
+    
+    reactable(table,
+              style = list(fontFamily = "Calibri"),
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              ),
+              defaultColDef = colDef(
+                header = function(value) gsub(".", " ", value, fixed = TRUE),
+                cell = function(value) format(value, nsmall = 1),
+                align = "center",
+                minWidth = 120,
+                headerStyle = list(background = "#dddedd")
+              ),
+              defaultSorted = c("Campus", "Specialty"),
+              bordered = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              height = 300)
   })
   
   
@@ -1344,6 +1718,59 @@ server <- function(input, output, session) {
         theme_bw()+
         graph_theme("bottom") + theme(legend.title = element_blank())
     }
+  })
+  
+  output$siteComparisonMedianCycleTimeTb <- renderReactable({
+    
+    # Scheduling Arrived Data
+    arrivedPts <- dataArrived()
+    arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
+    
+    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+                         borderRight = "1px solid #eee")
+    
+    if(input$bySpecialty6 == TRUE) {
+
+      # Check in to Room in  
+      table <- arrivedPts %>% filter(checkinToRoomin >= 0) %>% 
+        group_by(Campus, Campus.Specialty, Appt.Week) %>% 
+        dplyr::summarise(checkinToRoomin = paste0(round(median(checkinToRoomin)), " min")) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.Week", "checkinToRoomin")) %>%
+        pivot_wider(names_from = Appt.Week,
+                    values_from = checkinToRoomin)
+      
+    } else{
+      
+      # Check in to Room in  
+      table <- arrivedPts %>% filter(checkinToRoomin >= 0) %>% 
+        group_by(Campus, Campus.Specialty, Appt.MonthYear) %>% 
+        dplyr::summarise(checkinToRoomin = paste0(round(median(checkinToRoomin)), " min")) %>%
+        `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "checkinToRoomin")) %>%
+        pivot_wider(names_from = Appt.MonthYear,
+                    values_from = checkinToRoomin)
+      
+    }
+    
+    reactable(table,
+              style = list(fontFamily = "Calibri"),
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              ),
+              defaultColDef = colDef(
+                header = function(value) gsub(".", " ", value, fixed = TRUE),
+                cell = function(value) format(value, nsmall = 1),
+                align = "center",
+                minWidth = 120,
+                headerStyle = list(background = "#dddedd")
+              ),
+              defaultSorted = c("Campus", "Specialty"),
+              bordered = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              height = 300)
   })
   
   # output$siteComparisonWorkingFTE <- renderPlot({
@@ -1971,23 +2398,24 @@ server <- function(input, output, session) {
   output$vbox3 <- renderValueBox({
     
     valueBox(
-      prettyNum(round(median((dataAll() %>% filter(New.PT3 == TRUE, Wait.Time >= 0))$Wait.Time)), big.mark=','),
+      paste0(prettyNum(round(median((dataAll() %>% filter(New.PT3 == TRUE, Wait.Time >= 0))$Wait.Time)), big.mark=','), " days"),
       subtitle = tags$p("Median New Patient Wait Time", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
 
   output$vbox4 <- renderValueBox({
     
     valueBox(
-      prettyNum(round((sum(dataPastSlot()$`Available Hours`) / length(unique(dataPastSlot()$Appt.DateYear)))), big.mark=','),
+      paste0(prettyNum(round((sum(dataPastSlot()$`Available Hours`) / length(unique(dataPastSlot()$Appt.DateYear)))), big.mark=','), "hrs."),
       subtitle = tags$p("Avg Hrs Available per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox5 <- renderValueBox({
     
     valueBox(
-      round(((sum(dataPastSlot()$`Available Hours`)*60) / length(unique(dataPastSlot()$Appt.DateYear))) /
-              (length(unique(dataArrived()$uniqueId)) / length(unique(dataArrived()$Appt.DateYear))), 1),
-      subtitle = tags$p("Avg Worked Mins per Patient", style = "font-size: 130%;"), icon = NULL, color = "yellow")
+      # round(((sum(dataPastSlot()$`Available Hours`)*60) / length(unique(dataPastSlot()$Appt.DateYear))) /
+      #         (length(unique(dataArrived()$uniqueId)) / length(unique(dataArrived()$Appt.DateYear))), 1),
+      paste0(round(mean(dataArrivedNoShow()$Appt.Dur))," min"),
+      subtitle = tags$p("Avg Scheduled Duration per Visit", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox6 <- renderValueBox({

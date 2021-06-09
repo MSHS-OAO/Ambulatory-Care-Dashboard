@@ -46,6 +46,7 @@
 # install.packages("sjmisc")
 # install.packages("shinyBS")
 # install.packages("shinyscreenshot")
+# install.packages("reactable")
 
 
 suppressMessages({
@@ -116,6 +117,7 @@ suppressMessages({
   library(janitor)
   library(patchwork)
   library(pryr)
+  library(reactable)
 })
 
 # ### (0) Maximize R Memory Size 
