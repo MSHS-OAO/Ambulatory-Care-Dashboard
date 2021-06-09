@@ -35,6 +35,8 @@ dateRangeKpi_end = max((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear)
 dateRangeKpi_min = min((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
 dateRangeKpi_max = max((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
 
+util_date_start = min(utilization.data$Appt.DateYear)
+util_date_end = max(utilization.data$Appt.DateYear)
 
 
 # header <- dashboardHeader()
@@ -158,6 +160,14 @@ ui <- dashboardPage(
     tags$style(".small-box.bg-aqua { background-color: 	#00aeef !important; color: #ffffff !important; }"),
     
     
+    tags$style(HTML("
+    #update_filters {
+    position: absolute;
+    left: 25px
+    
+    }
+                    ")),
+    
     # Top align plot outputs
     tags$head(tags$style(".top-align { vertical-align: top;}  ")),
     
@@ -260,10 +270,10 @@ ui <- dashboardPage(
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonPts", height="550px") %>% 
+                              plotOutput("siteComparisonPts", height="600px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"), br(),
                               div("Total Arrived Patients by Site and Specialty", style = "text-align: center; 
-                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                                  background-color:white; color:black; font-size:180%; font-weight:bold"),
                               reactableOutput("siteComparisonPtsTb")
                               ),
                             boxPlus(
@@ -274,20 +284,20 @@ ui <- dashboardPage(
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonNewPtRatio", height="550px") %>% 
+                              plotOutput("siteComparisonNewPtRatio", height="600px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"), br(),
                               div("New Patient Ratio by Site and Specialty", style = "text-align: center; 
-                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                                  background-color:white; color:black; font-size:180%; font-weight:bold"),
                               reactableOutput("siteComparisonNewPtRatioTb"), hr(),
                               materialSwitch(
                                 inputId = "bySpecialty3",
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonNewPtWaitTime", height="550px") %>% 
+                              plotOutput("siteComparisonNewPtWaitTime", height="600px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"), br(),
                               div("Median New Appointment Lead Days by Site and Specialty", style = "text-align: center; 
-                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                                  background-color:white; color:black; font-size:180%; font-weight:bold"),
                               reactableOutput("siteComparisonNewPtWaitTimeTb")
                               ),
                             boxPlus(
@@ -301,17 +311,17 @@ ui <- dashboardPage(
                               plotOutput("siteComparisonBookedRate", height="900px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"), br(),
                               div("Avg Booked vs. Filled Rate (%) by Site and Specialty", style = "text-align: center; 
-                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                                  background-color:white; color:black; font-size:180%; font-weight:bold"),
                               reactableOutput("siteComparisonBookedRateTb"), hr(),
                               materialSwitch(
                                 inputId = "bySpecialty5",
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonNoShow", height="550px") %>% 
+                              plotOutput("siteComparisonNoShow", height="600px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"), br(),
                               div("Avg No Show Rate by Site and Specialty", style = "text-align: center; 
-                                  background-color:white; color:black; font-size:150%; font-weight:bold"),
+                                  background-color:white; color:black; font-size:180%; font-weight:bold"),
                               reactableOutput("siteComparisonNoShowTb")
                               #dataTableOutput("Testtable")
                               ),
@@ -323,12 +333,12 @@ ui <- dashboardPage(
                                 label = "By week", 
                                 right = TRUE,
                                 status = "primary"),
-                              plotOutput("siteComparisonMedianCheckInCycleTime", height="550px") %>% 
+                              plotOutput("siteComparisonMedianCheckInCycleTime", height="600px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"), br(),
                               div("Median Check-in to Visit-end Time by Site and Specialty", style = "text-align: center; 
                                   background-color:white; color:black; font-size:150%; font-weight:bold"),
                               reactableOutput("siteComparisonMedianCheckInCycleTimeTb"), hr(),
-                            plotOutput("siteComparisonMedianCycleTime", height="550px") %>% 
+                            plotOutput("siteComparisonMedianCycleTime", height="600px") %>% 
                               withSpinner(type = 5, color = "#d80b8c"), br(),
                             div("Median Check-in to Room-in Time by Site and Specialty", style = "text-align: center; 
                                   background-color:white; color:black; font-size:150%; font-weight:bold"),
@@ -461,12 +471,13 @@ ui <- dashboardPage(
                             boxPlus(
                               title = "Bumps", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              valueBoxOutput("provBumps", width = 6),
-                              valueBoxOutput("provBumpsPerc", width = 6),
+                              fluidRow(
+                                valueBoxOutput("provBumps", width = 6),
+                                valueBoxOutput("provBumpsPerc", width = 6)),
                               hr(),
-                              plotOutput("provBumpLeadDays", height = "200px") %>%
-                                withSpinner(type = 5, color = "#d80b8c"),
-                              br(), br(), br(), br(), br(), br()), 
+                              fluidRow(plotOutput("provBumpLeadDays", height = "200px") %>%
+                                withSpinner(type = 5, color = "#d80b8c")),
+                              br(), br()), 
                             boxPlus(
                               title = "No Shows", width = 12, status = "primary",
                               solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -502,8 +513,8 @@ ui <- dashboardPage(
               # KPIs Tab --------------------------------------------------------------------------------------------------------------------
               column(11,
                      div("KPIs", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
-                     #textOutput("practiceName_KPIs"),
-                     textOutput("kpis_mem"),
+                     textOutput("practiceName_KPIs"),
+                     #textOutput("kpis_mem"),
                      tags$head(tags$style("#practiceName_KPIs{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                      column(2,
                             box(
@@ -1154,6 +1165,9 @@ ui <- dashboardPage(
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
       input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
             br(),
+             actionButton("update_filters", "Update", width = "80%"),
+      br(),
+      br(),
              box(
                title = "Select Campus:",
                width = 12,
@@ -1330,8 +1344,8 @@ ui <- dashboardPage(
         width = 12, 
         solidHeader = FALSE, 
         dateRangeInput("dateRangeUtil", label = NULL,
-                       start = min(utilization.data$Appt.DateYear), end = max(utilization.data$Appt.DateYear),
-                       min = min(utilization.data$Appt.DateYear), max = max(utilization.data$Appt.DateYear))),
+                       start = util_date_start, end = util_date_end,
+                       min = util_date_start, max = util_date_end)),
       
       box(
         title = "Select Days of Week:",
@@ -1374,7 +1388,9 @@ ui <- dashboardPage(
                              actionsBox = TRUE,
                              dropupAuto = FALSE),
                            selected = unique(holid$holiday)))
+    
       ),
+  
     style = "material-circle", size = "lg", right = TRUE, status = "default",
     icon = icon("filter"), width = "300px",
     tooltip = tooltipOptions(title = "Set additional filters for graphs/tables."),
@@ -1420,6 +1436,9 @@ ui <- dashboardPage(
                    label = icon("download")),
       bsTooltip("download1", "Download (PNG) current tab.",
                 "right", options = list(container = "body")
+      ),
+      bsTooltip("update_filters", "Select filters and press the button to update the tool",
+                "top", options = list(container = "body")
       )
     )
     
