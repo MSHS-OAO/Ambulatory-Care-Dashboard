@@ -35,6 +35,8 @@ dateRangeKpi_end = max((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear)
 dateRangeKpi_min = min((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
 dateRangeKpi_max = max((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
 
+util_date_start = min(utilization.data$Appt.DateYear)
+util_date_end = end = max(utilization.data$Appt.DateYear)
 
 
 # header <- dashboardHeader()
@@ -157,6 +159,14 @@ ui <- dashboardPage(
     # valueBox "aqua" color for Mount Sinai Dark Blue
     tags$style(".small-box.bg-aqua { background-color: 	#00aeef !important; color: #ffffff !important; }"),
     
+    
+    tags$style(HTML("
+    #update_filters {
+    position: absolute;
+    left: 25px
+    
+    }
+                    ")),
     
     # Top align plot outputs
     tags$head(tags$style(".top-align { vertical-align: top;}  ")),
@@ -1133,6 +1143,9 @@ ui <- dashboardPage(
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
       input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
             br(),
+             actionButton("update_filters", "Update", width = "80%"),
+      br(),
+      br(),
              box(
                title = "Select Campus:",
                width = 12,
@@ -1309,8 +1322,8 @@ ui <- dashboardPage(
         width = 12, 
         solidHeader = FALSE, 
         dateRangeInput("dateRangeUtil", label = NULL,
-                       start = min(utilization.data$Appt.DateYear), end = max(utilization.data$Appt.DateYear),
-                       min = min(utilization.data$Appt.DateYear), max = max(utilization.data$Appt.DateYear))),
+                       start = util_date_start, end = util_date_end,
+                       min = util_date_start, max = util_date_end)),
       
       box(
         title = "Select Days of Week:",
@@ -1352,8 +1365,8 @@ ui <- dashboardPage(
                              liveSearch = TRUE,
                              actionsBox = TRUE,
                              dropupAuto = FALSE),
-                           selected = unique(holid$holiday))),
-      actionButton("update_filters", "Update", width = "80%"),
+                           selected = unique(holid$holiday)))
+    
       ),
   
     style = "material-circle", size = "lg", right = TRUE, status = "default",
@@ -1401,6 +1414,9 @@ ui <- dashboardPage(
                    label = icon("download")),
       bsTooltip("download1", "Download (PNG) current tab.",
                 "right", options = list(container = "body")
+      ),
+      bsTooltip("update_filters", "Select filters and press the button to update the tool",
+                "top", options = list(container = "body")
       )
     )
     
