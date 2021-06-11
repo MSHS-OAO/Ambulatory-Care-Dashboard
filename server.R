@@ -5030,7 +5030,9 @@ server <- function(input, output, session) {
       scale_y_continuous(limits=c(0,(max(pts.by.month$Volume))*1.2))+
       theme_new_line()+
       theme_bw()+
-      graph_theme("none")
+      graph_theme("none")+
+      geom_text(aes(label=Volume), hjust = 0.5, vjust = -1, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
       # theme(
       #   legend.position = "none",
       #   axis.title.y = element_blank(),
@@ -5068,7 +5070,9 @@ server <- function(input, output, session) {
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
+      theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+      geom_text(aes(label=Avg.Volume), hjust = 0.5, vjust = -1, color="black", fontface="bold",
+                position = position_dodge(1), size=5)
     
   })
   
