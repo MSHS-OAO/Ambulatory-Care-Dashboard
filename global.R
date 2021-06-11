@@ -318,11 +318,12 @@ setwd(wdpath)
 
 ### RStudio COnnect Data Read In
 
-# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/historical_data.feather"))
-# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/slot_data_subset.feather"))
-# holid <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/holid.feather"))
-# utilization.data <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/utilization_data.feather"))
-# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Access 2020-11 to 2021-04 Slot 2020-11 to 2021-08/population.data_filtered.feather"))
+# #### New Location with Updated Data
+# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Data/historical_data.feather"))
+# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Data/slot_data_subset.feather"))
+# holid <- as.data.frame(read_feather("/data/Ambulatory/Data/holid.feather"))
+# utilization.data <- as.data.frame(read_feather("/data/Ambulatory/Data/utilization_data.feather"))
+# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Data/population_data_filtered.feather"))
 
 
 historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
