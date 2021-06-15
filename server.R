@@ -6723,8 +6723,14 @@ server <- function(input, output, session) {
                                       marker = list(color = "#d80b8c"))
     slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
                                       marker = list(color = "#00aeef"))
-    
+
+    slot_fig <- slot_fig %>% add_segments(x = max(dataAll()$Appt.DateYear) + 2, 
+                                          xend = max(dataAll()$Appt.DateYear + 2), 
+                                          y = 0, yend = max(booked_filled$`Available Hours` + 5000), name = "Today's Date",
+                                          line = list(color = "#000000", dash = "dash"))
+      
     slot_fig %>% layout(
+      #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
       title = "Slot Usage Summary", font=list(size=20),
       autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
       xaxis = list(
@@ -6754,9 +6760,15 @@ server <- function(input, output, session) {
             #   stepmode = ""),
             list(step = "all"))),
         
-        rangeslider = list(type = "date")),
+        rangeslider = list(type = "date"),
+        mirror = TRUE,
+        ticks = 'outside',
+        showline = TRUE),
       yaxis = list(title = "Hours",
-                   tickfont = list(size = 14)),
+                   tickfont = list(size = 14),
+                   mirror = TRUE,
+                   ticks = 'outside',
+                   showline = TRUE),
       hovermode = "x unified")
 
     
