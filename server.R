@@ -3935,8 +3935,8 @@ server <- function(input, output, session) {
       reshape2::melt(noShows_bar_tb, id.vars = c("apptLeadDays"))
     
       ggplot(noShows_bar_tb, aes(x=factor(apptLeadDays, levels = status), y=value,fill=variable)) +
-      geom_bar(stat="identity", position=position_dodge(), width = 0.8, fill="midnightblue") +
-      labs(x=NULL, y = "Percent",
+        geom_bar(stat="identity", position=position_dodge(), width = 0.8, fill="#f9878a", color="red") +
+        labs(x=NULL, y = "Percent",
            # caption = "*No Show includes no show and same-day bumped, 
            # canceled, and rescheduled appointments.",
            title = "Average No Show Rate by Lead Days to Appointment*",
@@ -5520,193 +5520,193 @@ server <- function(input, output, session) {
   
   
   # Upcoming Demand - 2 Weeks - by Practice and Provider ---------------------------------------------------------
-  output$demandWeeksGraph <-  renderPlot({
-    ### ***TEMPORARY*** ###
-    future.slot.data <- past.slot.data # DELETE WITH NEW DATA
-    
-    summary.hrs <- future.slot.data %>%
-      # filter(Appt.DTTM >= todays_date - days(14)) # ONLY INCLUDE FUTURE 2 WEEKS
-      group_by(Campus, Department, Provider, Appt.DateYear) %>%
-      dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-                       `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-                       `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-                       `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-                       `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-      mutate(`Remaining Hours` = ifelse(`Booked Hours`-`Available Hours` < 0,0, round((`Booked Hours`-`Available Hours`),1)),
-             `Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100,1),
-             `Filled Rate (%)` = round((`Arrived Hours`/`Available Hours`)*100,1)) %>%
-      gather(variable, value, 5:12)
-    
-    # ***Booked or Filled Rate = Inf: appts completed outside of slotted hours*** -> convert to 0 for now
-    # ***Booked or Filled Rate = NaN: no available and booked hours*** -> convert to 0 for now
-    summary.hrs$value[which(!is.finite(summary.hrs$value))] <- 0
-    
-    summary.hrs$Date <- format(as.Date(summary.hrs$Date, format="%Y-%m-%d"), "%m/%d/%y")
-    summary.hrs <- summary.hrs %>% mutate(unique = paste0(Campus, Department, Provider, Date, variable))
-    
-    summary.df <- sapply(as.data.frame(unique(summary.hrs[,c("Campus","Department","Provider","variable")])), rep.int, times = length(unique(summary.hrs$Date)))
-    summary.df <- summary.df %>% as.data.frame() %>% arrange(Campus, Department, Provider, variable)
-    
-    full_dates <- data.frame(Date = rep(seq.dates(min(summary.hrs$Date), max(summary.hrs$Date), by = "days"), nrow(unique(summary.df))))
-    
-    summary.hrs.df <- cbind(summary.df,full_dates)
-    summary.hrs.df <- summary.hrs.df %>% mutate(unique = paste0(Campus, Department, Provider, Date, variable))
-    summary.hrs.df$value <- summary.hrs$value[match(summary.hrs.df$unique,summary.hrs$unique)]
-    
-    level.order <- c("Available Hours", "Booked Hours","Arrived Hours","Canceled Hours","No Show Hours","Remaining Hours","Booked Rate (%)","Filled Rate (%)")
-    summary.hrs.df <- summary.hrs.df[order(match(summary.hrs.df$variable, level.order)),]
-    summary.hrs.df$value[is.na(summary.hrs.df$value)] <- 0
-    summary.hrs.df$Date <- as.Date(summary.hrs.df$Date, format="%Y-%m-%d")
-    
-    
-    if(input$byProvider2 == TRUE){ # Provider - Future Filled and Booked Rates
-      
-      summary.hrs.df <- summary.hrs.df %>% filter(Provider %in% c("AMIN, SHYAM M","GOWDA, RAMESH M","PUSKAS, JOHN D","SHAH, ANKIT R","GOWDA, RAMESH M"))
-      
-      # if(length(unique(summary.hrs.df$Provider))>6){
-      #   
-      #   cowplot::ggdraw() +
-      #     cowplot::draw_label('Select fewer providers (<5)', fontface = "bold", color = "red", size = 50)
-      #   
-      # } else {
-      
-      # Provider - Booked vs.Remaining Hours - 2 Weeks #Provider %in% c("AMIN, SHYAM M","GOWDA, RAMESH M","PUSKAS, JOHN D","SHAH, ANKIT R","GOWDA, RAMESH M")
-      #booked.prov <-
-      
-      booked.prov <- 
-        ggplot(summary.hrs.df %>% filter(variable %in% c("Booked Rate (%)")) %>% mutate(value = round(ifelse(value == 0, 0, value*.001),1)), 
-               aes(x=Date, y=value, fill= value > 1.0, color=value)) +
-        geom_bar(stat="identity", color='black', size=0.5) +
-        geom_hline(yintercept=1.0, linetype="dashed", color = "red", size=1)+
-        facet_grid(Provider~., scales = "free_y")+
-        #facet_wrap(~ Department + Provider, scales="free_y")+
-        labs(title = paste0("\nDaily Slot Booked Rate (%) - Upcoming 2 Weeks"), x = NULL, y = NULL)+
-        scale_fill_manual("Status", labels = c("<= 100%", "> 100%"), values = c("#c7c6ef","#212070"))+
-        scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
-        theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-              plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-              legend.position = "top",
-              legend.text = element_text(size="12"),
-              legend.direction = "horizontal",
-              legend.key.size = unit(1.0,"cm"),
-              legend.title = element_blank(),
-              axis.title = element_text(size="14"),
-              axis.text = element_text(size="14"),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
-              axis.text.y = element_text(margin = margin(l=5, r=5)),
-              panel.grid.minor = element_blank(),
-              panel.border = element_blank(),
-              panel.background = element_rect(colour = "black", size=0.5),
-              axis.line = element_line(size = 0.3, colour = "black"))+
-        scale_y_continuous(labels = scales::percent_format(accuracy = 1))
-      
-      remaining.prov <-
-        ggplot(summary.hrs.df %>% filter(variable %in% c("Remaining Hours","Booked Hours")), 
-               aes(x=Date, y=value, fill=factor(variable, levels=c("Remaining Hours","Booked Hours")),
-                   color = variable =='Remaining Hours')) +
-        geom_bar(stat="identity", size=1) +
-        facet_grid(Provider~., scales = "free_y")+
-        #facet_wrap(~ Department + Provider, scales="free_y")+
-        labs(title = paste0("\n Total Booked and Remaining Hours  - Upcoming 2 Weeks"), x = NULL, y = NULL)+
-        scale_fill_manual("Status",values = c("#f75dbe","#a5a7a5"))+
-        scale_color_manual(values = c(NA, '#d80b8c'), guide=F)+
-        scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
-        theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-              plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-              legend.position = "top",
-              legend.text = element_text(size="12"),
-              legend.direction = "horizontal",
-              legend.key.size = unit(1.0,"cm"),
-              legend.title = element_blank(),
-              axis.title = element_text(size="14"),
-              axis.text = element_text(size="14"),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
-              axis.text.y = element_text(margin = margin(l=5, r=5)),
-              panel.grid.minor = element_blank(),
-              panel.border = element_blank(),
-              panel.background = element_rect(colour = "black", size=0.5),
-              axis.line = element_line(size = 0.3, colour = "black"))+
-        geom_text(aes(label=ifelse(value==0,"",paste0(value," hrs."))), color="white", 
-                  size=5, position = position_stack(vjust = 0.5))
-      
-      grid.arrange(booked.prov, remaining.prov, ncol=2)
-      
-      # }
-      
-    } else {
-      
-      # Practice - Summary of future booked and filled rates 
-      remaining.dept.df <- summary.hrs.df %>%
-        group_by(Campus, Department, Date, variable) %>%
-        dplyr::summarise(value = sum(value))
-      
-      # Practice - Future Booked vs.Remaining Hours - 2 Weeks 
-      booked.dept <-
-        ggplot(remaining.dept.df %>% filter(variable %in% c("Booked Rate (%)")) %>% mutate(value = round(ifelse(value == 0, 0, value*.001),1)), 
-               aes(x=Date, y=value, fill= value > 1.0, color=value)) +
-        geom_bar(stat="identity", color='black', size=1) +
-        geom_hline(yintercept=1.0, linetype="dashed", color = "red", size=1.5)+
-        labs(title = paste0("Daily Slot Booked Rate (%) - Upcoming 2 Weeks\n"), x = NULL, y = NULL)+
-        scale_fill_manual("Status", labels = c("<= 100%", "> 100%"), values = c("#c7c6ef","#212070"))+
-        scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
-        theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-              plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-              legend.position = "top",
-              axis.title = element_text(size="14"),
-              axis.text = element_text(size="14"),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
-              axis.text.y = element_text(margin = margin(l=5, r=5)),
-              panel.grid.minor = element_blank(),
-              panel.border = element_blank(),
-              panel.background = element_rect(colour = "black", size=0.5),
-              axis.line = element_line(size = 0.3, colour = "black"),
-              plot.margin=unit(c(1,1,0.5,1), "cm"))+
-        scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits=c(0,max(remaining.dept.df$value)*0.0012))+
-        geom_text(aes(label=paste(value*100,"%")), color="white", 
-                  size=5, position = position_stack(vjust = 0.5))
-      
-      # Practice - Future Remaining Hours - 2 Weeks 
-      remaining.dept <-
-        ggplot(remaining.dept.df %>% filter(variable %in% c("Remaining Hours","Booked Hours")), 
-               aes(x=Date, y=value, fill=factor(variable, levels=c("Remaining Hours","Booked Hours")),
-                   color = variable =='Remaining Hours')) +
-        geom_bar(stat="identity", size=1) +
-        labs(title = paste0("\n Total Booked and Remaining Hours  - Upcoming 2 Weeks"), x = NULL, y = NULL)+
-        scale_fill_manual("Status",values = c("#f75dbe","#a5a7a5"))+
-        scale_color_manual(values = c(NA, '#d80b8c'), guide=F)+
-        scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
-        theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-              plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-              legend.position = "top",
-              legend.text = element_text(size="12"),
-              legend.direction = "horizontal",
-              legend.key.size = unit(1.0,"cm"),
-              legend.title = element_blank(),
-              axis.title = element_text(size="14"),
-              axis.text = element_text(size="14"),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
-              axis.text.y = element_text(margin = margin(l=5, r=5)),
-              panel.grid.minor = element_blank(),
-              panel.border = element_blank(),
-              panel.background = element_rect(colour = "black", size=0.5),
-              axis.line = element_line(size = 0.3, colour = "black"),
-              plot.margin=unit(c(-0.5,1,1,1), "cm"))+
-        geom_text(aes(label=paste0(value," hrs.")), color="white", 
-                  size=5, position = position_stack(vjust = 0.5))
-      
-      grid.arrange(booked.dept, remaining.dept, ncol=1)
-      
-    } # End Booked and Filled Rate by Practice
-    
-  })
+  # output$demandWeeksGraph <-  renderPlot({
+  #   ### ***TEMPORARY*** ###
+  #   future.slot.data <- past.slot.data # DELETE WITH NEW DATA
+  #   
+  #   summary.hrs <- future.slot.data %>%
+  #     # filter(Appt.DTTM >= todays_date - days(14)) # ONLY INCLUDE FUTURE 2 WEEKS
+  #     group_by(Campus, Department, Provider, Appt.DateYear) %>%
+  #     dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
+  #                      `Booked Hours` = round(sum(BOOKED_MINUTES),0),
+  #                      `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
+  #                      `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
+  #                      `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
+  #     mutate(`Remaining Hours` = ifelse(`Booked Hours`-`Available Hours` < 0,0, round((`Booked Hours`-`Available Hours`),1)),
+  #            `Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100,1),
+  #            `Filled Rate (%)` = round((`Arrived Hours`/`Available Hours`)*100,1)) %>%
+  #     gather(variable, value, 5:12)
+  #   
+  #   # ***Booked or Filled Rate = Inf: appts completed outside of slotted hours*** -> convert to 0 for now
+  #   # ***Booked or Filled Rate = NaN: no available and booked hours*** -> convert to 0 for now
+  #   summary.hrs$value[which(!is.finite(summary.hrs$value))] <- 0
+  #   
+  #   summary.hrs$Date <- format(as.Date(summary.hrs$Date, format="%Y-%m-%d"), "%m/%d/%y")
+  #   summary.hrs <- summary.hrs %>% mutate(unique = paste0(Campus, Department, Provider, Date, variable))
+  #   
+  #   summary.df <- sapply(as.data.frame(unique(summary.hrs[,c("Campus","Department","Provider","variable")])), rep.int, times = length(unique(summary.hrs$Date)))
+  #   summary.df <- summary.df %>% as.data.frame() %>% arrange(Campus, Department, Provider, variable)
+  #   
+  #   full_dates <- data.frame(Date = rep(seq.dates(min(summary.hrs$Date), max(summary.hrs$Date), by = "days"), nrow(unique(summary.df))))
+  #   
+  #   summary.hrs.df <- cbind(summary.df,full_dates)
+  #   summary.hrs.df <- summary.hrs.df %>% mutate(unique = paste0(Campus, Department, Provider, Date, variable))
+  #   summary.hrs.df$value <- summary.hrs$value[match(summary.hrs.df$unique,summary.hrs$unique)]
+  #   
+  #   level.order <- c("Available Hours", "Booked Hours","Arrived Hours","Canceled Hours","No Show Hours","Remaining Hours","Booked Rate (%)","Filled Rate (%)")
+  #   summary.hrs.df <- summary.hrs.df[order(match(summary.hrs.df$variable, level.order)),]
+  #   summary.hrs.df$value[is.na(summary.hrs.df$value)] <- 0
+  #   summary.hrs.df$Date <- as.Date(summary.hrs.df$Date, format="%Y-%m-%d")
+  #   
+  #   
+  #   if(input$byProvider2 == TRUE){ # Provider - Future Filled and Booked Rates
+  #     
+  #     summary.hrs.df <- summary.hrs.df %>% filter(Provider %in% c("AMIN, SHYAM M","GOWDA, RAMESH M","PUSKAS, JOHN D","SHAH, ANKIT R","GOWDA, RAMESH M"))
+  #     
+  #     # if(length(unique(summary.hrs.df$Provider))>6){
+  #     #   
+  #     #   cowplot::ggdraw() +
+  #     #     cowplot::draw_label('Select fewer providers (<5)', fontface = "bold", color = "red", size = 50)
+  #     #   
+  #     # } else {
+  #     
+  #     # Provider - Booked vs.Remaining Hours - 2 Weeks #Provider %in% c("AMIN, SHYAM M","GOWDA, RAMESH M","PUSKAS, JOHN D","SHAH, ANKIT R","GOWDA, RAMESH M")
+  #     #booked.prov <-
+  #     
+  #     booked.prov <- 
+  #       ggplot(summary.hrs.df %>% filter(variable %in% c("Booked Rate (%)")) %>% mutate(value = round(ifelse(value == 0, 0, value*.001),1)), 
+  #              aes(x=Date, y=value, fill= value > 1.0, color=value)) +
+  #       geom_bar(stat="identity", color='black', size=0.5) +
+  #       geom_hline(yintercept=1.0, linetype="dashed", color = "red", size=1)+
+  #       facet_grid(Provider~., scales = "free_y")+
+  #       #facet_wrap(~ Department + Provider, scales="free_y")+
+  #       labs(title = paste0("\nDaily Slot Booked Rate (%) - Upcoming 2 Weeks"), x = NULL, y = NULL)+
+  #       scale_fill_manual("Status", labels = c("<= 100%", "> 100%"), values = c("#c7c6ef","#212070"))+
+  #       scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
+  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
+  #             legend.position = "top",
+  #             legend.text = element_text(size="12"),
+  #             legend.direction = "horizontal",
+  #             legend.key.size = unit(1.0,"cm"),
+  #             legend.title = element_blank(),
+  #             axis.title = element_text(size="14"),
+  #             axis.text = element_text(size="14"),
+  #             axis.title.x = element_blank(),
+  #             axis.title.y = element_blank(),
+  #             axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
+  #             axis.text.y = element_text(margin = margin(l=5, r=5)),
+  #             panel.grid.minor = element_blank(),
+  #             panel.border = element_blank(),
+  #             panel.background = element_rect(colour = "black", size=0.5),
+  #             axis.line = element_line(size = 0.3, colour = "black"))+
+  #       scale_y_continuous(labels = scales::percent_format(accuracy = 1))
+  #     
+  #     remaining.prov <-
+  #       ggplot(summary.hrs.df %>% filter(variable %in% c("Remaining Hours","Booked Hours")), 
+  #              aes(x=Date, y=value, fill=factor(variable, levels=c("Remaining Hours","Booked Hours")),
+  #                  color = variable =='Remaining Hours')) +
+  #       geom_bar(stat="identity", size=1) +
+  #       facet_grid(Provider~., scales = "free_y")+
+  #       #facet_wrap(~ Department + Provider, scales="free_y")+
+  #       labs(title = paste0("\n Total Booked and Remaining Hours  - Upcoming 2 Weeks"), x = NULL, y = NULL)+
+  #       scale_fill_manual("Status",values = c("#f75dbe","#a5a7a5"))+
+  #       scale_color_manual(values = c(NA, '#d80b8c'), guide=F)+
+  #       scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
+  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
+  #             legend.position = "top",
+  #             legend.text = element_text(size="12"),
+  #             legend.direction = "horizontal",
+  #             legend.key.size = unit(1.0,"cm"),
+  #             legend.title = element_blank(),
+  #             axis.title = element_text(size="14"),
+  #             axis.text = element_text(size="14"),
+  #             axis.title.x = element_blank(),
+  #             axis.title.y = element_blank(),
+  #             axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
+  #             axis.text.y = element_text(margin = margin(l=5, r=5)),
+  #             panel.grid.minor = element_blank(),
+  #             panel.border = element_blank(),
+  #             panel.background = element_rect(colour = "black", size=0.5),
+  #             axis.line = element_line(size = 0.3, colour = "black"))+
+  #       geom_text(aes(label=ifelse(value==0,"",paste0(value," hrs."))), color="white", 
+  #                 size=5, position = position_stack(vjust = 0.5))
+  #     
+  #     grid.arrange(booked.prov, remaining.prov, ncol=2)
+  #     
+  #     # }
+  #     
+  #   } else {
+  #     
+  #     # Practice - Summary of future booked and filled rates 
+  #     remaining.dept.df <- summary.hrs.df %>%
+  #       group_by(Campus, Department, Date, variable) %>%
+  #       dplyr::summarise(value = sum(value))
+  #     
+  #     # Practice - Future Booked vs.Remaining Hours - 2 Weeks 
+  #     booked.dept <-
+  #       ggplot(remaining.dept.df %>% filter(variable %in% c("Booked Rate (%)")) %>% mutate(value = round(ifelse(value == 0, 0, value*.001),1)), 
+  #              aes(x=Date, y=value, fill= value > 1.0, color=value)) +
+  #       geom_bar(stat="identity", color='black', size=1) +
+  #       geom_hline(yintercept=1.0, linetype="dashed", color = "red", size=1.5)+
+  #       labs(title = paste0("Daily Slot Booked Rate (%) - Upcoming 2 Weeks\n"), x = NULL, y = NULL)+
+  #       scale_fill_manual("Status", labels = c("<= 100%", "> 100%"), values = c("#c7c6ef","#212070"))+
+  #       scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
+  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
+  #             legend.position = "top",
+  #             axis.title = element_text(size="14"),
+  #             axis.text = element_text(size="14"),
+  #             axis.title.x = element_blank(),
+  #             axis.title.y = element_blank(),
+  #             axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
+  #             axis.text.y = element_text(margin = margin(l=5, r=5)),
+  #             panel.grid.minor = element_blank(),
+  #             panel.border = element_blank(),
+  #             panel.background = element_rect(colour = "black", size=0.5),
+  #             axis.line = element_line(size = 0.3, colour = "black"),
+  #             plot.margin=unit(c(1,1,0.5,1), "cm"))+
+  #       scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits=c(0,max(remaining.dept.df$value)*0.0012))+
+  #       geom_text(aes(label=paste(value*100,"%")), color="white", 
+  #                 size=5, position = position_stack(vjust = 0.5))
+  #     
+  #     # Practice - Future Remaining Hours - 2 Weeks 
+  #     remaining.dept <-
+  #       ggplot(remaining.dept.df %>% filter(variable %in% c("Remaining Hours","Booked Hours")), 
+  #              aes(x=Date, y=value, fill=factor(variable, levels=c("Remaining Hours","Booked Hours")),
+  #                  color = variable =='Remaining Hours')) +
+  #       geom_bar(stat="identity", size=1) +
+  #       labs(title = paste0("\n Total Booked and Remaining Hours  - Upcoming 2 Weeks"), x = NULL, y = NULL)+
+  #       scale_fill_manual("Status",values = c("#f75dbe","#a5a7a5"))+
+  #       scale_color_manual(values = c(NA, '#d80b8c'), guide=F)+
+  #       scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
+  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
+  #             legend.position = "top",
+  #             legend.text = element_text(size="12"),
+  #             legend.direction = "horizontal",
+  #             legend.key.size = unit(1.0,"cm"),
+  #             legend.title = element_blank(),
+  #             axis.title = element_text(size="14"),
+  #             axis.text = element_text(size="14"),
+  #             axis.title.x = element_blank(),
+  #             axis.title.y = element_blank(),
+  #             axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
+  #             axis.text.y = element_text(margin = margin(l=5, r=5)),
+  #             panel.grid.minor = element_blank(),
+  #             panel.border = element_blank(),
+  #             panel.background = element_rect(colour = "black", size=0.5),
+  #             axis.line = element_line(size = 0.3, colour = "black"),
+  #             plot.margin=unit(c(-0.5,1,1,1), "cm"))+
+  #       geom_text(aes(label=paste0(value," hrs.")), color="white", 
+  #                 size=5, position = position_stack(vjust = 0.5))
+  #     
+  #     grid.arrange(booked.dept, remaining.dept, ncol=1)
+  #     
+  #   } # End Booked and Filled Rate by Practice
+  #   
+  # })
   
   
   
@@ -6693,6 +6693,87 @@ server <- function(input, output, session) {
   # 
   # 
   # 
+  
+  
+  ### Access Tab ----------------------------------------------------------------------------------------------------------------------
+  ## Booked and Filled Rate
+  
+  output$test <- renderPlotly({
+    
+    data <- slot.data.subset %>% filter(Appt.Day == "Mon")
+    head(data)
+    
+    booked_filled <- data %>%
+      group_by(Appt.DateYear) %>%
+      summarise(`Available Hours` = sum(`Available Hours`),
+                `Booked Hours` = sum(`Booked Hours`),
+                `Filled Hours` = sum(`Arrived Hours`)) %>%
+      mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2),
+             `Filled Rate` = round(`Filled Hours`/`Available Hours`, 2)) 
+    
+    slot_fig <- plot_ly(booked_filled, x = ~Appt.DateYear,
+                        textfont = list(color = '#000000', size = 16))
+    slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
+                                       marker = list(color = "#212070"), line = list(color = "#212070"))
+    slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
+                                      marker = list(color = "#d80b8c"))
+    slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
+                                      marker = list(color = "#00aeef"))
+    
+    slot_fig %>% layout(
+      title = "Slot Usage Summary", font=list(size=20),
+      autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
+      xaxis = list(
+        title = "Date", 
+        tickfont = list(size = 14),
+        rangeselector = list(
+          buttons = list(
+            list(
+              count = 2,
+              label = "past 2 wk",
+              step = "week",
+              stepmode = "backward"),
+            list(
+              count = 1,
+              label = "past 1 mo",
+              step = "month",
+              stepmode = "backward"),
+            list(
+              count = 3,
+              label = "past 3 mo",
+              step = "month",
+              stepmode = "backward"),
+            # list(
+            #   count = 2,
+            #   label = "upcoming 2 wk",
+            #   step = "week",
+            #   stepmode = ""),
+            list(step = "all"))),
+        
+        rangeslider = list(type = "date")),
+      yaxis = list(title = "Hours",
+                   tickfont = list(size = 14)),
+      hovermode = "x unified")
+
+    
+  })
+    
+  
+  
+  
+  # detachAllPackages <- function() {
+  #   
+  #   basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
+  #   
+  #   package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
+  #   
+  #   package.list <- setdiff(package.list,basic.packages)
+  #   
+  #   if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
+  #   
+  # }
+  # 
+  # detachAllPackages()
   
   ### [3. ] Data Tab Output -----------------------------------------------------------------------------------------------------------
   # dataDisplay <- reactive({

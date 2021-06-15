@@ -47,6 +47,7 @@
 # install.packages("shinyBS")
 # install.packages("shinyscreenshot")
 # install.packages("reactable")
+# devtools::install_github("ropensci/plotly")
 
 
 suppressMessages({

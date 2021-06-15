@@ -641,6 +641,7 @@ ui <- dashboardPage(
                      tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                      textOutput("scheduled_arrived"),
                      tags$head(tags$style("#scheduled_arrived{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                     plotlyOutput("test", height = "800px"),
                      fluidRow(
                        boxPlus(
                          title = "Scheduling Summary", width = 12, status = "primary",
