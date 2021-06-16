@@ -108,7 +108,7 @@ ui <- dashboardPage(
                 menuItem("Access", tabName = "access", icon = icon("location-arrow"),
                          menuSubItem("New Patients", tabName = "newPatients"),
                          # menuSubItem("Upcoming Demand", tabName = "upcomingDemand"),
-                         menuSubItem("Slot Usage", tabName = "slotUsage")),
+                         menuSubItem("Slot Management", tabName = "slotManagement")),
                 menuItem("Day of Visit", tabName = "day", icon = icon("hand-holding-medical"),
                          menuSubItem("Cycle Time", tabName = "cycleTime"),
                          menuSubItem("Room-in Time", tabName = "roomInTime"))
@@ -641,7 +641,6 @@ ui <- dashboardPage(
                      tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                      textOutput("scheduled_arrived"),
                      tags$head(tags$style("#scheduled_arrived{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                     plotlyOutput("test", height = "800px"),
                      fluidRow(
                        boxPlus(
                          title = "Scheduling Summary", width = 12, status = "primary",
@@ -930,23 +929,34 @@ ui <- dashboardPage(
       #         )),
       
       
-      tabItem(tabName = "slotUsage",
+      tabItem(tabName = "slotManagement",
               column(11,
-                     div("Access | Slot Usage", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                     div("Access | Slot Management", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                      textOutput("slot_usage"),
                      tags$head(tags$style("#slot_usage{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
                      fluidRow(
                        boxPlus(
-                         title = "Booked vs. Filled Rate", width = 12, status = "primary",
+                         title = "Slot Management", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                         radioButtons("slotUsageChoice", label = NULL, inline=T,
-                                      choices = list("Available Hours " = 1, "Booked Hours " = 2, "Filled Hours " = 3, 
-                                                     "Booked Rate (%) " = 4, "Filled Rate (%) " = 5), selected = 1),
-                         h3("*Select fewer providers for better visibility"),
-                         plotOutput("slotUsageGraph", height = "800px") %>% 
-                           withSpinner(type = 5, color = "#d80b8c"),
-                         br(),
+                         materialSwitch(
+                           inputId = "byRate",
+                           label = "By Rate",
+                           right = TRUE,
+                           status = "primary"),
+                         plotlyOutput("test", height = "800px") %>%
+                           withSpinner(type = 5, color = "#d80b8c"))),
+                     fluidRow(
+                       # boxPlus(
+                       #   title = "Booked vs. Filled Rate", width = 12, status = "primary",
+                       #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                         # radioButtons("slotUsageChoice", label = NULL, inline=T,
+                         #              choices = list("Available Hours " = 1, "Booked Hours " = 2, "Filled Hours " = 3, 
+                         #                             "Booked Rate (%) " = 4, "Filled Rate (%) " = 5), selected = 1),
+                         # h3("*Select fewer providers for better visibility"),
+                         # plotOutput("slotUsageGraph", height = "800px") %>% 
+                         #   withSpinner(type = 5, color = "#d80b8c"),
+                         # br(),
                          boxPlus(
                            title = "Booked and Filled Rate Summary Table", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -957,7 +967,7 @@ ui <- dashboardPage(
                              right = TRUE,
                              status = "primary"),
                            DT::dataTableOutput("slotUsageTb") %>% 
-                             withSpinner(type = 5, color = "#d80b8c"))))
+                             withSpinner(type = 5, color = "#d80b8c")))
               )),
       
       # tabItem(tabName = "slotUsage",
@@ -1074,7 +1084,7 @@ ui <- dashboardPage(
                               h3("*Select fewer providers for better visibility"),
                               plotOutput("newRoomInTimeByProv", height = "800px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"),
-                              plotOutput("establishedRoomInTimeByProv", height = "800px") %>% 
+                              plotOutput("establishedRoomInTimeByProv", height = "650px") %>% 
                                 withSpinner(type = 5, color = "#d80b8c"))
                      ))
       ),
@@ -1137,7 +1147,7 @@ ui <- dashboardPage(
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='data'",
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='data'",
       
     # Formatting Buttons
     tags$head(tags$style(HTML("#dropdownbutton1 {color: #212070;}"))),
@@ -1164,7 +1174,7 @@ ui <- dashboardPage(
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
             br(),
              actionButton("update_filters", "Update", width = "80%"),
       br(),
@@ -1300,7 +1310,7 @@ ui <- dashboardPage(
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
-      input.sbm=='newPatients' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
              box(
                title = "Select Date Range:",
                width = 12, 
@@ -1375,8 +1385,8 @@ ui <- dashboardPage(
     
     conditionalPanel(
       condition = "input.sbm=='KPIs' | input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
-      input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='slotUsage' |
-      input.sbm=='newPatients' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
+      input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='newPatients' | 
+      input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
              box(
                title = "Select Holidays to Exclude:",
                width = 12,
@@ -1402,7 +1412,7 @@ ui <- dashboardPage(
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-      input.sbm=='newPatients' | input.sbm=='upcomingDemand' | input.sbm=='slotUsage' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime'",
       
       # br(),
       # dropdown(
