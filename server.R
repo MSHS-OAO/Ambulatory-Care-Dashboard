@@ -1905,49 +1905,79 @@ server <- function(input, output, session) {
   
   
   output$practiceName_KPIs <- renderText({
-    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$practiceName_siteOverview <- renderText({
-    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$practiceName_siteComp <- renderText({
-    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$practiceName_practice <- renderText({
-    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$practiceName_provider <- renderText({
-    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$practiceName_volume <- renderText({
-    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$practiceName_population <- renderText({
-    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$practiceName_utilization <- renderText({
-    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$scheduled_arrived <- renderText({
-    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$scheduled_noshow <- renderText({
-    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$scheduled_cancel <- renderText({
-    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$newpatients <- renderText({
-    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$slot_usage <- renderText({
-    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$cycle_time <- renderText({
-    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
   
   output$room_time <- renderText({
-    paste0("Based on data from ", input$dateRangeUtil[1]," to ", input$dateRangeUtil[2])})
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
  
   
   ### (4) Analysis Output ==============================================================================================================
@@ -5835,92 +5865,92 @@ server <- function(input, output, session) {
   
   
   # Slot Usage Graph by Practice and Provider -----------------------------------------------------------------
-  output$slotUsageGraph <-  renderPlot({
-    data <- dataPastSlot()
-    # data <- past.slot.data
-    # data <- past.slot.data %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
-    # data$siteSpecialtyProvider <- paste0(data$Campus," - ",data$Campus.Specialty," - ",data$Provider)
-    
-    summary.md <- data %>%
-      group_by(Provider, Appt.Week) %>%
-      summarise(`Available Hours` = sum(`Available Hours`),
-                `Booked Hours` = sum(`Booked Hours`),
-                `Arrived Hours` = sum(`Arrived Hours`)) %>%
-      mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`),2),
-             `Filled Rate (%)` = round((`Arrived Hours`/`Available Hours`),2)) 
-    
-    summary.md$`Booked Rate (%)`[which(!is.finite(summary.md$`Booked Rate (%)`))] <- 1
-    summary.md$`Filled Rate (%)`[which(!is.finite(summary.md$`Filled Rate (%)`))] <- 1
-    
-    if(input$slotUsageChoice == 1) { # Available Hours
-      
-      ggplot(summary.md, aes(x=Appt.Week, y=`Available Hours`, group=Provider, col=Provider)) +
-        geom_line()+
-        geom_point(size=2)+
-        scale_color_MountSinai("main", reverse = TRUE, labels = wrap_format(25))+
-        labs(x=NULL, y="Hours",
-             title = "Available Hours by Provider per Week",
-             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        theme_new_line()+
-        theme_bw()+
-        graph_theme("bottom")
-      
-    } else if(input$slotUsageChoice == 2) { # Booked Hours
-      
-      ggplot(summary.md, aes(x=Appt.Week, y=`Booked Hours`, group=Provider, col=Provider)) +
-        geom_line()+
-        geom_point(size=2)+
-        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-        labs(x=NULL, y="Hours",
-             title = "Total Booked Hours by Provider per Week",
-             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        theme_bw()+
-        graph_theme("bottom")
-      
-    } else if(input$slotUsageChoice == 3) { # Filled Hours
-      
-      ggplot(summary.md, aes(x=Appt.Week, y=`Arrived Hours`, group=Provider, col=Provider)) +
-        geom_line()+
-        geom_point(size=2)+
-        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-        labs(x=NULL, y="Hours",
-             title = "Total Filled Hours by Provider per Week",
-             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        theme_bw()+
-        graph_theme("bottom")
-      
-    } else if(input$slotUsageChoice == 4) { # Booked Rate
-      
-      ggplot(summary.md, aes(x=Appt.Week, y=`Booked Rate (%)`, group=Provider, col=Provider)) +
-        geom_line()+
-        geom_point(size=2)+
-        scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
-        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-        labs(x=NULL, y="Percent",
-             title = "Booked Rate (%) by Provider per Week",
-             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        theme_bw()+
-        graph_theme("bottom")
-      
-    } else { # Filled Rate
-      
-      ggplot(summary.md, aes(x=Appt.Week, y=`Filled Rate (%)`, group=Provider, col=Provider)) +
-        geom_line()+
-        geom_point(size=2)+
-        #scale_y_continuous(expand = c(0,0), limits = c(0,max(summary.md$`Filled Rate (%)`)*1.2))+
-        #scale_y_continuous(expand = c(0, 0), limits = c(0,NA))+
-        scale_y_continuous(expand = c(0, 0), limits = c(0,max(summary.md$`Filled Rate (%)`)*1.2), labels = scales::percent_format(accuracy = 0.1))+
-        #scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-        scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-        labs(x=NULL, y="Percent\n",
-             title = "Filled Rate (%) by Provider per Week",
-             subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        theme_bw()+
-        graph_theme("bottom")
-      
-    } 
-    
-  })
+  # output$slotUsageGraph <-  renderPlot({
+  #   data <- dataPastSlot()
+  #   # data <- past.slot.data
+  #   # data <- past.slot.data %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
+  #   # data$siteSpecialtyProvider <- paste0(data$Campus," - ",data$Campus.Specialty," - ",data$Provider)
+  #   
+  #   summary.md <- data %>%
+  #     group_by(Provider, Appt.Week) %>%
+  #     summarise(`Available Hours` = sum(`Available Hours`),
+  #               `Booked Hours` = sum(`Booked Hours`),
+  #               `Arrived Hours` = sum(`Arrived Hours`)) %>%
+  #     mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`),2),
+  #            `Filled Rate (%)` = round((`Arrived Hours`/`Available Hours`),2)) 
+  #   
+  #   summary.md$`Booked Rate (%)`[which(!is.finite(summary.md$`Booked Rate (%)`))] <- 1
+  #   summary.md$`Filled Rate (%)`[which(!is.finite(summary.md$`Filled Rate (%)`))] <- 1
+  #   
+  #   if(input$slotUsageChoice == 1) { # Available Hours
+  #     
+  #     ggplot(summary.md, aes(x=Appt.Week, y=`Available Hours`, group=Provider, col=Provider)) +
+  #       geom_line()+
+  #       geom_point(size=2)+
+  #       scale_color_MountSinai("main", reverse = TRUE, labels = wrap_format(25))+
+  #       labs(x=NULL, y="Hours",
+  #            title = "Available Hours by Provider per Week",
+  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+  #       theme_new_line()+
+  #       theme_bw()+
+  #       graph_theme("bottom")
+  #     
+  #   } else if(input$slotUsageChoice == 2) { # Booked Hours
+  #     
+  #     ggplot(summary.md, aes(x=Appt.Week, y=`Booked Hours`, group=Provider, col=Provider)) +
+  #       geom_line()+
+  #       geom_point(size=2)+
+  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+  #       labs(x=NULL, y="Hours",
+  #            title = "Total Booked Hours by Provider per Week",
+  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+  #       theme_bw()+
+  #       graph_theme("bottom")
+  #     
+  #   } else if(input$slotUsageChoice == 3) { # Filled Hours
+  #     
+  #     ggplot(summary.md, aes(x=Appt.Week, y=`Arrived Hours`, group=Provider, col=Provider)) +
+  #       geom_line()+
+  #       geom_point(size=2)+
+  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+  #       labs(x=NULL, y="Hours",
+  #            title = "Total Filled Hours by Provider per Week",
+  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+  #       theme_bw()+
+  #       graph_theme("bottom")
+  #     
+  #   } else if(input$slotUsageChoice == 4) { # Booked Rate
+  #     
+  #     ggplot(summary.md, aes(x=Appt.Week, y=`Booked Rate (%)`, group=Provider, col=Provider)) +
+  #       geom_line()+
+  #       geom_point(size=2)+
+  #       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
+  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+  #       labs(x=NULL, y="Percent",
+  #            title = "Booked Rate (%) by Provider per Week",
+  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+  #       theme_bw()+
+  #       graph_theme("bottom")
+  #     
+  #   } else { # Filled Rate
+  #     
+  #     ggplot(summary.md, aes(x=Appt.Week, y=`Filled Rate (%)`, group=Provider, col=Provider)) +
+  #       geom_line()+
+  #       geom_point(size=2)+
+  #       #scale_y_continuous(expand = c(0,0), limits = c(0,max(summary.md$`Filled Rate (%)`)*1.2))+
+  #       #scale_y_continuous(expand = c(0, 0), limits = c(0,NA))+
+  #       scale_y_continuous(expand = c(0, 0), limits = c(0,max(summary.md$`Filled Rate (%)`)*1.2), labels = scales::percent_format(accuracy = 0.1))+
+  #       #scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
+  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
+  #       labs(x=NULL, y="Percent\n",
+  #            title = "Filled Rate (%) by Provider per Week",
+  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
+  #       theme_bw()+
+  #       graph_theme("bottom")
+  #     
+  #   } 
+  #   
+  # })
   
   
   # Slot Usage Table by Practice and Provider 
@@ -5928,7 +5958,6 @@ server <- function(input, output, session) {
     
     data <- dataPastSlot()
     # data <- past.slot.data %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
-    
     
     if(input$byProvider2 == TRUE){
       
@@ -6704,73 +6733,131 @@ server <- function(input, output, session) {
   
   output$test <- renderPlotly({
     
-    data <- slot.data.subset %>% filter(Appt.Day == "Mon")
-    head(data)
-    
+    data <- slot.data.subset %>% filter(Campus == "MSUS")
+
     booked_filled <- data %>%
       group_by(Appt.DateYear) %>%
       summarise(`Available Hours` = sum(`Available Hours`),
                 `Booked Hours` = sum(`Booked Hours`),
                 `Filled Hours` = sum(`Arrived Hours`)) %>%
-      mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2),
-             `Filled Rate` = round(`Filled Hours`/`Available Hours`, 2)) 
+      mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2)*100,
+             `Filled Rate` = round(`Filled Hours`/`Available Hours`, 2)*100) 
     
-    slot_fig <- plot_ly(booked_filled, x = ~Appt.DateYear,
-                        textfont = list(color = '#000000', size = 16))
-    slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
-                                       marker = list(color = "#212070"), line = list(color = "#212070"))
-    slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
-                                      marker = list(color = "#d80b8c"))
-    slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
-                                      marker = list(color = "#00aeef"))
-
-    slot_fig <- slot_fig %>% add_segments(x = max(dataAll()$Appt.DateYear) + 2, 
-                                          xend = max(dataAll()$Appt.DateYear + 2), 
-                                          y = 0, yend = max(booked_filled$`Available Hours` + 5000), name = "Today's Date",
-                                          line = list(color = "#000000", dash = "dash"))
+    if(input$byRate == TRUE){ # by Booked and Filled Rate
       
-    slot_fig %>% layout(
-      #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-      title = "Slot Usage Summary", font=list(size=20),
-      autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
-      xaxis = list(
-        title = "Date", 
-        tickfont = list(size = 14),
-        rangeselector = list(
-          buttons = list(
-            list(
-              count = 2,
-              label = "past 2 wk",
-              step = "week",
-              stepmode = "backward"),
-            list(
-              count = 1,
-              label = "past 1 mo",
-              step = "month",
-              stepmode = "backward"),
-            list(
-              count = 3,
-              label = "past 3 mo",
-              step = "month",
-              stepmode = "backward"),
-            # list(
-            #   count = 2,
-            #   label = "upcoming 2 wk",
-            #   step = "week",
-            #   stepmode = ""),
-            list(step = "all"))),
-        
-        rangeslider = list(type = "date"),
-        mirror = TRUE,
-        ticks = 'outside',
-        showline = TRUE),
-      yaxis = list(title = "Hours",
-                   tickfont = list(size = 14),
-                   mirror = TRUE,
-                   ticks = 'outside',
-                   showline = TRUE),
-      hovermode = "x unified")
-
+      slot_fig <- plot_ly(booked_filled, x = ~Appt.DateYear,
+                          textfont = list(color = '#000000', size = 16))
+      slot_fig <- slot_fig %>% add_trace(y = ~`Booked Rate`, name = "Booked Rate (%)", mode = 'lines+markers',
+                                         marker = list(color = "#d80b8c"), line = list(color = "#d80b8c"))
+      slot_fig <- slot_fig %>% add_trace(y = ~`Filled Rate`, name = "Filled Rate (%)", mode = 'lines+markers',
+                                         marker = list(color = "#00aeef"), line = list(color = "#00aeef"))
+      
+      slot_fig <- slot_fig %>% add_segments(x = max(dataAll()$Appt.DateYear) + 2, 
+                                            xend = max(dataAll()$Appt.DateYear + 2), 
+                                            y = 0, yend = max(booked_filled$`Available Hours` + 5000), name = "Today's Date",
+                                            line = list(color = "#000000", dash = "dash"))
+      
+      slot_fig %>% layout(
+        #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
+        title = "Slot Usage Summary", font=list(size=20),
+        autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
+        xaxis = list(
+          title = "Date", 
+          tickfont = list(size = 14),
+          rangeselector = list(
+            buttons = list(
+              list(
+                count = 2,
+                label = "past 2 wk",
+                step = "week",
+                stepmode = "backward"),
+              list(
+                count = 1,
+                label = "past 1 mo",
+                step = "month",
+                stepmode = "backward"),
+              list(
+                count = 3,
+                label = "past 3 mo",
+                step = "month",
+                stepmode = "backward"),
+              # list(
+              #   count = 2,
+              #   label = "upcoming 2 wk",
+              #   step = "week",
+              #   stepmode = ""),
+              list(step = "all"))),
+          
+          rangeslider = list(type = "date"),
+          mirror = TRUE,
+          ticks = 'outside',
+          showline = TRUE),
+        yaxis = list(title = "Hours",
+                     tickfont = list(size = 14),
+                     ticksuffix = "%",
+                     mirror = TRUE,
+                     ticks = 'outside',
+                     showline = TRUE),
+        hovermode = "x unified") 
+      
+    } else{
+      
+      slot_fig <- plot_ly(booked_filled, x = ~Appt.DateYear,
+                          textfont = list(color = '#000000', size = 16))
+      slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
+                                         marker = list(color = "#212070"), line = list(color = "#212070"))
+      slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
+                                        marker = list(color = "#d80b8c"))
+      slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
+                                        marker = list(color = "#00aeef"))
+      
+      slot_fig <- slot_fig %>% add_segments(x = max(dataAll()$Appt.DateYear) + 2, 
+                                            xend = max(dataAll()$Appt.DateYear + 2), 
+                                            y = 0, yend = max(booked_filled$`Available Hours` + 5000), name = "Today's Date",
+                                            line = list(color = "#000000", dash = "dash"))
+      
+      slot_fig %>% layout(
+        #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
+        title = "Slot Usage Summary", font=list(size=20),
+        autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
+        xaxis = list(
+          title = "Date", 
+          tickfont = list(size = 14),
+          rangeselector = list(
+            buttons = list(
+              list(
+                count = 2,
+                label = "past 2 wk",
+                step = "week",
+                stepmode = "backward"),
+              list(
+                count = 1,
+                label = "past 1 mo",
+                step = "month",
+                stepmode = "backward"),
+              list(
+                count = 3,
+                label = "past 3 mo",
+                step = "month",
+                stepmode = "backward"),
+              # list(
+              #   count = 2,
+              #   label = "upcoming 2 wk",
+              #   step = "week",
+              #   stepmode = ""),
+              list(step = "all"))),
+          
+          rangeslider = list(type = "date"),
+          mirror = TRUE,
+          ticks = 'outside',
+          showline = TRUE),
+        yaxis = list(title = "Hours",
+                     tickfont = list(size = 14),
+                     mirror = TRUE,
+                     ticks = 'outside',
+                     showline = TRUE),
+        hovermode = "x unified") 
+    }
     
   })
     
