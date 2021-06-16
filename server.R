@@ -6713,7 +6713,10 @@ server <- function(input, output, session) {
                 `Booked Hours` = sum(`Booked Hours`),
                 `Filled Hours` = sum(`Arrived Hours`)) %>%
       mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2),
-             `Filled Rate` = round(`Filled Hours`/`Available Hours`, 2)) 
+             `Filled Rate` = round(`Filled Hours`/`Available Hours`, 2))
+    
+    today <- max(dataAll()$Appt.DateYear) + 2
+    
     
     slot_fig <- plot_ly(booked_filled, x = ~Appt.DateYear,
                         textfont = list(color = '#000000', size = 16))
@@ -6724,42 +6727,167 @@ server <- function(input, output, session) {
     slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
                                       marker = list(color = "#00aeef"))
 
-    slot_fig <- slot_fig %>% add_segments(x = max(dataAll()$Appt.DateYear) + 2, 
-                                          xend = max(dataAll()$Appt.DateYear + 2), 
-                                          y = 0, yend = max(booked_filled$`Available Hours` + 5000), name = "Today's Date",
-                                          line = list(color = "#000000", dash = "dash"))
+    slot_fig <- slot_fig %>% add_segments(x = today, 
+                                          xend = today, 
+                                          y = 0, yend = max(booked_filled$`Available Hours` * 1.2), 
+                                          line = list(color = "#000000", dash = "dash"),
+                                          showlegend = FALSE)
+    
+    slot_fig <- slot_fig %>% add_segments(x = today - 14, 
+                                          xend = today - 14, 
+                                          y = 0, yend = max(booked_filled$`Available Hours` * 1.2), 
+                                          line = list(color = "#000000", dash = "dash"),
+                                          showlegend = FALSE)
+    
+    slot_fig <- slot_fig %>% add_segments(x = today - 30, 
+                                          xend = today - 30, 
+                                          y = 0, yend = max(booked_filled$`Available Hours` * 1.2), 
+                                          line = list(color = "#000000", dash = "dash"),
+                                          showlegend = FALSE)
+    
+    slot_fig <- slot_fig %>% add_segments(x = today - 90, 
+                                          xend = today - 90, 
+                                          y = 0, yend = max(booked_filled$`Available Hours` * 1.2), 
+                                          line = list(color = "#000000", dash = "dash"),
+                                          showlegend = FALSE)
+    
+    slot_fig <- slot_fig %>% add_segments(x = today + 14,
+                                          xend = today + 14,
+                                          y = 0, yend = max(booked_filled$`Available Hours` * 1.2),
+                                          line = list(color = "#000000", dash = "dash"),
+                                          showlegend = FALSE)
+
+    # slot_fig <- slot_fig %>% add_segments(x = today + 30, 
+    #                                       xend = today + 30, 
+    #                                       y = 0, yend = max(booked_filled$`Available Hours` * 1.2), 
+    #                                       line = list(color = "#000000", dash = "dash"),
+    #                                       showlegend = FALSE)
+    # 
+    # slot_fig <- slot_fig %>% add_segments(x = today + 90, 
+    #                                       xend = today + 90, 
+    #                                       y = 0, yend = max(booked_filled$`Available Hours` * 1.2), 
+    #                                       line = list(color = "#000000", dash = "dash"),
+    #                                       showlegend = FALSE)
+    
+    
+    annon <- list(
+      list(
+        x = today,
+        y = max(booked_filled$`Available Hours` * 1.25),
+        text = "Today's Date",
+        xref = "x",
+        yref= "y",
+        showarrow = FALSE,
+        ax = 20,
+        ay=  -40,
+        font = list(size = 14)
+      ),
+      list(
+        x = today - 14,
+        y = max(booked_filled$`Available Hours` * 1.25),
+        text = "Past 2 Weeks",
+        xref = "x",
+        yref= "y",
+        showarrow = FALSE,
+        ax = 20,
+        ay=  -40,
+        font = list(size = 14)
+      ),
+      list(
+        x = today - 28,
+        y = max(booked_filled$`Available Hours` * 1.25),
+        text = "Past 1 Month",
+        xref = "x",
+        yref= "y",
+        showarrow = FALSE,
+        ax = 20,
+        ay=  -40,
+        font = list(size = 14)
+      ),
+      list(
+        x = today - 88,
+        y = max(booked_filled$`Available Hours` * 1.25),
+        text = "Past 3 Months",
+        xref = "x",
+        yref= "y",
+        showarrow = FALSE,
+        ax = 20,
+        ay=  -40,
+        font = list(size = 14)
+      )
+      # list(
+      #   x = max(dataAll()$Appt.DateYear) + 14,
+      #   y = max(booked_filled$`Available Hours` * 1.2),
+      #   text = "Future 2 Weeks",
+      #   xref = "x",
+      #   yref= "y",
+      #   showarrow = FALSE,
+      #   ax = 20,
+      #   ay=  -40,
+      #   font = list(size = 14)
+      # )
+    )
+    
       
     slot_fig %>% layout(
+      annotations = annon,
+      # shapes = list(
+      #   list(
+      #     type = "rect",
+      #     fillcolor = "#00aeef",
+      #     line = list(color = "#00aeef"),
+      #     opacity = 0.1,
+      #     x0 = today,
+      #     x1 = min(dataAll()$Appt.DateYear),
+      #     y0 = 0,
+      #     y1 = max(booked_filled$`Available Hours` * 1.17),
+      #     xref = "x",
+      #     yref = "y"
+      #   ),
+      #   list(
+      #     type = "rect",
+      #     fillcolor = "#d80b8c",
+      #     line = list(color = "#d80b8c"),
+      #     opacity = 0.1,
+      #     x0 = today,
+      #     x1 = max(data$Appt.DateYear),
+      #     y0 = 0,
+      #     y1 = max(booked_filled$`Available Hours` * 1.17),
+      #     xref = "x",
+      #     yref = "y"
+      #   )
+      #   
+      # ),
       #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
       title = "Slot Usage Summary", font=list(size=20),
       autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
       xaxis = list(
         title = "Date", 
         tickfont = list(size = 14),
-        rangeselector = list(
-          buttons = list(
-            list(
-              count = 2,
-              label = "past 2 wk",
-              step = "week",
-              stepmode = "backward"),
-            list(
-              count = 1,
-              label = "past 1 mo",
-              step = "month",
-              stepmode = "backward"),
-            list(
-              count = 3,
-              label = "past 3 mo",
-              step = "month",
-              stepmode = "backward"),
-            # list(
-            #   count = 2,
-            #   label = "upcoming 2 wk",
-            #   step = "week",
-            #   stepmode = ""),
-            list(step = "all"))),
-        
+        # rangeselector = list(
+        #   buttons = list(
+        #     list(
+        #       count = 2,
+        #       label = "past 2 wk",
+        #       step = "week",
+        #       stepmode = "backward"),
+        #     list(
+        #       count = 1,
+        #       label = "past 1 mo",
+        #       step = "month",
+        #       stepmode = "backward"),
+        #     list(
+        #       count = 3,
+        #       label = "past 3 mo",
+        #       step = "month",
+        #       stepmode = "backward"),
+        #     # list(
+        #     #   count = 2,
+        #     #   label = "upcoming 2 wk",
+        #     #   step = "week",
+        #     #   stepmode = ""),
+        #     list(step = "all"))),
+        # 
         rangeslider = list(type = "date"),
         mirror = TRUE,
         ticks = 'outside',
