@@ -6755,6 +6755,32 @@ server <- function(input, output, session) {
     today <- max(dataAll()$Appt.DateYear) + 2
     annon <- list()
     
+    annon_test <<- list(
+      list(
+        x = today - 90,
+        y = max(booked_filled[[y_axis]] * 1.25),
+        text = "Past\n 3 Months",
+        xref = "x",
+        yref= "y",
+        showarrow = FALSE,
+        ax = 20,
+        ay=  -40,
+        font = list(size = 14)
+      ),
+      list(
+        x = today - 30,
+        y = max(booked_filled[[y_axis]] * 1.25),
+        text = "Past\n 1 Month",
+        xref = "x",
+        yref= "y",
+        showarrow = FALSE,
+        ax = 20,
+        ay=  -40,
+        font = list(size = 14)
+      )
+    )
+    
+    i <- 1
     if(input$dateRange[1] <= today - 90 && today-90 <= input$dateRange[2]){
       slot_fig <- slot_fig %>% add_segments(x = today - 90, 
                                             xend = today - 90, 
@@ -6762,7 +6788,8 @@ server <- function(input, output, session) {
                                             line = list(color = "#a5a7a5", dash = "dash"),
                                             showlegend = FALSE,
                                             hoverinfo = 'skip')
-      annon_append <- list(
+      
+      annon[[i]] <- list(
                           x = today - 90,
                           y = max(booked_filled[[y_axis]] * 1.25),
                           text = "Past\n 3 Months",
@@ -6773,7 +6800,7 @@ server <- function(input, output, session) {
                           ay=  -40,
                           font = list(size = 14)
                       )
-      annon <- c(annon,annon_append)
+      i <- i + 1
     } 
     if(input$dateRange[1] <= today - 30 && today-30 <= input$dateRange[2]){
       slot_fig <- slot_fig %>% add_segments(x = today - 30, 
@@ -6783,7 +6810,7 @@ server <- function(input, output, session) {
                                             showlegend = FALSE,
                                             hoverinfo = 'skip')
       
-      annon_append <- list(
+      annon[[i]] <- list(
                         x = today - 30,
                         y = max(booked_filled[[y_axis]] * 1.25),
                         text = "Past\n 1 Month",
@@ -6794,7 +6821,7 @@ server <- function(input, output, session) {
                         ay=  -40,
                         font = list(size = 14)
                      )
-      annon <- c(annon,annon_append)
+      i <- i + 1
     } 
     
     if(input$dateRange[1] <= today - 14 && today-14 <= input$dateRange[2]){
@@ -6804,7 +6831,7 @@ server <- function(input, output, session) {
                                             line = list(color = "#a5a7a5", dash = "dash"),
                                             showlegend = FALSE,
                                             hoverinfo = 'skip')
-      annon_append <-  list(
+      annon[[i]] <-  list(
                         x = today - 14,
                         y = max(booked_filled[[y_axis]] * 1.25),
                         text = "Past\n 2 Weeks",
@@ -6816,7 +6843,7 @@ server <- function(input, output, session) {
                         font = list(size = 14)
                       )
       
-      annon <- c(annon,annon_append)
+      i <- i + 1
     }
     if(input$dateRange[1] <= today  && today  >= input$dateRange[2]){
       slot_fig <- slot_fig %>% add_segments(x = today, 
@@ -6826,7 +6853,7 @@ server <- function(input, output, session) {
                                             showlegend = FALSE,
                                             hoverinfo = 'skip')
       
-      annon_append <- list(
+      annon[[i]] <- list(
                         x = today,
                         y = max(booked_filled[[y_axis]]  * 1.25),
                         text = "Today",
@@ -6838,7 +6865,7 @@ server <- function(input, output, session) {
                         font = list(size = 14)
                       )
       
-      annon <- c(annon,annon_append)
+      i <- i + 1
     }
     
     if(max(booked_filled$Appt.DateYear) >= today + 14 && today + 14 <= max(booked_filled$Appt.DateYear)){
@@ -6849,7 +6876,7 @@ server <- function(input, output, session) {
                                             showlegend = FALSE,
                                             hoverinfo = 'skip')
       
-      annon_append <- list(
+      annon[[i]] <- list(
         x = today + 14,
         y = max(booked_filled[[y_axis]]  * 1.25),
         text = "Future\n 2 Weeks",
@@ -6861,7 +6888,7 @@ server <- function(input, output, session) {
         font = list(size = 14)
       )
       
-      annon <- c(annon,annon_append)
+      i <- i + 1
     }
     
     if(max(booked_filled$Appt.DateYear) >= today + 30 && today + 30 <= max(booked_filled$Appt.DateYear)){
@@ -6872,10 +6899,10 @@ server <- function(input, output, session) {
                                             showlegend = FALSE,
                                             hoverinfo = 'skip')
       
-      annon_append <- list(
+      annon[[i]] <- list(
         x = today + 30,
         y = max(booked_filled[[y_axis]]  * 1.25),
-        text = "Future\n 2 Weeks",
+        text = "Future\n 1 Month",
         xref = "x",
         yref= "y",
         showarrow = FALSE,
@@ -6884,7 +6911,7 @@ server <- function(input, output, session) {
         font = list(size = 14)
       )
       
-      annon <- c(annon,annon_append)
+     i <- i + 1
     }
     
     if(max(booked_filled$Appt.DateYear) >= today + 90 && today + 90 <= max(booked_filled$Appt.DateYear)){
@@ -6895,10 +6922,10 @@ server <- function(input, output, session) {
                                             showlegend = FALSE,
                                             hoverinfo = 'skip')
       
-      annon_append <- list(
+      annon[[i]] <- list(
         x = today + 90,
         y = max(booked_filled[[y_axis]]  * 1.25),
-        text = "Future\n 2 Weeks",
+        text = "Future\n 3 Months",
         xref = "x",
         yref= "y",
         showarrow = FALSE,
@@ -6907,7 +6934,7 @@ server <- function(input, output, session) {
         font = list(size = 14)
       )
       
-      annon <- c(annon,annon_append)
+      i <- i + 1
     }
     
     if(input$byRate == TRUE){ # by Booked and Filled Rate
@@ -6938,7 +6965,7 @@ server <- function(input, output, session) {
           mirror = TRUE,
           ticks = 'outside',
           showline = TRUE),
-        yaxis = list(title = "Hours",
+        yaxis = list(title = "Percent",
                      font = list(size = 14),
                      tickfont = list(size = 14),
                      ticksuffix = "%",
