@@ -5596,6 +5596,7 @@ server <- function(input, output, session) {
       
       today <- max(dataAll()$Appt.DateYear) + 2
       annon <- list()
+      i <- 1
       # annon <- list(list(text = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
       #                    x = 0.78,
       #                    y = 1.14,
@@ -5603,11 +5604,11 @@ server <- function(input, output, session) {
       #                    xref = "paper",
       #                    showarrow = FALSE
       # ))
+      # i <- 2
+      
+      
+      
 
-      
-      
-      
-      i <- 1
       
       if(min(booked_filled$Appt.DateYear) <= today  && today  <= max(booked_filled$Appt.DateYear)){
         slot_fig <- slot_fig %>% add_segments(x = today,
