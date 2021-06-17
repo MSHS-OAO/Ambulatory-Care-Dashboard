@@ -1983,7 +1983,7 @@ server <- function(input, output, session) {
   
   output$slot_usage <- renderText({
     paste0("Based on data from ", input$dateRangeslot[1]," to ", input$dateRangeslot[2], 
-           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+           " for ", paste(sort(input$selectedCampus), collapse = ', '), " as of ", max(dataAll()$Appt.DateYear) + 1)
   })
   
   output$cycle_time <- renderText({
@@ -5596,6 +5596,15 @@ server <- function(input, output, session) {
       
       today <- max(dataAll()$Appt.DateYear) + 2
       annon <- list()
+      # annon <- list(list(text = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+      #                    x = 0.78,
+      #                    y = 1.14,
+      #                    yref = "paper",
+      #                    xref = "paper",
+      #                    showarrow = FALSE
+      # ))
+
+      
       
       
       i <- 1
