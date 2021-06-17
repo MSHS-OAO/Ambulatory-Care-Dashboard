@@ -944,7 +944,7 @@ ui <- dashboardPage(
                            label = "By Rate",
                            right = TRUE,
                            status = "primary"),
-                         plotlyOutput("test", height = "800px") %>%
+                         plotlyOutput("slotManageGraph", height = "800px") %>%
                            withSpinner(type = 5, color = "#d80b8c"))),
                      fluidRow(
                        # boxPlus(
@@ -958,14 +958,14 @@ ui <- dashboardPage(
                          #   withSpinner(type = 5, color = "#d80b8c"),
                          # br(),
                          boxPlus(
-                           title = "Booked and Filled Rate Summary Table", width = 12, status = "primary",
+                           title = "Slot Management Summary Table", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                           hr(),
                            materialSwitch(
                              inputId = "byProvider2",
                              label = "By Provider",
                              right = TRUE,
                              status = "primary"),
+                           br(),
                            DT::dataTableOutput("slotUsageTb") %>% 
                              withSpinner(type = 5, color = "#d80b8c")))
               )),
