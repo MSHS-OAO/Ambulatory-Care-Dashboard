@@ -39,6 +39,10 @@ util_date_start = min(utilization.data$Appt.DateYear)
 util_date_end = max(utilization.data$Appt.DateYear)
 
 
+dateRangeSlot_start <- min(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
+dateRangeSlot_end <- max(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
+
+
 # header <- dashboardHeader()
 # anchor <- tags$a(tags$img(src='MS_KO_Vrtl.png', height='60', width='80'),
 #                  'Amb Care Analytics Tool')
@@ -1166,6 +1170,9 @@ ui <- dashboardPage(
                     box-shadow: 0 2px 5px 0 rgba(0,0,0,.18), 0 1px 5px 0 rgba(0,0,0,.15);
                     border-radius: 50%;
                     border-color: transparent;}"))),
+    tags$head(tags$style(HTML("#update_filters {background-color: #d80b8c;
+                                                color: #FFFFFF;
+                                                font-size: 18px}"))),
     br(),
     br(),
     br(),
@@ -1176,7 +1183,7 @@ ui <- dashboardPage(
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
       input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
             br(),
-             actionButton("update_filters", "Update", width = "80%"),
+             actionButton("update_filters", "CLICK TO UPDATE", width = "80%"),
       br(),
       br(),
              box(
@@ -1310,7 +1317,7 @@ ui <- dashboardPage(
     conditionalPanel(
       condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
-      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
+      input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'",
              box(
                title = "Select Date Range:",
                width = 12, 
@@ -1327,6 +1334,29 @@ ui <- dashboardPage(
                            choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
                            multiple=TRUE, selectize=TRUE))
       ),
+    
+    
+    conditionalPanel(
+      condition = "input.sbm=='slotManagement'",
+      box(
+        title = "Select Date Range:",
+        width = 12, 
+        solidHeader = FALSE, 
+        dateRangeInput("dateRangeslot", label = NULL,
+                       start = dateRangeSlot_start, end = dateRangeSlot_end,
+                       min = dateRangeSlot_start, max = dateRangeSlot_end)),
+      
+      
+      box(
+        title = "Select Days of Week:",
+        width = 12, 
+        solidHeader = FALSE, 
+        selectInput("daysOfWeekslot",label = NULL,
+                    choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
+                    multiple=TRUE, selectize=TRUE))
+      
+      
+    ),
     
     conditionalPanel(
       condition = "input.sbm=='KPIs'",

@@ -392,6 +392,8 @@ past.slot.data.rows <- slot.data.subset[Appt.DateYear <= max_date, which = TRUE]
 
 future.slot.data.rows <- slot.data.subset[Appt.DateYear > max_date, which = TRUE]
 
+all.slot.rows <- c(past.slot.data.rows,future.slot.data.rows)
+
 scheduled.utilization.data.rows <- utilization.data[util.type == "scheduled", which = TRUE]
 
 arrived.utilization.data.rows <- utilization.data[util.type == "actual", which = TRUE]

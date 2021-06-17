@@ -753,6 +753,23 @@ server <- function(input, output, session) {
   }) 
   
   
+  dataAllSlot <- eventReactive(list(input$sbm,input$update_filters),{
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_4(slot.data.subset[all.slot.rows,],
+                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                     input$selectedVisitMethod,
+                     input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
+  }) 
+  
+  
   
   # dataPastSlotTest <- reactive({
   #   groupByFilters_4_Test(past.slot.data,
@@ -1965,7 +1982,7 @@ server <- function(input, output, session) {
   })
   
   output$slot_usage <- renderText({
-    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+    paste0("Based on data from ", input$dateRangeslot[1]," to ", input$dateRangeslot[2], 
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
@@ -6733,7 +6750,9 @@ server <- function(input, output, session) {
   
   output$test <- renderPlotly({
     
-    data <- slot.data.subset %>% filter(Campus == "MSUS")
+    #data <- slot.data.subset %>% filter(Campus == "MSUS")
+    
+    data <- dataAllSlot()
 
     booked_filled <- data %>%
       group_by(Appt.DateYear) %>%
@@ -6755,104 +6774,17 @@ server <- function(input, output, session) {
     today <- max(dataAll()$Appt.DateYear) + 2
     annon <- list()
     
-    annon_test <<- list(
-      list(
-        x = today - 90,
-        y = max(booked_filled[[y_axis]] * 1.25),
-        text = "Past\n 3 Months",
-        xref = "x",
-        yref= "y",
-        showarrow = FALSE,
-        ax = 20,
-        ay=  -40,
-        font = list(size = 14)
-      ),
-      list(
-        x = today - 30,
-        y = max(booked_filled[[y_axis]] * 1.25),
-        text = "Past\n 1 Month",
-        xref = "x",
-        yref= "y",
-        showarrow = FALSE,
-        ax = 20,
-        ay=  -40,
-        font = list(size = 14)
-      )
-    )
-    
+
     i <- 1
-    if(input$dateRange[1] <= today - 90 && today-90 <= input$dateRange[2]){
-      slot_fig <- slot_fig %>% add_segments(x = today - 90, 
-                                            xend = today - 90, 
-                                            y = 0, yend = max(booked_filled[[y_axis]] * 1.2), 
-                                            line = list(color = "#a5a7a5", dash = "dash"),
-                                            showlegend = FALSE,
-                                            hoverinfo = 'skip')
-      
-      annon[[i]] <- list(
-                          x = today - 90,
-                          y = max(booked_filled[[y_axis]] * 1.25),
-                          text = "Past\n 3 Months",
-                          xref = "x",
-                          yref= "y",
-                          showarrow = FALSE,
-                          ax = 20,
-                          ay=  -40,
-                          font = list(size = 14)
-                      )
-      i <- i + 1
-    } 
-    if(input$dateRange[1] <= today - 30 && today-30 <= input$dateRange[2]){
-      slot_fig <- slot_fig %>% add_segments(x = today - 30, 
-                                            xend = today - 30, 
-                                            y = 0, yend = max(booked_filled[[y_axis]]  * 1.2), 
-                                            line = list(color = "#a5a7a5", dash = "dash"),
-                                            showlegend = FALSE,
-                                            hoverinfo = 'skip')
-      
-      annon[[i]] <- list(
-                        x = today - 30,
-                        y = max(booked_filled[[y_axis]] * 1.25),
-                        text = "Past\n 1 Month",
-                        xref = "x",
-                        yref= "y",
-                        showarrow = FALSE,
-                        ax = 20,
-                        ay=  -40,
-                        font = list(size = 14)
-                     )
-      i <- i + 1
-    } 
-    
-    if(input$dateRange[1] <= today - 14 && today-14 <= input$dateRange[2]){
-      slot_fig <- slot_fig %>% add_segments(x = today - 14, 
-                                            xend = today - 14, 
-                                            y = 0, yend = max(booked_filled[[y_axis]] * 1.2), 
-                                            line = list(color = "#a5a7a5", dash = "dash"),
-                                            showlegend = FALSE,
-                                            hoverinfo = 'skip')
-      annon[[i]] <-  list(
-                        x = today - 14,
-                        y = max(booked_filled[[y_axis]] * 1.25),
-                        text = "Past\n 2 Weeks",
-                        xref = "x",
-                        yref= "y",
-                        showarrow = FALSE,
-                        ax = 20,
-                        ay=  -40,
-                        font = list(size = 14)
-                      )
-      
-      i <- i + 1
-    }
-    if(input$dateRange[1] <= today  && today  >= input$dateRange[2]){
-      slot_fig <- slot_fig %>% add_segments(x = today, 
-                                            xend = today, 
+   
+    if(min(booked_filled$Appt.DateYear) <= today  && today  <= max(booked_filled$Appt.DateYear)){
+      slot_fig <- slot_fig %>% add_segments(x = today,
+                                            xend = today,
                                             y = 0, yend = max(booked_filled[[y_axis]]  * 1.2),
-                                            line = list(color = "#a5a7a5", dash = "dash"),
+                                            line = list(color = "#000000", dash = "dash"),
                                             showlegend = FALSE,
                                             hoverinfo = 'skip')
-      
+
       annon[[i]] <- list(
                         x = today,
                         y = max(booked_filled[[y_axis]]  * 1.25),
@@ -6862,89 +6794,35 @@ server <- function(input, output, session) {
                         showarrow = FALSE,
                         ax = 20,
                         ay=  -40,
-                        font = list(size = 14)
+                        font = list(color = '#000000',size = 18)
                       )
-      
+
       i <- i + 1
     }
-    
-    if(max(booked_filled$Appt.DateYear) >= today + 14 && today + 14 <= max(booked_filled$Appt.DateYear)){
-      slot_fig <- slot_fig %>% add_segments(x = today + 14, 
-                                            xend = today + 14, 
-                                            y = 0, yend = max(booked_filled[[y_axis]]  * 1.2),
-                                            line = list(color = "#a5a7a5", dash = "dash"),
-                                            showlegend = FALSE,
-                                            hoverinfo = 'skip')
-      
-      annon[[i]] <- list(
-        x = today + 14,
-        y = max(booked_filled[[y_axis]]  * 1.25),
-        text = "Future\n 2 Weeks",
-        xref = "x",
-        yref= "y",
-        showarrow = FALSE,
-        ax = 20,
-        ay=  -40,
-        font = list(size = 14)
-      )
-      
-      i <- i + 1
-    }
-    
-    if(max(booked_filled$Appt.DateYear) >= today + 30 && today + 30 <= max(booked_filled$Appt.DateYear)){
-      slot_fig <- slot_fig %>% add_segments(x = today + 30, 
-                                            xend = today + 30, 
-                                            y = 0, yend = max(booked_filled[[y_axis]]  * 1.2),
-                                            line = list(color = "#a5a7a5", dash = "dash"),
-                                            showlegend = FALSE,
-                                            hoverinfo = 'skip')
-      
-      annon[[i]] <- list(
-        x = today + 30,
-        y = max(booked_filled[[y_axis]]  * 1.25),
-        text = "Future\n 1 Month",
-        xref = "x",
-        yref= "y",
-        showarrow = FALSE,
-        ax = 20,
-        ay=  -40,
-        font = list(size = 14)
-      )
-      
-     i <- i + 1
-    }
-    
-    if(max(booked_filled$Appt.DateYear) >= today + 90 && today + 90 <= max(booked_filled$Appt.DateYear)){
-      slot_fig <- slot_fig %>% add_segments(x = today + 90, 
-                                            xend = today + 90, 
-                                            y = 0, yend = max(booked_filled[[y_axis]]  * 1.2),
-                                            line = list(color = "#a5a7a5", dash = "dash"),
-                                            showlegend = FALSE,
-                                            hoverinfo = 'skip')
-      
-      annon[[i]] <- list(
-        x = today + 90,
-        y = max(booked_filled[[y_axis]]  * 1.25),
-        text = "Future\n 3 Months",
-        xref = "x",
-        yref= "y",
-        showarrow = FALSE,
-        ax = 20,
-        ay=  -40,
-        font = list(size = 14)
-      )
-      
-      i <- i + 1
-    }
+  
     
     if(input$byRate == TRUE){ # by Booked and Filled Rate
       
-      slot_fig <- slot_fig %>% add_segments(x = input$dateRange[1],
+      slot_fig <- slot_fig %>% add_segments(x = min(booked_filled$Appt.DateYear),
                                            xend = max(booked_filled$Appt.DateYear),
                                            y = 100,
                                            yend = 100,
-                                           line = list(color = "#000000", dash = "dash"),
+                                           line = list(color = "#FF0000", dash = "dash"),
                                            showlegend = FALSE)
+      
+      annon[[i]] <- list(
+        x = max(booked_filled$Appt.DateYear)+5,
+        y = 100 ,
+        text = "100 %",
+        xref = "x",
+        yref= "y",
+        showarrow = FALSE,
+        ax = 20,
+        ay=  -40,
+        font = list(color = '#FF0000',size = 18)
+      )
+      
+      i <- i + 1
 
       slot_fig <- slot_fig %>% add_trace(y = ~`Booked Rate`, name = "Booked Rate (%)", mode = 'lines+markers',
                                          marker = list(color = "#d80b8c"), line = list(color = "#d80b8c"))
@@ -6954,7 +6832,7 @@ server <- function(input, output, session) {
       slot_fig %>% layout(
         annotations = annon,
         #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-        title = "Past and Upcoming Slot Usage Summary (%)", font=list(size=20),
+        title = "Past and Upcoming Slot Usage (%)", font=list(size=20),
         autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
         xaxis = list(
           title = "Date", 
@@ -6989,7 +6867,7 @@ server <- function(input, output, session) {
       slot_fig %>% layout(
         annotations = annon,
         #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-        title = "Slot Usage Summary", font=list(size=20),
+        title = "Past and Upcoming Slot Usage", font=list(size=20),
         autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
         xaxis = list(
           font = list(size = 16),
