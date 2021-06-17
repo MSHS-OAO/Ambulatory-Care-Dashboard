@@ -5569,412 +5569,157 @@ server <- function(input, output, session) {
     
   })
   
+  # Booked and Filled Rate
   
-  # Upcoming Demand - 2 Weeks - by Practice and Provider ---------------------------------------------------------
-  # output$demandWeeksGraph <-  renderPlot({
-  #   ### ***TEMPORARY*** ###
-  #   future.slot.data <- past.slot.data # DELETE WITH NEW DATA
-  #   
-  #   summary.hrs <- future.slot.data %>%
-  #     # filter(Appt.DTTM >= todays_date - days(14)) # ONLY INCLUDE FUTURE 2 WEEKS
-  #     group_by(Campus, Department, Provider, Appt.DateYear) %>%
-  #     dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-  #                      `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-  #                      `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-  #                      `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-  #                      `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-  #     mutate(`Remaining Hours` = ifelse(`Booked Hours`-`Available Hours` < 0,0, round((`Booked Hours`-`Available Hours`),1)),
-  #            `Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100,1),
-  #            `Filled Rate (%)` = round((`Arrived Hours`/`Available Hours`)*100,1)) %>%
-  #     gather(variable, value, 5:12)
-  #   
-  #   # ***Booked or Filled Rate = Inf: appts completed outside of slotted hours*** -> convert to 0 for now
-  #   # ***Booked or Filled Rate = NaN: no available and booked hours*** -> convert to 0 for now
-  #   summary.hrs$value[which(!is.finite(summary.hrs$value))] <- 0
-  #   
-  #   summary.hrs$Date <- format(as.Date(summary.hrs$Date, format="%Y-%m-%d"), "%m/%d/%y")
-  #   summary.hrs <- summary.hrs %>% mutate(unique = paste0(Campus, Department, Provider, Date, variable))
-  #   
-  #   summary.df <- sapply(as.data.frame(unique(summary.hrs[,c("Campus","Department","Provider","variable")])), rep.int, times = length(unique(summary.hrs$Date)))
-  #   summary.df <- summary.df %>% as.data.frame() %>% arrange(Campus, Department, Provider, variable)
-  #   
-  #   full_dates <- data.frame(Date = rep(seq.dates(min(summary.hrs$Date), max(summary.hrs$Date), by = "days"), nrow(unique(summary.df))))
-  #   
-  #   summary.hrs.df <- cbind(summary.df,full_dates)
-  #   summary.hrs.df <- summary.hrs.df %>% mutate(unique = paste0(Campus, Department, Provider, Date, variable))
-  #   summary.hrs.df$value <- summary.hrs$value[match(summary.hrs.df$unique,summary.hrs$unique)]
-  #   
-  #   level.order <- c("Available Hours", "Booked Hours","Arrived Hours","Canceled Hours","No Show Hours","Remaining Hours","Booked Rate (%)","Filled Rate (%)")
-  #   summary.hrs.df <- summary.hrs.df[order(match(summary.hrs.df$variable, level.order)),]
-  #   summary.hrs.df$value[is.na(summary.hrs.df$value)] <- 0
-  #   summary.hrs.df$Date <- as.Date(summary.hrs.df$Date, format="%Y-%m-%d")
-  #   
-  #   
-  #   if(input$byProvider2 == TRUE){ # Provider - Future Filled and Booked Rates
-  #     
-  #     summary.hrs.df <- summary.hrs.df %>% filter(Provider %in% c("AMIN, SHYAM M","GOWDA, RAMESH M","PUSKAS, JOHN D","SHAH, ANKIT R","GOWDA, RAMESH M"))
-  #     
-  #     # if(length(unique(summary.hrs.df$Provider))>6){
-  #     #   
-  #     #   cowplot::ggdraw() +
-  #     #     cowplot::draw_label('Select fewer providers (<5)', fontface = "bold", color = "red", size = 50)
-  #     #   
-  #     # } else {
-  #     
-  #     # Provider - Booked vs.Remaining Hours - 2 Weeks #Provider %in% c("AMIN, SHYAM M","GOWDA, RAMESH M","PUSKAS, JOHN D","SHAH, ANKIT R","GOWDA, RAMESH M")
-  #     #booked.prov <-
-  #     
-  #     booked.prov <- 
-  #       ggplot(summary.hrs.df %>% filter(variable %in% c("Booked Rate (%)")) %>% mutate(value = round(ifelse(value == 0, 0, value*.001),1)), 
-  #              aes(x=Date, y=value, fill= value > 1.0, color=value)) +
-  #       geom_bar(stat="identity", color='black', size=0.5) +
-  #       geom_hline(yintercept=1.0, linetype="dashed", color = "red", size=1)+
-  #       facet_grid(Provider~., scales = "free_y")+
-  #       #facet_wrap(~ Department + Provider, scales="free_y")+
-  #       labs(title = paste0("\nDaily Slot Booked Rate (%) - Upcoming 2 Weeks"), x = NULL, y = NULL)+
-  #       scale_fill_manual("Status", labels = c("<= 100%", "> 100%"), values = c("#c7c6ef","#212070"))+
-  #       scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
-  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-  #             legend.position = "top",
-  #             legend.text = element_text(size="12"),
-  #             legend.direction = "horizontal",
-  #             legend.key.size = unit(1.0,"cm"),
-  #             legend.title = element_blank(),
-  #             axis.title = element_text(size="14"),
-  #             axis.text = element_text(size="14"),
-  #             axis.title.x = element_blank(),
-  #             axis.title.y = element_blank(),
-  #             axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
-  #             axis.text.y = element_text(margin = margin(l=5, r=5)),
-  #             panel.grid.minor = element_blank(),
-  #             panel.border = element_blank(),
-  #             panel.background = element_rect(colour = "black", size=0.5),
-  #             axis.line = element_line(size = 0.3, colour = "black"))+
-  #       scale_y_continuous(labels = scales::percent_format(accuracy = 1))
-  #     
-  #     remaining.prov <-
-  #       ggplot(summary.hrs.df %>% filter(variable %in% c("Remaining Hours","Booked Hours")), 
-  #              aes(x=Date, y=value, fill=factor(variable, levels=c("Remaining Hours","Booked Hours")),
-  #                  color = variable =='Remaining Hours')) +
-  #       geom_bar(stat="identity", size=1) +
-  #       facet_grid(Provider~., scales = "free_y")+
-  #       #facet_wrap(~ Department + Provider, scales="free_y")+
-  #       labs(title = paste0("\n Total Booked and Remaining Hours  - Upcoming 2 Weeks"), x = NULL, y = NULL)+
-  #       scale_fill_manual("Status",values = c("#f75dbe","#a5a7a5"))+
-  #       scale_color_manual(values = c(NA, '#d80b8c'), guide=F)+
-  #       scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
-  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-  #             legend.position = "top",
-  #             legend.text = element_text(size="12"),
-  #             legend.direction = "horizontal",
-  #             legend.key.size = unit(1.0,"cm"),
-  #             legend.title = element_blank(),
-  #             axis.title = element_text(size="14"),
-  #             axis.text = element_text(size="14"),
-  #             axis.title.x = element_blank(),
-  #             axis.title.y = element_blank(),
-  #             axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
-  #             axis.text.y = element_text(margin = margin(l=5, r=5)),
-  #             panel.grid.minor = element_blank(),
-  #             panel.border = element_blank(),
-  #             panel.background = element_rect(colour = "black", size=0.5),
-  #             axis.line = element_line(size = 0.3, colour = "black"))+
-  #       geom_text(aes(label=ifelse(value==0,"",paste0(value," hrs."))), color="white", 
-  #                 size=5, position = position_stack(vjust = 0.5))
-  #     
-  #     grid.arrange(booked.prov, remaining.prov, ncol=2)
-  #     
-  #     # }
-  #     
-  #   } else {
-  #     
-  #     # Practice - Summary of future booked and filled rates 
-  #     remaining.dept.df <- summary.hrs.df %>%
-  #       group_by(Campus, Department, Date, variable) %>%
-  #       dplyr::summarise(value = sum(value))
-  #     
-  #     # Practice - Future Booked vs.Remaining Hours - 2 Weeks 
-  #     booked.dept <-
-  #       ggplot(remaining.dept.df %>% filter(variable %in% c("Booked Rate (%)")) %>% mutate(value = round(ifelse(value == 0, 0, value*.001),1)), 
-  #              aes(x=Date, y=value, fill= value > 1.0, color=value)) +
-  #       geom_bar(stat="identity", color='black', size=1) +
-  #       geom_hline(yintercept=1.0, linetype="dashed", color = "red", size=1.5)+
-  #       labs(title = paste0("Daily Slot Booked Rate (%) - Upcoming 2 Weeks\n"), x = NULL, y = NULL)+
-  #       scale_fill_manual("Status", labels = c("<= 100%", "> 100%"), values = c("#c7c6ef","#212070"))+
-  #       scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
-  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-  #             legend.position = "top",
-  #             axis.title = element_text(size="14"),
-  #             axis.text = element_text(size="14"),
-  #             axis.title.x = element_blank(),
-  #             axis.title.y = element_blank(),
-  #             axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
-  #             axis.text.y = element_text(margin = margin(l=5, r=5)),
-  #             panel.grid.minor = element_blank(),
-  #             panel.border = element_blank(),
-  #             panel.background = element_rect(colour = "black", size=0.5),
-  #             axis.line = element_line(size = 0.3, colour = "black"),
-  #             plot.margin=unit(c(1,1,0.5,1), "cm"))+
-  #       scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits=c(0,max(remaining.dept.df$value)*0.0012))+
-  #       geom_text(aes(label=paste(value*100,"%")), color="white", 
-  #                 size=5, position = position_stack(vjust = 0.5))
-  #     
-  #     # Practice - Future Remaining Hours - 2 Weeks 
-  #     remaining.dept <-
-  #       ggplot(remaining.dept.df %>% filter(variable %in% c("Remaining Hours","Booked Hours")), 
-  #              aes(x=Date, y=value, fill=factor(variable, levels=c("Remaining Hours","Booked Hours")),
-  #                  color = variable =='Remaining Hours')) +
-  #       geom_bar(stat="identity", size=1) +
-  #       labs(title = paste0("\n Total Booked and Remaining Hours  - Upcoming 2 Weeks"), x = NULL, y = NULL)+
-  #       scale_fill_manual("Status",values = c("#f75dbe","#a5a7a5"))+
-  #       scale_color_manual(values = c(NA, '#d80b8c'), guide=F)+
-  #       scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 day", expand = c(0,0.2))+
-  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-  #             legend.position = "top",
-  #             legend.text = element_text(size="12"),
-  #             legend.direction = "horizontal",
-  #             legend.key.size = unit(1.0,"cm"),
-  #             legend.title = element_blank(),
-  #             axis.title = element_text(size="14"),
-  #             axis.text = element_text(size="14"),
-  #             axis.title.x = element_blank(),
-  #             axis.title.y = element_blank(),
-  #             axis.text.x = element_text(hjust=1, angle = 35, margin = margin(t=10)),
-  #             axis.text.y = element_text(margin = margin(l=5, r=5)),
-  #             panel.grid.minor = element_blank(),
-  #             panel.border = element_blank(),
-  #             panel.background = element_rect(colour = "black", size=0.5),
-  #             axis.line = element_line(size = 0.3, colour = "black"),
-  #             plot.margin=unit(c(-0.5,1,1,1), "cm"))+
-  #       geom_text(aes(label=paste0(value," hrs.")), color="white", 
-  #                 size=5, position = position_stack(vjust = 0.5))
-  #     
-  #     grid.arrange(booked.dept, remaining.dept, ncol=1)
-  #     
-  #   } # End Booked and Filled Rate by Practice
-  #   
-  # })
-  
-  
-  
-  # Upcoming Demand -  Months - by Practice and Provider ------------------------------------------------
-  # Slot Usage Graph by Practice and Provider 
-  # output$demandMonthsGraph <-  renderPlot({
-  #   
-  #   if(input$byProvider3 == TRUE){ # By Provider
-  #     
-  #     # Future Booked Rate by Month and Day Table
-  #     summary.tb <- dataPastSlot() %>%
-  #       group_by(Campus, Department, Provider, Date) %>%
-  #       dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-  #                        `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-  #                        `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-  #                        `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-  #                        `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-  #       mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
-  #              `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
-  #       gather(variable, value, 5:11)
-  #     
-  #     summary.tb$Date <- format(as.Date(summary.tb$Date, format="%Y-%m-%d"), "%m/%d/%Y")
-  #     summary.tb$Month <- format(as.Date(summary.tb$Date, format="%m/%d/%Y"), "%m")
-  #     summary.tb$DateD <- format(as.Date(summary.tb$Date, format="%m/%d/%Y"), "%d")
-  #     
-  #     dept <- summary.tb %>% filter(variable == "Booked Rate")
-  #     dept$unique <- paste0(dept$Department, dept$Provider, dept$Month, dept$DateD)
-  #     
-  #     # Dataframe for dates, month, date as number
-  #     DateD <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24",
-  #                "25", "26", "27", "28", "29", "30", "31")
-  #     DateD <- data.frame(DateD = rep(DateD, length(unique(summary.tb$Month))*nrow(unique(summary.tb[,c("Department","Provider")]))))
-  #     prov <- as.data.frame(unique(summary.tb[,c("Department", "Provider")]))
-  #     final_df <- prov[rep(seq_len(nrow(prov)), length(unique(summary.tb$Month))*31), ]
-  #     final_df <- final_df %>% arrange(Department, Provider)
-  #     Month <- data.frame(Month = rep(unique(summary.tb$Month), nrow(final_df)))
-  #     Month <- Month %>% arrange(Month)
-  #     
-  #     final_df <- cbind(final_df, Month, DateD)
-  #     final_df$unique <-  paste0(final_df$Department, final_df$Provider, final_df$Month, final_df$DateD)
-  #     
-  #     final_df$value <- dept$value[match(final_df$unique, dept$unique)]
-  #     
-  #     is.nan.data.frame <- function(x) do.call(cbind, lapply(x, is.nan))
-  #     final_df[is.nan(final_df)] <- NA
-  #     
-  #     
-  #     ggplot(final_df, aes(y=Month, x=DateD))+
-  #       geom_tile(aes(fill=value), colour = "black", size=0.5)+
-  #       scale_fill_gradientn("Fill Rate", colors = c("#5a8ac6","white","#f8696b","#ff0000"), breaks = c(0.4,0.6,0.8,1.0))+
-  #       facet_grid(Provider~., switch = "y")+
-  #       coord_fixed(ratio=1/3)+
-  #       labs(title = paste0("\n","Booked Rate (%) by Provider - Upcoming 3 Months\n"), x = "\nDay", y = "Provider\nby Month\n")+
-  #       theme_bw()+
-  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-  #             axis.text.x = element_text(size = 12),
-  #             axis.text.y = element_text(size = 12),
-  #             strip.text.y.left = element_text(angle = 0),
-  #             panel.background = element_rect(colour = "black", size=0.5),
-  #             axis.line = element_line(size = 0.3, colour = "black"),
-  #             strip.placement = "outside")
-  #     
-  #   } else{ # By Practice 
-  #     
-  #     # Future Booked Rate by Month and Day Table
-  #     summary.dept.tb <- dataPastSlot() %>%
-  #       group_by(Campus, Department, Date) %>%
-  #       dplyr::summarise(`Available Hours` = round(sum(AVAIL_MINUTES),0),
-  #                        `Booked Hours` = round(sum(BOOKED_MINUTES),0),
-  #                        `Arrived Hours` = round(sum(ARRIVED_MINUTES),0),
-  #                        `Canceled Hours` = round(sum(CANCELED_MINUTES),0),
-  #                        `No Show Hours` = round(sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES),0)) %>%
-  #       mutate(`Booked Rate` = round((`Booked Hours`/`Available Hours`),2),
-  #              `Filled Rate` = round((`Arrived Hours`/`Available Hours`),2)) %>%
-  #       gather(variable, value, 4:10)
-  #     
-  #     summary.dept.tb$Date <- format(as.Date(summary.dept.tb$Date, format="%Y-%m-%d"), "%m/%d/%Y")
-  #     summary.dept.tb$Month <- format(as.Date(summary.dept.tb$Date, format="%m/%d/%Y"), "%m")
-  #     summary.dept.tb$DateD <- format(as.Date(summary.dept.tb$Date, format="%m/%d/%Y"), "%d")
-  #     
-  #     dept <- summary.dept.tb %>% filter(variable == "Booked Rate")
-  #     dept$unique <- paste0(dept$Department, dept$Month, dept$DateD)
-  #     
-  #     # Dataframe for dates, month, date as number
-  #     DateD <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24",
-  #                "25", "26", "27", "28", "29", "30", "31")
-  #     DateD <- data.frame(DateD = rep(DateD, length(unique(summary.dept.tb$Month))*length(unique(summary.dept.tb$Department))))
-  #     prov <- as.vector(unique(summary.dept.tb$Department))
-  #     final_df <- data.frame(Department = rep(prov, length(unique(summary.dept.tb$Month))*31))
-  #     final_df <- final_df %>% arrange(Department)
-  #     Month <- data.frame(Month = rep(unique(summary.dept.tb$Month), nrow(final_df)))
-  #     Month <- Month %>% arrange(Month)
-  #     
-  #     final_df <- cbind(final_df, Month, DateD)
-  #     final_df$unique <-  paste0(final_df$Department, final_df$Month, final_df$DateD)
-  #     
-  #     final_df$value <- dept$value[match(final_df$unique, dept$unique)]
-  #     
-  #     is.nan.data.frame <- function(x) do.call(cbind, lapply(x, is.nan))
-  #     final_df[is.nan(final_df)] <- NA
-  #     
-  #     
-  #     ggplot(final_df, aes(y=Month, x=DateD))+
-  #       geom_tile(aes(fill=value), colour = "black", size=0.5)+
-  #       scale_fill_gradientn("Fill Rate", colors = c("#5a8ac6","white","#f8696b","#ff0000"), breaks = c(0.4,0.6,0.8,1.0))+
-  #       facet_grid(Department~., switch = "y")+
-  #       coord_fixed(ratio=1/3)+
-  #       labs(title = paste0("\n","Booked Rate (%) by Practice - Upcoming 3 Months\n"), x = "\nDay", y = "Department\nby Month\n")+
-  #       theme_bw()+
-  #       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-  #             plot.subtitle = element_text(hjust=0.5, size = 15, face = "italic"),
-  #             axis.text.x = element_text(size = 12),
-  #             axis.text.y = element_text(size = 12),
-  #             strip.text.y.left = element_text(angle = 0),
-  #             #anel.background = element_rect(colour = "black", size=0.5),
-  #             axis.line = element_line(size = 0.3, colour = "black"),
-  #             strip.placement = "outside")
-  #   }
-  #   
-  # })
-  
-  
-  # Slot Usage Graph by Practice and Provider -----------------------------------------------------------------
-  # output$slotUsageGraph <-  renderPlot({
-  #   data <- dataPastSlot()
-  #   # data <- past.slot.data
-  #   # data <- past.slot.data %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
-  #   # data$siteSpecialtyProvider <- paste0(data$Campus," - ",data$Campus.Specialty," - ",data$Provider)
-  #   
-  #   summary.md <- data %>%
-  #     group_by(Provider, Appt.Week) %>%
-  #     summarise(`Available Hours` = sum(`Available Hours`),
-  #               `Booked Hours` = sum(`Booked Hours`),
-  #               `Arrived Hours` = sum(`Arrived Hours`)) %>%
-  #     mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`),2),
-  #            `Filled Rate (%)` = round((`Arrived Hours`/`Available Hours`),2)) 
-  #   
-  #   summary.md$`Booked Rate (%)`[which(!is.finite(summary.md$`Booked Rate (%)`))] <- 1
-  #   summary.md$`Filled Rate (%)`[which(!is.finite(summary.md$`Filled Rate (%)`))] <- 1
-  #   
-  #   if(input$slotUsageChoice == 1) { # Available Hours
-  #     
-  #     ggplot(summary.md, aes(x=Appt.Week, y=`Available Hours`, group=Provider, col=Provider)) +
-  #       geom_line()+
-  #       geom_point(size=2)+
-  #       scale_color_MountSinai("main", reverse = TRUE, labels = wrap_format(25))+
-  #       labs(x=NULL, y="Hours",
-  #            title = "Available Hours by Provider per Week",
-  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-  #       theme_new_line()+
-  #       theme_bw()+
-  #       graph_theme("bottom")
-  #     
-  #   } else if(input$slotUsageChoice == 2) { # Booked Hours
-  #     
-  #     ggplot(summary.md, aes(x=Appt.Week, y=`Booked Hours`, group=Provider, col=Provider)) +
-  #       geom_line()+
-  #       geom_point(size=2)+
-  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-  #       labs(x=NULL, y="Hours",
-  #            title = "Total Booked Hours by Provider per Week",
-  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-  #       theme_bw()+
-  #       graph_theme("bottom")
-  #     
-  #   } else if(input$slotUsageChoice == 3) { # Filled Hours
-  #     
-  #     ggplot(summary.md, aes(x=Appt.Week, y=`Arrived Hours`, group=Provider, col=Provider)) +
-  #       geom_line()+
-  #       geom_point(size=2)+
-  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-  #       labs(x=NULL, y="Hours",
-  #            title = "Total Filled Hours by Provider per Week",
-  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-  #       theme_bw()+
-  #       graph_theme("bottom")
-  #     
-  #   } else if(input$slotUsageChoice == 4) { # Booked Rate
-  #     
-  #     ggplot(summary.md, aes(x=Appt.Week, y=`Booked Rate (%)`, group=Provider, col=Provider)) +
-  #       geom_line()+
-  #       geom_point(size=2)+
-  #       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
-  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-  #       labs(x=NULL, y="Percent",
-  #            title = "Booked Rate (%) by Provider per Week",
-  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-  #       theme_bw()+
-  #       graph_theme("bottom")
-  #     
-  #   } else { # Filled Rate
-  #     
-  #     ggplot(summary.md, aes(x=Appt.Week, y=`Filled Rate (%)`, group=Provider, col=Provider)) +
-  #       geom_line()+
-  #       geom_point(size=2)+
-  #       #scale_y_continuous(expand = c(0,0), limits = c(0,max(summary.md$`Filled Rate (%)`)*1.2))+
-  #       #scale_y_continuous(expand = c(0, 0), limits = c(0,NA))+
-  #       scale_y_continuous(expand = c(0, 0), limits = c(0,max(summary.md$`Filled Rate (%)`)*1.2), labels = scales::percent_format(accuracy = 0.1))+
-  #       #scale_y_continuous(labels = scales::percent_format(accuracy = 0.1))+
-  #       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
-  #       labs(x=NULL, y="Percent\n",
-  #            title = "Filled Rate (%) by Provider per Week",
-  #            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-  #       theme_bw()+
-  #       graph_theme("bottom")
-  #     
-  #   } 
-  #   
-  # })
+  output$slotManageGraph <- renderPlotly({
+    
+      #data <- slot.data.subset %>% filter(Campus == "MSUS")
+      
+      data <- dataAllSlot()
+      
+      booked_filled <- data %>%
+        group_by(Appt.DateYear) %>%
+        summarise(`Available Hours` = sum(`Available Hours`),
+                  `Booked Hours` = sum(`Booked Hours`),
+                  `Filled Hours` = sum(`Arrived Hours`)) %>%
+        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2)*100,
+               `Filled Rate` = round(`Filled Hours`/`Available Hours`, 2)*100) 
+      
+      slot_fig <- plot_ly(booked_filled, x = ~Appt.DateYear,
+                          textfont = list(color = '#000000', size = 16))
+      
+      if(input$byRate == TRUE){
+        y_axis <- "Booked Rate" 
+      } else{
+        y_axis <- "Available Hours"
+      }
+      
+      today <- max(dataAll()$Appt.DateYear) + 2
+      annon <- list()
+      
+      
+      i <- 1
+      
+      if(min(booked_filled$Appt.DateYear) <= today  && today  <= max(booked_filled$Appt.DateYear)){
+        slot_fig <- slot_fig %>% add_segments(x = today,
+                                              xend = today,
+                                              y = 0, yend = max(booked_filled[[y_axis]]  * 1.2),
+                                              line = list(color = "#000000", dash = "dash"),
+                                              showlegend = FALSE,
+                                              hoverinfo = 'skip')
+        
+        annon[[i]] <- list(
+          x = today,
+          y = max(booked_filled[[y_axis]]  * 1.25),
+          text = "Today",
+          xref = "x",
+          yref= "y",
+          showarrow = FALSE,
+          ax = 20,
+          ay=  -40,
+          font = list(color = '#000000',size = 18)
+        )
+        
+        i <- i + 1
+      }
+      
+      
+      if(input$byRate == TRUE){ # by Booked and Filled Rate
+        
+        slot_fig <- slot_fig %>% add_segments(x = min(booked_filled$Appt.DateYear),
+                                              xend = max(booked_filled$Appt.DateYear),
+                                              y = 100,
+                                              yend = 100,
+                                              line = list(color = "#FF0000", dash = "dash"),
+                                              showlegend = FALSE)
+        
+        annon[[i]] <- list(
+          x = max(booked_filled$Appt.DateYear)+5,
+          y = 100 ,
+          text = "100 %",
+          xref = "x",
+          yref= "y",
+          showarrow = FALSE,
+          ax = 20,
+          ay=  -40,
+          font = list(color = '#FF0000',size = 18)
+        )
+        
+        i <- i + 1
+        
+        slot_fig <- slot_fig %>% add_trace(y = ~`Booked Rate`, name = "Booked Rate (%)", mode = 'lines+markers',
+                                           marker = list(color = "#d80b8c"), line = list(color = "#d80b8c"))
+        slot_fig <- slot_fig %>% add_trace(y = ~`Filled Rate`, name = "Filled Rate (%)", mode = 'lines+markers',
+                                           marker = list(color = "#00aeef"), line = list(color = "#00aeef"))
+        
+        slot_fig %>% layout(
+          annotations = annon,
+          #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
+          title = "Past and Upcoming Slot Usage (%)", font=list(size=20),
+          autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
+          xaxis = list(
+            title = "Date", 
+            font = list(size = 14),
+            tickfont = list(size = 14),
+            
+            rangeslider = list(type = "date"),
+            mirror = TRUE,
+            ticks = 'outside',
+            showline = TRUE),
+          yaxis = list(title = "Percent",
+                       font = list(size = 14),
+                       tickfont = list(size = 14),
+                       ticksuffix = "%",
+                       mirror = TRUE,
+                       ticks = 'outside',
+                       showline = TRUE),
+          hovermode = "x unified") 
+        
+      } else{
+        
+        
+        slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
+                                           marker = list(color = "#212070"), line = list(color = "#212070"))
+        slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
+                                          marker = list(color = "#d80b8c"))
+        slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
+                                          marker = list(color = "#00aeef"))
+        
+        
+        
+        slot_fig %>% layout(
+          annotations = annon,
+          #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
+          title = "Past and Upcoming Slot Usage", font=list(size=20),
+          autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
+          xaxis = list(
+            font = list(size = 16),
+            title = "Date", 
+            tickfont = list(size = 14),
+            rangeslider = list(type = "date"),
+            mirror = TRUE,
+            ticks = 'outside',
+            showline = TRUE),
+          yaxis = list(
+            font = list(size = 14),
+            title = "Hours",
+            tickfont = list(size = 14),
+            mirror = TRUE,
+            ticks = 'outside',
+            showline = TRUE),
+          hovermode = "x unified") 
+      }
+      
+
+    
+  })
   
   
   # Slot Usage Table by Practice and Provider 
   slotUsageTb_data <- reactive({
     
-    data <- dataPastSlot()
-    # data <- past.slot.data %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
+    data <- dataAllSlot()
+    # data <- slot.data.subset %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
     
     if(input$byProvider2 == TRUE){
       
@@ -5982,13 +5727,19 @@ server <- function(input, output, session) {
         group_by(Campus, Campus.Specialty, Provider, Appt.DateYear) %>%
         dplyr::summarise(`Available Hours` = round(sum(`Available Hours`),1),
                          `Booked Hours` = round(sum(`Booked Hours`),1),
-                         `Filled Hours` = round(sum(`Arrived Hours`),1)) %>%
-        mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100),
-               `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100)) %>%
+                         `Filled Hours` = round(sum(`Arrived Hours`),1)) 
+      
+      summary.prov[is.na(summary.prov)] <- 0
+      
+      summary.prov <- summary.prov %>%
+        mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100), "%"),
+               `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100), "%")) %>%
         gather(variable, value, 5:9) %>%
         spread(Appt.DateYear, value)
       
-      summary.prov[is.na(summary.prov)] <- 0
+      summary.prov[summary.prov == "Inf%"] <- "-"
+      summary.prov[summary.prov == "NaN%"] <- "-"
+        
       level.order <- c("Available Hours", "Booked Hours","Filled Hours","Booked Rate (%)","Filled Rate (%)")
       summary.prov <- summary.prov[order(match(summary.prov$variable, level.order)),]
       summary.prov <- summary.prov %>% arrange(Campus, Campus.Specialty, Provider)
@@ -6014,16 +5765,22 @@ server <- function(input, output, session) {
         group_by(Campus, Campus.Specialty, Appt.DateYear) %>%
         dplyr::summarise(`Available Hours` = round(sum(`Available Hours`),1),
                          `Booked Hours` = round(sum(`Booked Hours`),1),
-                         `Filled Hours` = round(sum(`Arrived Hours`),1)) %>%
-        mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100),
-               `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100)) %>%
+                         `Filled Hours` = round(sum(`Arrived Hours`),1))
+      
+      summary.dept[is.na(summary.dept)] <- 0
+      
+      summary.dept <- summary.dept %>%
+        mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100), "%"),
+               `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100), "%")) %>%
         gather(variable, value, 4:8) %>%
         spread(Appt.DateYear, value)
       
-      summary.dept[is.na(summary.dept)] <- 0
+      summary.dept[summary.dept == "Inf%"] <- "-"
+      summary.dept[summary.dept == "NaN%"] <- "-"
+      
       level.order <- c("Available Hours", "Booked Hours","Filled Hours","Booked Rate (%)","Filled Rate (%)")
       summary.dept <- summary.dept[order(match(summary.dept$variable, level.order)),]
-      summary.dept <- summary.dept %>% arrange(Campus, Campus.Specialty, variable)
+      summary.dept <- summary.dept %>% arrange(Campus, Campus.Specialty)
       
       names(summary.dept)[names(summary.dept) == "Campus.Specialty"] <- "Specialty"
       names(summary.dept)[names(summary.dept) == "variable"] <- "Status"
@@ -6043,11 +5800,42 @@ server <- function(input, output, session) {
   })
   
   output$slotUsageTb <- DT::renderDT(slotUsageTb_data(),
-                                     extensions = 'Buttons',
-                                     options = list(scrollX = TRUE,
-                                                    dom = 'Bfrtip',
-                                                    buttons = c('csv','excel'),
-                                                    sDom  = '<"top">lrt<"bottom">ip'))
+                                     class = 'cell-border stripe',
+                                     rownames = FALSE,
+                                     extensions = c('Buttons','Scroller'),
+                                     options = list(
+                                       scrollX = TRUE,
+                                       list(pageLength = 20, scrollY = "400px"),
+                                       dom = 'Bfrtip',
+                                       buttons = c('csv','excel'),
+                                       sDom  = '<"top">lrt<"bottom">ip',
+                                       initComplete = JS(
+                                         "function(settings, json) {",
+                                         "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                                         "}"),
+                                       fixedColumns = list(leftColumns =
+                                                             ifelse(colnames(slotUsageTb_data())[3] == "Provider", 4, 3))))
+
+  
+  # datatable(summary.prov,
+  #           class = 'cell-border stripe',
+  #           rownames = FALSE,
+  #           extensions = c('Buttons','Scroller'),
+  #           title = "Subset Selection",
+  #           options = list(
+  #             scrollX = TRUE,
+  #             list(pageLength = 20, scrollY = "400px"),
+  #                          dom = 'Bfrtip',
+  #                          buttons = c('csv','excel'),
+  #                          sDom  = '<"top">lrt<"bottom">ip',
+  #                          initComplete = JS(
+  #                            "function(settings, json) {",
+  #                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+  #                            "}"),
+  #                          fixedColumns = list(leftColumns =
+  #                                                ifelse(colnames(summary.prov)[3] == "Provider", 4, 3)))) 
+
+
   
   ### [3. ] Day of Visit Tab -----------------------------------------------------------------------------------------------------------
   
@@ -6745,150 +6533,6 @@ server <- function(input, output, session) {
   # 
   
   
-  ### Access Tab ----------------------------------------------------------------------------------------------------------------------
-  ## Booked and Filled Rate
-  
-  output$test <- renderPlotly({
-    
-    #data <- slot.data.subset %>% filter(Campus == "MSUS")
-    
-    data <- dataAllSlot()
-
-    booked_filled <- data %>%
-      group_by(Appt.DateYear) %>%
-      summarise(`Available Hours` = sum(`Available Hours`),
-                `Booked Hours` = sum(`Booked Hours`),
-                `Filled Hours` = sum(`Arrived Hours`)) %>%
-      mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2)*100,
-             `Filled Rate` = round(`Filled Hours`/`Available Hours`, 2)*100) 
-    
-    slot_fig <- plot_ly(booked_filled, x = ~Appt.DateYear,
-                        textfont = list(color = '#000000', size = 16))
-    
-    if(input$byRate == TRUE){
-     y_axis <- "Booked Rate" 
-    } else{
-      y_axis <- "Available Hours"
-    }
-    
-    today <- max(dataAll()$Appt.DateYear) + 2
-    annon <- list()
-    
-
-    i <- 1
-   
-    if(min(booked_filled$Appt.DateYear) <= today  && today  <= max(booked_filled$Appt.DateYear)){
-      slot_fig <- slot_fig %>% add_segments(x = today,
-                                            xend = today,
-                                            y = 0, yend = max(booked_filled[[y_axis]]  * 1.2),
-                                            line = list(color = "#000000", dash = "dash"),
-                                            showlegend = FALSE,
-                                            hoverinfo = 'skip')
-
-      annon[[i]] <- list(
-                        x = today,
-                        y = max(booked_filled[[y_axis]]  * 1.25),
-                        text = "Today",
-                        xref = "x",
-                        yref= "y",
-                        showarrow = FALSE,
-                        ax = 20,
-                        ay=  -40,
-                        font = list(color = '#000000',size = 18)
-                      )
-
-      i <- i + 1
-    }
-  
-    
-    if(input$byRate == TRUE){ # by Booked and Filled Rate
-      
-      slot_fig <- slot_fig %>% add_segments(x = min(booked_filled$Appt.DateYear),
-                                           xend = max(booked_filled$Appt.DateYear),
-                                           y = 100,
-                                           yend = 100,
-                                           line = list(color = "#FF0000", dash = "dash"),
-                                           showlegend = FALSE)
-      
-      annon[[i]] <- list(
-        x = max(booked_filled$Appt.DateYear)+5,
-        y = 100 ,
-        text = "100 %",
-        xref = "x",
-        yref= "y",
-        showarrow = FALSE,
-        ax = 20,
-        ay=  -40,
-        font = list(color = '#FF0000',size = 18)
-      )
-      
-      i <- i + 1
-
-      slot_fig <- slot_fig %>% add_trace(y = ~`Booked Rate`, name = "Booked Rate (%)", mode = 'lines+markers',
-                                         marker = list(color = "#d80b8c"), line = list(color = "#d80b8c"))
-      slot_fig <- slot_fig %>% add_trace(y = ~`Filled Rate`, name = "Filled Rate (%)", mode = 'lines+markers',
-                                         marker = list(color = "#00aeef"), line = list(color = "#00aeef"))
-      
-      slot_fig %>% layout(
-        annotations = annon,
-        #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-        title = "Past and Upcoming Slot Usage (%)", font=list(size=20),
-        autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
-        xaxis = list(
-          title = "Date", 
-          font = list(size = 14),
-          tickfont = list(size = 14),
-          
-          rangeslider = list(type = "date"),
-          mirror = TRUE,
-          ticks = 'outside',
-          showline = TRUE),
-        yaxis = list(title = "Percent",
-                     font = list(size = 14),
-                     tickfont = list(size = 14),
-                     ticksuffix = "%",
-                     mirror = TRUE,
-                     ticks = 'outside',
-                     showline = TRUE),
-        hovermode = "x unified") 
-      
-    } else{
-
-
-      slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
-                                         marker = list(color = "#212070"), line = list(color = "#212070"))
-      slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
-                                        marker = list(color = "#d80b8c"))
-      slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
-                                        marker = list(color = "#00aeef"))
-      
-      
-      
-      slot_fig %>% layout(
-        annotations = annon,
-        #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-        title = "Past and Upcoming Slot Usage", font=list(size=20),
-        autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
-        xaxis = list(
-          font = list(size = 16),
-          title = "Date", 
-          tickfont = list(size = 14),
-          rangeslider = list(type = "date"),
-          mirror = TRUE,
-          ticks = 'outside',
-          showline = TRUE),
-        yaxis = list(
-                     font = list(size = 14),
-                     title = "Hours",
-                     tickfont = list(size = 14),
-                     mirror = TRUE,
-                     ticks = 'outside',
-                     showline = TRUE),
-        hovermode = "x unified") 
-    }
-    
-  })
-    
   
   
   
