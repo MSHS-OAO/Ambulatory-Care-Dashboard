@@ -96,26 +96,39 @@ ui <- dashboardPage(
     
     sidebarMenu(id = "sbm",
                 menuItem("Home", tabName = "homepage", icon= icon("home")),
-                menuItem("KPIs", tabName = "KPIs", icon = icon("tachometer-alt")),
-                menuItem("Site Overview", tabName = "systemOverview", icon = icon("hospital-symbol"),
-                         menuSubItem("Site Overview", tabName = "system"),
-                         menuSubItem("Site Comparison", tabName = "systemComparison")),
-                menuItem("Practice Overview", tabName = "profile", icon = icon("hospital")),
-                menuItem("Provider Overview", tabName = "provider", icon = icon("user-md")),
-                menuItem("Population", tabName = "population", icon = icon("users")),
-                menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
-                menuItem("Scheduling", tabName = "scheduling", icon = icon("calendar-day"),
-                         menuSubItem("Scheduled/Arrived", tabName = "arrived"),
-                         menuSubItem("No Shows/Overbooks", tabName = "noshows"),
-                         menuSubItem("Bumps/Cancellations", tabName = "cancellations")),
-                menuItem("Utilization", tabName = "utilization", icon = icon("percent")),
-                menuItem("Access", tabName = "access", icon = icon("location-arrow"),
-                         menuSubItem("New Patients", tabName = "newPatients"),
-                         # menuSubItem("Upcoming Demand", tabName = "upcomingDemand"),
-                         menuSubItem("Slot Management", tabName = "slotManagement")),
-                menuItem("Day of Visit", tabName = "day", icon = icon("hand-holding-medical"),
-                         menuSubItem("Cycle Time", tabName = "cycleTime"),
-                         menuSubItem("Room-in Time", tabName = "roomInTime"))
+                menuItem("Overview", tabName = "overview",
+                    menuItem("Site Overview", tabName = "systemOverview", icon = icon("hospital-symbol"),
+                             menuSubItem("Site Overview", tabName = "system"),
+                             menuSubItem("Site Comparison", tabName = "systemComparison")),
+                    menuItem("Practice Overview", tabName = "profile", icon = icon("hospital")),
+                    menuItem("Provider Overview", tabName = "provider", icon = icon("user-md"))
+                ),
+                
+                menuItem("Pre Visit", tabName = "previsit",
+                          menuItem("Access", tabName = "access", icon = icon("location-arrow"),
+                                   menuSubItem("New Patients", tabName = "newPatients"),
+                                   # menuSubItem("Upcoming Demand", tabName = "upcomingDemand"),
+                                   menuSubItem("Slot Management", tabName = "slotManagement")),
+                          menuItem("Scheduling", tabName = "scheduling", icon = icon("calendar-day"),
+                                   menuSubItem("Scheduled/Arrived", tabName = "arrived"),
+                                   menuSubItem("No Shows/Overbooks", tabName = "noshows"),
+                                   menuSubItem("Bumps/Cancellations", tabName = "cancellations"))       
+                          ),
+                menuItem("Day of Visit", tabName = "dayof",
+                         menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
+                         menuItem("Utilization", tabName = "utilization", icon = icon("percent")),
+                         menuItem("Population", tabName = "population", icon = icon("users")),
+                         menuItem("Day of Visit", tabName = "day", icon = icon("hand-holding-medical"),
+                                  menuSubItem("Cycle Time", tabName = "cycleTime"),
+                                  menuSubItem("Room-in Time", tabName = "roomInTime"))
+                         ),
+                menuItem("KPIs", tabName = "KPIs", icon = icon("tachometer-alt"))
+                
+
+
+                
+
+
                 #menuItem("Data", tabName = "data", icon = icon("table"))
     ) # Close sidebarMenu
     

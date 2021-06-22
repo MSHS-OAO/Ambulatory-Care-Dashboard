@@ -866,7 +866,7 @@ server <- function(input, output, session) {
   
   output$siteWaitTime <- renderPlot({
     data <- dataAll() %>% filter(New.PT3 == TRUE)
-    # data <- all.data %>% filter(Campus == "MSUS") %>% filter(New.PT3 == TRUE)
+    # data <- kpi.all.data[all.data.rows,] %>% filter(Campus == "MSUS") %>% filter(New.PT3 == TRUE)
     
     data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
     
@@ -879,30 +879,32 @@ server <- function(input, output, session) {
     if(input$median1 == TRUE){ # Median Wait Time
       
       ggplot(waitTime, 
-             aes(reorder(Campus.Specialty, -medWaitTime), medWaitTime, fill = medWaitTime <= 14))+
-        geom_bar(stat="identity", width = 0.8) +
-        scale_fill_manual("Meets New Patient Access Target: <= 14 Days", values = c("#d80b8c", "#212070"))+
+             aes(reorder(Campus.Specialty, -medWaitTime), medWaitTime))+
+        geom_bar(stat="identity", width = 0.8, fill = "#221f72") +
+        geom_hline(aes(yintercept = 14), color = "red", linetype="dashed", size = 1)+
+        geom_text(aes(nrow(waitTime)-1,14, label = "14 days", vjust = -1, hjust = 0, size = 12, color = "red"))+
         scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.2), expand = c(0,0))+
         labs(x=NULL, y="Days",
              title = "Median New Appointment Lead Days by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
-        graph_theme("top")+ theme(legend.title = element_text(size = "14"))
+        graph_theme("none")
       
     }else{ # Average Wait Time 
       
       ggplot(waitTime, 
-             aes(reorder(Campus.Specialty, -avgWaitTime), avgWaitTime, fill = avgWaitTime <= 14))+
-        geom_bar(stat="identity", width = 0.8) +
-        scale_fill_manual("Meets New Patient Access Target: <= 14 Days", values = c("#d80b8c", "#212070"))+
+             aes(reorder(Campus.Specialty, -avgWaitTime), avgWaitTime))+
+        geom_bar(stat="identity", width = 0.8, fill = "#221f72") +
+        geom_hline(aes(yintercept = 14), color = "red", linetype="dashed", size = 1)+
+        geom_text(aes(nrow(waitTime)-1,14, label = "14 days", vjust = -1, hjust = 0, size = 12, color = "red"))+
         scale_y_continuous(limits=c(0,max(waitTime$avgWaitTime)*1.2), expand = c(0,0))+
         labs(x=NULL, y="Days",
              title = "Average New Appointment Lead Days by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
-        graph_theme("top")+ theme(legend.title = element_text(size = "14"))
+        graph_theme("none")
       
     }
   })
@@ -1510,7 +1512,7 @@ server <- function(input, output, session) {
         labs(x="Site - Specialty", y=NULL,
              title = "Avg Booked vs. Filled Rate (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
-        scale_y_continuous(expand = c(0,0), limits = c(0,max(bookedFilledRate$value)*1.2))+
+        scale_y_continuous(expand = c(0,0), limits = c(0,max(bookedFilledRate$value)*1.2),labels=scales::percent_format(accuracy = 1))+
         theme_new_line()+
         theme_bw()+
         graph_theme("bottom") + theme(legend.title = element_blank())
@@ -3932,7 +3934,7 @@ server <- function(input, output, session) {
   # Distribution of No Shows (%) by Lead Days 
   output$noShowLeadDays <- renderPlot({
     data <- dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))
-    # data <- kpi.all.data[arrivedNoShow.data.rows,]
+    # data <- kpi.all.data[arrivedNoShow.data.rows,] %>% filter(Campus == "MSUS")
     
     data$Appt.Status <- ifelse(data$Appt.Status == "Arrived","Arrived","No Show")
     
@@ -3952,20 +3954,83 @@ server <- function(input, output, session) {
       status <- c('0 day','1-7 days','8-14 days','> 14 days')
       
       if(input$distribution == TRUE){
+        g1 <- ggplot(noShows, aes(x = factor(apptLeadDays, levels = status), y = noShow_perc)) +
+              geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+              stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+              scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits = c(0,max(noShows$noShow_perc)*1.2))+
+              labs(x=NULL, y = "Percent",
+                   title = "Distribution of No Show Rate by Lead Days to Appointment*",
+                   subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+                   # caption = "*No Show includes no show and same-day bumped, 
+                   # canceled, and rescheduled appointments.")+
+              theme_new_line()+
+              theme_bw()+
+              graph_theme("none")+
+              theme(plot.caption = element_text(size=12, face="italic"),
+                    axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
+        
+        
+        # noShows.summary <- noShows %>%
+        #                    group_by(apptLeadDays) #%>%
+        #                    #dplyr::summarise(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
+        # 
+        # noShows.summary.1 <- noShows.summary %>% filter(apptLeadDays == "0 day") %>%
+        #                       group_by(apptLeadDays) %>% 
+        #                       dplyr::mutate(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
+        # 
+        # cols <- c(1,6:10)
+        # noShows.summary.test <- noShows.summary.1[1,cols]
+        # noShows.summary.2 <- noShows.summary %>% filter(apptLeadDays == "1-7 days")
+        # %>% plyr::summarise(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
+        # 
+        # noShows.summary.3 <- noShows.summary %>% filter(apptLeadDays == "8-14 days")
+        # %>% plyr::summarise(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
+        # 
+        # noShows.summary.4 <- noShows.summary %>% filter(apptLeadDays == "> 14 days")
+        # %>% plyr::summarise(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
+        # 
+        # 
+        # noShows.summary <- noShows.summary %>%
+        #                    arrange(factor(apptLeadDays, levels = c("0 day", "1-7 days", "8-14 days", "> 14 days")))
+        # 
+        # data_melt <<- reshape2::melt(noShows.summary, id = "apptLeadDays")
+        # 
+        # n <- length(unique(data_melt$variable)) - 1
+        # if(n==0){
+        #   hline_y <- 0
+        # } else{
+        #   hline_y <- seq(1.5, 0.5+n, by= 1)
+        # }
+        # 
+        # 
+        # g2 <- ggplot(data_melt, aes(x = apptLeadDays, y = variable, label = value))+
+        #   scale_color_MountSinai('dark' )+
+        #   geom_text(size = 5, vjust = "center", hjust = "center", fontface  = "bold")+
+        #   geom_hline(yintercept = hline_y, colour='black')+
+        #   geom_vline(xintercept = 0, colour = 'black')+
+        #   scale_x_discrete(position = "top") + 
+        #   labs(y = NULL, x = NULL, fill = "AssociationListA")+
+        #   theme_minimal() +
+        #   table_theme()
+        # 
+        # 
+        # g1 + g2 + plot_layout(ncol = 1, heights = c(7, 0.67 * length(unique(data_melt$variable))))
+        
+        
         ggplot(noShows, aes(x = factor(apptLeadDays, levels = status), y = noShow_perc)) +
-        geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
-        stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-        scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits = c(0,max(noShows$noShow_perc)*1.2))+
-        labs(x=NULL, y = "Percent",
-             title = "Distribution of No Show Rate by Lead Days to Appointment*",
-             subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-             # caption = "*No Show includes no show and same-day bumped, 
-             # canceled, and rescheduled appointments.")+
-        theme_new_line()+
-        theme_bw()+
-        graph_theme("none")+
-        theme(plot.caption = element_text(size=12, face="italic"),
-              axis.text.x = element_text(size = 16, angle=0, hjust=1))
+          geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+          stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+          scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits = c(0,max(noShows$noShow_perc)*1.2))+
+          labs(x=NULL, y = "Percent",
+               title = "Distribution of No Show Rate by Lead Days to Appointment*",
+               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+          # caption = "*No Show includes no show and same-day bumped, 
+          # canceled, and rescheduled appointments.")+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("none")+
+          theme(plot.caption = element_text(size=12, face="italic"),
+                axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
     }
     
     else{
@@ -5128,8 +5193,8 @@ server <- function(input, output, session) {
     pts.dist <- aggregate(dataArrived()$uniqueId, 
                           by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date), FUN=NROW)
     
-    # pts.dist <- aggregate(arrived.data$uniqueId, 
-    #                       by=list(arrived.data$Appt.MonthYear, arrived.data$Appt.Date), FUN=NROW)
+    # pts.dist <- aggregate(kpi.all.data[arrived.data.rows,]$uniqueId,
+    #                       by=list(kpi.all.data[arrived.data.rows,]$Appt.MonthYear, kpi.all.data[arrived.data.rows,]$Appt.Date), FUN=NROW)
     
     names(pts.dist) <- c("Month","Date","Volume")
     pts.dist$Month <- as.yearmon(pts.dist$Month, format="%Y-%m")
