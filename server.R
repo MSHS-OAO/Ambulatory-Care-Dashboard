@@ -18,9 +18,9 @@ server <- function(input, output, session) {
   # 
   # })
   
-
   
-
+  
+  
   observeEvent(input$selectedCampus,{
     print(class(input$selectedCampus))
     specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
@@ -33,7 +33,7 @@ server <- function(input, output, session) {
     department_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% specialty_choices, "Department"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedDepartment",
                       choices = department_choices,
@@ -44,27 +44,27 @@ server <- function(input, output, session) {
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% specialty_choices &
         kpi.all.data$Department %in% department_choices, "Provider"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedProvider",
                       choices = provider_choices,
                       selected = provider_choices
     )
-
-
+    
+    
     visit_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% specialty_choices &
         kpi.all.data$Department %in% department_choices &
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% provider_choices, "Visit.Method"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedVisitMethod",
                       choices = visit_choices,
                       selected = visit_choices
     )
-
+    
     prc_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% specialty_choices &
@@ -72,53 +72,53 @@ server <- function(input, output, session) {
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% provider_choices &
         kpi.all.data$Visit.Method %in% visit_choices, "Appt.Type"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedPRCName",
                       choices = prc_choices,
                       selected = prc_choices
     )
     
-    },
-    ignoreInit = TRUE,
-    ignoreNULL = FALSE)
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
   observeEvent(input$selectedSpecialty,{
     department_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedDepartment",
                       choices = department_choices,
                       selected = department_choices
     )
-
+    
     provider_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
         kpi.all.data$Department %in% department_choices, "Provider"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedProvider",
                       choices = provider_choices,
                       selected = provider_choices
     )
-
-
+    
+    
     visit_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
         kpi.all.data$Department %in% department_choices &
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% provider_choices, "Visit.Method"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedVisitMethod",
                       choices = visit_choices,
                       selected = visit_choices
     )
-
+    
     prc_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -126,7 +126,7 @@ server <- function(input, output, session) {
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% provider_choices &
         kpi.all.data$Visit.Method %in% visit_choices, "Appt.Type"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedPRCName",
                       choices = prc_choices,
@@ -135,33 +135,33 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-
+  
   observeEvent(input$selectedDepartment,{
     provider_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
         kpi.all.data$Department %in% input$selectedDepartment &
         kpi.all.data$Resource %in% input$selectedResource, "Provider"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedProvider",
                       choices = provider_choices,
                       selected = provider_choices
     )
-
+    
     visit_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
         kpi.all.data$Department %in% input$selectedDepartment &
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% provider_choices, "Visit.Method"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedVisitMethod",
                       choices = visit_choices,
                       selected = visit_choices
     )
-
+    
     prc_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -169,7 +169,7 @@ server <- function(input, output, session) {
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% provider_choices &
         kpi.all.data$Visit.Method %in% visit_choices, "Appt.Type"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedPRCName",
                       choices = prc_choices,
@@ -178,33 +178,33 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-
+  
   observeEvent(input$selectedResource,{
     provider_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
         kpi.all.data$Department %in% input$selectedDepartment &
         kpi.all.data$Resource %in% input$selectedResource, "Provider"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedProvider",
                       choices = provider_choices,
                       selected = provider_choices
     )
-
+    
     visit_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
         kpi.all.data$Department %in% input$selectedDepartment &
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% provider_choices, "Visit.Method"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedVisitMethod",
                       choices = visit_choices,
                       selected = visit_choices
     )
-
+    
     prc_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -212,7 +212,7 @@ server <- function(input, output, session) {
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% provider_choices &
         kpi.all.data$Visit.Method %in% visit_choices, "Appt.Type"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedPRCName",
                       choices = prc_choices,
@@ -221,7 +221,7 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-
+  
   observeEvent(input$selectedProvider, {
     visit_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
@@ -229,13 +229,13 @@ server <- function(input, output, session) {
         kpi.all.data$Department %in% input$selectedDepartment &
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% input$selectedProvider, "Visit.Method"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedVisitMethod",
                       choices = visit_choices,
                       selected = visit_choices
     )
-
+    
     prc_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
         kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -243,7 +243,7 @@ server <- function(input, output, session) {
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% input$selectedProvider &
         kpi.all.data$Visit.Method %in% visit_choices, "Appt.Type"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedPRCName",
                       choices = prc_choices,
@@ -252,7 +252,7 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-
+  
   observeEvent(input$selectedVisitMethod, {
     prc_choices <- sort(unique(kpi.all.data[
       kpi.all.data$Campus %in% input$selectedCampus &
@@ -261,7 +261,7 @@ server <- function(input, output, session) {
         kpi.all.data$Resource %in% input$selectedResource &
         kpi.all.data$Provider %in% input$selectedProvider &
         kpi.all.data$Visit.Method %in% input$selectedVisitMethod, "Appt.Type"]))
-
+    
     updatePickerInput(session,
                       inputId = "selectedPRCName",
                       choices = prc_choices,
@@ -457,10 +457,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data[all.data.rows,],
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data[all.data.rows,],
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataArrivedNoShow <- eventReactive(list(input$sbm,input$update_filters),{
@@ -473,10 +473,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data[arrivedNoShow.data.rows,],
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data[arrivedNoShow.data.rows,],
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataArrived <- eventReactive(list(input$sbm,input$update_filters),{
@@ -489,10 +489,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data[arrived.data.rows,],
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data[arrived.data.rows,],
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataNoShow <- eventReactive(list(input$sbm,input$update_filters),{
@@ -505,10 +505,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data[noshow.data.rows,],
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data[noshow.data.rows,],
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataCanceledBumpedRescheduled<- eventReactive(list(input$sbm,input$update_filters),{
@@ -521,10 +521,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data[canceled.bumped.rescheduled.data.rows,],
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data[canceled.bumped.rescheduled.data.rows,],
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataCanceled<- eventReactive(list(input$sbm,input$update_filters),{
@@ -537,10 +537,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data[canceled.data.rows,],
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data[canceled.data.rows,],
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataBumped<- eventReactive(list(input$sbm,input$update_filters),{
@@ -586,10 +586,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data,
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataArrivedNoShowKpi <- eventReactive(list(input$sbm,input$update_filters),{
@@ -602,10 +602,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data[kpi.arrivedNoShow.data.rows,],
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data[kpi.arrivedNoShow.data.rows,],
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataArrivedKpi <- eventReactive(list(input$sbm,input$update_filters),{
@@ -619,10 +619,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data[kpi.arrived.data.rows,],
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data[kpi.arrived.data.rows,],
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataCanceledBumpedKpi <- eventReactive(list(input$sbm,input$update_filters),{
@@ -651,10 +651,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(kpi.all.data[kpi.canceled.data.rows,],
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(kpi.all.data[kpi.canceled.data.rows,],
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   dataBumpedKpi <- eventReactive(list(input$sbm,input$update_filters),{
@@ -674,7 +674,7 @@ server <- function(input, output, session) {
   }) 
   
   # [2.2] All pre-processed data for utilization tabs --------------------------------------------------------------------------------------
-
+  
   dataUtilization <- eventReactive(list(input$sbm,input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -685,10 +685,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters_2(utilization.data,
-                       input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                       input$selectedVisitMethod, input$selectedPRCName, 
-                       input$dateRange[1], input$dateRange[2], input$daysOfWeekUtil, input$excludeHolidays, input$utilType)
+    groupByFilters_2(utilization.data,
+                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                     input$selectedVisitMethod, input$selectedPRCName, 
+                     input$dateRange[1], input$dateRange[2], input$daysOfWeekUtil, input$excludeHolidays, input$utilType)
   }) 
   
   # dataScheduledUtilization <- reactive({
@@ -730,7 +730,7 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters_4(slot.data.subset[future.slot.data.rows,],
+    groupByFilters_4(slot.data.subset[future.slot.data.rows,],
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod, 
                      input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
@@ -746,7 +746,7 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters_4(slot.data.subset[past.slot.data.rows,],
+    groupByFilters_4(slot.data.subset[past.slot.data.rows,],
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod,
                      input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
@@ -796,10 +796,10 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-      groupByFilters(population.data_filtered,
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    groupByFilters(population.data_filtered,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
   ### (3) Dashboard Layout ============================================================================================================
@@ -808,7 +808,16 @@ server <- function(input, output, session) {
   output$siteTotalPts <- renderValueBox({
     valueBox(
       prettyNum(round(length(unique(dataArrived()$uniqueId))/length(unique(dataArrived()$Appt.DateYear))), big.mark = ','),
-      subtitle = tags$p("Avg Patients per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("Avg. Patients per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+    )
+  })
+  
+  output$siteNoShowPts <- renderValueBox({
+    
+    valueBox(
+      prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / 
+                        length(unique((dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
+      subtitle = tags$p("Avg. No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
   })
   
@@ -821,11 +830,11 @@ server <- function(input, output, session) {
   })
   
   output$siteTotalProvs <- renderValueBox({
-
+    
     valueBox(
       prettyNum(round(mean((dataArrived() %>% group_by(Appt.DateYear, Provider) %>% dplyr::summarise(n()) 
                             %>% group_by(Appt.DateYear) %>% dplyr::summarise(total = n()))$total)), big.mark = ','),
-      subtitle = tags$p("Avg Providers Available per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("Avg. Unique Providers Available per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
   })
   
@@ -835,9 +844,11 @@ server <- function(input, output, session) {
       prettyNum(round((length(unique(dataArrived()$uniqueId))/length(unique(dataArrived()$Appt.DateYear)))/
                         (mean((dataArrived() %>% group_by(Appt.DateYear, Provider) %>% dplyr::summarise(n()) 
                                %>% group_by(Appt.DateYear) %>% dplyr::summarise(total = n()))$total))), big.mark = ','),
-      subtitle = tags$p("Avg Patients per Provider per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("Avg. Patients per Provider per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
   })
+  
+  
   output$siteSpecialties <- renderPlot({
     data <- dataArrived()
     
@@ -882,10 +893,10 @@ server <- function(input, output, session) {
              aes(reorder(Campus.Specialty, -medWaitTime), medWaitTime))+
         geom_bar(stat="identity", width = 0.8, fill = "#221f72") +
         geom_hline(aes(yintercept = 14), color = "red", linetype="dashed", size = 1)+
-        geom_text(aes(nrow(waitTime)-1,14, label = "14 days", vjust = -1, hjust = 0, size = 12, color = "red"))+
-        scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.2), expand = c(0,0))+
+        geom_text(aes(nrow(waitTime)*(0.9),14, label = "New Patient Wait Time \nTarget: 14 days", 
+                      vjust = -1, hjust = 0, size = 16, color = "red"))+        scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.2), expand = c(0,0))+
         labs(x=NULL, y="Days",
-             title = "Median New Appointment Lead Days by Specialty",
+             title = "Median Wait Time to New Appointment by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
@@ -897,10 +908,11 @@ server <- function(input, output, session) {
              aes(reorder(Campus.Specialty, -avgWaitTime), avgWaitTime))+
         geom_bar(stat="identity", width = 0.8, fill = "#221f72") +
         geom_hline(aes(yintercept = 14), color = "red", linetype="dashed", size = 1)+
-        geom_text(aes(nrow(waitTime)-1,14, label = "14 days", vjust = -1, hjust = 0, size = 12, color = "red"))+
+        geom_text(aes(nrow(waitTime)*(0.9),14, label = "New Patient Wait Time \nTarget: 14 days", 
+                      vjust = -1, hjust = 0, size = 16, color = "red"))+
         scale_y_continuous(limits=c(0,max(waitTime$avgWaitTime)*1.2), expand = c(0,0))+
         labs(x=NULL, y="Days",
-             title = "Average New Appointment Lead Days by Specialty",
+             title = "Average Wait Time to New Appointment by Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
@@ -1004,12 +1016,13 @@ server <- function(input, output, session) {
   })
   
   output$siteComparisonPtsTb <- renderReactable({
-    
+
     # Scheduling Arrived Data
     arrivedPts <- dataArrived()
     # arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty == "Cardiology")
     
-    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+    sticky_style <- list(position = "sticky", left = 0, background = "#d80b8c", color = "white", 
+                         fontWeight = "bold", zIndex = 1,
                          borderRight = "1px solid #eee")
     
     if(input$bySpecialty1 == TRUE) {
@@ -1020,7 +1033,12 @@ server <- function(input, output, session) {
         `colnames<-` (c("Campus", "Specialty", "Appt.Week", "total")) %>%
         pivot_wider(names_from = Appt.Week,
                     values_from = total,
-                    values_fill = 0)
+                    values_fill = 0) 
+      
+      col_names <- c(colnames(table),c("Total Arrived Patients"))
+      table <- transform(table, `Total Arrived Patients` = round(rowSums(table[,3:length(table)], na.rm = TRUE)))
+      colnames(table) <- col_names
+      table[table == "NA%"] <- "-"      
       
     } else{
       
@@ -1030,30 +1048,54 @@ server <- function(input, output, session) {
         `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "total")) %>%
         pivot_wider(names_from = Appt.MonthYear,
                     values_from = total,
-                    values_fill = 0)
+                    values_fill = 0) 
+      
+      col_names <- c(colnames(table),c("Total Arrived Patients"))
+      table <- transform(table, `Total Arrived Patients` = round(rowSums(table[,3:length(table)], na.rm = TRUE)))
+      colnames(table) <- col_names
+      table[table == "NA%"] <- "-"
+
     }
+    
+    # bar_chart <- function(label, width = "100%", height = "16px", fill = "#00aeef", background = NULL, align="left") {
+    #   bar <- div(style = list(background = fill, width = width, height = height))
+    #   chart <- div(style = list(flexGrow = 1, marginLeft = "8px", background = background), bar)
+    #   div(style = list(display = "flex", alignItems = "center"), label, chart)
+    # }
     
     reactable(table,
               style = list(fontFamily = "Calibri"),
-              columns = list(
-                Campus = colDef(
-                  style = sticky_style,
-                  headerStyle = sticky_style
-                )
-              ),
+              striped = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              bordered = TRUE,
+              height = 300,
               defaultColDef = colDef(
                 header = function(value) gsub(".", " ", value, fixed = TRUE),
                 cell = function(value) format(value, nsmall = 1),
                 align = "center",
                 minWidth = 120,
-                headerStyle = list(background = "#dddedd")
+                headerStyle = list(background = "#d80b8c",
+                                   color = "white",
+                                   fontWeight = "bold")
               ),
-              defaultSorted = c("Campus", "Specialty"),
-              bordered = TRUE,
-              highlight = TRUE,
-              pagination = FALSE,
-              height = 300)
-   
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              #   Total = colDef(name = "Total", align = "left", cell = function(value) {
+              #     width <- paste0(value / max(table$Total) * 100, "%")
+              #     bar_chart(value, width = width)
+              #   }
+              # ),
+              # Trend = colDef(cell = function(value, index) {
+              #   sparkline(sparkline$trend[[index]])
+              # })
+
+    )
+    )
+  
   })
   
   output$siteComparisonNewPtRatio <- renderPlot({
@@ -1123,7 +1165,8 @@ server <- function(input, output, session) {
     arrivedPts <- dataArrived()
     # arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty == "Cardiology")
     
-    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+    sticky_style <- list(position = "sticky", left = 0, background = "#d80b8c", color = "white", 
+                         fontWeight = "bold", zIndex = 1,
                          borderRight = "1px solid #eee")
     
     if(input$bySpecialty2 == TRUE) {
@@ -1136,14 +1179,19 @@ server <- function(input, output, session) {
       newPts <- merge(arrivedPts.tb, arrivedNewPts.tb, all.x=TRUE)
       newPts[is.na(newPts)] <- 0
       
-      newPts$newRatio <- paste0(round(newPts$`Total New Patients Arrived` / newPts$`Total Patients Arrived`, 2)*100, "%")
+      newPts$newRatio <- round(newPts$`Total New Patients Arrived` / newPts$`Total Patients Arrived`, 2)*100
       
       table <- newPts %>% 
         select(Campus, Campus.Specialty, Appt.Week, newRatio) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.Week", "ratio"))
       
       table <- dcast(table, Campus + Specialty ~ Appt.Week)
-      
+      col_names <- c(colnames(table),c("Avg. New Patient Ratio"))
+      table <- transform(table, `Avg. New Patient Ratio` = round(rowMeans(table[,3:length(table)], na.rm = TRUE)))
+      colnames(table) <- col_names
+      table <- table %>% mutate_if(is.numeric, ~paste0(.,"%"), )
+      table[table == "NA%"] <- "-"
+
     } else{
       
       # Total Arrived Patients
@@ -1154,35 +1202,44 @@ server <- function(input, output, session) {
       newPts <- merge(arrivedPts.tb, arrivedNewPts.tb, all.x=TRUE)
       newPts[is.na(newPts)] <- 0
       
-      newPts$newRatio <- paste0(round(newPts$`Total New Patients Arrived` / newPts$`Total Patients Arrived`, 2)*100, "%")
+      newPts$newRatio <- round(newPts$`Total New Patients Arrived` / newPts$`Total Patients Arrived`, 2)*100
       
       table <- newPts %>% 
         select(Campus, Campus.Specialty, Appt.MonthYear, newRatio) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "ratio"))
       
       table <- dcast(table, Campus + Specialty ~ Appt.MonthYear)
+      
+      col_names <- c(colnames(table),c("Avg. New Patient Ratio"))
+      table <- transform(table, `Avg. New Patient Ratio` = round(rowMeans(table[,3:length(table)], na.rm = TRUE)))
+      colnames(table) <- col_names
+      table <- table %>% mutate_if(is.numeric, ~paste0(.,"%"), )
+      table[table == "NA%"] <- "-"
     }
     
     reactable(table,
               style = list(fontFamily = "Calibri"),
-              columns = list(
-                Campus = colDef(
-                  style = sticky_style,
-                  headerStyle = sticky_style
-                )
-              ),
+              striped = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              bordered = TRUE,
+              height = 300,
               defaultColDef = colDef(
                 header = function(value) gsub(".", " ", value, fixed = TRUE),
                 cell = function(value) format(value, nsmall = 1),
                 align = "center",
                 minWidth = 120,
-                headerStyle = list(background = "#dddedd")
+                headerStyle = list(background = "#d80b8c",
+                                   color = "white",
+                                   fontWeight = "bold")
               ),
-              defaultSorted = c("Campus", "Specialty"),
-              bordered = TRUE,
-              highlight = TRUE,
-              pagination = FALSE,
-              height = 300)
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              )
+    )
     
   })
   
@@ -1210,7 +1267,7 @@ server <- function(input, output, session) {
         geom_point(size=2)+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y="Days",
-             title = "Median New Appointment Lead Days by Site and Specialty",
+             title = "Median Wait Time to New Appointment by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(newWaitTime.tb$`Median New Wait Time`)*1.2))+
         theme_new_line()+
@@ -1231,7 +1288,7 @@ server <- function(input, output, session) {
         geom_point(size=2)+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y="Days",
-             title = "Median New Appointment Lead Days by Site and Specialty",
+             title = "Median Wait Time to New Appointment by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(newWaitTime.tb$`Median New Wait Time`)*1.2))+
         theme_new_line()+
@@ -1245,60 +1302,75 @@ server <- function(input, output, session) {
     
     # Scheduling Arrived Data
     arrivedPts <- dataArrived()
-    # arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
-
+    # arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus == "MSUS") 
+    
     # Median New Patient Wait Time 
     newWaitTime <- arrivedPts %>% filter(New.PT3 == TRUE) %>% 
       mutate(wait.time = as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2))) %>%
       filter(wait.time >= 0)
     
-    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+    sticky_style <- list(position = "sticky", left = 0, background = "#d80b8c", color = "white", 
+                         fontWeight = "bold", zIndex = 1,
                          borderRight = "1px solid #eee")
-
+    
+    
     if(input$bySpecialty3 == TRUE) {
       
       newWaitTime.tb <- newWaitTime %>% 
         group_by(Campus, Campus.Specialty, Appt.Week) %>%
-        dplyr::summarise(waitTime = paste0(round(median(wait.time)), " days")) 
+        dplyr::summarise(waitTime = round(median(wait.time))) 
       
       table <-  newWaitTime.tb %>% 
         select(Campus, Campus.Specialty, Appt.Week, waitTime) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.Week", "waitTime")) %>%
         pivot_wider(names_from = Appt.Week, values_from = waitTime)
+      table$`Median Wait Time` <- apply(table[,3:length(table)], 1, median, na.rm=T)
+      table <- table %>% mutate_if(is.numeric, ~paste0(.," days"))
+      # table$`Median Wait Time` <- paste0(table$`Median Wait Time`," days")
+      table[table == "NA days"] <- "-"
       
+      
+
     } else{
       
       newWaitTime.tb <- newWaitTime %>% 
         group_by(Campus, Campus.Specialty, Appt.MonthYear) %>%
-        dplyr::summarise(waitTime = paste0(round(median(wait.time)), " days")) 
+        dplyr::summarise(waitTime = round(median(wait.time))) 
       
       table <-  newWaitTime.tb %>% 
         select(Campus, Campus.Specialty, Appt.MonthYear, waitTime) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "waitTime")) %>%
         pivot_wider(names_from = Appt.MonthYear, values_from = waitTime)
+      table$`Median Wait Time` <- apply(table[,3:length(table)], 1, median, na.rm=T)
+      table <- table %>% mutate_if(is.numeric, ~paste0(.," days"))
+      # table$`Median Wait Time` <- paste0(table$`Median Wait Time`," days")
+      table[table == "NA days"] <- "-"
       
     }
     
     reactable(table,
               style = list(fontFamily = "Calibri"),
-              columns = list(
-                Campus = colDef(
-                  style = sticky_style,
-                  headerStyle = sticky_style
-                )
-              ),
+              striped = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              bordered = TRUE,
+              height = 300,
               defaultColDef = colDef(
                 header = function(value) gsub(".", " ", value, fixed = TRUE),
                 cell = function(value) format(value, nsmall = 1),
                 align = "center",
                 minWidth = 120,
-                headerStyle = list(background = "#dddedd")
+                headerStyle = list(background = "#d80b8c",
+                                   color = "white",
+                                   fontWeight = "bold")
               ),
-              defaultSorted = c("Campus", "Specialty"),
-              bordered = TRUE,
-              highlight = TRUE,
-              pagination = FALSE,
-              height = 300)
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              )
+    )
     
   })
   
@@ -1329,7 +1401,7 @@ server <- function(input, output, session) {
                            labels=scales::percent_format(accuracy = 1)) +
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y="No Show Rate (%)",
-             title = "Avg No Show (%) by Site and Specialty",
+             title = "Average No Show (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
@@ -1356,7 +1428,7 @@ server <- function(input, output, session) {
                            ,labels=scales::percent_format(accuracy = 1)) +
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y="No Show Rate (%)",
-             title = "Avg No Show (%) by Site and Specialty",
+             title = "Average No Show (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
@@ -1366,12 +1438,13 @@ server <- function(input, output, session) {
   })
   
   output$siteComparisonNoShowTb <- renderReactable({
-
+    
     # Scheduling Arrived and No Show Data
     arrivedNoShowPts <- dataArrivedNoShow()
-    # arrivedNoShowPts <- kpi.all.data[arrivedNoShow.data.rows,] %>% filter(Campus.Specialty == "Cardiology")
+    # arrivedNoShowPts <- kpi.all.data[arrivedNoShow.data.rows,] 
     
-    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+    sticky_style <- list(position = "sticky", left = 0, background = "#d80b8c", color = "white", 
+                         fontWeight = "bold", zIndex = 1,
                          borderRight = "1px solid #eee")
     
     if(input$bySpecialty5 == TRUE) {
@@ -1384,13 +1457,18 @@ server <- function(input, output, session) {
       
       noShows[is.na(noShows)] <- 0
       
-      noShows$`noShow` <- paste0(round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)*100, "%")
+      noShows$`noShow` <- round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)*100
       
       table <-  noShows %>% 
         select(Campus, Campus.Specialty, Appt.Week, noShow) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.Week", "noShow")) %>%
         pivot_wider(names_from = Appt.Week, 
                     values_from = noShow)
+      col_names <- c(colnames(table),c("Avg. No Show Rate"))
+      table <- transform(table, `Avg. No Show Rate` = round(rowMeans(table[,3:length(table)], na.rm = TRUE)))
+      colnames(table) <- col_names
+      table <- table %>% mutate_if(is.numeric, ~paste0(.,"%"), )
+      table[table == "NA%"] <- "-"
       
     } else{
       
@@ -1402,36 +1480,44 @@ server <- function(input, output, session) {
       
       noShows[is.na(noShows)] <- 0
       
-      noShows$`noShow` <- paste0(round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)*100, "%")
+      noShows$`noShow` <- round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)*100
       
       table <-  noShows %>% 
         select(Campus, Campus.Specialty, Appt.MonthYear, noShow) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "noShow")) %>%
         pivot_wider(names_from = Appt.MonthYear, 
                     values_from = noShow)
+      col_names <- c(colnames(table),c("Avg. New Patient Ratio"))
+      table <- transform(table, `Avg. New Patient Ratio` = round(rowMeans(table[,3:length(table)], na.rm = TRUE)))
+      colnames(table) <- col_names
+      table <- table %>% mutate_if(is.numeric, ~paste0(.,"%"), )
+      table[table == "NA%"] <- "-"
       
-      }
+    }
     
     reactable(table,
               style = list(fontFamily = "Calibri"),
-              columns = list(
-                Campus = colDef(
-                  style = sticky_style,
-                  headerStyle = sticky_style
-                )
-              ),
+              striped = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              bordered = TRUE,
+              height = 300,
               defaultColDef = colDef(
                 header = function(value) gsub(".", " ", value, fixed = TRUE),
                 cell = function(value) format(value, nsmall = 1),
                 align = "center",
                 minWidth = 120,
-                headerStyle = list(background = "#dddedd")
+                headerStyle = list(background = "#d80b8c",
+                                   color = "white",
+                                   fontWeight = "bold")
               ),
-              defaultSorted = c("Campus", "Specialty"),
-              bordered = TRUE,
-              highlight = TRUE,
-              pagination = FALSE,
-              height = 300)
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              )
+    )
   })
   
   # testdataset <- reactive({
@@ -1471,7 +1557,7 @@ server <- function(input, output, session) {
         gather(variable, value, 3:7)
       
       bookedFilledRate <- bookedFilledRate %>% filter(variable %in% c("Booked Rate","Filled Rate"))
-
+      
       ggplot(bookedFilledRate, aes(Appt.Week, value, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
         geom_point(size=2)+
@@ -1480,7 +1566,7 @@ server <- function(input, output, session) {
                            labels=scales::percent_format(accuracy = 1)) +
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y=NULL,
-             title = "Avg Booked vs. Filled Rate (%) by Site and Specialty",
+             title = "Average Booked vs. Filled Rate (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         theme_new_line()+
         theme_bw()+
@@ -1510,7 +1596,7 @@ server <- function(input, output, session) {
                            labels=scales::percent_format(accuracy = 1)) +
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y=NULL,
-             title = "Avg Booked vs. Filled Rate (%) by Site and Specialty",
+             title = "Average Booked vs. Filled Rate (%) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(bookedFilledRate$value)*1.2),labels=scales::percent_format(accuracy = 1))+
         theme_new_line()+
@@ -1526,9 +1612,11 @@ server <- function(input, output, session) {
     # Slot Data
     slotData <- dataPastSlot()
     # slotData <- slot.data.subset[past.slot.data.rows,]
-
-    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+    
+    sticky_style <- list(position = "sticky", left = 0, background = "#d80b8c", color = "white", 
+                         fontWeight = "bold", zIndex = 1,
                          borderRight = "1px solid #eee")
+    
     
     if(input$bySpecialty4 == TRUE) {
       
@@ -1538,8 +1626,8 @@ server <- function(input, output, session) {
         summarise(`Available Hours` = sum(`Available Hours`),
                   `Booked Hours` = sum(`Booked Hours`),
                   `Arrived Hours` = sum(`Arrived Hours`)) %>%
-        mutate(`Booked Rate` = paste0(round(`Booked Hours`/`Available Hours`, 2)*100, "%"),
-               `Filled Rate` = paste0(round(`Arrived Hours`/`Available Hours`, 2)*100, "%")) %>%
+        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2)*100,
+               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2)*100) %>%
         select(Campus, Campus.Specialty, Appt.Week, `Booked Rate`, `Filled Rate`) %>%
         gather(variable, value, 4:5) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.Week", "Status", "value")) 
@@ -1547,7 +1635,17 @@ server <- function(input, output, session) {
       table <- bookedFilledRate %>%
         pivot_wider(names_from = Appt.Week,
                     values_from = value) %>%
-        arrange(Campus, Specialty)
+        arrange(Campus, Specialty) 
+      col_names <- c(colnames(table),c("Avg. Rate"))
+      table <- transform(table, `Avg. Rate` = round(rowMeans(table[,4:length(table)], na.rm = TRUE)))
+      colnames(table) <- col_names
+      table <- table %>% mutate_if(is.numeric, ~paste0(.,"%"), )
+      table <- table %>% mutate_if(is.numeric, ~paste0(.,"%"), )
+      table[table == "NA%"] <- "-"
+      table[table == "Inf%"] <- "-"
+      table[table == "NaN%"] <- "-"
+      
+        
       
     } else{
       
@@ -1557,39 +1655,49 @@ server <- function(input, output, session) {
         summarise(`Available Hours` = sum(`Available Hours`),
                   `Booked Hours` = sum(`Booked Hours`),
                   `Arrived Hours` = sum(`Arrived Hours`)) %>%
-        mutate(`Booked Rate` = paste0(round(`Booked Hours`/`Available Hours`, 2)*100, "%"),
-               `Filled Rate` = paste0(round(`Arrived Hours`/`Available Hours`, 2)*100, "%")) %>%
+        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2)*100,
+               `Filled Rate` = round(`Arrived Hours`/`Available Hours`, 2)*100) %>%
         select(Campus, Campus.Specialty, Appt.MonthYear, `Booked Rate`, `Filled Rate`) %>%
         gather(variable, value, 4:5) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "Status", "value")) 
-        
+      
       table <- bookedFilledRate %>%
         pivot_wider(names_from = Appt.MonthYear,
                     values_from = value) %>%
         arrange(Campus, Specialty)
+      col_names <- c(colnames(table),c("Avg. Rate"))
+      table <- transform(table, `Avg. Rate` = round(rowMeans(table[,4:length(table)], na.rm = TRUE)))
+      colnames(table) <- col_names
+      table <- table %>% mutate_if(is.numeric, ~paste0(.,"%"), )
+      table[table == "NA%"] <- "-"
+      table[table == "Inf%"] <- "-"
+      table[table == "NaN%"] <- "-"
       
     }
     
     reactable(table,
               style = list(fontFamily = "Calibri"),
-              columns = list(
-                Campus = colDef(
-                  style = sticky_style,
-                  headerStyle = sticky_style
-                )
-              ),
+              striped = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              bordered = TRUE,
+              height = 300,
               defaultColDef = colDef(
                 header = function(value) gsub(".", " ", value, fixed = TRUE),
                 cell = function(value) format(value, nsmall = 1),
                 align = "center",
                 minWidth = 120,
-                headerStyle = list(background = "#dddedd")
+                headerStyle = list(background = "#d80b8c",
+                                   color = "white",
+                                   fontWeight = "bold")
               ),
-              defaultSorted = c("Campus", "Specialty"),
-              bordered = TRUE,
-              highlight = TRUE,
-              pagination = FALSE,
-              height = 300)
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              )
+    )
   })
   
   
@@ -1647,50 +1755,60 @@ server <- function(input, output, session) {
     arrivedPts <- dataArrived()
     # arrivedPts <- kpi.all.data[arrived.data.rows,]
     
-    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+    sticky_style <- list(position = "sticky", left = 0, background = "#d80b8c", color = "white", 
+                         fontWeight = "bold", zIndex = 1,
                          borderRight = "1px solid #eee")
     
     if(input$bySpecialty6 == TRUE) {
       
       table <- arrivedPts %>% filter(cycleTime > 0) %>% 
         group_by(Campus, Campus.Specialty, Appt.Week) %>% 
-        dplyr::summarise(cycleTime = paste0(round(median(cycleTime)), " min")) %>%
+        dplyr::summarise(cycleTime = round(median(cycleTime))) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.Week", "cycleTime")) %>%
         pivot_wider(names_from = Appt.Week,
                     values_from = cycleTime)
-
+      table$`Median Cycle Time` <- apply(table[,3:length(table)], 1, median, na.rm=T)
+      table <- table %>% mutate_if(is.numeric, ~paste0(.," min"))
+      table[table == "NA min"] <- "-"
+      
     } else{
       
       
       table <- arrivedPts %>% filter(cycleTime > 0) %>% 
         group_by(Campus, Campus.Specialty, Appt.MonthYear) %>% 
-        dplyr::summarise(cycleTime = paste0(round(median(cycleTime)), " min")) %>%
+        dplyr::summarise(cycleTime = round(median(cycleTime))) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "cycleTime")) %>%
         pivot_wider(names_from = Appt.MonthYear,
                     values_from = cycleTime)
+      table$`Median Cycle Time` <- apply(table[,3:length(table)], 1, median, na.rm=T)
+      table <- table %>% mutate_if(is.numeric, ~paste0(.," min"))
+      table[table == "NA min"] <- "-"
       
     }
     
     reactable(table,
               style = list(fontFamily = "Calibri"),
-              columns = list(
-                Campus = colDef(
-                  style = sticky_style,
-                  headerStyle = sticky_style
-                )
-              ),
+              striped = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              bordered = TRUE,
+              height = 300,
               defaultColDef = colDef(
                 header = function(value) gsub(".", " ", value, fixed = TRUE),
                 cell = function(value) format(value, nsmall = 1),
                 align = "center",
                 minWidth = 120,
-                headerStyle = list(background = "#dddedd")
+                headerStyle = list(background = "#d80b8c",
+                                   color = "white",
+                                   fontWeight = "bold")
               ),
-              defaultSorted = c("Campus", "Specialty"),
-              bordered = TRUE,
-              highlight = TRUE,
-              pagination = FALSE,
-              height = 300)
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              )
+    )
   })
   
   
@@ -1716,7 +1834,7 @@ server <- function(input, output, session) {
       # Check in to Room in  
       roomedTime <- roomedTime.tb %>% 
         group_by(siteSpecialty, Appt.Week) %>% dplyr::summarise(`Median Check-in to Room-in Time` = round(median(checkinToRoomin)))
-    
+      
       ggplot(roomedTime, aes(Appt.Week, `Median Check-in to Room-in Time`, group=siteSpecialty, col=siteSpecialty)) +
         geom_line()+
         geom_point(size=2)+
@@ -1745,7 +1863,7 @@ server <- function(input, output, session) {
         geom_point(size=2)+
         scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
         labs(x="Site - Specialty", y="Min.",
-             title = "Median Check-in to Room-in Time (Min.) by Site and Specialty",
+             title = "Median Check-in to Room-in Time (Min) by Site and Specialty",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_y_continuous(expand = c(0,0), limits = c(0,max(roomedTime$`Median Check-in to Room-in Time`)*1.2))+
         theme_new_line()+
@@ -1760,51 +1878,61 @@ server <- function(input, output, session) {
     arrivedPts <- dataArrived()
     # arrivedPts <- kpi.all.data[arrived.data.rows,] %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Cardiology")
     
-    sticky_style <- list(position = "sticky", left = 0, background = "#fff", zIndex = 1,
+    sticky_style <- list(position = "sticky", left = 0, background = "#d80b8c", color = "white", 
+                         fontWeight = "bold", zIndex = 1,
                          borderRight = "1px solid #eee")
     
     if(input$bySpecialty6 == TRUE) {
-
+      
       # Check in to Room in  
       table <- arrivedPts %>% filter(checkinToRoomin >= 0) %>% 
         group_by(Campus, Campus.Specialty, Appt.Week) %>% 
-        dplyr::summarise(checkinToRoomin = paste0(round(median(checkinToRoomin)), " min")) %>%
+        dplyr::summarise(checkinToRoomin = round(median(checkinToRoomin))) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.Week", "checkinToRoomin")) %>%
         pivot_wider(names_from = Appt.Week,
                     values_from = checkinToRoomin)
+      table$`Median Room-in Time` <- apply(table[,3:length(table)], 1, median, na.rm=T)
+      table <- table %>% mutate_if(is.numeric, ~paste0(.," min"))
+      table[table == "NA min"] <- "-"
       
     } else{
       
       # Check in to Room in  
       table <- arrivedPts %>% filter(checkinToRoomin >= 0) %>% 
         group_by(Campus, Campus.Specialty, Appt.MonthYear) %>% 
-        dplyr::summarise(checkinToRoomin = paste0(round(median(checkinToRoomin)), " min")) %>%
+        dplyr::summarise(checkinToRoomin = round(median(checkinToRoomin))) %>%
         `colnames<-` (c("Campus", "Specialty", "Appt.MonthYear", "checkinToRoomin")) %>%
         pivot_wider(names_from = Appt.MonthYear,
                     values_from = checkinToRoomin)
+      table$`Median Room-in Time` <- apply(table[,3:length(table)], 1, median, na.rm=T)
+      table <- table %>% mutate_if(is.numeric, ~paste0(.," min"))
+      table[table == "NA min"] <- "-"
       
     }
     
     reactable(table,
               style = list(fontFamily = "Calibri"),
-              columns = list(
-                Campus = colDef(
-                  style = sticky_style,
-                  headerStyle = sticky_style
-                )
-              ),
+              striped = TRUE,
+              highlight = TRUE,
+              pagination = FALSE,
+              bordered = TRUE,
+              height = 300,
               defaultColDef = colDef(
                 header = function(value) gsub(".", " ", value, fixed = TRUE),
                 cell = function(value) format(value, nsmall = 1),
                 align = "center",
                 minWidth = 120,
-                headerStyle = list(background = "#dddedd")
+                headerStyle = list(background = "#d80b8c",
+                                   color = "white",
+                                   fontWeight = "bold")
               ),
-              defaultSorted = c("Campus", "Specialty"),
-              bordered = TRUE,
-              highlight = TRUE,
-              pagination = FALSE,
-              height = 300)
+              columns = list(
+                Campus = colDef(
+                  style = sticky_style,
+                  headerStyle = sticky_style
+                )
+              )
+    )
   })
   
   # output$siteComparisonWorkingFTE <- renderPlot({
@@ -1918,7 +2046,7 @@ server <- function(input, output, session) {
     output$kpis_mem <- renderText({
       mem_used()/1000000000
       #object_size(dataArrivedKpi())
-      })
+    })
   })
   
   
@@ -1997,7 +2125,7 @@ server <- function(input, output, session) {
     paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
- 
+  
   
   ### (4) Analysis Output ==============================================================================================================
   ### Practice Overview Tab ------------------------------------------------------------------------------------------------------------
@@ -2019,14 +2147,14 @@ server <- function(input, output, session) {
   output$avgVisitsPt <- renderValueBox({
     valueBox(
       prettyNum(round(length((unique(dataArrived()$uniqueId))) / length((unique(dataArrived()$MRN))),1), big.mark = ','),
-      subtitle = tags$p("Avg Visits per Patient", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("Avg. Visits per Patient", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
   })
   
   output$avgVisitsDay <- renderValueBox({
     valueBox(
-      prettyNum(round(length((unique(dataArrived()$uniqueId))) / length((unique(dataArrived()$Appt.DateYear))),1), big.mark = ','),
-      subtitle = tags$p("Avg Visits per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      prettyNum(round(length((unique(dataArrived()$uniqueId))) / length((unique(dataArrived()$Appt.DateYear)))), big.mark = ','),
+      subtitle = tags$p("Avg. Visits per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
   })
   
@@ -2081,25 +2209,25 @@ server <- function(input, output, session) {
   
   output$newPtRatio <- renderInfoBox({
     infoBox(
-      title = tags$p("Arrived New Patient Ratio", style = "font-size: 130%;"), subtitle = NULL, 
-      value = paste0(round((nrow(dataArrived() %>% filter(New.PT3 == TRUE)) / nrow(dataArrived()))*100),"%"), icon = icon("user")
+      title = tags$p("Arrived New Patient Ratio", style = "font-size: 150%;"), subtitle = NULL, 
+      value = tags$p(paste0(round((nrow(dataArrived() %>% filter(New.PT3 == TRUE)) / nrow(dataArrived()))*100),"%"), style = "font-size: 200%;"), icon = icon("user")
     )
   })
   
   output$newNoShow <- renderInfoBox({
     infoBox(
-      title = tags$p("Avg New Patient No Show %", style = "font-size: 130%;"), subtitle = NULL,
-      value = paste0(round(nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status == "No Show"))/ 
-                             nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status %in% c("Arrived", "No Show"))),2)*100,"%"), icon = icon("user-times")
+      title = tags$p("Avg. New Patient No Show %", style = "font-size: 150%;"), subtitle = NULL,
+      value = tags$p(paste0(round(nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status == "No Show"))/ 
+                             nrow(dataArrivedNoShow() %>% filter(New.PT3 == TRUE) %>% filter(Appt.Status %in% c("Arrived", "No Show"))),2)*100,"%"), style = "font-size: 200%;"), icon = icon("user-times")
     )
   })
   
   output$newApptWaitTime <- renderInfoBox({
     infoBox(
-      title = tags$p("Avg Lead Days to New Appointment", style = "font-size: 130%;"), subtitle = NULL, 
-      value =  paste0(round(mean((dataAll() %>% filter(New.PT3 == TRUE) %>%
+      title = tags$p("Avg. Wait Time to New Appointment", style = "font-size: 150%;"), subtitle = NULL, 
+      value = tags$p(paste0(round(mean((dataAll() %>% filter(New.PT3 == TRUE) %>%
                                     mutate(wait.time = as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2))) %>%
-                                    filter(!is.na(wait.time)) %>% filter(wait.time >= 0))$wait.time))," days"), icon = icon("clock")
+                                    filter(!is.na(wait.time)) %>% filter(wait.time >= 0))$wait.time))," days"), style = "font-size: 200%;"), icon = icon("clock")
     )
   })
   
@@ -2137,7 +2265,7 @@ server <- function(input, output, session) {
     #   group_by(Appt.Status) %>%
     #   summarise(value = round(n()/length(unique(kpi.all.data[arrived.data.rows,]$Appt.DateYear)))) %>%
     #   arrange(desc(value)) 
-
+    
     
     sameDay <- data %>%
       group_by(Appt.Status) %>%
@@ -2149,7 +2277,7 @@ server <- function(input, output, session) {
       scale_y_continuous(limits=c(0,(max(sameDay$value))*1.5))+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       labs(x=NULL, y=NULL,
-           title = "Avg Daily No Shows and Same-day \nBumped/Canceled/Rescheduled Appointments",
+           title = "Average Daily No Shows and Same-day \nBumped/Canceled/Rescheduled Appointments",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
       theme_new_line()+
       theme_bw()+
@@ -2210,7 +2338,7 @@ server <- function(input, output, session) {
   output$avgCycleTime <- renderValueBox({
     valueBoxSpark(
       value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0))$cycleTime, na.rm = TRUE))," min"),
-      title = toupper("Avg Check-in to Visit-End"),
+      title = toupper("Avg. Check-in to Visit-End"),
       sparkobj = NULL,
       info = "Sample size (N) is the total number of arrived patients included in this analysis.\nPatients must have both check-in and check-out times > 0 min.",
       icon = NULL,
@@ -2264,7 +2392,7 @@ server <- function(input, output, session) {
     
     valueBoxSpark(
       value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0))$checkinToRoomin, na.rm = TRUE))," min"),
-      title = toupper("Avg Check-in to Room-in"),
+      title = toupper("Avg. Check-in to Room-in"),
       sparkobj = NULL,
       info = "Sample size (N) is the total number of arrived patients included in this analysis.\nPatients must have both check-in and room-in times >= 0.",
       icon = NULL,
@@ -2345,12 +2473,12 @@ server <- function(input, output, session) {
   
   # Provider Overview Tab ------------------------------------------------------------------------------------------------------------
   ## Value Boxes for Key Metrics
-
+  
   output$vbox1 <- renderValueBox({
     
     valueBox(
       prettyNum(round(length(unique(dataArrived()$uniqueId))/length(unique(dataArrived()$Appt.DateYear))), big.mark=','),
-      subtitle = tags$p("Avg Patients Seen per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow")
+      subtitle = tags$p("Avg. Patients Seen per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox2 <- renderValueBox({
@@ -2366,12 +2494,12 @@ server <- function(input, output, session) {
       paste0(prettyNum(round(median((dataAll() %>% filter(New.PT3 == TRUE, Wait.Time >= 0))$Wait.Time)), big.mark=','), " days"),
       subtitle = tags$p("Median New Patient Wait Time", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
-
+  
   output$vbox4 <- renderValueBox({
     
     valueBox(
       paste0(prettyNum(round((sum(dataPastSlot()$`Available Hours`) / length(unique(dataPastSlot()$Appt.DateYear)))), big.mark=','), " hrs"),
-      subtitle = tags$p("Avg Hrs Available per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow")
+      subtitle = tags$p("Avg. Hrs Available per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox5 <- renderValueBox({
@@ -2380,14 +2508,14 @@ server <- function(input, output, session) {
       # round(((sum(dataPastSlot()$`Available Hours`)*60) / length(unique(dataPastSlot()$Appt.DateYear))) /
       #         (length(unique(dataArrived()$uniqueId)) / length(unique(dataArrived()$Appt.DateYear))), 1),
       paste0(round(mean(dataArrivedNoShow()$Appt.Dur))," min"),
-      subtitle = tags$p("Avg Scheduled Duration per Visit", style = "font-size: 130%;"), icon = NULL, color = "yellow")
+      subtitle = tags$p("Avg. Scheduled Duration per Visit", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
   
   output$vbox6 <- renderValueBox({
     
     valueBox(
       prettyNum(round(nrow(dataBumped()) / length(unique(dataArrived()$Appt.DateYear))), big.mark=','),
-      subtitle = tags$p("Avg Same-day Bumps per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow")
+      subtitle = tags$p("Avg. Same-day Bumps per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow")
   })
   
   
@@ -2625,7 +2753,7 @@ server <- function(input, output, session) {
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
       prettyNum(round(nrow(dataArrivedNoShow())/length(unique(dataArrivedNoShow()$Appt.DateYear))), big.mark = ","),
-      subtitle = tags$p("Avg Appointments Scheduled per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("Avg. Appointments Scheduled per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
   })
@@ -2636,7 +2764,7 @@ server <- function(input, output, session) {
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
       paste0(prettyNum(round(nrow(dataArrivedNoShow() %>% filter(Appt.Status != "Arrived")) / 
-                        nrow(dataArrivedNoShow()), 2)*100, big.mark = ","),"%"),
+                               nrow(dataArrivedNoShow()), 2)*100, big.mark = ","),"%"),
       subtitle = tags$p("% of Incomplete Appointments", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -2796,7 +2924,7 @@ server <- function(input, output, session) {
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
       labs(x=NULL, y=NULL,
-           title = "% of Bumps by Lead Days",
+           title = "% of Bumps by Wait Time to Appointment",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
       theme_new_line()+
       theme_bw()+
@@ -2882,7 +3010,7 @@ server <- function(input, output, session) {
   #               position = position_dodge(1), size=5)
   # 
   # })
-
+  
   # 
   # output$provSlotUsagesAvg <- renderPlot({
   #   
@@ -2947,7 +3075,7 @@ server <- function(input, output, session) {
     
     # kpiVolumeData <- aggregate(arrived.data$uniqueId, by=list(arrived.data$Appt.Year,arrived.data$Appt.Quarter,
     #                                                          arrived.data$Appt.Month, arrived.data$Appt.Date, arrived.data$Appt.MonthYear, arrived.data$Appt.DateYear), FUN=NROW)
-
+    
     colnames(kpiVolumeData) <- c("Year","Quarter","Month","Date","YearMonth","DateYear","Volume")
     kpiVolumeData$DateYear <-as.Date(kpiVolumeData$DateYear, "%Y-%m-%d")
     
@@ -3077,7 +3205,7 @@ server <- function(input, output, session) {
     #   group_by(Appt.Year, Appt.Quarter, Appt.Month, Appt.Date, Appt.Status, Appt.MonthYear, Appt.DateYear) %>%
     #   summarise(total = n()) %>%
     #   `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
-   
+    
     statusDataYear <- statusData %>% group_by(Year,Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataYear <- reshape2::dcast(statusDataYear, Year ~ Status)
     statusDataYear[is.na(statusDataYear)] <- 0
@@ -3146,7 +3274,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
@@ -3161,7 +3289,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
@@ -3175,7 +3303,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,  
                title = "Historical Trend of Scheduling Status by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
@@ -3193,7 +3321,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
@@ -3208,7 +3336,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
@@ -3223,7 +3351,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
@@ -3237,7 +3365,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
           facet_wrap(variable~., dir = "v", scales = "free")+
           theme_new_line()+
@@ -3270,7 +3398,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days",
-               title = "Average New Appointment Lead Days by Year",
+               title = "Average Wait Time to New Appointment by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -3279,12 +3407,12 @@ server <- function(input, output, session) {
         
       } else if(input$kpiFreq == 2) { # Quarter
         data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>%
-                                   dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
+          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
         ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days",
-               title = "Average New Appointment Lead Days by Quarter",
+               title = "Average Wait Time to New Appointment by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -3293,14 +3421,14 @@ server <- function(input, output, session) {
         
       } else if(input$kpiFreq == 3){ # Month
         data_filter <- data %>% group_by(Appt.MonthYear) %>% 
-                                           dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
+          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
         ggplot(data_filter, aes(x=interaction(Appt.MonthYear,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days", 
-               title = "Average New Appointment Lead Days by Month",
+               title = "Average Wait Time to New Appointment by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3308,28 +3436,28 @@ server <- function(input, output, session) {
         
       } else { # Day
         data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>%
-                                   dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
+          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
         data_filter$DateYear <- as.Date(with(data_filter, paste(Appt.Year, Appt.Date,sep="-")), "%Y-%m-%d")
         ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean, group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Days",
-               title = "Average New Appointment Lead Days by Day",
+               title = "Average Wait Time to New Appointment by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+
-        scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
-                     date_minor_breaks = "1 day", expand = c(0, 0.6))
+          scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+                       date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
         data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
-                                mutate(Label = "Year")
+          mutate(Label = "Year")
         ggplot(data_filter, aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days", 
-               title = "Average New Appointment Lead Days by Year",
+               title = "Average Wait Time to New Appointment by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -3345,7 +3473,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days", 
-               title = "Average New Appointment Lead Days by Quarter",
+               title = "Average Wait Time to New Appointment by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -3357,13 +3485,13 @@ server <- function(input, output, session) {
         data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
           dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
           mutate(Label = "Month") #%>%
-          #rename(Appt.Year = Year)
-
+        #rename(Appt.Year = Year)
+        
         ggplot(data_filter, aes(x = factor(Appt.Month, level = monthOptions), y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days",
-               title = "Average New Appointment Lead Days by Month",
+               title = "Average Wait Time to New Appointment by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -3379,7 +3507,7 @@ server <- function(input, output, session) {
         ggplot(data_filter, aes(x = Appt.DateYear, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           labs(x = NULL, y = "Days",
-               title = "Average New Appointment Lead Days by Day",
+               title = "Average Wait Time to New Appointment by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           coord_cartesian(clip = 'off') +
@@ -3448,12 +3576,12 @@ server <- function(input, output, session) {
           dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
         data_filter$DateYear <- as.Date(with(data_filter, paste(Appt.Year, Appt.Date,sep="-")), "%Y-%m-%d")
         ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
-        #ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
+          #ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Time (min)",  
                title = "Average Check-in to Visit-End Time (Min.) by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3471,7 +3599,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = "Time (min)",  
                title = "Average Check-in to Visit-End Time (Min.) by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3488,7 +3616,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Visit-End Time (Min.) by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3505,7 +3633,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = "Time (min)",
                title = "Average Check-in to Visit-End Time (Min.) by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3521,7 +3649,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Visit-End Time (Min.) by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3578,7 +3706,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3593,7 +3721,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3611,7 +3739,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Year",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3628,7 +3756,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Quarter",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3645,7 +3773,7 @@ server <- function(input, output, session) {
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Month",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
@@ -3656,19 +3784,19 @@ server <- function(input, output, session) {
         data_filter <- data %>% group_by(Appt.Year, Appt.DateYear) %>% 
           dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
           mutate(Label = "Date")
-      ggplot(data_filter, aes(x = Appt.DateYear, y=mean, col=Appt.Year,group=Appt.Year)) +
+        ggplot(data_filter, aes(x = Appt.DateYear, y=mean, col=Appt.Year,group=Appt.Year)) +
           geom_line() +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Day",
                subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])
-               )+
+          )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
-        theme_new_line()+
-        theme_bw()+
-        graph_theme("top")+ 
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("top")+ 
           scale_color_MountSinai("main") + 
-        scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
-                     date_minor_breaks = "1 day", expand = c(0, 0.6))
+          scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
+                       date_minor_breaks = "1 day", expand = c(0, 0.6))
       }
     }
     
@@ -3681,7 +3809,7 @@ server <- function(input, output, session) {
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
       prettyNum(round(nrow(dataArrivedNoShow())/length(unique(dataArrivedNoShow()$Appt.DateYear))), big.mark = ","),
-      subtitle = tags$p("Avg Appointments Scheduled per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("Avg. Appointments Scheduled per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
   })
@@ -3725,7 +3853,7 @@ server <- function(input, output, session) {
       scale_y_continuous(limits=c(0,(max(sameDay$value))*1.3))+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       labs(x=NULL, y=NULL,
-           title = "Avg Daily No Shows and Same-day \nBumped/Canceled/Rescheduled Appointments",
+           title = "Average Daily No Shows and Same-day \nBumped/Canceled/Rescheduled Appointments",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
       theme_new_line()+
       theme_bw()+
@@ -3870,8 +3998,8 @@ server <- function(input, output, session) {
                     dropupAuto = FALSE),
                   selected = unique(dataAll()$Appt.Type)
                   #selected = sort(unique(dataAll()$Appt.Type), na.last = TRUE)
-                  )
       )
+    )
   })
   
   output$insuranceControl <- renderUI({
@@ -3892,8 +4020,8 @@ server <- function(input, output, session) {
                     dropupAuto = FALSE),
                   #selected = unique(dataAll()$Coverage)
                   selected = sort(unique(dataAll()$Coverage), na.last = TRUE)
-                  )
       )
+    )
   })
   
   # Arrived No Show Data with Additional Filters (Appointment Type and Insurance)
@@ -3909,14 +4037,14 @@ server <- function(input, output, session) {
     data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
     groupByFilters_1(data %>% filter(Appt.Status %in% c("No Show")),
                      input$selectedApptType, input$selectedInsurance
-                     )
+    )
   })
   
   # Total No Shows per Day
   output$avgDailyNoShow_Count <- renderValueBox({
     valueBox(
       prettyNum(round(nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / length(unique((dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
-      subtitle = tags$p("Average No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p("Avg. No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
   })
@@ -3938,130 +4066,100 @@ server <- function(input, output, session) {
     
     data$Appt.Status <- ifelse(data$Appt.Status == "Arrived","Arrived","No Show")
     
-      noShows <- 
-        data %>%
-        mutate(apptLeadDays = as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2))) %>%
-        mutate(apptLeadDays = ifelse(is.na(apptLeadDays),0, apptLeadDays)) %>%
-        mutate(apptLeadDays = ifelse(apptLeadDays > 14, "> 14 days",
-                                     ifelse(apptLeadDays <= 14 & apptLeadDays>= 8, "8-14 days",
-                                            ifelse(apptLeadDays <= 7 & apptLeadDays >= 1, "1-7 days",
-                                                   ifelse(apptLeadDays < 0, "0 day","0 day")))))
+    noShows <- 
+      data %>%
+      mutate(apptLeadDays = as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2))) %>%
+      mutate(apptLeadDays = ifelse(is.na(apptLeadDays),0, apptLeadDays)) %>%
+      mutate(apptLeadDays = ifelse(apptLeadDays > 14, "> 14 days",
+                                   ifelse(apptLeadDays <= 14 & apptLeadDays>= 8, "8-14 days",
+                                          ifelse(apptLeadDays <= 7 & apptLeadDays >= 1, "1-7 days",
+                                                 ifelse(apptLeadDays < 0, "0 day","0 day")))))
+    
+    noShows <- reshape2::dcast(noShows, apptLeadDays + Appt.DateYear ~ Appt.Status)
+    noShows$noShow_perc <- round(noShows$`No Show`/ (noShows$`No Show` + noShows$Arrived),2)
+    noShows$noShow_perc[!is.finite(noShows$noShow_perc)] <- 0
+    
+    status <- c('0 day','1-7 days','8-14 days','> 14 days')
+    
+    if(input$distribution == TRUE){
+      g1 <- ggplot(noShows, aes(x = factor(apptLeadDays, levels = status), y = noShow_perc)) +
+        geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+        stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+        scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits = c(0,max(noShows$noShow_perc)))+
+        labs(x=NULL, y = "Percent",
+             title = "Distribution of Average Daily No Show Rate by Wait Time to Appointment*",
+             subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+        # caption = "*No Show includes no show and same-day bumped, 
+        # canceled, and rescheduled appointments.")+
+        theme_new_line()+
+        theme_bw()+
+        graph_theme("none")+
+        theme(plot.caption = element_text(size=12, face="italic"),
+              axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
       
-      noShows <- reshape2::dcast(noShows, apptLeadDays + Appt.DateYear ~ Appt.Status)
-      noShows$noShow_perc <- round(noShows$`No Show`/ (noShows$`No Show` + noShows$Arrived),2)
-      noShows$noShow_perc[!is.finite(noShows$noShow_perc)] <- 0
       
-      status <- c('0 day','1-7 days','8-14 days','> 14 days')
+      noShows.summary <- noShows %>%
+                         group_by(apptLeadDays) %>%
+                         dplyr::summarise(Avg = paste0(round(mean(noShow_perc),2)*100,"%"), 
+                                          Median = paste0(median(noShow_perc)*100,"%"),
+                                          Min = paste0(min(noShow_perc)*100,"%"), 
+                                          Max = paste0(max(noShow_perc)*100,"%"), N = n())
       
-      if(input$distribution == TRUE){
-        g1 <- ggplot(noShows, aes(x = factor(apptLeadDays, levels = status), y = noShow_perc)) +
-              geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
-              stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-              scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits = c(0,max(noShows$noShow_perc)*1.2))+
-              labs(x=NULL, y = "Percent",
-                   title = "Distribution of No Show Rate by Lead Days to Appointment*",
-                   subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-                   # caption = "*No Show includes no show and same-day bumped, 
-                   # canceled, and rescheduled appointments.")+
-              theme_new_line()+
-              theme_bw()+
-              graph_theme("none")+
-              theme(plot.caption = element_text(size=12, face="italic"),
-                    axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
-        
-        
-        # noShows.summary <- noShows %>%
-        #                    group_by(apptLeadDays) #%>%
-        #                    #dplyr::summarise(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
-        # 
-        # noShows.summary.1 <- noShows.summary %>% filter(apptLeadDays == "0 day") %>%
-        #                       group_by(apptLeadDays) %>% 
-        #                       dplyr::mutate(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
-        # 
-        # cols <- c(1,6:10)
-        # noShows.summary.test <- noShows.summary.1[1,cols]
-        # noShows.summary.2 <- noShows.summary %>% filter(apptLeadDays == "1-7 days")
-        # %>% plyr::summarise(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
-        # 
-        # noShows.summary.3 <- noShows.summary %>% filter(apptLeadDays == "8-14 days")
-        # %>% plyr::summarise(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
-        # 
-        # noShows.summary.4 <- noShows.summary %>% filter(apptLeadDays == "> 14 days")
-        # %>% plyr::summarise(Avg = round(mean(noShow_perc),1), Median = median(noShow_perc), Min = min(noShow_perc), Max = max(noShow_perc), N = n())
-        # 
-        # 
-        # noShows.summary <- noShows.summary %>%
-        #                    arrange(factor(apptLeadDays, levels = c("0 day", "1-7 days", "8-14 days", "> 14 days")))
-        # 
-        # data_melt <<- reshape2::melt(noShows.summary, id = "apptLeadDays")
-        # 
-        # n <- length(unique(data_melt$variable)) - 1
-        # if(n==0){
-        #   hline_y <- 0
-        # } else{
-        #   hline_y <- seq(1.5, 0.5+n, by= 1)
-        # }
-        # 
-        # 
-        # g2 <- ggplot(data_melt, aes(x = apptLeadDays, y = variable, label = value))+
-        #   scale_color_MountSinai('dark' )+
-        #   geom_text(size = 5, vjust = "center", hjust = "center", fontface  = "bold")+
-        #   geom_hline(yintercept = hline_y, colour='black')+
-        #   geom_vline(xintercept = 0, colour = 'black')+
-        #   scale_x_discrete(position = "top") + 
-        #   labs(y = NULL, x = NULL, fill = "AssociationListA")+
-        #   theme_minimal() +
-        #   table_theme()
-        # 
-        # 
-        # g1 + g2 + plot_layout(ncol = 1, heights = c(7, 0.67 * length(unique(data_melt$variable))))
-        
-        
-        ggplot(noShows, aes(x = factor(apptLeadDays, levels = status), y = noShow_perc)) +
-          geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
-          stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-          scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits = c(0,max(noShows$noShow_perc)*1.2))+
-          labs(x=NULL, y = "Percent",
-               title = "Distribution of No Show Rate by Lead Days to Appointment*",
-               subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-          # caption = "*No Show includes no show and same-day bumped, 
-          # canceled, and rescheduled appointments.")+
-          theme_new_line()+
-          theme_bw()+
-          graph_theme("none")+
-          theme(plot.caption = element_text(size=12, face="italic"),
-                axis.text.x = element_text(size = 16, angle=0, hjust=0.5))
-    }
+      cols <- c(1,6:10)
+  
+      level_order <- c("0 day", "1-7 days", "8-14 days", "> 14 days")
+
+      data_melt <- reshape2::melt(noShows.summary, id = "apptLeadDays")
+
+      n <- length(unique(data_melt$variable)) - 1
+      if(n==0){
+        hline_y <- 0
+      } else{
+        hline_y <- seq(1.5, 0.5+n, by= 1)
+      }
+
+
+      g2 <- ggplot(data_melt, aes(x = factor(apptLeadDays, level = level_order), y = variable, label = value))+
+        scale_color_MountSinai('dark')+
+        geom_text(size = 5, vjust = "center", hjust = "center", fontface  = "bold")+
+        geom_hline(yintercept = hline_y, colour='black')+
+        geom_vline(xintercept = 0, colour = 'black')+
+        scale_x_discrete(position = "top") +
+        labs(y = NULL, x = NULL, fill = "apptLeadDays")+
+        theme_minimal() +
+        table_theme()
+
+      g1 + g2 + plot_layout(ncol = 1, heights = c(7, 0.67 * length(unique(data_melt$variable))))
     
-    else{
-    
-    noShows_bar_tb <-
-      noShows %>%
-      group_by(apptLeadDays) %>%
-      dplyr::summarise(Arrived = sum(Arrived),
-                       `No Show` = sum(`No Show`)) %>%
-      mutate(Average = round(`No Show`/(Arrived + `No Show`),2)) %>%
-      select(apptLeadDays, Average)
-    
-    noShows_bar_tb <-
-      reshape2::melt(noShows_bar_tb, id.vars = c("apptLeadDays"))
-    
+   } else{
+      
+      noShows_bar_tb <-
+        noShows %>%
+        group_by(apptLeadDays) %>%
+        dplyr::summarise(Arrived = sum(Arrived),
+                         `No Show` = sum(`No Show`)) %>%
+        mutate(Average = round(`No Show`/(Arrived + `No Show`),2)) %>%
+        select(apptLeadDays, Average)
+      
+      noShows_bar_tb <-
+        reshape2::melt(noShows_bar_tb, id.vars = c("apptLeadDays"))
+      
       ggplot(noShows_bar_tb, aes(x=factor(apptLeadDays, levels = status), y=value,fill=variable)) +
         geom_bar(stat="identity", position=position_dodge(), width = 0.8, fill="#f9878a", color="red") +
         labs(x=NULL, y = "Percent",
-           # caption = "*No Show includes no show and same-day bumped, 
-           # canceled, and rescheduled appointments.",
-           title = "Average No Show Rate by Lead Days to Appointment*",
-           subtitle = paste0("Based on data from ",input$dateRangeKpi[1],
-                                        " to ",input$dateRangeKpi[2]))+
-      scale_y_continuous(labels=scales::percent_format(accuracy=1),limits = c(0,max(noShows_bar_tb$value)*1.2))+
-    theme_new_line()+
-    theme_bw()+
-    graph_theme("none")+
-    theme(plot.caption = element_text(size=12, face="italic"),
-          axis.text.x = element_text(size = 16, angle=0, hjust=1))+
-    geom_text(aes(label=paste0(value*100,"%")), vjust = -1, hjust = .5, color="black", fontface="bold",
-              position = position_dodge(1), size=5)
+             # caption = "*No Show includes no show and same-day bumped,
+             # canceled, and rescheduled appointments.",
+             title = "Average No Show Rate by Wait Time to Appointment*",
+             subtitle = paste0("Based on data from ",input$dateRangeKpi[1],
+                               " to ",input$dateRangeKpi[2]))+
+        scale_y_continuous(labels=scales::percent_format(accuracy=1),limits = c(0,max(noShows_bar_tb$value)*1.2))+
+        theme_new_line()+
+        theme_bw()+
+        graph_theme("none")+
+        theme(plot.caption = element_text(size=12, face="italic"),
+              axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+        geom_text(aes(label=paste0(value*100,"%")), vjust = -1, hjust = .5, color="black", fontface="bold",
+                  position = position_dodge(1), size=5)
     }
     #grid.arrange(noShows_bar, noShows_box, ncol = 2)
     
@@ -4098,8 +4196,8 @@ server <- function(input, output, session) {
            title = "Average Daily No Shows*",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",
                              input$dateRangeKpi[2]))+
-           # caption = "*No Show includes no show and same-day bumped,
-           # canceled, and rescheduled appointments.")+
+      # caption = "*No Show includes no show and same-day bumped,
+      # canceled, and rescheduled appointments.")+
       geom_tile(aes(fill=avgNoShows), colour = "black", size=0.5)+
       scale_fill_gradient(low = "white", high = "red", space = "Lab", na.value = "#dddedd", guide = "colourbar", name="No Shows ")+
       scale_y_discrete(limits = rev(unique(sort(noShow_count.df$Time))))+
@@ -4147,8 +4245,8 @@ server <- function(input, output, session) {
            title = "Average No Show %*",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",
                              input$dateRangeKpi[2]))+
-           # caption = "*No Show includes no show and same-day bumped, 
-           # canceled, and rescheduled appointments.")+
+      # caption = "*No Show includes no show and same-day bumped, 
+      # canceled, and rescheduled appointments.")+
       geom_tile(aes(fill=percentage), colour = "black", size=0.5)+
       scale_fill_gradient(low = "white", high = "red", space = "Lab", na.value = "#dddedd", guide = "colourbar", name="No Show % ")+
       scale_y_discrete(limits = rev(unique(sort(noShow_perc.df$Time))))+
@@ -4195,7 +4293,7 @@ server <- function(input, output, session) {
     
     valueBox(
       prettyNum(round(nrow(data %>% filter(Appt.Status == "Bumped"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
-      subtitle = tags$p("Avg Daily Bumped Appointments", style = "font-size: 160%;"), icon = NULL,
+      subtitle = tags$p("Avg. Daily Bumped Appointments", style = "font-size: 160%;"), icon = NULL,
       color = "yellow"
     )
   })
@@ -4208,7 +4306,7 @@ server <- function(input, output, session) {
     
     valueBox(
       prettyNum(round(nrow(data %>% filter(Appt.Status == "Canceled"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
-      subtitle = tags$p("Avg Daily Canceled Appointments", style = "font-size: 160%;"), icon = NULL,
+      subtitle = tags$p("Avg. Daily Canceled Appointments", style = "font-size: 160%;"), icon = NULL,
       color = "yellow"
     )
   })
@@ -4221,7 +4319,7 @@ server <- function(input, output, session) {
     
     valueBox(
       prettyNum(round(nrow(data %>% filter(Appt.Status == "Rescheduled"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
-      subtitle = tags$p("Avg Daily Rescheduled Appointments", style = "font-size: 160%;"), icon = NULL,
+      subtitle = tags$p("Avg. Daily Rescheduled Appointments", style = "font-size: 160%;"), icon = NULL,
       color = "yellow"
     )
   })
@@ -4276,7 +4374,7 @@ server <- function(input, output, session) {
       geom_bar(position="stack",stat="identity", width=0.7)+
       scale_fill_manual(values=c("grey","#00aeef","#d80b8c","midnightblue"))+
       labs(x=NULL, y=NULL,
-           title = "% of Bumped/Canceled/Rescheduled \nAppointments by Lead Days*",
+           title = "% of Bumped/Canceled/Rescheduled \nAppointments by Wait Time*",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
            caption = "*Time from appointment scheduled to status changed.")+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
@@ -4315,7 +4413,7 @@ server <- function(input, output, session) {
                 position = position_dodge(1), size=5)
     
   })
-
+  
   
   ## Bumped Reasons by Lead Days
   output$reasonsBumps <- renderPlot({
@@ -4355,10 +4453,10 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Bumped Reasons by Lead Days",
+             title = "Top 10 Bumped Reasons by Wait Time to Appointment",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_fill_gradient(low = "white", high = "#d80b8c", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
-                            name="Total Bumped Appointments\n by Lead Days")+
+                            name="Total Bumped Appointments\n by Wait Time to Appointment")+
         geom_text(aes(label= ifelse(is.na(total),"",total)), color="black", size=5)
       
     }else{
@@ -4369,10 +4467,10 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Bumped Reasons by Lead Days",
+             title = "Top 10 Bumped Reasons by Wait Time to Appointment",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_fill_gradient(low = "white", high = "#d80b8c", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
-                            name="Total % of Bumped \nAppointments by Lead Days")+
+                            name="Total % of Bumped \nAppointments by Wait Time to Appointment")+
         geom_text(aes(label= ifelse(is.na(percent),"",paste0(percent,"%"))), color="black", size=5, fontface="bold")
       
     }
@@ -4430,10 +4528,10 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Canceled Reasons by Lead Days",
+             title = "Top 10 Canceled Reasons by Wait Time to Appointment",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_fill_gradient(low = "white", high = "#00aeef", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
-                            name="Total Canceled Appointments\n by Lead Days")+
+                            name="Total Canceled Appointments\n by Wait Time to Appointment")+
         geom_text(aes(label= ifelse(is.na(total),"",total)), color="black", size=5)
       
     }else{
@@ -4444,10 +4542,10 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Canceled Reasons by Lead Days",
+             title = "Top 10 Canceled Reasons by Wait Time to Appointment",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_fill_gradient(low = "white", high = "#00aeef", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
-                            name="% of Total Canceled \nAppointments by Lead Days")+
+                            name="% of Total Canceled \nAppointments by Wait Time to Appointment")+
         geom_text(aes(label= ifelse(is.na(percent),"",paste0(percent,"%"))), color="black", size=5)
     }
     
@@ -4464,7 +4562,7 @@ server <- function(input, output, session) {
     
   })
   
-
+  
   ### Utilization Tab -----------------------------------------------------------------------------------------------------------------
   # Average Rooms Required --------------------------------------------------------------------------------------------
   output$roomStat1 <- renderValueBox({
@@ -4537,7 +4635,7 @@ server <- function(input, output, session) {
   # Average Number of Rooms Required -----------------------------------------------
   output$spaceUsed <- renderPlot({
     data <- dataUtilization() %>% filter(comparison == 0)
-
+    
     # data <- as.data.frame(utilization.data[arrived.utilization.data.rows,])
     
     # Days of Week Table
@@ -4573,7 +4671,7 @@ server <- function(input, output, session) {
       scale_color_MountSinai("main")+
       theme_new_line()+
       theme_bw()+
-    graph_theme("top") + theme(legend.title = element_blank(), legend.direction = "horizontal", legend.key.size = unit(1.0,"cm"))+
+      graph_theme("top") + theme(legend.title = element_blank(), legend.direction = "horizontal", legend.key.size = unit(1.0,"cm"))+
       guides(colour = guide_legend(nrow = 1))
     
     table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
@@ -4627,7 +4725,7 @@ server <- function(input, output, session) {
     
     names(space.hour.day) <- c("Day","Time","Total_Dur","Days","Average_Util")
     #space.hour.day$Average_Util <- space.hour.day$Average_Util*100
-
+    
     byDayTime.df <- byDayTime.df[which(byDayTime.df$Day %in% unique(space.hour.day$Day)),]
     
     space.hour.day <- as.data.frame(merge(byDayTime.df,space.hour.day, by.x = c("Day","Time"), by.y = c("Day","Time"), all = TRUE))
@@ -4654,7 +4752,7 @@ server <- function(input, output, session) {
       guides(colour = guide_legend(nrow = 1))
     
     space.hour.day$Average_Util <- space.hour.day$Average_Util*100
-      
+    
     table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
       labs(x=NULL, y=NULL)+
       geom_tile(aes(fill=Average_Util), colour = "black", size=0.5)+
@@ -4677,7 +4775,7 @@ server <- function(input, output, session) {
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
       geom_text(aes(label= ifelse(is.na(Average_Util),"",paste0(round(Average_Util,2),"%"))), color="black", size=5, fontface="bold")
-      #geom_text(aes(label= ifelse(is.na(Average_Util),"",paste0(round(Average_Util*100,2)*100,"%"))), color="black", size=5, fontface="bold")
+    #geom_text(aes(label= ifelse(is.na(Average_Util),"",paste0(round(Average_Util*100,2)*100,"%"))), color="black", size=5, fontface="bold")
     
     grid.arrange(graph, table, ncol = 1, heights = c(5,3))
     
@@ -4716,7 +4814,7 @@ server <- function(input, output, session) {
       theme_new_line()+
       theme_bw()+
       graph_theme("top") + theme(legend.title = element_blank(), legend.direction = "horizontal", legend.key.size = unit(1.0,"cm"))
-        guides(colour = guide_legend(nrow = 1))
+    guides(colour = guide_legend(nrow = 1))
     
     table <- ggplot(space.hour, aes(x=variable, y=Time))+
       labs(x=NULL, y=NULL)+
@@ -4787,7 +4885,7 @@ server <- function(input, output, session) {
       theme_new_line()+
       theme_bw()+
       graph_theme("top") + theme(legend.title = element_blank(), legend.direction = "horizontal", legend.key.size = unit(1.0,"cm"))
-        guides(colour = guide_legend(nrow = 1))
+    guides(colour = guide_legend(nrow = 1))
     
     space.hour$value <- space.hour$value*100
     
@@ -4840,7 +4938,7 @@ server <- function(input, output, session) {
       row_spec(0, bold=T, background = "#dddedd", color = "black") %>%
       column_spec(1, bold=T) %>%
       add_header_above(c("Coverage Breakdown" = length(data)),
-                      background = "#d80b8c", color = "white", font_size = 18, align = "center")
+                       background = "#d80b8c", color = "white", font_size = 18, align = "center")
     
   }
   
@@ -4931,7 +5029,7 @@ server <- function(input, output, session) {
   
   ## Breakdown of Arrived Visits by Zip Code
   output$zipCode_tb <- function(){
-
+    
     data <- dataArrivedPop()
     newdata <- uniquePts_df_system(data)
     
@@ -5099,9 +5197,9 @@ server <- function(input, output, session) {
       hc_subtitle(text = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2])) %>%
       hc_xAxis(title = list(text = ''), labels = list(format = '{value:%Y-%m}', rotation = "310")) %>%
       hc_yAxis(title = list(text = 'Patients')) #%>%
-      # hc_theme(style = list(
-      #                       fontFamily = "Calibri")
-      #          )
+    # hc_theme(style = list(
+    #                       fontFamily = "Calibri")
+    #          )
     # ggplot(pts.count,  aes(x=Date, y=Volume))+
     #   geom_line(color="midnightblue")+
     #   #geom_point(color="midnightblue")+
@@ -5145,14 +5243,14 @@ server <- function(input, output, session) {
       graph_theme("none")+
       geom_text(aes(label=Volume), hjust = 0.5, vjust = -1, color="black", fontface="bold",
                 position = position_dodge(1), size=5)
-      # theme(
-      #   legend.position = "none",
-      #   axis.title.y = element_blank(),
-      #   axis.title.x = element_blank(),
-      #   axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
-      #   axis.text.y = element_text(size = "16"))+
-      # geom_text(aes(label=Volume), vjust = -.5, color="black", fontface="bold",
-      #           position = position_dodge(1), size=5)
+    # theme(
+    #   legend.position = "none",
+    #   axis.title.y = element_blank(),
+    #   axis.title.x = element_blank(),
+    #   axis.text.x = element_text(size = "16", vjust=0.5, angle = 0),
+    #   axis.text.y = element_text(size = "16"))+
+    # geom_text(aes(label=Volume), vjust = -.5, color="black", fontface="bold",
+    #           position = position_dodge(1), size=5)
     
   })
   
@@ -5202,18 +5300,15 @@ server <- function(input, output, session) {
     pts.dist <- pts.dist[order(pts.dist$Month),]
     
     g1 <- ggplot(pts.dist, aes(x=Month, y=Volume, group=Month))+
-            geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
-            stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-            labs(x = NULL, y = "Patients",
-                 title = "Daily Patient Volume Distribution by Month",
-                 subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-            scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m")+
-            theme_new_line()+
-            theme_bw()+
-            graph_theme("none")
-    
-    
-    
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+      stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      labs(x = NULL, y = "Patients",
+           title = "Daily Patient Volume Distribution by Month",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m")+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")
     
     
     pts.dist <- aggregate(dataArrived()$uniqueId, 
@@ -5227,7 +5322,7 @@ server <- function(input, output, session) {
     pts.dist.summary <-
       pts.dist %>%
       group_by(Month) %>%
-      dplyr::summarise(Avg = round(mean(Volume),1), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
+      dplyr::summarise(Avg = round(mean(Volume)), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
     
     pts.dist.summary <- 
       pts.dist.summary[order(as.yearmon(pts.dist.summary$Month,format="%Y-%m")),]
@@ -5258,6 +5353,7 @@ server <- function(input, output, session) {
     g1 + g2 + plot_layout(ncol = 1, heights = c(7, 0.67 * length(unique(data_melt$variable))))
     
   })
+  
   
   # Daily Volume Distribution by Month Table
   output$volume4.1 <- function(){
@@ -5298,15 +5394,15 @@ server <- function(input, output, session) {
     names(pts.dist) <- c("Month","Date","Day","Volume")
     
     g1 <- ggplot(pts.dist, aes(x=factor(Day, level = daysOfWeek.options), y=Volume))+
-              geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+ 
-              stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-              labs(x = NULL, y = "Patients",
-                   title = "Daily Patient Volume Distribution by Day of Week",
-                   subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
-              theme_new_line()+
-              theme_bw()+
-              graph_theme("none")+
-              theme(axis.text.x = element_text(size = 16, angle=0, hjust = 0.5))
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+ 
+      stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      labs(x = NULL, y = "Patients",
+           title = "Daily Patient Volume Distribution by Day of Week",
+           subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      theme(axis.text.x = element_text(size = 16, angle=0, hjust = 0.5))
     
     
     # data <- filter(arrived.data, Campus == "MSUS")
@@ -5316,17 +5412,17 @@ server <- function(input, output, session) {
     
     pts.dist <- aggregate(dataArrived()$uniqueId,
                           by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date, dataArrived()$Appt.Day), FUN=NROW)
-
+    
     names(pts.dist) <- c("Month","Date","Day","Volume")
-
+    
     pts.dist.summary <-
       pts.dist %>%
       group_by(Day) %>%
-      dplyr::summarise(Avg = round(mean(Volume),1), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
-
+      dplyr::summarise(Avg = round(mean(Volume)), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
+    
     pts.dist.summary <- pts.dist.summary[match(daysOfWeek.options,pts.dist.summary$Day),]
     pts.dist.summary <- pts.dist.summary[complete.cases(pts.dist.summary),]
-
+    
     pts.dist.summary.t <-setNames(data.frame(t(pts.dist.summary[,-1])), pts.dist.summary[,1])
     colnames(pts.dist.summary.t) <- pts.dist.summary$Day
     
@@ -5472,9 +5568,9 @@ server <- function(input, output, session) {
       scale_color_manual(values=c('#212070','#7f7f7f','red'))+
       scale_size_manual(values=c(1, 1, 1.3))+
       labs(x=NULL, y=NULL,
-           title = "New and Established Appointment Lead Days (Median) Over Time",
+           title = "Median Wait Time to New and Established Appointment Over Time",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2])
-           )+
+      )+
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
@@ -5506,7 +5602,7 @@ server <- function(input, output, session) {
       geom_hline(yintercept=14, linetype="dashed", color = "red", size=1)+
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       labs(x=NULL, y=NULL, 
-           title = "New and Established Appointment Lead Days (Median) Over Time by Provider",
+           title = "Median Wait Time to New and Established Appointment Over Time by Provider",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
       theme_new_line()+
       theme_bw()+
@@ -5570,7 +5666,7 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('pink')+
       labs(x=NULL, y=NULL, 
-           title = "New Appointment Lead Days*",
+           title = "Wait Time* to New Appointment",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
            caption = "*Based on all of scheduled patients")+
       theme_new_line()+
@@ -5638,154 +5734,154 @@ server <- function(input, output, session) {
   
   output$slotManageGraph <- renderPlotly({
     
-      #data <- slot.data.subset %>% filter(Campus == "MSUS")
+    #data <- slot.data.subset %>% filter(Campus == "MSUS")
+    
+    data <- dataAllSlot()
+    
+    booked_filled <- data %>%
+      group_by(Appt.DateYear) %>%
+      summarise(`Available Hours` = sum(`Available Hours`),
+                `Booked Hours` = sum(`Booked Hours`),
+                `Filled Hours` = sum(`Arrived Hours`)) %>%
+      mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2)*100,
+             `Filled Rate` = round(`Filled Hours`/`Available Hours`, 2)*100) 
+    
+    slot_fig <- plot_ly(booked_filled, x = ~Appt.DateYear,
+                        textfont = list(color = '#000000', size = 16))
+    
+    if(input$byRate == TRUE){
+      y_axis <- "Booked Rate" 
+    } else{
+      y_axis <- "Available Hours"
+    }
+    
+    today <- max(dataAll()$Appt.DateYear) + 2
+    annon <- list()
+    i <- 1
+    # annon <- list(list(text = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+    #                    x = 0.78,
+    #                    y = 1.14,
+    #                    yref = "paper",
+    #                    xref = "paper",
+    #                    showarrow = FALSE
+    # ))
+    # i <- 2
+    
+    
+    
+    
+    
+    if(min(booked_filled$Appt.DateYear) <= today  && today  <= max(booked_filled$Appt.DateYear)){
+      slot_fig <- slot_fig %>% add_segments(x = today,
+                                            xend = today,
+                                            y = 0, yend = max(booked_filled[[y_axis]]  * 1.2),
+                                            line = list(color = "#000000", dash = "dash"),
+                                            showlegend = FALSE,
+                                            hoverinfo = 'skip')
       
-      data <- dataAllSlot()
+      annon[[i]] <- list(
+        x = today,
+        y = max(booked_filled[[y_axis]]  * 1.25),
+        text = "Today",
+        xref = "x",
+        yref= "y",
+        showarrow = FALSE,
+        ax = 20,
+        ay=  -40,
+        font = list(color = '#000000',size = 18)
+      )
       
-      booked_filled <- data %>%
-        group_by(Appt.DateYear) %>%
-        summarise(`Available Hours` = sum(`Available Hours`),
-                  `Booked Hours` = sum(`Booked Hours`),
-                  `Filled Hours` = sum(`Arrived Hours`)) %>%
-        mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`, 2)*100,
-               `Filled Rate` = round(`Filled Hours`/`Available Hours`, 2)*100) 
+      i <- i + 1
+    }
+    
+    
+    if(input$byRate == TRUE){ # by Booked and Filled Rate
       
-      slot_fig <- plot_ly(booked_filled, x = ~Appt.DateYear,
-                          textfont = list(color = '#000000', size = 16))
+      slot_fig <- slot_fig %>% add_segments(x = min(booked_filled$Appt.DateYear),
+                                            xend = max(booked_filled$Appt.DateYear),
+                                            y = 100,
+                                            yend = 100,
+                                            line = list(color = "#FF0000", dash = "dash"),
+                                            showlegend = FALSE)
       
-      if(input$byRate == TRUE){
-        y_axis <- "Booked Rate" 
-      } else{
-        y_axis <- "Available Hours"
-      }
+      annon[[i]] <- list(
+        x = max(booked_filled$Appt.DateYear)+5,
+        y = 100 ,
+        text = "100 %",
+        xref = "x",
+        yref= "y",
+        showarrow = FALSE,
+        ax = 20,
+        ay=  -40,
+        font = list(color = '#FF0000',size = 18)
+      )
       
-      today <- max(dataAll()$Appt.DateYear) + 2
-      annon <- list()
-      i <- 1
-      # annon <- list(list(text = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-      #                    x = 0.78,
-      #                    y = 1.14,
-      #                    yref = "paper",
-      #                    xref = "paper",
-      #                    showarrow = FALSE
-      # ))
-      # i <- 2
+      i <- i + 1
+      
+      slot_fig <- slot_fig %>% add_trace(y = ~`Booked Rate`, name = "Booked Rate (%)", mode = 'lines+markers',
+                                         marker = list(color = "#d80b8c"), line = list(color = "#d80b8c"))
+      slot_fig <- slot_fig %>% add_trace(y = ~`Filled Rate`, name = "Filled Rate (%)", mode = 'lines+markers',
+                                         marker = list(color = "#00aeef"), line = list(color = "#00aeef"))
+      
+      slot_fig %>% layout(
+        annotations = annon,
+        #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
+        title = "Past and Upcoming Slot Usage (%)", font=list(size=20),
+        autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
+        xaxis = list(
+          title = "Date", 
+          font = list(size = 14),
+          tickfont = list(size = 14),
+          
+          rangeslider = list(type = "date"),
+          mirror = TRUE,
+          ticks = 'outside',
+          showline = TRUE),
+        yaxis = list(title = "Percent",
+                     font = list(size = 14),
+                     tickfont = list(size = 14),
+                     ticksuffix = "%",
+                     mirror = TRUE,
+                     ticks = 'outside',
+                     showline = TRUE),
+        hovermode = "x unified") 
+      
+    } else{
+      
+      
+      slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
+                                         marker = list(color = "#212070"), line = list(color = "#212070"))
+      slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
+                                        marker = list(color = "#d80b8c"))
+      slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
+                                        marker = list(color = "#00aeef"))
       
       
       
-
-      
-      if(min(booked_filled$Appt.DateYear) <= today  && today  <= max(booked_filled$Appt.DateYear)){
-        slot_fig <- slot_fig %>% add_segments(x = today,
-                                              xend = today,
-                                              y = 0, yend = max(booked_filled[[y_axis]]  * 1.2),
-                                              line = list(color = "#000000", dash = "dash"),
-                                              showlegend = FALSE,
-                                              hoverinfo = 'skip')
-        
-        annon[[i]] <- list(
-          x = today,
-          y = max(booked_filled[[y_axis]]  * 1.25),
-          text = "Today",
-          xref = "x",
-          yref= "y",
-          showarrow = FALSE,
-          ax = 20,
-          ay=  -40,
-          font = list(color = '#000000',size = 18)
-        )
-        
-        i <- i + 1
-      }
-      
-      
-      if(input$byRate == TRUE){ # by Booked and Filled Rate
-        
-        slot_fig <- slot_fig %>% add_segments(x = min(booked_filled$Appt.DateYear),
-                                              xend = max(booked_filled$Appt.DateYear),
-                                              y = 100,
-                                              yend = 100,
-                                              line = list(color = "#FF0000", dash = "dash"),
-                                              showlegend = FALSE)
-        
-        annon[[i]] <- list(
-          x = max(booked_filled$Appt.DateYear)+5,
-          y = 100 ,
-          text = "100 %",
-          xref = "x",
-          yref= "y",
-          showarrow = FALSE,
-          ax = 20,
-          ay=  -40,
-          font = list(color = '#FF0000',size = 18)
-        )
-        
-        i <- i + 1
-        
-        slot_fig <- slot_fig %>% add_trace(y = ~`Booked Rate`, name = "Booked Rate (%)", mode = 'lines+markers',
-                                           marker = list(color = "#d80b8c"), line = list(color = "#d80b8c"))
-        slot_fig <- slot_fig %>% add_trace(y = ~`Filled Rate`, name = "Filled Rate (%)", mode = 'lines+markers',
-                                           marker = list(color = "#00aeef"), line = list(color = "#00aeef"))
-        
-        slot_fig %>% layout(
-          annotations = annon,
-          #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-          title = "Past and Upcoming Slot Usage (%)", font=list(size=20),
-          autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
-          xaxis = list(
-            title = "Date", 
-            font = list(size = 14),
-            tickfont = list(size = 14),
-            
-            rangeslider = list(type = "date"),
-            mirror = TRUE,
-            ticks = 'outside',
-            showline = TRUE),
-          yaxis = list(title = "Percent",
-                       font = list(size = 14),
-                       tickfont = list(size = 14),
-                       ticksuffix = "%",
-                       mirror = TRUE,
-                       ticks = 'outside',
-                       showline = TRUE),
-          hovermode = "x unified") 
-        
-      } else{
-        
-        
-        slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
-                                           marker = list(color = "#212070"), line = list(color = "#212070"))
-        slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
-                                          marker = list(color = "#d80b8c"))
-        slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
-                                          marker = list(color = "#00aeef"))
-        
-        
-        
-        slot_fig %>% layout(
-          annotations = annon,
-          #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-          title = "Past and Upcoming Slot Usage", font=list(size=20),
-          autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
-          xaxis = list(
-            font = list(size = 16),
-            title = "Date", 
-            tickfont = list(size = 14),
-            rangeslider = list(type = "date"),
-            mirror = TRUE,
-            ticks = 'outside',
-            showline = TRUE),
-          yaxis = list(
-            font = list(size = 14),
-            title = "Hours",
-            tickfont = list(size = 14),
-            mirror = TRUE,
-            ticks = 'outside',
-            showline = TRUE),
-          hovermode = "x unified") 
-      }
-      
-
+      slot_fig %>% layout(
+        annotations = annon,
+        #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
+        title = "Past and Upcoming Slot Usage", font=list(size=20),
+        autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
+        xaxis = list(
+          font = list(size = 16),
+          title = "Date", 
+          tickfont = list(size = 14),
+          rangeslider = list(type = "date"),
+          mirror = TRUE,
+          ticks = 'outside',
+          showline = TRUE),
+        yaxis = list(
+          font = list(size = 14),
+          title = "Hours",
+          tickfont = list(size = 14),
+          mirror = TRUE,
+          ticks = 'outside',
+          showline = TRUE),
+        hovermode = "x unified") 
+    }
+    
+    
     
   })
   
@@ -5814,7 +5910,7 @@ server <- function(input, output, session) {
       
       summary.prov[summary.prov == "Inf%"] <- "-"
       summary.prov[summary.prov == "NaN%"] <- "-"
-        
+      
       level.order <- c("Available Hours", "Booked Hours","Filled Hours","Booked Rate (%)","Filled Rate (%)")
       summary.prov <- summary.prov[order(match(summary.prov$variable, level.order)),]
       summary.prov <- summary.prov %>% arrange(Campus, Campus.Specialty, Provider)
@@ -5890,7 +5986,7 @@ server <- function(input, output, session) {
                                          "}"),
                                        fixedColumns = list(leftColumns =
                                                              ifelse(colnames(slotUsageTb_data())[3] == "Provider", 4, 3))))
-
+  
   
   # datatable(summary.prov,
   #           class = 'cell-border stripe',
@@ -5909,8 +6005,8 @@ server <- function(input, output, session) {
   #                            "}"),
   #                          fixedColumns = list(leftColumns =
   #                                                ifelse(colnames(summary.prov)[3] == "Provider", 4, 3)))) 
-
-
+  
+  
   
   ### [3. ] Day of Visit Tab -----------------------------------------------------------------------------------------------------------
   
@@ -5971,7 +6067,7 @@ server <- function(input, output, session) {
     
     valueBoxSpark(
       value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
-      title = toupper("Avg NEW Appointments Check-in to Visit-end Time"),
+      title = toupper("Average New Patients Check-in to Visit-end Time"),
       subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(cycleTime > 0))/nrow(dataArrived()),2)*100,"% of total arrived patients"),
       width = 6,
       color = "fuchsia"
@@ -5984,8 +6080,8 @@ server <- function(input, output, session) {
     valueBoxSpark(
       value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
       title = toupper(ifelse(length(unique(dataNewComparison()$Appt.Type)) == 1,
-                             paste0("Avg ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
-                             "Avg Other* Appointments Check-in to Visit-end Time")),
+                             paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
+                             "Average Non-New Patients Check-in to Visit-end Time")),
       subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived patients"),
       width = 6,
       color = "fuchsia"
@@ -6073,7 +6169,7 @@ server <- function(input, output, session) {
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
-           caption = paste0("*Includes following appointment types: ", paste(unique(data$Appt.Type),sep="", collapse=", ")))+
+           caption = paste0("*Includes ", length(unique(data$Appt.Type)), "non-new appointments"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -6154,7 +6250,7 @@ server <- function(input, output, session) {
       scale_fill_gradient(low="white", high="#00aeef")+
       labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
            y = NULL,
-           caption = paste0("*Includes following appointment types: ", names),
+           caption = paste0("*Includes ", length(unique(data$Appt.Type)), "non-new appointments"),
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
@@ -6233,7 +6329,7 @@ server <- function(input, output, session) {
       labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Visit-end Time by Provider"), 
            y = "Minutes",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
-           caption = paste0("*Includes following appointment types: ",paste(unique(data$Appt.Type),sep="", collapse=", ")))+
+           caption = paste0("*Includes ", length(unique(data$Appt.Type)), "non-new appointments"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -6247,7 +6343,7 @@ server <- function(input, output, session) {
     
     valueBoxSpark(
       value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
-      title = toupper("Avg NEW Appointments Check-in to Room-in Time"),
+      title = toupper("Avg. New Appointments Check-in to Room-in Time"),
       subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived patients"),
       width = 6,
       color = "fuchsia"
@@ -6260,8 +6356,8 @@ server <- function(input, output, session) {
     valueBoxSpark(
       value =  paste0(round(mean((dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
       title = toupper(ifelse(length(unique(dataNewComparison2()$Appt.Type)) == 1,
-                             paste0("Avg ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
-                             "Avg Other* Appointments Check-in to Room-in Time")),
+                             paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
+                             "Avg. Non-New* Appointments Check-in to Room-in Time")),
       subtitle = paste0("*Based on ",round(nrow(dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived patients"),
       width = 6,
       color = "fuchsia"
@@ -6346,7 +6442,7 @@ server <- function(input, output, session) {
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
-           caption = paste0("*Includes following appointment types: ", paste(unique(data$Appt.Type),sep="", collapse=", ")))+
+           caption = paste0("*Includes ", length(unique(data$Appt.Type)), "non-new appointments"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -6385,7 +6481,7 @@ server <- function(input, output, session) {
         group_by(Appt.Day, Appt.TM.Hr) %>%
         summarise(avg = mean(checkinToRoomin)) %>%
         filter(Appt.TM.Hr %in% timeOptionsHr_filter)
-
+      
       
       data_other <- data_other %>%
         group_by(Appt.Day, Appt.TM.Hr) %>%
@@ -6404,10 +6500,10 @@ server <- function(input, output, session) {
     new <- ggplot(data, aes(Appt.TM.Hr, Appt.Day, fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#d80b8c")+
-      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour"),
+      labs(title = paste0(input," New Patients Check-in to Visit-end Time by Hour"),
            y = NULL,
            fill = "Minutes")+
-           #subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      #subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             legend.position = "right",
             legend.direction = "vertical",
@@ -6423,14 +6519,14 @@ server <- function(input, output, session) {
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
       geom_text(aes(label= ifelse(is.na(avg),"", round(avg))), color="black", size=5, fontface="bold")
-      
+    
     
     other <- ggplot(data_other, aes(Appt.TM.Hr, Appt.Day, fill = avg))+ 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#00aeef")+
-      labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
+      labs(title = paste0(input," ",appt.type," Patients Check-in to Visit-end Time by Hour\n"), 
            y = NULL,
-           caption = paste0("*Includes following appointment types: ", names),
+           caption = paste0("*Includes ", length(unique(data$Appt.Type)), "non-new appointments"),
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             legend.position = "right",
@@ -6507,7 +6603,7 @@ server <- function(input, output, session) {
       labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Room-in Time by Provider"), 
            y = "Minutes",
            subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
-           caption = paste0("*Includes following appointment types: ",paste(unique(data$Appt.Type),sep="", collapse=", ")))+
+           caption = paste0("*Includes ", length(unique(data$Appt.Type)), "non-new appointments"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -6635,7 +6731,7 @@ server <- function(input, output, session) {
   # output$dTableAll <- DT::renderDataTable({
   #   DT::datatable(dataDisplay()[,c("Campus","Campus.Specialty","Department","Provider","MRN","Appt.DTTM","Appt.Day","Appt.Type","Appt.Status","holiday")])
   # })
-
+  
   output$dTableAll <- DT::renderDT(
     dataAll()[,c("Campus","Campus.Specialty","Department","Resource","Provider","MRN","Appt.DTTM","Appt.Day","Appt.Type","Appt.Status")],
     filter = "top",
@@ -6650,15 +6746,10 @@ server <- function(input, output, session) {
   observeEvent(input$download1, {
     screenshot(filename = "Ambulatory Care Dashboard")
   })
-
+  
 } # Close server 
 
 #shinyApp(ui, server)
 
 
 #shinyApp(ui, server, options = list(launch.browser = T,browser = "C:/Program Files/Google/Chrome/Application/chrome.exe"))
-
-
-
-
-
