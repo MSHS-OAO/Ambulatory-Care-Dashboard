@@ -2800,7 +2800,7 @@ server <- function(input, output, session) {
     noShows <- data %>%
       group_by(Appt.Status) %>%
       summarise(total = n()) %>%
-      mutate(avg = round(total/length(unique(kpi.all.data[arrived.data.rows,]$Appt.DateYear))),
+      mutate(avg = round(total/length(unique((dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear))),
              name = "appt.status")
     
     noShows$Appt.Status[which(noShows$Appt.Status == "Bumped")] <- "Same-day Bumped"
