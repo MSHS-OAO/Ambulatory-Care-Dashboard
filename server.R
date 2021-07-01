@@ -675,7 +675,7 @@ server <- function(input, output, session) {
   
   # [2.2] All pre-processed data for utilization tabs --------------------------------------------------------------------------------------
   
-  dataUtilization <- eventReactive(list(input$sbm,input$update_filters),{
+  dataUtilization <- eventReactive(list(input$sbm,input$update_filters,input$utilType),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
