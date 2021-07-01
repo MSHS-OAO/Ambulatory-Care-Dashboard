@@ -207,7 +207,7 @@ ui <- dashboardPage(
                      column(12,
                             tags$div(id = "home_data",
                                      h3("Data Sources"),
-                                    p("This tool is based on the EPIC Clairty scheduling ('CRREPORT_REP.MV_DM_PATIENT_ACCESS') and slot ('CRREPORT_REP.Y_DM_BOOKED_FILLED_RATE') data tables. The site and department mappings and metric calculation methodologies used in this 
+                                    p("This tool is based on the EPIC Clairty scheduling ('CRREPORT_REP.MV_DM_PATIENT_ACCESS') and slot ('CRREPORT_REP.Y_DM_BOOKED_FILLED_RATE') data tables. The site, provider, and department mappings and metric calculation methodologies used in this 
                                       tool can be downloaded from the hyperlinks below.", style = "font-size:18px"),
                                     a(href = "Mappings/Master Mapping File.xlsx",target='blank', 'Ambulatory Analytics Tool Mappings', download = 'Ambulatory Analytics Tool Mappings.xlsx', style = "font-size:18px")
                                     )),
