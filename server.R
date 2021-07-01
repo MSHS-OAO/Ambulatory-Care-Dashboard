@@ -675,7 +675,7 @@ server <- function(input, output, session) {
   
   # [2.2] All pre-processed data for utilization tabs --------------------------------------------------------------------------------------
   
-  dataUtilization <- eventReactive(list(input$sbm,input$update_filters),{
+  dataUtilization <- eventReactive(list(input$sbm,input$update_filters,input$utilType),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -4453,7 +4453,7 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Bumped Reasons by Wait Time to Appointment",
+             title = "Top 10 Bumped Reasons by Lead Days to Bump",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_fill_gradient(low = "white", high = "#d80b8c", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
                             name="Total Bumped Appointments\n by Wait Time to Appointment")+
@@ -4467,7 +4467,7 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Bumped Reasons by Wait Time to Appointment",
+             title = "Top 10 Bumped Reasons by Lead Days to Bump",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_fill_gradient(low = "white", high = "#d80b8c", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
                             name="Total % of Bumped \nAppointments by Wait Time to Appointment")+
@@ -4528,7 +4528,7 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Canceled Reasons by Wait Time to Appointment",
+             title = "Top 10 Canceled Reasons by Lead Days to Cancellation",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_fill_gradient(low = "white", high = "#00aeef", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
                             name="Total Canceled Appointments\n by Wait Time to Appointment")+
@@ -4542,7 +4542,7 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Canceled Reasons by Wait Time to Appointment",
+             title = "Top 10 Canceled Reasons by Lead Days to Cancellation",
              subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
         scale_fill_gradient(low = "white", high = "#00aeef", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
                             name="% of Total Canceled \nAppointments by Wait Time to Appointment")+

@@ -193,7 +193,7 @@ ui <- dashboardPage(
               column(12,
                      div("About Ambulatory Care Analytics Tool", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                      tags$div( id = "home_text",
-                       HTML("<p>Version: 1.0 <br> Last Updated: 5/21/2021</p>")
+                       HTML("<p>Version: 1.0 <br> Last Updated: 6/24/2021</p>")
                      ),
                      tags$head(tags$style("#home_text{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 15px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), 
                      column(12,
@@ -207,13 +207,11 @@ ui <- dashboardPage(
                      column(12,
                             tags$div(id = "home_data",
                                      h3("Data Sources"),
-                                    p("This tool is based on the EPIC Clairty scheduling ('CRREPORT_REP.MV_DM_PATIENT_ACCESS') and slot ('CRREPORT_REP.Y_DM_BOOKED_FILLED_RATE') data tables.
-                                      The site and department mappings and metric calculation methodologies used in this tool can be downloaded from the hyperlinks below.", style = "font-size:18px"),
-                                    a(href = "Mappings/Ambulatory Department Mapping (Master).xlsx",target='blank', 'Ambulatory Department Mapping File', download = 'Ambulatory Care Analysis Tool - Department Mappings.xlsx', style = "font-size:18px"),
-                                    br(),
-                                    a(href = "Mappings/Department Site Crosswalk 8-24-2020.xlsx",target='blank', 'Ambulatory Site Mapping File', download = 'Ambulatory Care Analysis Tool - Site Mappings.xlsx', style = "font-size:18px"),
-                                    br(),
-                                    a(href = "Mappings/Analysis Methodology.xlsx",target='blank', 'Analysis Methodology', download = 'Ambulatory Care Analysis Tool - Metrics.xlsx', style = "font-size:18px")
+                                     p("This tool is based on the EPIC Clairty scheduling ('CRREPORT_REP.MV_DM_PATIENT_ACCESS') and slot ('CRREPORT_REP.Y_DM_BOOKED_FILLED_RATE') data tables. The site, provider, department mappings and metric calculation methodologies used in this
+                                      tool can be downloaded from the hyperlinks below.", style = "font-size:18px"),
+                                     a(href = "Mappings/Master Mapping File.xlsx",target='blank', 'Ambulatory Analytics Tool Mappings', download = 'Ambulatory Analytics Tool Mappings.xlsx', style = "font-size:18px"),
+                                     br(),
+                                     a(href = "Mappings/Analysis Methodology.xlsx",target='blank', 'Analysis Methodology', download = 'Ambulatory Care Analysis Tool - Metrics.xlsx', style = "font-size:18px")
                                     )),
                      column(12,
                             tags$div(id = "home_usage",
