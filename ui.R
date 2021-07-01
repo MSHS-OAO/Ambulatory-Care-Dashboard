@@ -208,10 +208,12 @@ ui <- dashboardPage(
                             tags$div(id = "home_data",
                                      h3("Data Sources"),
                                     p("This tool is based on the EPIC Clairty scheduling ('CRREPORT_REP.MV_DM_PATIENT_ACCESS') and slot ('CRREPORT_REP.Y_DM_BOOKED_FILLED_RATE') data tables.
-                                      The site and department mappings used in this tool can be downloaded from the hyperlinks below.", style = "font-size:18px"),
-                                    a(href = "Mappings/Ambulatory Department Mapping (Master).xlsx",target='blank', 'Ambulatory Department Mapping File', download = 'Department Mappings.xlsx', style = "font-size:18px"),
+                                      The site and department mappings and metric calculation methodologies used in this tool can be downloaded from the hyperlinks below.", style = "font-size:18px"),
+                                    a(href = "Mappings/Ambulatory Department Mapping (Master).xlsx",target='blank', 'Ambulatory Department Mapping File', download = 'Ambulatory Care Analysis Tool - Department Mappings.xlsx', style = "font-size:18px"),
                                     br(),
-                                    a(href = "Mappings/Department Site Crosswalk 8-24-2020.xlsx",target='blank', 'Ambulatory Site Mapping File', download = 'Site Mappings.xlsx', style = "font-size:18px")
+                                    a(href = "Mappings/Department Site Crosswalk 8-24-2020.xlsx",target='blank', 'Ambulatory Site Mapping File', download = 'Ambulatory Care Analysis Tool - Site Mappings.xlsx', style = "font-size:18px"),
+                                    br(),
+                                    a(href = "Mappings/Analysis Methodology.xlsx",target='blank', 'Analysis Methodology', download = 'Ambulatory Care Analysis Tool - Metrics.xlsx', style = "font-size:18px")
                                     )),
                      column(12,
                             tags$div(id = "home_usage",
