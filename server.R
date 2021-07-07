@@ -4343,7 +4343,7 @@ server <- function(input, output, session) {
       scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits=c(0,(max(apptsCanceled$percent))*1.5))+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       labs(x=NULL, y=NULL,
-           title = "Bumped/Canceled/Rescheduled Rate*",
+           title = "Rate* of Scheduling Activities - \nBump/Cancel/Reschedule",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
            caption = "*% of Total Appointments Scheduled.")+
       theme_new_line()+
@@ -4357,7 +4357,7 @@ server <- function(input, output, session) {
   ## Lead Days to Bumps/Canc/Resc 
   output$leadDaysBumpsCancResc <- renderPlot({
     data <- dataAll() %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
-    # data <- canceled.bumped.rescheduled.data %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
+    # data <- kpi.all.data[canceled.bumped.rescheduled.data.rows ,] %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
     
     lead.days.df <- data %>%
       filter(Lead.Days >= 0) %>%
@@ -4374,7 +4374,7 @@ server <- function(input, output, session) {
       geom_bar(position="stack",stat="identity", width=0.7)+
       scale_fill_manual(values=c("grey","#00aeef","#d80b8c","midnightblue"))+
       labs(x=NULL, y=NULL,
-           title = "% of Bumped/Canceled/Rescheduled \nAppointments by Wait Time*",
+           title = "% of Bumped/Canceled/Rescheduled \nAppointments by Lead days \nto Appt Cancellation*",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
            caption = "*Time from appointment scheduled to status changed.")+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
@@ -4383,7 +4383,8 @@ server <- function(input, output, session) {
                 size=5, fontface="bold", position = position_stack(vjust = 0.5))+
       theme_new_line()+
       theme_bw()+
-      graph_theme("none")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+      graph_theme("top")+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5), 
+                                legend.title = element_blank())
     
   })
   
@@ -4403,8 +4404,8 @@ server <- function(input, output, session) {
       scale_y_continuous(limits=c(0,(max(sameDay$avg))*1.5))+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       labs(x=NULL, y=NULL,
-           title = "Average Daily Same-day \nBumped/Canceled/Rescheduled Appointments",
-           # subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
+           title = "Average Daily Same-day \nBumped/Canceled/Rescheduled \nAppointments",
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
            caption = "*Appointment status changed on the day of appoinment.")+
       theme_new_line()+
       theme_bw()+
