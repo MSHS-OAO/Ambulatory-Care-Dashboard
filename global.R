@@ -320,18 +320,18 @@ setwd(wdpath)
 ### RStudio COnnect Data Read In
 
 # #### New Location with Updated Data
-historical.data <- as.data.frame(read_feather("/data/Ambulatory/Data/historical_data.feather"))
-slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Data/slot_data_subset.feather"))
-holid <- as.data.frame(read_feather("/data/Ambulatory/Data/holid.feather"))
-utilization.data <- as.data.frame(read_feather("/data/Ambulatory/Data/utilization_data.feather"))
-population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Data/population_data_filtered.feather"))
+# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Data/historical_data.feather"))
+# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Data/slot_data_subset.feather"))
+# holid <- as.data.frame(read_feather("/data/Ambulatory/Data/holid.feather"))
+# utilization.data <- as.data.frame(read_feather("/data/Ambulatory/Data/utilization_data.feather"))
+# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Data/population_data_filtered.feather"))
 
 
-# historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
-# slot.data.subset <- readRDS(paste0(wdpath,"/Data/new_slot_data_subset.rds"))
-# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-# utilization.data <- readRDS(paste0(wdpath,"/Data/new_utilization_data.rds"))
-# population.data_filtered <- readRDS(paste0(wdpath,"/Data/population.data_filtered.rds"))
+historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
+slot.data.subset <- readRDS(paste0(wdpath,"/Data/new_slot_data_subset.rds"))
+holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+utilization.data <- readRDS(paste0(wdpath,"/Data/new_utilization_data.rds"))
+population.data_filtered <- readRDS(paste0(wdpath,"/Data/population.data_filtered.rds"))
 
 max_date <- max(historical.data$Appt.DateYear)
 
