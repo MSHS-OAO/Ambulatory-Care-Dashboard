@@ -5571,10 +5571,10 @@ server <- function(input, output, session) {
       scale_size_manual(values=c(1, 1, 1.3))+
       scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 week",
                    date_minor_breaks = "1 day", expand = c(0, 0.6))+
-      # labs(x=NULL, y=NULL,
-      #      title = "Median Wait Time to New and Established Appointment Over Time",
-      #      subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2])
-      #)+
+      labs(x=NULL, y=NULL,
+           title = "Median Wait Time to New and Established Appointment Over Time",
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2])
+      )+
       theme_new_line()+
       theme_bw()+
       graph_theme("top")
