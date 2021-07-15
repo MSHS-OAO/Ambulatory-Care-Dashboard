@@ -2924,7 +2924,7 @@ server <- function(input, output, session) {
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
       labs(x=NULL, y=NULL,
-           title = "% of Bumps by Wait Time to Appointment",
+           title = "% of Bumps by Lead Days to Appt Cancellation",
            subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]))+
       theme_new_line()+
       theme_bw()+
@@ -5622,20 +5622,24 @@ server <- function(input, output, session) {
     
     newpatients.ratio <- data %>%
       group_by(Appt.Source.New, New.PT3) %>%
-      dplyr::summarise(Total = n()) %>%
-      spread(New.PT3, Total)
+      filter(New.PT3 == TRUE) %>%
+      dplyr::summarise(Total = n()) 
     
-    newpatients.ratio$ratio <- round(newpatients.ratio$`TRUE` / (newpatients.ratio$`FALSE` + newpatients.ratio$`TRUE`),2)
+    newpatients.ratio$Appt.Source.New[which(newpatients.ratio$Appt.Source.New == "Other")] <- "Practice"
+      
+    newpatients.ratio$ratio <- round(newpatients.ratio$Total / sum(newpatients.ratio$Total), 2)
     
     newRatio <-
-      ggplot(newpatients.ratio, aes(x=factor(Appt.Source.New, levels = c("Zocdoc","StayWell","Other","MyChart","Access Center")), y=ratio, group=Appt.Source.New, fill=Appt.Source.New)) +
+      ggplot(newpatients.ratio, aes(x=factor(Appt.Source.New, levels = c("Practice","Access Center","MyChart","StayWell","Zocdoc")), 
+                                    y=ratio, group=Appt.Source.New, fill=Appt.Source.New)) +
       geom_bar(stat="identity", width = 0.8) +
       coord_flip() +
       scale_fill_MountSinai('purple')+
-      labs(x=NULL, y=NULL, 
+      labs(x=NULL, y=NULL,
            title = "New Patient Ratio*",
-           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-           caption = "*Based on arrived patients")+
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2],
+                             "\nTotal New Patients = ",prettyNum(sum(newpatients.ratio$Total), big.mark = ',')),
+           caption = "*Based on arrived patients\n**New patients defined by CPT codes (level of service).")+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -5661,8 +5665,11 @@ server <- function(input, output, session) {
       filter(New.PT3 == TRUE)
     waitTime$target <- 14
     
+    waitTime$Appt.Source.New[which(waitTime$Appt.Source.New == "Other")] <- "Practice"
+    
     newWaitTime <-
-      ggplot(waitTime, aes(x=factor(Appt.Source.New, levels = c("Zocdoc","StayWell","Other","MyChart","Access Center")), y=medWaitTime, group=Appt.Source.New, fill=Appt.Source.New)) +
+      ggplot(waitTime, aes(x=factor(Appt.Source.New, levels = c("Practice","Access Center","MyChart","StayWell","Zocdoc")), 
+                           y=medWaitTime, group=Appt.Source.New, fill=Appt.Source.New)) +
       geom_bar(stat="identity", width = 0.8) +
       geom_hline(aes(yintercept=target), linetype="dashed", color = "red", size=1)+
       scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.3))+
@@ -5670,8 +5677,9 @@ server <- function(input, output, session) {
       scale_fill_MountSinai('pink')+
       labs(x=NULL, y=NULL, 
            title = "Wait Time* to New Appointment",
-           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-           caption = "*Based on all of scheduled patients")+
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2],
+                             "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
+           caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service).")+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -5702,18 +5710,21 @@ server <- function(input, output, session) {
     noShows[is.na(noShows)] <- 0
     
     noShows$`No Show Perc` <- round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)
+    noShows$Appt.Source.New[which(noShows$Appt.Source.New == "Other")] <- "Practice"
     
     
     newNoShow <-
-      ggplot(noShows, aes(x=factor(Appt.Source.New, levels = c("Zocdoc","StayWell","Other","MyChart","Access Center")), y=`No Show Perc`, group=Appt.Source.New, fill=Appt.Source.New)) +
+      ggplot(noShows, aes(x=factor(Appt.Source.New, levels =  c("Practice","Access Center","MyChart","StayWell","Zocdoc")), 
+                          y=`No Show Perc`, group=Appt.Source.New, fill=Appt.Source.New)) +
       geom_bar(stat="identity", width = 0.8) +
       scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.3)+
       coord_flip() +
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
            title = "New Patient No Show Rate*",
-           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2]),
-           caption = "*Based on all of scheduled patients")+
+           subtitle = paste0("Based on data from ",input$dateRange[1]," to ",input$dateRange[2],
+                             "\nNo Show Rate = Total No Shows / (Arrived + No Shows)"),
+           caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service).")+
       theme_new_line()+
       theme_bw()+
       theme(
