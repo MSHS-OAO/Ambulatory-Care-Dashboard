@@ -162,11 +162,11 @@ ui <- dashboardPage(
                  background: rgba(255, 255, 255, 0);
                  color: #FFFFFF"),
                 tags$hr(style="border-color: #FFFFFF; margin-top: 10px;"),
+                menuItem("Access", tabName = "newPatients", icon = icon("plus-circle")),
                 menuItem("Cycle Time", tabName = "cycleTime", icon = icon("stopwatch"),
                          menuSubItem("Cycle Time", tabName = "cycleTime"),
                          menuSubItem("Room-in Time", tabName = "roomInTime")
                 ),
-                menuItem("New Patients", tabName = "newPatients", icon = icon("plus-circle")),
                 menuItem("Population", tabName = "population", icon = icon("users")),
                 menuItem("Scheduling", tabName = "scheduling", icon = icon("calendar-day"),
                          menuSubItem("Scheduled/Arrived", tabName = "arrived"),
