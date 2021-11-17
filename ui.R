@@ -1206,7 +1206,7 @@ ui <- dashboardPage(
                                 plotOutput("cycleTimeByHour", height = "700px") %>%
                                   withSpinner(type = 5, color = "#d80b8c")),
                               boxPlus(
-                                title = "Cycle Time by Provider and Appointment Type", width = 12, status = "primary",
+                                title = "Cycle Time by Provider and Appointment Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 h3("*Select fewer providers for better visibility"),
                                 plotOutput("newCycleTimeByProv", height = "800px") %>% 
@@ -1255,7 +1255,7 @@ ui <- dashboardPage(
                                 plotOutput("roomInTimeByHour", height = "700px") %>%
                                   withSpinner(type = 5, color = "#d80b8c")),
                               boxPlus(
-                                title = "Room-in Time by Provider and Appointment Type", width = 12, status = "primary",
+                                title = "Room-in Time by Provider and Appointment Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 h3("*Select fewer providers for better visibility"),
                                 plotOutput("newRoomInTimeByProv", height = "800px") %>% 
