@@ -201,12 +201,13 @@ ui <- dashboardPage(
         .nav-tabs-custom > .nav > li[class=active] > a {
            background-color: #d80b8c;
            color: #FFF;
-           border-top-color:  #d80b8c;
+           border-top-color: #d80b8c;
         }")),
     
     tags$style(HTML("
         .nav-tabs-custom {
-          font-size: 15px
+          font-size: 15px;
+          border-top-color: #d80b8c;
         }")),
     
     
@@ -1000,7 +1001,7 @@ ui <- dashboardPage(
                                 title = "Space Utilization", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 tabBox(
-                                  title = NULL,
+                                  title = NULL, type = "pills",
                                   id = "tabset1", width = "100%", height = "1000px",
                                   tabPanel("Average",
                                            plotOutput("spaceUtil", height = "900px") %>% 
@@ -1012,7 +1013,7 @@ ui <- dashboardPage(
                                 title = "Space Required", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 tabBox(
-                                  title = NULL,
+                                  title = NULL, type = "pills",
                                   id = "tabset2", width = "100%", height = "1000px",
                                   tabPanel("Average",
                                            plotOutput("spaceUsed", height = "900px") %>% 
@@ -1037,7 +1038,7 @@ ui <- dashboardPage(
                            title = "New Patient Visit Ratio", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            tabBox(
-                             title = NULL,
+                             title = NULL, type = "pills",
                              id = "tabset4", width = "100%",
                              tabPanel("Total", 
                                       plotOutput("newPtRatioByDept", height = "550px") %>% 
@@ -1051,7 +1052,7 @@ ui <- dashboardPage(
                            title = "New Patient Wait Time", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            tabBox(
-                             title = NULL,
+                             title = NULL, type = "pills",
                              id = "tabset5", width = "100%",
                              tabPanel("Total", 
                                       plotOutput("newPtWaitTimeByDept", height = "550px") %>% 
