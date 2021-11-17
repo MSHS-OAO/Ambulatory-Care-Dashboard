@@ -4,8 +4,8 @@ server <- function(input, output, session) {
   observeEvent(input$update_filters,{print(is.null(input$update_filters))})
   
   user <- reactive({
-    session$user
-    #"Armando"
+    #session$user
+    "Armando"
   })
   
   filter_choices <- eventReactive(input$save_filters,{
@@ -5802,8 +5802,7 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
            title = "Monthly New Patient Ratio",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "% No Show = No Show / No Show and Arrived")+
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
