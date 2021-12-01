@@ -4881,9 +4881,9 @@ server <- function(input, output, session) {
     space.hour <- space.hour %>%
       group_by(variable) %>%
       dplyr::summarise( 
-        Median = quantile(value, probs=0.5)/(60*input$setRooms),
-        `70th Percentile`= quantile(value, probs=0.75)/(60*input$setRooms),
-        `90th Percentile`= quantile(value, probs=0.90)/(60*input$setRooms))
+        Median = round(quantile(value, probs=0.5)/(60*input$setRooms),0),
+        `70th Percentile`= round(quantile(value, probs=0.75)/(60*input$setRooms),0),
+        `90th Percentile`= round(quantile(value, probs=0.90)/(60*input$setRooms),0))
     
     # space.hour <- space.hour %>%
     #   group_by(variable) %>%
@@ -4901,7 +4901,7 @@ server <- function(input, output, session) {
     graph <- ggplot(space.hour, aes(x=Time, y=value, col=variable, group=variable))+
       geom_line(size=1.2)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0,max(space.hour$value)*1.2))+
-      labs(x=NULL, y="Percent", 
+      labs(x=NULL, y="Utilization (%)", 
            title = "Space Utilization (%) by Percentile by Time of Day",
            subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2])))+
       scale_color_MountSinai("main")+
