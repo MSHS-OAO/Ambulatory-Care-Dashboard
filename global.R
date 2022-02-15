@@ -328,6 +328,7 @@ setwd(wdpath)
 # population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Data/population_data_filtered.feather"))
 # filter_path <- "/data/Ambulatory/Filters"
 
+#historical.data <- readRDS("C:/Users/villea04/Documents/Process_Amb/Data/historical_data.rds")
 historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
 slot.data.subset <- readRDS(paste0(wdpath,"/Data/new_slot_data_subset.rds"))
 holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
@@ -337,6 +338,8 @@ filter_path <- paste0(wdpath, "/Filters")
 
 max_date <- max(historical.data$Appt.DateYear)
 
+historical.data["Appt.Source.New"][historical.data["Appt.Source.New"] == "MyChart"] <- "My MountSinai/ MyChart"
+historical.data["Appt.Source.New"][historical.data["Appt.Source"] == "APP, FINDADOC [MSHSFAD]"] <- "FindADoc"
 ## Slot datasets
 # past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
 # future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
@@ -551,8 +554,24 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
 
 
 ## Filtered No Show Data
+# groupByFilters_1 <- function(dt, apptType, insurance){
+#   result <- dt %>% filter(Appt.Type %in% apptType, Coverage %in% insurance)
+#   # na_result <- dt[is.na(dt$Coverage),]
+#   # result <- rbind(result,na_result)
+#   return(result)
+# }
+
 groupByFilters_1 <- function(dt, apptType, insurance){
-  result <- dt %>% filter(Appt.Type %in% apptType, Coverage %in% insurance)
+  result <- dt %>% filter(Coverage %in% insurance)
+  if(apptType == "New"){
+    result <- result %>% filter(New.PT3 == TRUE)
+  }
+  else if(apptType == "Established"){
+    result <- result %>% filter(New.PT3 == FALSE)
+  }
+  else{
+    result
+  }
   # na_result <- dt[is.na(dt$Coverage),]
   # result <- rbind(result,na_result)
   return(result)

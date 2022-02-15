@@ -51,12 +51,12 @@ dateRangeSlot_end <- max(slot.data.subset[all.slot.rows,]$Appt.DateYear)
 dateRangepop_max <- format(max(population.data_filtered$Appt.DTTM), "%Y-%m-%d")
 dateRangepop_min <- min(population.data_filtered$Appt.DTTM)
 #dateRangepop_start <- paste0(format(as.Date(dateRangepop_max) %m+% months(-2), "%Y-%m"), "-01")
-dateRangepop_start <- as.Date("2021-01-01")
+#dateRangepop_start <- as.Date("2021-01-01")
 
 
 
 
-header <-   dashboardHeader(title = HTML("Amb Care Analytics Tool"),
+header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),
                             disable = FALSE,
                             titleWidth = 400,
                             tags$li(class = "dropdown", actionButton("download1",
@@ -67,39 +67,42 @@ header <-   dashboardHeader(title = HTML("Amb Care Analytics Tool"),
                             tags$li(class = "dropdown",
                                     dropdown(
                                       box(
-                                        title = "Name preset input:",
+                                        title = "Bookmark Current Page:",
                                         width = 12,
-                                        height = "100px",
+                                        height = "200px",
                                         solidHeader = FALSE,
-                                        textInput("filter_name", label = NULL)
-                                      ), br(), br(), br(), br(), br(),
-                                      actionButton("save_filters", "CLICK TO SAVE", width = "80%"), br(), br(),
+                                        h5("For naming your bookmarks please follow: 'SITE_FIRSTNAME_LASTNAME_DESC'"),#, style = "font-size:12px;"), br(),
+                                        textInput("filter_name", label = NULL),
+                                        actionButton("save_filters", "CLICK TO SAVE", width = "80%")
+                                      ), br(), br(), br(), br(), br(), br(), br(), br(),
+                                      br(), br(),
                                       style = "material-circle", size = "lg", right = TRUE, status = "default",
                                       icon = icon("save"), width = "300px",
                                       inputId = "dropdownbutton4"
                                     )
                             ),
-                            
-                            tags$li(class = "dropdown", dropdown(box(title = "Select a saved preset:",
+
+                            tags$li(class = "dropdown", dropdown(box(title = "Retrieve Previously Saved Bookmark:",
                                                                      width = 12,
                                                                      height = "100px",
                                                                      solidHeader = FALSE,
                                                                      pickerInput("filter_list", choices = NULL, multiple = TRUE,
                                                                                  selected = NULL, options = pickerOptions(maxOptions = 1)
-                                                                     )
-                            ), br(), br(), br(), br(), br(),
-                            actionButton("update_filters1", "CLICK TO UPDATE", width = "80%"), br(), br(),br(),
-                            actionButton("remove_filters", "CLICK TO REMOVE", width = "80%"), br(), br(),
+                                                                     ),
+                                                                     actionButton("update_filters1", "CLICK TO UPDATE", width = "80%")
+                            ), br(), br(), br(), br(), br(), br(),
+                            br(), br(),
+                            # actionButton("remove_filters", "CLICK TO REMOVE", width = "80%"), br(), br(),
                             style = "material-circle", size = "lg", right = TRUE, status = "default",
                             icon = icon("star"), width = "300px",
                             tooltip = tooltipOptions(title = "Set additional filters for graphs/tables."),
                             inputId = "dropdownbutton3"
-                            ), 
+                            ),
+                            )
+
                             )
                             
-                            #)
-                            
-)
+#)
 
 
 
@@ -305,9 +308,9 @@ ui <- dashboardPage(
                        # setBackgroundImage(
                        #   src = "MS_RGB_Vrtl_test.png", shinydashboard = TRUE
                        # ),
-                       div("Ambulatory Care Analytics Tool", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Ambulatory Analytics Tool", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        tags$div(id = "home_text",
-                                HTML("<p>Version: 1.0 <br> Last Updated: 9/16/2021</p>")
+                                HTML("<p>Version: 1.0 <br> Last Updated: 2/10/2022</p>")
                        ),
                        tags$head(tags$style("#home_text{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 15px; margin-top: -0.2em; margin-bottom: -4em; margin-left: 20px}")), 
                        br(), br(),
@@ -316,16 +319,16 @@ ui <- dashboardPage(
                          column(4,
                                 box(
                                   title = p("About this Tool", style = "font-size:34px; font-weight:bold"), width = 12,  height = "400px", status = "warning", solidHeader = TRUE,
-                                  p("- Ambulatory Care Analytics Tool is a system-wide analytics tool that 
+                                  p("- Ambulatory Analytics Tool is a system-wide analytics tool that 
                                 aims to provide analytical solutions to help", strong("drive data-driven decisions and operational improvements."), style = "font-size:22px"),
-                                  p("- Ambulatory Care Analytics Tool provides", strong("current state assessment and historical trending"), "of key operational metrics.", style = "font-size:22px")
+                                  p("- Ambulatory Analytics Tool provides", strong("current state assessment and historical trending"), "of key operational metrics.", style = "font-size:22px")
                                 )),
                          
                          column(4,
                                 tags$div(id = "home_data",
                                          box(
                                            title = p("Data Sources", style = "font-size:34px; font-weight:bold"), width = 12, height = "400px", status = "warning", solidHeader = TRUE,
-                                           p("Ambulatory Care Analytics Tool is developed based on the following data from EPIC Clarity:", style = "font-size:22px; font-weight: bold"),
+                                           p("Ambulatory Analytics Tool is developed based on the following data from EPIC Clarity:", style = "font-size:22px; font-weight: bold"),
                                            p("1. ", strong("Scheduling Data"), " provides scheduling details on arrived, bumped, canceled, no show, and rescheduled appointments.", style = "font-size:22px"),
                                            p("2. ", strong("Slot Availability Data"), " provides slot level details inlcuding booked and filled hours and slots.", style = "font-size:22px"),
                                          ))),
@@ -335,11 +338,9 @@ ui <- dashboardPage(
                                          box(
                                            title = p("Reference Files", style = "font-size:34px; font-weight:bold"), width = 12, height = "400px", status = "warning", solidHeader = TRUE,
                                            p("- Metrics Overview:", style = "font-size:22px; font-weight: bold"),
-                                           a(href = "Mappings/Metrics_Overview.pdf",target='blank', 'Click to View', download = 'Ambulatory Care Analysis Tool - Metric Overview.pdf', style = "font-size:22px"),
+                                           a(href = "Mappings/Metrics_Overview.pdf",target='blank', 'Click to View', download = 'Ambulatory Analysis Tool - Metric Overview.pdf', style = "font-size:22px"),
                                            p("- Metric Definitions and Analysis Methodology:", style = "font-size:20px; font-weight: bold"),
-                                           a(href = "Mappings/Analysis Methodology.xlsx",target='blank', 'Click to Download', download = 'Ambulatory Care Analysis Tool - Metric definitions.xlsx', style = "font-size:22px"),
-                                           p("- EPIC Site, Specialty, Department, and Provider Breakdown:", style = "font-size:20px; font-weight: bold"),
-                                           a(href = "Mappings/Master Mapping File.xlsx",target='blank', 'Click to Download', download = 'Ambulatory Analytics Tool - Mappings.xlsx', style = "font-size:22px"),
+                                           a(href = "Mappings/Analysis Methodology.xlsx",target='blank', 'Click to Download', download = 'Ambulatory Analysis Tool - Metric definitions.xlsx', style = "font-size:22px")
                                          )))
                        ),
                        
@@ -357,7 +358,7 @@ ui <- dashboardPage(
                                 tags$div(id = "home_use_case",
                                          box(
                                            title = p("Targeted Use", style = "font-size:34px; font-weight:bold"), width = 12, status = "warning", solidHeader = TRUE,
-                                           p("Data-driven insights and findings obtained from this tool should be used in conjunction with the learnings from the Ambulatory Care Academy to achieve operational improvements.", 
+                                           p("Data-driven insights and findings obtained from this tool should be used in conjunction with the learnings from the Ambulatory Academy to achieve operational improvements.", 
                                              style = "font-size:20px; font-weight: bold; font-style: italic"),
                                            img(src = "Use_Case.png", width = "700px", style="display: block; margin-left: auto; margin-right: auto"))))
                        )
@@ -739,7 +740,7 @@ ui <- dashboardPage(
                        # ),
                        column(12,
                               boxPlus(
-                                title = "Insurance Types", width = 12, status = "primary",
+                                title = "Payer Mix", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 column(2),
                                 column(8, tableOutput("ins_breakdown_tb") %>%
@@ -877,11 +878,6 @@ ui <- dashboardPage(
                            title = "No Shows by Wait Time to Appointment", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            br(),
-                           materialSwitch(
-                             inputId = "distribution",
-                             label = "Distribution", 
-                             right = TRUE,
-                             status = "primary"),
                            plotOutput("noShowLeadDays", height = "600px") %>% 
                              withSpinner(type = 5, color = "#d80b8c"))
                        )
@@ -1044,7 +1040,7 @@ ui <- dashboardPage(
                                       plotOutput("newPtRatioByDept", height = "550px") %>% 
                                         withSpinner(type = 5, color = "#d80b8c")),
                              tabPanel("By Provider",
-                                      h3("*Select fewer providers for better visibility"),
+                                      "*Select fewer providers for better visibility",
                                       plotOutput("newPtRatioByProv", height = "550px") %>% 
                                         withSpinner(type = 5, color = "#d80b8c"))))),
                        fluidRow(
@@ -1183,18 +1179,19 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")),
                                          column(4, valueBoxOutput("cycleTimeCompOther", width = 12)))),
                               boxPlus(
-                                title = "Cycle Time by Appointment Type", width = 12, status = "primary",
+                                title = "Cycle Time by Visit Type", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                h3("*Select fewer appointment types for better visibility"),
+                                "*Select fewer visit types for better visibility",
                                 br(),
-                                fluidRow(column(12, plotOutput("cycleTimeTrend", height = "600px") %>% 
-                                                  withSpinner(type = 5, color = "#d80b8c"))),
-                                hr(),
                                 fluidRow(
                                   column(6, plotOutput("newCycleTimeBoxPlot", height = "500px") %>% 
                                            withSpinner(type = 5, color = "#d80b8c")),
                                   column(6, plotOutput("establishedCycleTimeBoxPlot", height = "500px") %>% 
-                                           withSpinner(type = 5, color = "#d80b8c")))),
+                                           withSpinner(type = 5, color = "#d80b8c"))),
+                                hr(),
+                                fluidRow(column(12, plotOutput("cycleTimeTrend", height = "600px") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c")))
+                                ),
                               boxPlus(
                                 title = "Cycle Time by Time of Day", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -1206,9 +1203,9 @@ ui <- dashboardPage(
                                 plotOutput("cycleTimeByHour", height = "700px") %>%
                                   withSpinner(type = 5, color = "#d80b8c")),
                               boxPlus(
-                                title = "Cycle Time by Provider and Appointment Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
+                                title = "Cycle Time by Provider and Visit Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                h3("*Select fewer providers for better visibility"),
+                                "*Select fewer providers for better visibility",
                                 plotOutput("newCycleTimeByProv", height = "800px") %>% 
                                   withSpinner(type = 5, color = "#d80b8c"),
                                 plotOutput("establishedCycleTimeByProv", height = "800px") %>% 
@@ -1232,18 +1229,19 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")),
                                          column(4, valueBoxOutput("roomInTimeCompOther", width = 12)))),
                               boxPlus(
-                                title = "Room-in Time by Appointment Type", width = 12, status = "primary",
+                                title = "Room-in Time by Visit Type", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                h3("*Select fewer appointment types for better visibility"),
+                                "*Select fewer visit types for better visibility",
                                 br(),
-                                fluidRow(column(12, plotOutput("roomInTimeTrend", height = "600px") %>% 
-                                                  withSpinner(type = 5, color = "#d80b8c"))),                   
-                                hr(),
                                 fluidRow(
                                   column(6, plotOutput("newRoomInTimeBoxPlot", height = "500px") %>% 
                                            withSpinner(type = 5, color = "#d80b8c")),
                                   column(6, plotOutput("establishedRoomInTimeBoxPlot", height = "500px") %>% 
-                                           withSpinner(type = 5, color = "#d80b8c")))),
+                                           withSpinner(type = 5, color = "#d80b8c"))),
+                                hr(),
+                                fluidRow(column(12, plotOutput("roomInTimeTrend", height = "600px") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c")))
+                                ),
                               boxPlus(
                                 title = "Room-in Time by Time of Day", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -1255,9 +1253,9 @@ ui <- dashboardPage(
                                 plotOutput("roomInTimeByHour", height = "700px") %>%
                                   withSpinner(type = 5, color = "#d80b8c")),
                               boxPlus(
-                                title = "Room-in Time by Provider and Appointment Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
+                                title = "Room-in Time by Provider and Visit Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                h3("*Select fewer providers for better visibility"),
+                                "*Select fewer providers for better visibility",
                                 plotOutput("newRoomInTimeByProv", height = "800px") %>% 
                                   withSpinner(type = 5, color = "#d80b8c"),
                                 plotOutput("establishedRoomInTimeByProv", height = "650px") %>% 
@@ -1388,9 +1386,9 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")
                                               )
                                      ),
-                                     tabPanel("Booked/Fill Rate",
+                                     tabPanel("Booked/Filled Rate",
                                               boxPlus(
-                                                title = "Fill Rate", width = 12, status = "primary", 
+                                                title = "Filled Rate", width = 12, status = "primary", 
                                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE, 
                                                 h3(uiOutput(("new_patient_fill_rate_day_title"))),
                                                 DTOutput("new_patient_fill_rate_day") %>% 
@@ -1415,16 +1413,17 @@ ui <- dashboardPage(
       # Conditional Filters ------------------------------------------------------------------------------------------------------
       conditionalPanel(
         condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
-      input.sbm=='arrived' | input.sbm=='noshows' | input.sbm=='utilization' | input.sbm=='access' | 
+      input.sbm=='arrived' | input.sbm=='noshows' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='cancellations' | 
       input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='data' | input.sbm == 'Comparison'",
         
         # Formatting Buttons
+        tags$head(tags$style(HTML("#dropdownboxplot {color: #fff;}"))),
         tags$head(tags$style(HTML("#dropdownbutton1 {color: #fff;}"))),
         tags$head(tags$style(HTML("#dropdownbutton3 {color: #fff;
                                                    background-color: #212070;
                                                    box-shadow: none;
                                                 }"))),
-        
+
         tags$head(tags$style(HTML("#dropdownbutton4 {color: #fff;
                                                    background-color: #212070;
                                                    box-shadow: none;
@@ -1633,7 +1632,7 @@ ui <- dashboardPage(
                      height = "100px",
                      solidHeader = FALSE, 
                      dateRangeInput("dateRangepop", label = NULL,
-                                    start = dateRangepop_start, end = dateRangepop_max,
+                                    start = dateRangepop_min, end = dateRangepop_max,
                                     min = dateRangepop_min, max = dateRangepop_max)),
                    box(
                      title = "Select Days of Week:",
@@ -1652,7 +1651,7 @@ ui <- dashboardPage(
                      width = 12, 
                      solidHeader = FALSE, 
                      dateRangeInput("dateRangeslot", label = NULL,
-                                    start = dateRange_start, end = dateRange_max,
+                                    start = dateRangeSlot_start, end = dateRangeSlot_end,
                                     min = dateRangeSlot_start, max = dateRangeSlot_end)),
                    
                    
@@ -1850,17 +1849,159 @@ ui <- dashboardPage(
         # actionButton("download1",
         #              label = icon("download")),
         
-        bsTooltip("dropdownbutton3", "Load previously saved bookmarks.",
-                  "left", options = list(container = "body")
-        ),
-        bsTooltip("dropdownbutton4", "Bookmark global filters.",
-                  "left", options = list(container = "body")
-        ),
+        # bsTooltip("dropdownbutton3", "Load previously saved bookmarks.",
+        #           "left", options = list(container = "body")
+        # ),
+        # bsTooltip("dropdownbutton4", "Bookmark global filters.",
+        #           "left", options = list(container = "body")
+        # ),
         bsTooltip("download1", "Download (PNG) current tab.",
                   "left", options = list(container = "body")
         ),
         bsTooltip("update_filters", "Select filters and press the button to update the tool",
                   "top", options = list(container = "body")
+        )
+      ),
+      
+      conditionalPanel(
+        condition = "input.sbm == 'cycleTime' | input.sbm == 'roomInTime'",
+          br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        br(),
+        column(1,
+          dropdown(
+            box(
+              title = NULL,
+              width = 20,
+              height = "400px",
+              solidHeader = FALSE,
+              tags$img(src='Boxplot.png',height='100%',width='100%')
+            ),
+            style = "material-circle", size = "lg", right = TRUE, status = "default",
+            icon = icon("info"), width = "300px",
+            
+            tooltip = tooltipOptions(title = "Click for additional info on how to interpret boxplots."),
+            inputId = "dropdownboxplot"
+          )
         )
       )
       
