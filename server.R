@@ -4687,7 +4687,7 @@ server <- function(input, output, session) {
     
     space.hour.day <- space.hour.day %>% filter(Time %in% timeOptionsHr_filter)
     
-    graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Req, col=factor(Day,level = daysOfWeek.options), group=Day))+
+    graph <- ggplot(space.hour.day, aes(x=Time, y=ceiling(Average_Req), col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
       labs(x=NULL, y="Number of Rooms\n",
            title = "Average Space Required by Time of Day and Day of Week",
@@ -4719,7 +4719,7 @@ server <- function(input, output, session) {
             panel.grid.minor = element_blank(),
             panel.grid.major = element_blank(),
             plot.margin = margin(10,30,30,30))+
-      geom_text(aes(label= ifelse(is.na(Average_Req),"", round(Average_Req))), color="black", size=5, fontface="bold")
+      geom_text(aes(label= ifelse(is.na(Average_Req),"", ceiling(Average_Req))), color="black", size=5, fontface="bold")
     
     grid.arrange(graph, table, ncol = 1, heights = c(5,3))
     
