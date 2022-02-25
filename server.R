@@ -9382,6 +9382,8 @@ server <- function(input, output, session) {
     # compare_filters <- "Campus.Specialty"
     # breakdown_filters <- "Visit.Method"
     
+    
+    data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
     data$Appt.Status <- ifelse(data$Appt.Status == "Arrived","Arrived","No Show")
     
     
@@ -9437,6 +9439,20 @@ server <- function(input, output, session) {
         
         noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% pivot_wider(names_from = Appt.MonthYear, values_from = percentage)
       }
+    
+    noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
+    
+    
+    months_df <- noShow_perc[,!(names(noShow_perc) %in% c(cols_name, "Total", "Total_YN"))]
+    months <- order(as.yearmon(colnames(months_df), "%b %Y"))
+    order_months <- months_df[months]
+    
+    
+    index <- months+length(cols_name)
+    index <- c(1:length(cols_name),index,(length(noShow_perc)-1):length(noShow_perc))
+    
+    noShow_perc <- noShow_perc[index]
+    
   })
   
   
