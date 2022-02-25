@@ -7408,6 +7408,20 @@ server <- function(input, output, session) {
     
   })
   
+  rows_group_opt <- reactive({
+    if(input$compare_filters_opt == "Campus.Specialty"){
+      list <- list(0)
+    }
+    if(input$compare_filters_opt == "Department"){
+      list <- list(0,1)
+    }
+    if(input$compare_filters_opt == "Provider"){
+      list <- list(0,1,2)
+    }
+    list
+    
+  }) 
+  
   rows_group_slot <- reactive({
     if(input$compare_filters == "Campus.Specialty"){
       list <- list(0,1)
@@ -9278,7 +9292,7 @@ server <- function(input, output, session) {
   output[["opt_comparison_tb"]] <- renderDT({
     
     #col_dissappear <- which(names( schedule_opt()) %in% c("Total_YN"))
-    num_of_cols <- length( schedule_opt())
+    num_of_cols <- length(schedule_opt())
     
     dtable <-   datatable( schedule_opt(), 
                            class = 'cell-border stripe',
@@ -9307,7 +9321,7 @@ server <- function(input, output, session) {
                                                    ifelse(colnames( schedule_opt())[3] == "Provider", 4, 3)
                              ),
                              #fixedColumns = list(leftColumns = 2),
-                             rowsGroup = rows_group(),
+                              rowsGroup = rows_group_opt(),
                              headerCallback = DT::JS(
                                "function(thead) {",
                                "  $(thead).css('font-size', '115%');",
