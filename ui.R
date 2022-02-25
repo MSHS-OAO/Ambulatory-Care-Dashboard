@@ -1387,6 +1387,19 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")
                                               )
                                      ),
+                                     tabPanel("No Show %",
+                                              boxPlus(
+                                                title = "No Show %", width = 12, status = "primary", 
+                                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                                # h2(uiOutput(("new_wait_day_title"))),
+                                                # br(),
+                                                # DTOutput("new_patient_lead_time_day") %>% 
+                                                #   withSpinner(type = 5, color = "#d80b8c"),
+                                                h3(uiOutput(("no_show_comp_title"))),
+                                                DTOutput("no_show_comp_month") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c")
+                                              )
+                                     ),
                                      tabPanel("Booked/Filled Rate",
                                               boxPlus(
                                                 title = "Filled Rate", width = 12, status = "primary", 
