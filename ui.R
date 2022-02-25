@@ -192,6 +192,15 @@ ui <- dashboardPage(
                 menuItem("Comparison", tabName = "Comparison"),
                 
                 menuItem("Trending", tabName = "KPIs"),
+                br(),
+                tags$div("Operational Improvement",
+                         style= "
+                 font-size: 16px;
+                 text-align: center;
+                 margin: 0;
+                 background: rgba(255, 255, 255, 0);
+                 color: #FFFFFF"),
+                tags$hr(style="border-color: #FFFFFF; margin-top: 10px;"),
                 menuItem("Schedule Optimization", tabName = "optimization")
                 
                 

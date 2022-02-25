@@ -9082,6 +9082,9 @@ server <- function(input, output, session) {
   
   schedule_opt <- reactive({
     # Volume Data
+    #data <- kpi.all.data %>% filter(Campus.Specialty=="Allergy")
+    #compare_filters <- "Provider"
+    
     data  <- dataArrived() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     compare_filters <- input$compare_filters_opt
     
@@ -9133,19 +9136,24 @@ server <- function(input, output, session) {
     
     ### Calculate new patient ratio by breakdown
     newpatients.ratio <- newpatients.ratio %>% group_by(Appt.MonthYear) %>%
-      mutate(ratio = round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2))
+      mutate(ratio = paste0(round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2)*100, "%")) 
+      
+    
+      
+    
+    
+    
+   # `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
     
     
     drop <- c("FALSE","TRUE", "<NA>")
     newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
-    newpatients.ratio <- newpatients.ratio %>%
-      pivot_wider(names_from = Appt.MonthYear,
-                  values_from = ratio,
-                  values_fill = 0)
+    newpatients.ratio <- newpatients.ratio %>% spread(Appt.MonthYear, ratio)
+    newpatients.ratio[is.na(newpatients.ratio)] <- "0%"
     
-    newpatients.ratio$Metrics <- "New Patient Ratio"
+    
+    newpatients.ratio$Metrics <- "New Patient Ratio (%)"
     newpatients.ratio <-newpatients.ratio %>% select(cols, Metrics, everything())
-    
     
     
     
@@ -9205,6 +9213,8 @@ server <- function(input, output, session) {
     
     
     # Process slot data
+    #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Allery")
+    
     data_slot <- dataAllSlot_comp()
     compare_filters <- input$compare_filters_opt
     
@@ -9250,7 +9260,7 @@ server <- function(input, output, session) {
     
     
     ### Bind datas by row to create the final table
-    opt_table <- plyr:: rbind.fill(volume, newpatients.ratio, waitTime, slot)  
+    opt_table <- plyr:: rbind.fill(volume,slot, newpatients.ratio, waitTime )  
     opt_table[is.na(opt_table)] <- 0  
     
     
@@ -9258,9 +9268,13 @@ server <- function(input, output, session) {
     months <- order(as.yearmon(colnames(months_df), "%b %Y"))
     order_months <- months_df[months]
     
+  
+    
     
     index <- months+length(cols_name)
-    index <- c(1:length(cols_name),index,length(opt_table))
+    #index <- c(1:length(cols_name),index,length(opt_table))
+    index <- c(1:length(cols_name),index)
+    index <- sort(index, decreasing = F)
     
     opt_table <- opt_table[index]
     opt_table <- opt_table %>% select(cols, "Metrics", everything())
@@ -9270,7 +9284,6 @@ server <- function(input, output, session) {
   
   
   
-  ### [4. ] optimization -----------------------------------------------------------------------------------------------------------
   
   output$opt_day_title <- renderText({
     
