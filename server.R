@@ -9082,6 +9082,9 @@ server <- function(input, output, session) {
   
   schedule_opt <- reactive({
     # Volume Data
+    # data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus == "MSUS") %>% filter(Campus.Specialty == "Allergy")
+    # compare_filters <- "Provider"
+    
     data  <- dataArrived() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     compare_filters <- input$compare_filters_opt
     
@@ -9349,7 +9352,28 @@ server <- function(input, output, session) {
   },server = FALSE)  
   
   
-  
+  output$no_show_comp_title <- renderText({
+    if(input$breakdown_filters == "Visit.Method"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "Appt.Type"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "New.PT3"){
+      name_2 <- "Patient Status"
+    }
+    
+    if(input$compare_filters == "Campus.Specialty"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "Department"){
+      name_1 <- input$compare_filters
+    }
+    if(input$compare_filters == "Provider"){
+      name_1 <- input$compare_filters
+    }
+    paste0("Monthly No Show Rate (%) by ", name_1 , " and ", name_2)
+  })
   
   no_show_rate_month <- reactive({
     
