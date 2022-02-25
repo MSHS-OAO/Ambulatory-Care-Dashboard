@@ -9082,6 +9082,7 @@ server <- function(input, output, session) {
   
   schedule_opt <- reactive({
     # Volume Data
+
     #data <- kpi.all.data %>% filter(Campus.Specialty=="Allergy")
     #compare_filters <- "Provider"
     
@@ -9362,7 +9363,28 @@ server <- function(input, output, session) {
   },server = FALSE)  
   
   
-  
+  output$no_show_comp_title <- renderText({
+    if(input$breakdown_filters == "Visit.Method"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "Appt.Type"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "New.PT3"){
+      name_2 <- "Patient Status"
+    }
+    
+    if(input$compare_filters == "Campus.Specialty"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "Department"){
+      name_1 <- input$compare_filters
+    }
+    if(input$compare_filters == "Provider"){
+      name_1 <- input$compare_filters
+    }
+    paste0("Monthly No Show Rate (%) by ", name_1 , " and ", name_2)
+  })
   
   no_show_rate_month <- reactive({
     
@@ -9371,6 +9393,8 @@ server <- function(input, output, session) {
     # compare_filters <- "Campus.Specialty"
     # breakdown_filters <- "Visit.Method"
     
+    
+    data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
     data$Appt.Status <- ifelse(data$Appt.Status == "Arrived","Arrived","No Show")
     
     
@@ -9426,6 +9450,20 @@ server <- function(input, output, session) {
         
         noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% pivot_wider(names_from = Appt.MonthYear, values_from = percentage)
       }
+    
+    noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
+    
+    
+    months_df <- noShow_perc[,!(names(noShow_perc) %in% c(cols_name, "Total", "Total_YN"))]
+    months <- order(as.yearmon(colnames(months_df), "%b %Y"))
+    order_months <- months_df[months]
+    
+    
+    index <- months+length(cols_name)
+    index <- c(1:length(cols_name),index,(length(noShow_perc)-1):length(noShow_perc))
+    
+    noShow_perc <- noShow_perc[index]
+    
   })
   
   
