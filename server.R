@@ -2137,6 +2137,11 @@ server <- function(input, output, session) {
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
+  output$practiceName_opt_comp <- renderText({
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
+  
   
   ### (4) Analysis Output ==============================================================================================================
   ### Practice Overview Tab ------------------------------------------------------------------------------------------------------------
@@ -9047,6 +9052,292 @@ server <- function(input, output, session) {
     session$doBookmark()
   })
   #callModule(profvis_server, "profiler")
+  
+  
+  
+  
+### optimization 
+  
+  
+  output$practiceName_opt_comp <- renderText({
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
+  
+
+  
+  schedule_opt <- reactive({
+    # Volume Data
+    data  <- dataArrived() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+    compare_filters <- input$compare_filters_opt
+    
+    if(compare_filters == "Campus.Specialty"){
+      name_1 <- "Specialty"
+      cols <- c(compare_filters)
+      cols_name <- c(name_1)
+      tot_cols <- c(compare_filters)
+    }
+    if(compare_filters == "Department"){
+      name_1 <- compare_filters
+      cols <- c("Campus.Specialty",compare_filters)    
+      cols_name <- c("Specialty",name_1)
+      tot_cols <- c("Campus.Specialty",compare_filters)
+    }
+    if(compare_filters == "Provider"){
+      name_1 <- compare_filters
+      cols <- c("Campus.Specialty","Department",compare_filters)
+      cols_name <- c("Specialty","Department", name_1)
+      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+    }
+    
+    #### group Data by inputs and Month and data get the total for each day then group by the Month in order to sum all the vistis within the month and 
+    #### divide it by the number of days within the month in the data, then we make a wider data sets with the months values made into a column
+    
+    volume <- data %>% group_by(across(all_of(cols)),Appt.DateYear, Appt.MonthYear) %>%
+      summarise(total = n()) %>%
+      group_by(across(cols), Appt.MonthYear) %>%
+      summarise(avg = round(sum(total)/n())) %>%
+      pivot_wider(names_from = Appt.MonthYear,
+                  values_from = avg,
+                  values_fill = 0) 
+    
+    volume[is.na(volume)] <- 0
+    
+    volume$Metrics <- "Average Daily Volume"
+    volume <- volume %>% select(cols, Metrics, everything())
+    
+    
+    
+    ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
+    newpatients.ratio <- data %>% group_by(across(cols), Appt.MonthYear, New.PT3) %>%
+      summarise(total = n()) %>%
+      drop_na() %>%
+      spread(New.PT3, total) %>%
+      drop_na()
+    
+    newpatients.ratio[is.na(newpatients.ratio)] <- 0
+    
+    ### Calculate new patient ratio by breakdown
+    newpatients.ratio <- newpatients.ratio %>% group_by(Appt.MonthYear) %>%
+      mutate(ratio = round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2))
+    
+    
+    drop <- c("FALSE","TRUE", "<NA>")
+    newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
+    newpatients.ratio <- newpatients.ratio %>%
+      pivot_wider(names_from = Appt.MonthYear,
+                  values_from = ratio,
+                  values_fill = 0)
+    
+    newpatients.ratio$Metrics <- "New Patient Ratio"
+    newpatients.ratio <-newpatients.ratio %>% select(cols, Metrics, everything())
+    
+    
+    
+    
+    dataAll <- dataAll()
+    compare_filters <- input$compare_filters_opt
+    
+    if(compare_filters == "Campus.Specialty"){
+      name_1 <- "Specialty"
+      cols <- c(compare_filters)
+      cols_name <- c(name_1)
+      tot_cols <- c(compare_filters)
+    }
+    if(compare_filters == "Department"){
+      name_1 <- compare_filters
+      cols <- c("Campus.Specialty",compare_filters)    
+      cols_name <- c("Specialty",name_1)
+      tot_cols <- c("Campus.Specialty",compare_filters)
+    }
+    if(compare_filters == "Provider"){
+      name_1 <- compare_filters
+      cols <- c("Campus.Specialty","Department",compare_filters)
+      cols_name <- c("Specialty","Department", name_1)
+      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+    }
+    
+    
+    ### Calculate wait time which is the difference between when the patient made the appt and the scheduled date
+    
+    waitTime <- dataAll %>% mutate(wait.time= as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2)))
+    waitTime <-waitTime  %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+    
+    #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
+    waitTime <- waitTime %>%
+      filter(wait.time >= 0) %>%
+      group_by(across(cols), Appt.MonthYear, New.PT3) %>%
+      dplyr::summarise(medWaitTime = round(median(wait.time))) %>%
+      filter(New.PT3 %in% c("TRUE","FALSE"))
+    
+    
+    #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
+    waitTime$New.PT3 <- ifelse(waitTime$New.PT3 == TRUE, "New","Established")
+    waitTime <- waitTime %>% filter(New.PT3 == "New")
+    drop <- c("New.PT3")
+    waitTime = waitTime[,!(names(waitTime) %in% drop)]
+    
+    #### Pivot the data so the months are in the columns and shows only new patient median time   
+    waitTime <- waitTime %>%
+      pivot_wider(names_from = Appt.MonthYear,
+                  values_from = medWaitTime,
+                  values_fill = 0)
+    
+    
+    waitTime$Metrics <- "New Patient Wait Time"
+    waitTime <- waitTime %>% select(cols, Metrics, everything())
+    
+    
+    
+    
+    # Process slot data
+    data_slot <- dataAllSlot_comp()
+    compare_filters <- input$compare_filters_opt
+    
+    if(compare_filters == "Campus.Specialty"){
+      name_1 <- "Specialty"
+      cols <- c(compare_filters)
+      cols_name <- c(name_1)
+      tot_cols <- c(compare_filters)
+    }
+    if(compare_filters == "Department"){
+      name_1 <- compare_filters
+      cols <- c("Campus.Specialty",compare_filters)    
+      cols_name <- c("Specialty",name_1)
+      tot_cols <- c("Campus.Specialty",compare_filters)
+    }
+    if(compare_filters == "Provider"){
+      name_1 <- compare_filters
+      cols <- c("Campus.Specialty","Department",compare_filters)
+      cols_name <- c("Specialty","Department", name_1)
+      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+    }
+    
+    slot <- data_slot %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+    slot <- slot %>% group_by(across(cols), Appt.MonthYear, Appt.DateYear)%>%
+      dplyr::summarise(`Available Hours` = round(sum(`Available Hours`, na.rm=TRUE),1),
+                       `Booked Hours` = sum(`Booked Hours`),
+                       `Filled Hours` = sum(`Arrived Hours`))
+    slot[is.na(slot)] <- 0
+    slot_metrics <- c( "Booked Rate (%)", "Filled Rate (%)")
+    
+    ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
+    ### then gather all created columns make them categories for the STatus column
+    ### Spread data to make monhts in Appt.Month into columns
+    slot <- slot %>%  group_by(across(!!cols), Appt.MonthYear) %>%
+      summarise(
+        `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
+        `Filled Rate (%)` = paste0(round(sum(`Filled Hours`)/sum(`Available Hours`)*100),"%"),
+      ) %>%
+      gather(variable, value, !!slot_metrics) %>%
+      spread(Appt.MonthYear, value) %>%
+      rename(Metrics = variable)
+    
+    
+    
+    ### Bind datas by row to create the final table
+    opt_table <- plyr:: rbind.fill(volume, newpatients.ratio, waitTime, slot)  
+    opt_table[is.na(opt_table)] <- 0  
+    
+    
+    months_df <-  opt_table[,!(names( opt_table) %in% c(cols_name, "Metrics"))]
+    months <- order(as.yearmon(colnames(months_df), "%b %Y"))
+    order_months <- months_df[months]
+    
+    
+    index <- months+length(cols_name)
+    index <- c(1:length(cols_name),index,length(opt_table))
+    
+    opt_table <- opt_table[index]
+    opt_table <- opt_table %>% select(cols, "Metrics", everything())
+    
+  })
+  
+  
+  
+  
+  ### [4. ] optimization -----------------------------------------------------------------------------------------------------------
+  
+  output$opt_day_title <- renderText({
+    
+    if(input$compare_filters_opt == "Campus.Specialty"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters_opt == "Department"){
+      name_1 <- input$compare_filters_opt
+    }
+    if(input$compare_filters_opt == "Provider"){
+      name_1 <- input$compare_filters_opt
+    }
+    paste0("Schedule Optimization by ", name_1 )
+  })
+  
+  
+  
+  
+  output[["opt_comparison_tb"]] <- renderDT({
+    
+    #col_dissappear <- which(names( schedule_opt()) %in% c("Total_YN"))
+    num_of_cols <- length( schedule_opt())
+    
+    dtable <-   datatable( schedule_opt(), 
+                           class = 'cell-border stripe',
+                           rownames = FALSE,
+                           extensions = c('Buttons','Scroller'),
+                           caption = htmltools::tags$caption(
+                             style = 'caption-side: bottom; text-align: left;'
+                             #htmltools::em('Average Daily Volume = Total arrived visits by month and breakdown / Total number of days within the month.')
+                           ),
+                           options = list(
+                             scrollX = TRUE,
+                             #columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
+                             list(pageLength = 20, scrollY = "400px"),
+                             dom = 'Bfrtip',
+                             #buttons = c('csv','excel'),
+                             buttons = list(
+                               list(extend = 'csv', filename = 'Daily Volume Comaprsion'),
+                               list(extend = 'excel', filename = 'Daily Volume Comaprsion')
+                             ),
+                             sDom  = '<"top">lrt<"bottom">ip',
+                             initComplete = JS(
+                               "function(settings, json) {",
+                               "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                               "}"),
+                             fixedColumns = list(leftColumns =
+                                                   ifelse(colnames( schedule_opt())[3] == "Provider", 4, 3)
+                             ),
+                             #fixedColumns = list(leftColumns = 2),
+                             rowsGroup = rows_group(),
+                             headerCallback = DT::JS(
+                               "function(thead) {",
+                               "  $(thead).css('font-size', '115%');",
+                               "}"
+                             )
+                           )
+                           
+                           # %>%
+                           #   formatStyle(
+                           #     'Total_YN',
+                           #     target = "row",
+                           #     fontWeight = styleEqual(1, "bold")
+                           #     #backgroundColor = styleEqual(c(1),c('grey'))
+                           #   ) 
+    ) %>% formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+    
+    
+    path <- here::here("www")
+    
+    dep <- htmltools::htmlDependency(
+      "RowsGroup", "2.0.0", 
+      path, script = "dataTables.rowsGroup.js")
+    dtable$dependencies <- c(dtable$dependencies, list(dep))
+    dtable
+  },server = FALSE)  
+  
+  
+  
+  
+  
   
 } # Close server 
 

@@ -591,6 +591,7 @@ groupByFilters_3 <- function(dt, apptType){
   return(result)
 }
 
+
 ## Filtered Slot Data
 groupByFilters_4 <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
   result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource, Provider %in% provider,

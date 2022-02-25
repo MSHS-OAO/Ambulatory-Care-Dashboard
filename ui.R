@@ -16,7 +16,7 @@ default_provider <- sort(unique(kpi.all.data[
     kpi.all.data$Resource %in% default_resource_type, "Provider"]), na.last = TRUE)
 
 default_visit_method <- sort(unique(kpi.all.data[
-  kpi.all.data$Campus %in% default_campus &
+    kpi.all.data$Campus %in% default_campus &
     kpi.all.data$Campus.Specialty %in% default_specialty &
     kpi.all.data$Department %in% default_departments & 
     kpi.all.data$Resource %in% default_resource_type &
@@ -191,7 +191,8 @@ ui <- dashboardPage(
                 tags$hr(style="border-color: #FFFFFF; margin-top: 10px;"),
                 menuItem("Comparison", tabName = "Comparison"),
                 
-                menuItem("Trending", tabName = "KPIs")
+                menuItem("Trending", tabName = "KPIs"),
+                menuItem("Schedule Optimization", tabName = "optimization")
                 
                 
     ) # Close sidebarMenu
@@ -1403,7 +1404,49 @@ ui <- dashboardPage(
                               
                        )
                 )
-        )
+        ),
+        
+        tabItem(tabName = "optimization",
+                column(11,
+                       div("Schedule Optimization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       textOutput("practiceName_opt_comp"),
+                       #textOutput("kpis_mem"),
+                       tags$head(tags$style("#practiceName_opt_comp{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                       
+                       
+                       column(2,
+                              box(
+                                title = NULL,
+                                width = 12,
+                                height = "200px",
+                                solidHeader = FALSE,
+                                radioButtons("compare_filters_opt", label = h4("Compare by:"),
+                                             choices = list("Specialty" = "Campus.Specialty", "Department" = "Department", "Provider" = "Provider"),
+                                             selected = "Campus.Specialty")),
+                              
+                              
+                       ),
+                       
+                       column(10,
+                              box(title = NULL, id = "tabset8", width = "100%", type = 'pills',      
+                                     boxPlus(
+                                       title = "Metrics Comparison", width = 12, status = "primary", 
+                                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE, 
+                                       h3(uiOutput(("opt_day_title"))),
+                                       DTOutput("opt_comparison_tb") %>% 
+                                         withSpinner(type = 5, color = "#d80b8c")
+                                       #hr()
+                                    
+                                       
+                                     )
+                                     
+                                     
+                              )
+                       )
+                ) # close column
+                
+        ) # close tabItem
+        
         
       ), #Close Tab Items
       
@@ -1414,7 +1457,7 @@ ui <- dashboardPage(
       conditionalPanel(
         condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='cancellations' | 
-      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='data' | input.sbm == 'Comparison'",
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='data' | input.sbm == 'Comparison'| input.sbm == 'optimization'",
         
         # Formatting Buttons
         tags$head(tags$style(HTML("#dropdownboxplot {color: #fff;}"))),
@@ -1470,7 +1513,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-        input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'| input.sbm == 'Comparison'",
+        input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'",
                    br(),
                    actionButton("update_filters", "CLICK TO UPDATE", width = "80%"),
                    br(),
@@ -1606,7 +1649,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'| input.sbm == 'Comparison'",
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'",
                    box(
                      title = "Select Date Range:",
                      width = 12, 
