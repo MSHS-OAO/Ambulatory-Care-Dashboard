@@ -7439,9 +7439,9 @@ server <- function(input, output, session) {
   
   vol_comp_day <- reactive({
     data <- dataArrived() #%>% filter(Resource == "Provider")
-    # data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
-    # compare_filters <- "Specialty"
-    # breakdown_filters <- "Visit.Method"
+    #data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
+    #compare_filters <- "Campus.Specialty"
+    #breakdown_filters <- "Visit.Method"
 
     data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
     
@@ -7489,6 +7489,8 @@ server <- function(input, output, session) {
       
       volume[is.na(volume)] <- 0 ## NAs to 0
       
+     
+    
       
       #### Create "New" column to establish number of new patients. then group by Month and create "avg" column that is the sum of all new patients within 
       #### the month divided by the total number of days we have data in the month
@@ -7533,6 +7535,7 @@ server <- function(input, output, session) {
         #relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
       
+      
       ### Join numbers for new and est patients
       volume <- full_join(volume_new,volume_est)
       # volume <- volume %>% relocate(breakdown_filters, .after = !!compare_filters)
@@ -7544,7 +7547,12 @@ server <- function(input, output, session) {
         summarise_at(vars(-!!breakdown_filters), sum) #%>%
         #relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
-      #volume <- full_join(volume,tot)
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      
+      volume <- full_join(volume,tot)
       
       #### GEt rowSUms of all columns with months
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
@@ -7566,6 +7574,15 @@ server <- function(input, output, session) {
       
       volume[is.na(volume)] <- 0
       
+      
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum)  %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      
+      
+      volume <- full_join(volume,tot)
+      
       ### Get average total by adding all the numbers in the months columns grouped by the volume filters
       #### Also added a column named by the breakdown filter to store the number Avergae Total NUmber
       # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
@@ -7574,26 +7591,35 @@ server <- function(input, output, session) {
       # 
       # volume <- full_join(volume,tot)
       
-      
       #### GEt rowSUms of all columns with months
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
     }
     
     volume <- setnames(volume, old = cols, new = cols_name)
-
-    months_df <- volume[,!(names(volume) %in% c(cols_name, "Total"))]
+    
+    volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
+    
+    months_df <- volume[,!(names(volume) %in% c(cols_name, "Total", "Total_YN"))]
     months <- order(as.yearmon(colnames(months_df), "%b %Y"))
     order_months <- months_df[months]
     
     
     index <- months+length(cols_name)
-    index <- c(1:length(cols_name),index,length(volume))
+    index <- c(1:length(cols_name),index,(length(volume)-1):length(volume))
     
     volume <- volume[index]
-    month_names <- colnames(volume[setdiff(names(volume), c(cols_name, "Total", "Total_YN"))])
-    month_names_new <- as.character(lapply(month_names, function(x){paste(sapply(strsplit(x, "\\s+"), rev), collapse= '-')}))
     
-    volume <- setnames(volume, old = month_names, new = month_names_new)
+    #index <- months+length(cols_name)
+    #index <- c(1:length(cols_name),index,length(volume))
+    
+    #volume <- volume[index]
+    #month_names <- colnames(volume[setdiff(names(volume), c(cols_name, "Total", "Total_YN"))])
+    #month_names_new <- as.character(lapply(month_names, function(x){paste(sapply(strsplit(x, "\\s+"), rev), collapse= '-')}))
+    
+    #volume <- setnames(volume, old = month_names, new = month_names_new)
+    
+   
+  
     
     # if(compare_filters == "Specialty"){
     #   col = 3
@@ -7619,7 +7645,7 @@ server <- function(input, output, session) {
   
   output[["volume_comparison_tb_day"]] <- renderDT({
     
-    #col_dissappear <- which(names(vol_comp_day()) %in% c("Total_YN"))
+    col_dissappear <- which(names(vol_comp_day()) %in% c("Total_YN"))
     num_of_cols <- length(vol_comp_day())
     
     dtable <-   datatable(vol_comp_day(), 
@@ -7632,7 +7658,7 @@ server <- function(input, output, session) {
                           ),
                           options = list(
                             scrollX = TRUE,
-                            #columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
+                            columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
                             list(pageLength = 20, scrollY = "400px"),
                             dom = 'Bfrtip',
                             #buttons = c('csv','excel'),
@@ -7664,7 +7690,14 @@ server <- function(input, output, session) {
     #     fontWeight = styleEqual(1, "bold")
     #     #backgroundColor = styleEqual(c(1),c('grey'))
     #   ) 
-    ) %>% formatStyle(columns = c("Total"), fontWeight = 'bold') %>%
+    ) %>% 
+      formatStyle(
+        'Total_YN',
+        target = "row",
+        fontWeight = styleEqual(1, "bold")
+      ) %>%
+      
+      formatStyle(columns = c("Total"), fontWeight = 'bold') %>%
       formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
     
     path <- here::here("www")
@@ -7675,7 +7708,9 @@ server <- function(input, output, session) {
     dtable$dependencies <- c(dtable$dependencies, list(dep))
     dtable
   },server = FALSE)
-  
+
+
+
   
   
   
@@ -8541,7 +8576,7 @@ server <- function(input, output, session) {
   
   patient_lead <- reactive({
     data <- dataAll()
-    # data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
+    #data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Department"
     # breakdown_filters <- "New.PT3"
     
