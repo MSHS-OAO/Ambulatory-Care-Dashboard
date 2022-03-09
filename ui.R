@@ -1400,10 +1400,10 @@ ui <- dashboardPage(
                                               boxPlus(
                                                 title = "No Show %", width = 12, status = "primary", 
                                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                                # h2(uiOutput(("new_wait_day_title"))),
-                                                # br(),
-                                                # DTOutput("new_patient_lead_time_day") %>% 
-                                                #   withSpinner(type = 5, color = "#d80b8c"),
+                                                h3(uiOutput(("no_show_comp_title_daily"))),
+                                                DTOutput("no_show_comp_daily") %>%
+                                                  withSpinner(type = 5, color = "#d80b8c"),
+                                                hr(),
                                                 h3(uiOutput(("no_show_comp_title"))),
                                                 DTOutput("no_show_comp_month") %>% 
                                                   withSpinner(type = 5, color = "#d80b8c")

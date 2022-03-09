@@ -9430,6 +9430,172 @@ server <- function(input, output, session) {
   },server = FALSE)  
   
   
+  output$no_show_comp_title_daily <- renderText({
+    if(input$breakdown_filters == "Visit.Method"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "Appt.Type"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "New.PT3"){
+      name_2 <- "Patient Status"
+    }
+    
+    if(input$compare_filters == "Campus.Specialty"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "Department"){
+      name_1 <- input$compare_filters
+    }
+    if(input$compare_filters == "Provider"){
+      name_1 <- input$compare_filters
+    }
+    paste0("Average Daily No Show Rate (%) by ", name_1 , " and ", name_2)
+  })
+  
+  
+  no_show_rate_daily <- reactive({
+    
+    data <- dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived", "No Show"))
+    # data <- kpi.all.data[arrivedNoShow.data.rows,] %>% filter(Appt.Status %in% c("Arrived", "No Show")) %>% filter(Campus == "MSUS")
+    # compare_filters <- "Campus.Specialty"
+    # breakdown_filters <- "Visit.Method"
+    
+    
+    data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
+    data$Appt.Status <- ifelse(data$Appt.Status == "Arrived","Arrived","No Show")
+    
+    
+    
+    compare_filters <- input$compare_filters
+    breakdown_filters <- input$breakdown_filters
+    
+    
+    if(breakdown_filters == "Visit.Method"){
+      name_2 <- "Visit Method"
+    }
+    if(breakdown_filters == "Appt.Type"){
+      name_2 <- "Vist Type"
+    }
+    if(breakdown_filters == "New.PT3"){
+      name_2 <- "Patient Status"
+    }
+    
+    
+    if(compare_filters == "Campus.Specialty"){
+      name_1 <- "Specialty"
+      cols <- c(compare_filters,breakdown_filters)
+      cols_name <- c(name_1,name_2)
+      tot_cols <- c(compare_filters)
+    }
+    if(compare_filters == "Department"){
+      name_1 <- compare_filters
+      cols <- c("Campus.Specialty",compare_filters,breakdown_filters)
+      cols_name <- c("Specialty",name_1,name_2)
+      tot_cols <- c("Campus.Specialty",compare_filters)
+    }
+    if(compare_filters == "Provider"){
+      name_1 <- compare_filters
+      cols <- c("Campus.Specialty","Department",compare_filters,breakdown_filters)
+      cols_name <- c("Specialty","Department",name_1,name_2)
+      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+    }
+    
+    
+    
+    
+    
+    if(breakdown_filters == "New.PT3"){
+    }else {
+      
+      noShow_perc <- data %>%
+        group_by(across(cols),Appt.Status, Appt.MonthYear) %>%
+        dplyr::summarise(Total = n())
+  
+      noShow_perc_days <- data %>%
+        group_by(across(cols), Appt.MonthYear) %>%
+        dplyr::summarise(total_days = length(unique(Appt.DateYear)))
+  
+
+      noShow_perc <- noShow_perc %>% pivot_wider(names_from = Appt.Status, values_from = Total)
+      
+      noShow_perc <- merge(noShow_perc,noShow_perc_days)
+      
+      noShow_perc <- noShow_perc %>% group_by(across(cols),Appt.MonthYear) %>% mutate(percentage = round((`No Show` / (Arrived + `No Show`))/total_days*100,2))
+      noShow_perc <- noShow_perc %>% mutate(percentage = ifelse(percentage >= 1,round((`No Show` / (Arrived + `No Show`))/total_days*100,0), round((`No Show` / (Arrived + `No Show`))/total_days*100,2)))
+      
+      noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived, -total_days) %>% pivot_wider(names_from = Appt.MonthYear, values_from = percentage)
+    }
+    
+    noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
+    
+    
+    months_df <- noShow_perc[,!(names(noShow_perc) %in% c(cols_name, "Total", "Total_YN"))]
+    months <- order(as.yearmon(colnames(months_df), "%b %Y"))
+    order_months <- months_df[months]
+    
+    
+    index <- months+length(cols_name)
+    index <- c(1:length(cols_name),index)
+    
+    noShow_perc <- noShow_perc[index]
+    
+  })
+  
+  output[["no_show_comp_daily"]] <- renderDT({
+    data_table <- no_show_rate_daily()
+    #data_table <- noShow_perc
+    num_of_cols <- length(data)
+    #col_dissappear <- which(names(data_table) %in% c("Total_YN"))
+    dtable <-   datatable(data_table, 
+                          class = 'cell-border stripe',
+                          rownames = FALSE,
+                          extensions = c('Buttons','Scroller'),
+                          options = list(
+                            scrollX = TRUE,
+                            headerCallback = DT::JS(
+                              "function(thead) {",
+                              "  $(thead).css('font-size', '115%');",
+                              "}"
+                            ),
+                            columnDefs = list(list(visible = F#, targets = as.list(col_dissappear-1)
+                            )
+                            ),
+                            list(pageLength = 20, scrollY = "400px"),
+                            dom = 'Bfrtip',
+                            #buttons = c('csv','excel'),
+                            buttons = list(
+                              list(extend = 'csv', filename = 'Monthly New Patient Wait Time Comaprsion'),
+                              list(extend = 'excel', filename = 'Monthly New Patient Wait Time Comaprsion')
+                            ),
+                            sDom  = '<"top">lrt<"bottom">ip',
+                            initComplete = JS(
+                              "function(settings, json) {",
+                              "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                              "}"),
+                            fixedColumns = list(leftColumns =
+                                                  ifelse(colnames(data_table)[3] == "Provider", 4, 3)
+                            ),
+                            rowsGroup = rows_group()
+                          )
+    )
+    dtable <- dtable %>%
+      formatStyle(
+        0,
+        target = "row",
+        fontWeight = styleEqual(2, "bold")
+      )%>%
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+    path <- here::here("www")
+    
+    dep <- htmltools::htmlDependency(
+      "RowsGroup", "2.0.0", 
+      path, script = "dataTables.rowsGroup.js")
+    dtable$dependencies <- c(dtable$dependencies, list(dep))
+    dtable
+  },server = FALSE)
+  
+  
   output$no_show_comp_title <- renderText({
     if(input$breakdown_filters == "Visit.Method"){
       name_2 <- "Visit Method"
@@ -9527,7 +9693,7 @@ server <- function(input, output, session) {
     
     
     index <- months+length(cols_name)
-    index <- c(1:length(cols_name),index,(length(noShow_perc)-1):length(noShow_perc))
+    index <- c(1:length(cols_name),index)
     
     noShow_perc <- noShow_perc[index]
     
