@@ -7543,8 +7543,8 @@ server <- function(input, output, session) {
       
       ### Get average total by adding all the numbers in the months columns grouped by the volume filters
       #### Also added a column named by the breakdown filter to store the number Avergae Total NUmber
-      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) #%>%
+      #tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+       # summarise_at(vars(-!!breakdown_filters), sum) #%>%
         #relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
       tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
@@ -7581,7 +7581,7 @@ server <- function(input, output, session) {
         relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
       
-      volume <- full_join(volume,tot)
+      volume <- full_join(tot, volume)
       
       ### Get average total by adding all the numbers in the months columns grouped by the volume filters
       #### Also added a column named by the breakdown filter to store the number Avergae Total NUmber
@@ -7593,11 +7593,15 @@ server <- function(input, output, session) {
       
       #### GEt rowSUms of all columns with months
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
+
+      
+      
     }
     
     volume <- setnames(volume, old = cols, new = cols_name)
     
     volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
+    
     
     months_df <- volume[,!(names(volume) %in% c(cols_name, "Total", "Total_YN"))]
     months <- order(as.yearmon(colnames(months_df), "%b %Y"))
@@ -7608,6 +7612,23 @@ server <- function(input, output, session) {
     index <- c(1:length(cols_name),index,(length(volume)-1):length(volume))
     
     volume <- volume[index]
+    
+    
+    ## Adding "All" for aggregate total comparison
+    all <- volume %>% group_by(across(!!name_2)) %>% summarise_at(vars(names(order_months),Total), sum) %>%
+                       filter(across(!!name_2) !="Total")
+      
+     
+    all[cols_name[1:length(cols_name)-1]] <- "-"
+    
+    all[[name_1]] <- "All"
+    all$Total_YN <- 1
+    
+    
+    all <- all %>% select(cols_name, everything())
+    
+    
+    volume <- full_join(all, volume)
     
     #index <- months+length(cols_name)
     #index <- c(1:length(cols_name),index,length(volume))
@@ -7856,6 +7877,17 @@ server <- function(input, output, session) {
     month_names_new <- as.character(lapply(month_names, function(x){paste(sapply(strsplit(x, "\\s+"), rev), collapse= '-')}))
     
     volume <- setnames(volume, old = month_names, new = month_names_new)
+    
+    
+    all <- volume %>% group_by(across(!!name_2)) %>% summarise_at(vars(all_of(month_names_new),Total), sum) %>%
+      filter(across(!!name_2) !="Total")
+    
+    all[cols_name[1:length(cols_name)-1]] <- "-"
+    all[[name_1]] <- "All"
+    all$Total_YN <- 1
+    all <- all %>% select(cols_name, everything())
+    
+    volume <- full_join(all, volume)
     
     # volume <- cbind(volume[,1:2],round(volume[,3:length(volume)]))
     # 

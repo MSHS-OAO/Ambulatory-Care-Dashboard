@@ -102,6 +102,7 @@ suppressMessages({
   library(treemap)
   library(broom)
   library(extrafont)
+  library(janitor)
   library(tis) # for US holidays
   library(vroom)
   library(sjmisc)
