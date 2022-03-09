@@ -328,7 +328,7 @@ setwd(wdpath)
 # population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Data/population_data_filtered.feather"))
 # filter_path <- "/data/Ambulatory/Filters"
 
-#historical.data <- readRDS("C:/Users/villea04/Documents/Process_Amb/Data/historical_data.rds")
+historical.data <- readRDS("C:/Users/villea04/Documents/Process_Amb/Data/historical_data.rds")
 historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
 slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
 holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
