@@ -1430,7 +1430,7 @@ ui <- dashboardPage(
         
         tabItem(tabName = "optimization",
                 column(11,
-                       div("Schedule Optimization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Scheduling Template Optimization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        textOutput("practiceName_opt_comp"),
                        #textOutput("kpis_mem"),
                        tags$head(tags$style("#practiceName_opt_comp{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
