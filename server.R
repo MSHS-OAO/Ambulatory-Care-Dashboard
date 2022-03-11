@@ -7581,7 +7581,7 @@ server <- function(input, output, session) {
         relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
       
-      volume <- full_join(tot, volume)
+      volume <- full_join(volume, tot)
       
       ### Get average total by adding all the numbers in the months columns grouped by the volume filters
       #### Also added a column named by the breakdown filter to store the number Avergae Total NUmber
@@ -7619,7 +7619,7 @@ server <- function(input, output, session) {
                        filter(across(!!name_2) !="Total")
       
      
-    all[cols_name[1:length(cols_name)-1]] <- "-"
+    all[cols_name[1:length(cols_name)-1]] <- ""
     
     all[[name_1]] <- "All"
     all$Total_YN <- 1
@@ -7669,6 +7669,7 @@ server <- function(input, output, session) {
     col_dissappear <- which(names(vol_comp_day()) %in% c("Total_YN"))
     num_of_cols <- length(vol_comp_day())
     
+    
     dtable <-   datatable(vol_comp_day(), 
                           class = 'cell-border stripe',
                           rownames = FALSE,
@@ -7677,6 +7678,7 @@ server <- function(input, output, session) {
                             style = 'caption-side: bottom; text-align: left;',
                             htmltools::em('Average Daily Volume = Total arrived visits by month and breakdown / Total number of days within the month.')
                           ),
+                          
                           options = list(
                             scrollX = TRUE,
                             columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
@@ -7729,6 +7731,7 @@ server <- function(input, output, session) {
     dtable$dependencies <- c(dtable$dependencies, list(dep))
     dtable
   },server = FALSE)
+
 
 
 
@@ -7882,7 +7885,7 @@ server <- function(input, output, session) {
     all <- volume %>% group_by(across(!!name_2)) %>% summarise_at(vars(all_of(month_names_new),Total), sum) %>%
       filter(across(!!name_2) !="Total")
     
-    all[cols_name[1:length(cols_name)-1]] <- "-"
+    all[cols_name[1:length(cols_name)-1]] <- ""
     all[[name_1]] <- "All"
     all$Total_YN <- 1
     all <- all %>% select(cols_name, everything())
