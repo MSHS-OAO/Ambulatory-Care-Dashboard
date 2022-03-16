@@ -9207,10 +9207,11 @@ server <- function(input, output, session) {
     
     ### Calculate new patient ratio by breakdown
     newpatients.ratio <- newpatients.ratio %>% group_by(Appt.MonthYear) %>%
-      mutate(ratio = paste0(round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2)*100, "%")) 
+      mutate(ratio = round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)), 2)) 
       
     
-      
+    #newpatients.ratio <- newpatients.ratio %>% group_by(Appt.MonthYear) %>%
+     # mutate(ratio = paste0(round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2)*100, "%"))   
     
     
     
@@ -9220,7 +9221,8 @@ server <- function(input, output, session) {
     drop <- c("FALSE","TRUE", "<NA>")
     newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
     newpatients.ratio <- newpatients.ratio %>% spread(Appt.MonthYear, ratio)
-    newpatients.ratio[is.na(newpatients.ratio)] <- "0%"
+    #newpatients.ratio[is.na(newpatients.ratio)] <- "0%"
+    newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
     
     newpatients.ratio$Metrics <- "New Patient Ratio (%)"
@@ -9284,7 +9286,7 @@ server <- function(input, output, session) {
     
     
     # Process slot data
-    #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Allery")
+    #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Allergy")
     
     data_slot <- dataAllSlot_comp()
     compare_filters <- input$compare_filters_opt
@@ -9321,12 +9323,24 @@ server <- function(input, output, session) {
     ### Spread data to make monhts in Appt.Month into columns
     slot <- slot %>%  group_by(across(!!cols), Appt.MonthYear) %>%
       summarise(
-        `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
-        `Filled Rate (%)` = paste0(round(sum(`Filled Hours`)/sum(`Available Hours`)*100),"%"),
+        `Booked Rate (%)` = round(sum(`Booked Hours`)/sum(`Available Hours`),2 ),
+        `Filled Rate (%)` = round(sum(`Filled Hours`)/sum(`Available Hours`),2 ),
       ) %>%
       gather(variable, value, !!slot_metrics) %>%
       spread(Appt.MonthYear, value) %>%
       rename(Metrics = variable)
+    
+    
+    
+    
+    #slot <- slot %>%  group_by(across(!!cols), Appt.MonthYear) %>%
+     # summarise(
+      #  `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
+       # `Filled Rate (%)` = paste0(round(sum(`Filled Hours`)/sum(`Available Hours`)*100),"%"),
+       # )%>%
+      #gather(variable, value, !!slot_metrics) %>%
+      #spread(Appt.MonthYear, value) %>%
+      #rename(Metrics = variable)
     
     
     
@@ -9349,6 +9363,26 @@ server <- function(input, output, session) {
     
     opt_table <- opt_table[index]
     opt_table <- opt_table %>% select(cols, "Metrics", everything())
+    
+    opt_table <- opt_table %>% add_column(Target = "TBD", .after = "Metrics") 
+    opt_table <- opt_table %>% mutate(Target= case_when(Metrics=="Booked Rate (%)"~ ">= 95%", 
+                                                        Metrics=="Filled Rate (%)"~ ">= 85%",
+                                                        Metrics=="New Patient Wait Time"~ "14 Days",
+                                                        Metrics=="Average Daily Volume"~ "Variable",
+                                                        TRUE ~ "TBD"))
+      
+    
+ # opt_table <- as.datatable(formattable(opt_table, list(
+ #    `Jan 2021` = formatter("span", 
+ #                          style = x ~ style(color = 'white',
+ #                                           'background-color' =
+ #                                             ifelse(opt_table$Metrics == "Booked Rate (%)",
+ #                                                  ifelse( x> 0.95,"green", "red"), "gray")) ))))
+    
+ #opt_table <- opt_table %>% mutate(`Jan 2021`=ifelse(Metrics == "Booked Rate (%)", paste0(`Jan 2021`*100, "%"), `Jan 2021`))
+    
+      
+
     
   })
   
@@ -9405,7 +9439,7 @@ server <- function(input, output, session) {
                                                    ifelse(colnames( schedule_opt())[3] == "Provider", 4, 3)
                              ),
                              #fixedColumns = list(leftColumns = 2),
-                              rowsGroup = rows_group_opt(),
+                             rowsGroup = rows_group_opt(),
                              headerCallback = DT::JS(
                                "function(thead) {",
                                "  $(thead).css('font-size', '115%');",
@@ -9431,6 +9465,8 @@ server <- function(input, output, session) {
     dtable$dependencies <- c(dtable$dependencies, list(dep))
     dtable
   },server = FALSE)  
+  
+  
   
   
   output$no_show_comp_title_daily <- renderText({
