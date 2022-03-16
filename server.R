@@ -9371,6 +9371,16 @@ server <- function(input, output, session) {
                                                         Metrics=="Average Daily Volume"~ "Variable",
                                                         TRUE ~ "TBD"))
       
+    
+ # opt_table <- as.datatable(formattable(opt_table, list(
+ #    `Jan 2021` = formatter("span", 
+ #                          style = x ~ style(color = 'white',
+ #                                           'background-color' =
+ #                                             ifelse(opt_table$Metrics == "Booked Rate (%)",
+ #                                                  ifelse( x> 0.95,"green", "red"), "gray")) ))))
+    
+ #opt_table <- opt_table %>% mutate(`Jan 2021`=ifelse(Metrics == "Booked Rate (%)", paste0(`Jan 2021`*100, "%"), `Jan 2021`))
+    
       
 
     
