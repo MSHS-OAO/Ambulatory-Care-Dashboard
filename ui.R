@@ -1454,8 +1454,9 @@ ui <- dashboardPage(
                                      boxPlus(
                                        title = "Metrics Comparison", width = 12, status = "primary", 
                                        solidHeader = TRUE, collapsible = TRUE, closable = TRUE, 
-                                       h3(uiOutput(("opt_day_title"))),
-                                       DTOutput("opt_comparison_tb") %>% 
+                                       #h3(uiOutput(("opt_day_title"))),
+                                       #DTOutput("opt_comparison_tb") %>% 
+                                       tableOutput("opt_comparison_tb_kable") %>%
                                          withSpinner(type = 5, color = "#d80b8c")
                                        #hr()
                                     

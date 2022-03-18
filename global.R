@@ -49,6 +49,7 @@
 # install.packages("reactable")
 # devtools::install_github("ropensci/plotly")
 
+devtools::install_github("haozhu233/kableExtra", upgrade = "never")
 
 suppressMessages({
   library(readxl)
@@ -120,7 +121,14 @@ suppressMessages({
   library(patchwork)
   library(pryr)
   library(reactable)
+  library(devtools)
 })
+
+
+
+
+#detach("package:kableExtra", unload = TRUE)
+#library(kableExtra)
 
 # ### (0) Maximize R Memory Size 
 memory.limit(size = 8000000)
@@ -322,20 +330,20 @@ setwd(wdpath)
 ### RStudio COnnect Data Read In
 
 #### New Location with Updated Data
-# historical.data <- as.data.frame(read_feather("/data/Ambulatory/Data/historical_data.feather"))
-# slot.data.subset <- as.data.frame(read_feather("/data/Ambulatory/Data/slot_data_subset.feather"))
-# holid <- as.data.frame(read_feather("/data/Ambulatory/Data/holid.feather"))
-# utilization.data <- as.data.frame(read_feather("/data/Ambulatory/Data/utilization_data.feather"))
-# population.data_filtered  <- as.data.frame(read_feather("/data/Ambulatory/Data/population_data_filtered.feather"))
-# filter_path <- "/data/Ambulatory/Filters"
+historical.data <- readRDS("/data/Ambulatory/Data/historical_data.rds")
+slot.data.subset <- readRDS("/data/Ambulatory/Data/slot_data.rds")
+holid <- as.data.frame(read_feather("/data/Ambulatory/Data/holid.feather"))
+utilization.data <- readRDS("/data/Ambulatory/Data/utilization_data.rds")
+population.data_filtered  <- readRDS("/data/Ambulatory/Data/population_data.rds")
+filter_path <- "/data/Ambulatory/Filters"
 
-historical.data <- readRDS("C:/Users/villea04/Documents/Process_Amb/Data/historical_data.rds")
-historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
-slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
-population.data_filtered <- readRDS(paste0(wdpath,"/Data/population_data_filtered.rds"))
-filter_path <- paste0(wdpath, "/Filters")
+# historical.data <- readRDS("C:/Users/villea04/Documents/Process_Amb/Data/historical_data.rds")
+# historical.data <- readRDS(paste0(wdpath,"/Data/historical_data.rds")) ## Filter out historical data only
+# slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+# utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
+# population.data_filtered <- readRDS(paste0(wdpath,"/Data/population_data_filtered.rds"))
+# filter_path <- paste0(wdpath, "/Filters")
 
 max_date <- max(historical.data$Appt.DateYear)
 

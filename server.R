@@ -9153,10 +9153,11 @@ server <- function(input, output, session) {
   schedule_opt <- reactive({
     # Volume Data
 
-    #data <- kpi.all.data %>% filter(Campus.Specialty=="Allergy")
-    #compare_filters <- "Provider"
+    # data <- kpi.all.data %>% filter(Campus.Specialty=="Allergy") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+    # compare_filters <- "Provider"
     
     data  <- dataArrived() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+    
     compare_filters <- input$compare_filters_opt
     
     if(compare_filters == "Campus.Specialty"){
@@ -9195,7 +9196,6 @@ server <- function(input, output, session) {
     volume <- volume %>% select(cols, Metrics, everything())
     
     
-    
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
     newpatients.ratio <- data %>% group_by(across(cols), Appt.MonthYear, New.PT3) %>%
       summarise(total = n()) %>%
@@ -9229,30 +9229,12 @@ server <- function(input, output, session) {
     newpatients.ratio <-newpatients.ratio %>% select(cols, Metrics, everything())
     
     
-    
-    dataAll <- dataAll()
+
+    dataAll <- dataAll() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     compare_filters <- input$compare_filters_opt
     
-    if(compare_filters == "Campus.Specialty"){
-      name_1 <- "Specialty"
-      cols <- c(compare_filters)
-      cols_name <- c(name_1)
-      tot_cols <- c(compare_filters)
-    }
-    if(compare_filters == "Department"){
-      name_1 <- compare_filters
-      cols <- c("Campus.Specialty",compare_filters)    
-      cols_name <- c("Specialty",name_1)
-      tot_cols <- c("Campus.Specialty",compare_filters)
-    }
-    if(compare_filters == "Provider"){
-      name_1 <- compare_filters
-      cols <- c("Campus.Specialty","Department",compare_filters)
-      cols_name <- c("Specialty","Department", name_1)
-      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
-    }
-    
-    
+    #dataAll <- kpi.all.data[all.data.rows,] %>% filter(Campus.Specialty=="Allergy") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+
     ### Calculate wait time which is the difference between when the patient made the appt and the scheduled date
     
     waitTime <- dataAll %>% mutate(wait.time= as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2)))
@@ -9274,41 +9256,27 @@ server <- function(input, output, session) {
     
     #### Pivot the data so the months are in the columns and shows only new patient median time   
     waitTime <- waitTime %>%
+      mutate(`medWaitTime` = case_when(
+        `medWaitTime` <= 14 ~  cell_spec(medWaitTime, color = "green"),
+        `medWaitTime` > 14 ~  cell_spec(medWaitTime, color = "red")
+      )) %>%
       pivot_wider(names_from = Appt.MonthYear,
                   values_from = medWaitTime,
-                  values_fill = 0)
+                  values_fill = "0")
     
     
     waitTime$Metrics <- "New Patient Wait Time"
     waitTime <- waitTime %>% select(cols, Metrics, everything())
     
     
-    
-    
+
     # Process slot data
     #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Allergy")
     
-    data_slot <- dataAllSlot_comp()
+    data_slot <- dataAllSlot_comp() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     compare_filters <- input$compare_filters_opt
     
-    if(compare_filters == "Campus.Specialty"){
-      name_1 <- "Specialty"
-      cols <- c(compare_filters)
-      cols_name <- c(name_1)
-      tot_cols <- c(compare_filters)
-    }
-    if(compare_filters == "Department"){
-      name_1 <- compare_filters
-      cols <- c("Campus.Specialty",compare_filters)    
-      cols_name <- c("Specialty",name_1)
-      tot_cols <- c("Campus.Specialty",compare_filters)
-    }
-    if(compare_filters == "Provider"){
-      name_1 <- compare_filters
-      cols <- c("Campus.Specialty","Department",compare_filters)
-      cols_name <- c("Specialty","Department", name_1)
-      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
-    }
+    #data_slot <- slot.data.subset[all.slot.rows,] %>% filter(Campus.Specialty=="Allergy") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     
     slot <- data_slot %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     slot <- slot %>% group_by(across(cols), Appt.MonthYear, Appt.DateYear)%>%
@@ -9326,13 +9294,23 @@ server <- function(input, output, session) {
         `Booked Rate (%)` = round(sum(`Booked Hours`)/sum(`Available Hours`),2 ),
         `Filled Rate (%)` = round(sum(`Filled Hours`)/sum(`Available Hours`),2 ),
       ) %>%
+      mutate_if(is.numeric,function(x) ifelse(is.nan(x) | is.infinite(x), NA, x)) %>%
+      mutate(`Booked Rate (%)` = formattable::percent(`Booked Rate (%)`, digits = 0),
+             `Filled Rate (%)` = formattable::percent(`Filled Rate (%)`, digits = 0)) %>%
+    mutate(`Booked Rate (%)` = case_when(
+      `Booked Rate (%)` >= 0.95 ~ cell_spec(`Booked Rate (%)`, color = "green"),
+      `Booked Rate (%)` < 0.95 ~ cell_spec(`Booked Rate (%)`, color = "red")
+    )) %>%
+    mutate(`Filled Rate (%)` = case_when(
+           `Filled Rate (%)` >= 0.85 ~ cell_spec(`Filled Rate (%)`, color = "green"),
+           `Filled Rate (%)` < 0.85 ~ cell_spec(`Filled Rate (%)`, color = "red"))) %>%
       gather(variable, value, !!slot_metrics) %>%
       spread(Appt.MonthYear, value) %>%
       rename(Metrics = variable)
+   
     
     
-    
-    
+
     #slot <- slot %>%  group_by(across(!!cols), Appt.MonthYear) %>%
      # summarise(
       #  `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
@@ -9370,15 +9348,15 @@ server <- function(input, output, session) {
                                                         Metrics=="New Patient Wait Time"~ "14 Days",
                                                         Metrics=="Average Daily Volume"~ "Variable",
                                                         TRUE ~ "TBD"))
-      
     
+
  # opt_table <- as.datatable(formattable(opt_table, list(
- #    `Jan 2021` = formatter("span", 
+ #    `Jan 2021` = formatter("span",
  #                          style = x ~ style(color = 'white',
  #                                           'background-color' =
  #                                             ifelse(opt_table$Metrics == "Booked Rate (%)",
  #                                                  ifelse( x> 0.95,"green", "red"), "gray")) ))))
-    
+
  #opt_table <- opt_table %>% mutate(`Jan 2021`=ifelse(Metrics == "Booked Rate (%)", paste0(`Jan 2021`*100, "%"), `Jan 2021`))
     
       
@@ -9405,14 +9383,98 @@ server <- function(input, output, session) {
   })
   
   
-  
+  output$opt_comparison_tb_kable <- function(){
+    data <- schedule_opt()
+    #data <- opt_table
+    
+    compare_filters <- input$compare_filters_opt
+    
+
+    if(compare_filters == "Campus.Specialty"){
+      name_1 <- "Specialty"
+      cols <- name_1
+      cols_name <- name_1
+      pack_rows_name <- "Campus.Specialty"
+    }
+    if(compare_filters == "Department"){
+      name_1 <- compare_filters
+      cols <- c("Specialty",compare_filters)    
+      cols_name <- c("Specialty",name_1)
+      pack_rows_name <- c("Campus.Specialty", "Department")
+    }
+    if(compare_filters == "Provider"){
+      name_1 <- compare_filters
+      cols <- c("Specialty","Department",compare_filters)
+      cols_name <- c("Specialty","Department", name_1)
+      pack_rows_name <- c("Campus.Specialty", "Department", "Provider")
+    }
+    
+    col_names <- c(cols, "Metrics", "Target",                   
+                   colnames(data)[(length(cols)+3):length(data)])
+
+    header_above <- c("title" = length(data))
+    names(header_above) <- paste0("Schedule Optimization by ", name_1)
+    
+    month_columns <- colnames(data)[(length(cols)+3):length(data)]
+    
+    options(knitr.kable.NA = '-')
+    
+    pack_rows_name <- table(pack_rows_name)
+    
+    data %>%
+      kable(booktabs = T,escape = F, #align = c(rep("r",3),rep("c",length(metrics_dept_output)-4)),
+            col.names = col_names) %>%
+      kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
+      add_header_above(header_above, background = "white", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
+      collapse_rows(columns = 1:3, valign = "top") %>%
+      row_spec(0,  background = "#212070", color = "white")
+      
+    
+    
+    # data %>%
+    #   kable("html", booktabs = T,escape = F) %>%
+    #   collapse_rows(columns = "Department", valign = "top")
+    
+    
+    
+    # data_test %>%
+    #     kable(booktabs = T,escape = F) %>%
+    #   kableExtra::collapse_rows(columns = 4:5, valign = "top")
+  }
   
   output[["opt_comparison_tb"]] <- renderDT({
     
     #col_dissappear <- which(names( schedule_opt()) %in% c("Total_YN"))
-    num_of_cols <- length(schedule_opt())
     
-    dtable <-   datatable( schedule_opt(), 
+    data <- schedule_opt()
+    #data <- opt_table
+    
+    num_of_cols <- length(data)
+    
+    
+    
+    if(compare_filters == "Campus.Specialty"){
+      name_1 <- "Specialty"
+      cols_name <- c(name_1)
+    }
+    if(compare_filters == "Department"){
+      name_1 <- compare_filters
+      cols_name <- c("Specialty",name_1)
+    }
+    if(compare_filters == "Provider"){
+      name_1 <- compare_filters
+      cols_name <- c("Specialty","Department", name_1)
+    }
+    
+    filled_rate_rows <- which(data$Metrics == "Filled Rate (%)")
+    filled_rate_rows <- data.frame(which(data  == "Filled Rate (%)" & data >= 0.85, arr.ind=TRUE))
+    
+    green_booked_rate <- data.frame(which(data[,(length(cols_name)+3):length(data)] >= 0.85, arr.ind=TRUE) + length(cols_name)+2)
+     
+    
+    green_booked_rate <- green_booked_rate %>% filter(row %in% test)
+    
+    dtable <-   datatable( data, 
                            class = 'cell-border stripe',
                            rownames = FALSE,
                            extensions = c('Buttons','Scroller'),
@@ -9436,10 +9498,10 @@ server <- function(input, output, session) {
                                "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
                                "}"),
                              fixedColumns = list(leftColumns =
-                                                   ifelse(colnames( schedule_opt())[3] == "Provider", 4, 3)
+                                                   ifelse(colnames( data)[3] == "Provider", 4, 3)
                              ),
                              #fixedColumns = list(leftColumns = 2),
-                             rowsGroup = rows_group_opt(),
+                             #rowsGroup = rows_group_opt(),
                              headerCallback = DT::JS(
                                "function(thead) {",
                                "  $(thead).css('font-size', '115%');",
@@ -9633,6 +9695,9 @@ server <- function(input, output, session) {
     dtable$dependencies <- c(dtable$dependencies, list(dep))
     dtable
   },server = FALSE)
+  
+  
+
   
   
   output$no_show_comp_title <- renderText({
