@@ -4610,7 +4610,7 @@ server <- function(input, output, session) {
                                              select(Appt.DateYear, timeOptionsHr_filter) %>%
                                              gather(Time, sum, 2:15) %>%
                                              group_by(Time) %>%
-                                             summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))*1.2/60)))$avg)), 
+                                             summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg)), 
                                style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "aqua"
     )
   })
@@ -4620,7 +4620,7 @@ server <- function(input, output, session) {
     valueBox(NULL,
              subtitle = tags$p(paste0("Avg utilization per day: ",
                                       paste0(round((sum((dataUtilization() %>% filter(comparison == 0))$sum))/
-                                                     (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setHours*input$setRooms))*100*1.2),"%")), 
+                                                     (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%")), 
                                style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "fuchsia"
     )
   })
@@ -4635,7 +4635,7 @@ server <- function(input, output, session) {
                                              gather(Time, sum, 2:15) %>%
                                              group_by(Time) %>%
                                              summarise(avg = round((sum(sum)/ 
-                                                                      (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setRooms)))*100*1.2)))$avg),"%"), 
+                                                                      (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setRooms)))*100)))$avg),"%"), 
                                style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "fuchsia"
     )
   })
