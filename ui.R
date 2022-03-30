@@ -970,7 +970,7 @@ ui <- dashboardPage(
                                                   hr(),
                                                   h5("SCHEDULED: Utilization of all arrived appointments based on scheduled appointment start and end time."),
                                                   h5("ACTUAL: Utilization of all arrived appointments based on actual appointment start and end time."),
-                                                  h5("Scheduled time includes a 20 percent buffer."))),
+                                                  h5("Scheduled time includes an adjustment factor of 20% (every visit duration increased by 20%) to account for room turnover times and any non-physician contact time spent in rooms."))),
                                        column(3,
                                               box(title = NULL, width = 12, solidHeader = FALSE,
                                                   sliderInput("setRooms", label = h4("Set Rooms Available:"), min = 1, max = 24, value = 8)),

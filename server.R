@@ -9153,7 +9153,7 @@ server <- function(input, output, session) {
   schedule_opt <- reactive({
     # Volume Data
 
-    # data <- kpi.all.data %>% filter(Campus.Specialty=="Allergy") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+    # data <- kpi.all.data %>% filter(Campus.Specialty=="Cardiology") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     # compare_filters <- "Provider"
     
     data  <- dataArrived() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
@@ -9271,7 +9271,7 @@ server <- function(input, output, session) {
     
 
     # Process slot data
-    #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Allergy")
+    #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Cardiology") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     
     data_slot <- dataAllSlot_comp() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     compare_filters <- input$compare_filters_opt
@@ -9323,9 +9323,12 @@ server <- function(input, output, session) {
     
     
     ### Bind datas by row to create the final table
-    opt_table <- plyr:: rbind.fill(volume,slot, newpatients.ratio, waitTime )  
-    opt_table[is.na(opt_table)] <- 0  
+    opt_table <- plyr:: rbind.fill(volume, slot, newpatients.ratio, waitTime )  
+    opt_table[is.na(opt_table)] <- 0
     
+   
+    
+   
     
     months_df <-  opt_table[,!(names( opt_table) %in% c(cols_name, "Metrics"))]
     months <- order(as.yearmon(colnames(months_df), "%b %Y"))
@@ -9349,6 +9352,29 @@ server <- function(input, output, session) {
                                                         Metrics=="Average Daily Volume"~ "Variable",
                                                         TRUE ~ "TBD"))
     
+    
+   # opt_table <- opt_table %>% group_by(across(tot_cols)) %>% mutate(Metrics= arrange(Metrics, by_group= T))
+    
+
+    if(compare_filters== "Campus.Specialty"){
+      opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F))
+    }
+    if(compare_filters== "Department"){
+      opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F),
+                                        Department = sort(Department, decreasing = F))
+    }
+    if(compare_filters== "Provider"){
+      opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F),
+                                        Department = sort(Department, decreasing = F),
+                                        Provider= sort(Provider, decreasing = F))
+    }
+    
+    #opt_table <- opt_table %>% group_by(across(tot_cols)) %>% arrange(Metrics, by_group= T)
+    
+    #
+    # 
+    # 
+    # 
 
  # opt_table <- as.datatable(formattable(opt_table, list(
  #    `Jan 2021` = formatter("span",
@@ -9359,8 +9385,8 @@ server <- function(input, output, session) {
 
  #opt_table <- opt_table %>% mutate(`Jan 2021`=ifelse(Metrics == "Booked Rate (%)", paste0(`Jan 2021`*100, "%"), `Jan 2021`))
     
-      
-
+      #df <- opt_table %>% group_by(across(tot_cols)) %>% mutate(Metrics=sort(Metrics))
+   
     
   })
   
@@ -9387,6 +9413,7 @@ server <- function(input, output, session) {
     data <- schedule_opt()
     #data <- opt_table
     
+    
     compare_filters <- input$compare_filters_opt
     
 
@@ -9408,6 +9435,8 @@ server <- function(input, output, session) {
       cols_name <- c("Specialty","Department", name_1)
       pack_rows_name <- c("Campus.Specialty", "Department", "Provider")
     }
+    
+    #data <- data %>% group_by(across(pack_rows_name)) %>% mutate(Metrics= sort(Metrics))
     
     col_names <- c(cols, "Metrics", "Target",                   
                    colnames(data)[(length(cols)+3):length(data)])
@@ -9472,7 +9501,8 @@ server <- function(input, output, session) {
     green_booked_rate <- data.frame(which(data[,(length(cols_name)+3):length(data)] >= 0.85, arr.ind=TRUE) + length(cols_name)+2)
      
     
-    green_booked_rate <- green_booked_rate %>% filter(row %in% test)
+    #green_booked_rate <- green_booked_rate %>% filter(row %in% test)
+    green_booked_rate <- green_booked_rate %>% filter(row %in% filled_rate_rows)
     
     dtable <-   datatable( data, 
                            class = 'cell-border stripe',
