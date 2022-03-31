@@ -9353,29 +9353,12 @@ server <- function(input, output, session) {
                                                         TRUE ~ "TBD"))
     
     
-   #opt_table <- opt_table %>% group_by(across(tot_cols)) %>% mutate(Metrics= sort(Metrics, decreasing ))
     
+    metric_order <- c("Average Daily Volume", "Booked Rate (%)", "Filled Rate (%)", "New Patient Ratio (%)", "New Patient Wait Time" , as.vector(unique(opt_table$Metrics)))
+  
 
-    if(compare_filters== "Campus.Specialty"){
-      
-      
-      opt_table <- opt_table %>%  mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F))
-                                        
-    }
-    if(compare_filters== "Department"){
-      opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F))
-                                        
-      opt_table <- opt_table %>%  mutate(Department = sort(Department, decreasing = F))
-                                       
-
-    }
-    # if(compare_filters== "Provider"){
-    #   opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F),
-    #                                     Department = sort(Department, decreasing = F),
-    #                                     Provider= sort(Provider, decreasing = F))
-    #                                     
-    #   }
-
+    opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
+    
     
     
     #
@@ -9429,18 +9412,21 @@ server <- function(input, output, session) {
       cols <- name_1
       cols_name <- name_1
       pack_rows_name <- "Campus.Specialty"
+      data <- data %>% arrange(Campus.Specialty)
     }
     if(compare_filters == "Department"){
       name_1 <- compare_filters
       cols <- c("Specialty",compare_filters)    
       cols_name <- c("Specialty",name_1)
       pack_rows_name <- c("Campus.Specialty", "Department")
+      data <- data %>% arrange(Campus.Specialty, Department)
     }
     if(compare_filters == "Provider"){
       name_1 <- compare_filters
       cols <- c("Specialty","Department",compare_filters)
       cols_name <- c("Specialty","Department", name_1)
       pack_rows_name <- c("Campus.Specialty", "Department", "Provider")
+      data <- data %>% arrange(Campus.Specialty, Department, Provider)
     }
     
   
