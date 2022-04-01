@@ -9353,27 +9353,14 @@ server <- function(input, output, session) {
                                                         TRUE ~ "TBD"))
     
     
-   # opt_table <- opt_table %>% group_by(across(tot_cols)) %>% mutate(Metrics= arrange(Metrics, by_group= T))
+    
+    metric_order <- c("Average Daily Volume", "Booked Rate (%)", "Filled Rate (%)", "New Patient Ratio (%)", "New Patient Wait Time" , as.vector(unique(opt_table$Metrics)))
+  
+
+
+    opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
     
 
-    
-    appt_order <- c("Average Daily Volume",c("Booked Rate (%)", "Filled Rate (%)", "New Patient Ratio (%)", "New Patient Wait Time"), as.vector(unique(opt_table$Metrics)))
-    
-    opt_table <- opt_table[order(match(opt_table$Metrics, appt_order)),] 
-    # if(compare_filters== "Campus.Specialty"){
-    #   opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F))
-    # }
-    # if(compare_filters== "Department"){
-    #   opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F),
-    #                                     Department = sort(Department, decreasing = F))
-    # }
-    # if(compare_filters== "Provider"){
-    #   opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F),
-    #                                     Department = sort(Department, decreasing = F),
-    #                                     Provider= sort(Provider, decreasing = F))
-    # }
-    
-    #opt_table <- opt_table %>% group_by(across(tot_cols)) %>% arrange(Metrics, by_group= T)
     
     #
     # 
@@ -9443,7 +9430,7 @@ server <- function(input, output, session) {
       data <- data %>% arrange(Campus.Specialty, Department, Provider)
     }
     
-    #data <- data %>% group_by(across(pack_rows_name)) %>% mutate(Metrics= sort(Metrics))
+  
     
     col_names <- c(cols, "Metrics", "Target",                   
                    colnames(data)[(length(cols)+3):length(data)])
