@@ -9356,18 +9356,22 @@ server <- function(input, output, session) {
    # opt_table <- opt_table %>% group_by(across(tot_cols)) %>% mutate(Metrics= arrange(Metrics, by_group= T))
     
 
-    if(compare_filters== "Campus.Specialty"){
-      opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F))
-    }
-    if(compare_filters== "Department"){
-      opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F),
-                                        Department = sort(Department, decreasing = F))
-    }
-    if(compare_filters== "Provider"){
-      opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F),
-                                        Department = sort(Department, decreasing = F),
-                                        Provider= sort(Provider, decreasing = F))
-    }
+    
+    appt_order <- c("Average Daily Volume",c("Booked Rate (%)", "Filled Rate (%)", "New Patient Ratio (%)", "New Patient Wait Time"), as.vector(unique(opt_table$Metrics)))
+    
+    opt_table <- opt_table[order(match(opt_table$Metrics, appt_order)),] 
+    # if(compare_filters== "Campus.Specialty"){
+    #   opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F))
+    # }
+    # if(compare_filters== "Department"){
+    #   opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F),
+    #                                     Department = sort(Department, decreasing = F))
+    # }
+    # if(compare_filters== "Provider"){
+    #   opt_table <- opt_table %>% mutate(Campus.Specialty= sort(Campus.Specialty, decreasing = F),
+    #                                     Department = sort(Department, decreasing = F),
+    #                                     Provider= sort(Provider, decreasing = F))
+    # }
     
     #opt_table <- opt_table %>% group_by(across(tot_cols)) %>% arrange(Metrics, by_group= T)
     
@@ -9412,7 +9416,7 @@ server <- function(input, output, session) {
   output$opt_comparison_tb_kable <- function(){
     data <- schedule_opt()
     #data <- opt_table
-    
+
     
     compare_filters <- input$compare_filters_opt
     
@@ -9422,18 +9426,21 @@ server <- function(input, output, session) {
       cols <- name_1
       cols_name <- name_1
       pack_rows_name <- "Campus.Specialty"
+      data <- data %>% arrange(Campus.Specialty)
     }
     if(compare_filters == "Department"){
       name_1 <- compare_filters
       cols <- c("Specialty",compare_filters)    
       cols_name <- c("Specialty",name_1)
       pack_rows_name <- c("Campus.Specialty", "Department")
+      data <- data %>% arrange(Campus.Specialty, Department)
     }
     if(compare_filters == "Provider"){
       name_1 <- compare_filters
       cols <- c("Specialty","Department",compare_filters)
       cols_name <- c("Specialty","Department", name_1)
       pack_rows_name <- c("Campus.Specialty", "Department", "Provider")
+      data <- data %>% arrange(Campus.Specialty, Department, Provider)
     }
     
     #data <- data %>% group_by(across(pack_rows_name)) %>% mutate(Metrics= sort(Metrics))
