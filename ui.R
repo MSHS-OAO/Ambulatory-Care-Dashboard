@@ -977,11 +977,15 @@ ui <- dashboardPage(
                                               box(title = NULL, width = 12, solidHeader = FALSE,
                                                   sliderInput("setHours", label = h4("Set Daily Open Hours:"), min = 1, max = 24, value = 8))),
                                        column(6,
-                                              valueBoxOutput("roomStat1", width=12) %>%
-                                                withSpinner(type = 5, color = "#d80b8c"),
-                                              valueBoxOutput("avgUtilization", width=12),
-                                              valueBoxOutput("maxUtilization", width=12),
-                                              valueBoxOutput("maxRoomsRequired", width=12))
+                                              tableOutput("roomStat1")%>% 
+                                                withSpinner(type = 5, color = "#d80b8c"))
+                                              
+                                              
+                                              # valueBoxOutput("roomStat1", width=12) %>%
+                                              #   withSpinner(type = 5, color = "#d80b8c"),
+                                              #   valueBoxOutput("avgUtilization", width=12),
+                                              #   valueBoxOutput("maxUtilization", width=12),
+                                              #   valueBoxOutput("maxRoomsRequired", width=12))
                                        
                                        
                                        # column(9,

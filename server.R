@@ -4594,51 +4594,124 @@ server <- function(input, output, session) {
   
   ### Utilization Tab -----------------------------------------------------------------------------------------------------------------
   # Average Rooms Required --------------------------------------------------------------------------------------------
-  output$roomStat1 <- renderValueBox({
-    valueBox(NULL,
-             # paste0(input$setRooms," rooms available\n throughout",input$setHours," hours"),
-             subtitle = tags$p(paste0("Analysis based on ",input$setRooms," rooms available\n throughout ",input$setHours," hours"), style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "yellow"
-    )
-  })
+  # output$roomStat1 <- renderValueBox({
+  #   valueBox(NULL,
+  #            # paste0(input$setRooms," rooms available\n throughout",input$setHours," hours"),
+  #            subtitle = tags$p(paste0("Analysis based on ",input$setRooms," rooms available\n throughout ",input$setHours," hours"), style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "yellow"
+  #   )
+  # })
+  # 
+  # output$maxRoomsRequired <- renderValueBox({
+  #   
+  #   valueBox(NULL,
+  #            subtitle = tags$p(paste0("Max # of rooms required during the day: ",
+  #                                     max((dataUtilization() %>%
+  #                                            filter(comparison == 0) %>%
+  #                                            select(Appt.DateYear, timeOptionsHr_filter) %>%
+  #                                            gather(Time, sum, 2:15) %>%
+  #                                            group_by(Time) %>%
+  #                                            summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg)), 
+  #                              style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "aqua"
+  #   )
+  # })
   
-  output$maxRoomsRequired <- renderValueBox({
-    
-    valueBox(NULL,
-             subtitle = tags$p(paste0("Max # of rooms required during the day: ",
-                                      max((dataUtilization() %>%
-                                             filter(comparison == 0) %>%
-                                             select(Appt.DateYear, timeOptionsHr_filter) %>%
-                                             gather(Time, sum, 2:15) %>%
-                                             group_by(Time) %>%
-                                             summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg)), 
-                               style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "aqua"
-    )
-  })
+  # output$avgUtilization <- renderValueBox({
+  #   
+  #   valueBox(NULL,
+  #            subtitle = tags$p(paste0("Avg utilization per day: ",
+  #                                     paste0(round((sum((dataUtilization() %>% filter(comparison == 0))$sum))/
+  #                                                    (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%")), 
+  #                              style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "fuchsia"
+  #   )
+  # })
   
-  output$avgUtilization <- renderValueBox({
-    
-    valueBox(NULL,
-             subtitle = tags$p(paste0("Avg utilization per day: ",
-                                      paste0(round((sum((dataUtilization() %>% filter(comparison == 0))$sum))/
-                                                     (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%")), 
-                               style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "fuchsia"
-    )
-  })
+  # output$maxUtilization <- renderValueBox({
+  #   
+  #   valueBox(NULL,
+  #            subtitle = tags$p(paste0("Peak utilization during the day: ",
+  #                                     max((dataUtilization() %>%
+  #                                            filter(comparison == 0) %>%
+  #                                            select(Appt.DateYear, timeOptionsHr_filter) %>%
+  #                                            gather(Time, sum, 2:15) %>%
+  #                                            group_by(Time) %>%
+  #                                            summarise(avg = round((sum(sum)/ 
+  #                                                                     (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setRooms)))*100)))$avg),"%"), 
+  #                              style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "fuchsia"
+  #   )
+  # })
   
-  output$maxUtilization <- renderValueBox({
+  
+  
+  utilization_data <- reactive({
     
-    valueBox(NULL,
-             subtitle = tags$p(paste0("Peak utilization during the day: ",
-                                      max((dataUtilization() %>%
-                                             filter(comparison == 0) %>%
-                                             select(Appt.DateYear, timeOptionsHr_filter) %>%
-                                             gather(Time, sum, 2:15) %>%
-                                             group_by(Time) %>%
-                                             summarise(avg = round((sum(sum)/ 
-                                                                      (length(unique(dataUtilization()$Appt.DateYear))*(60*input$setRooms)))*100)))$avg),"%"), 
-                               style = "font-size: 180%; font-weight: bold; text-align: center;"), icon = NULL, color = "fuchsia"
-    )
+    dataUtilization <- dataUtilization() %>% filter(comparison == 0)
+     
+    #dataUtilization <- utilization.data %>% filter(comparison == 0)
+    
+    data <- data.frame( 
+      
+    
+    paste0("Avg utilization per day: ", paste0(round((sum(dataUtilization$sum))/
+                                                       (length(unique(dataUtilization$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%")),
+    
+      
+    paste0("Peak utilization during the day: ", paste0(
+        max((dataUtilization  %>%
+               select(Appt.DateYear, timeOptionsHr_filter) %>%
+               gather(Time, sum, 2:15) %>%
+               group_by(Time) %>%
+               summarise(avg = round((sum(sum)/ 
+                                        (length(unique(dataUtilization$Appt.DateYear))*(60*input$setRooms)))*100)))$avg),"%")),
+      
+    paste0("Max number of rooms required during the day: ", paste0(
+        max((dataUtilization  %>%
+               select(Appt.DateYear, timeOptionsHr_filter) %>%
+               gather(Time, sum, 2:15) %>%
+               group_by(Time) %>%
+               summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg))),
+    
+    paste0("% Utilization (Visits per Room): "), 
+    
+    paste0("% Utilization (Visits Duration): "))
+    
+    
+    
+    data <- as.data.frame(t(data))
+    
+    #rownames(data) <- c("Avg utilization per day: ","Peak utilization during the day: ","Max # of rooms required during the day: ",
+     #                   "% Utilization (Visits per Room): ", "% Utilization (Visits Duration): " )
+    data <- rownames_to_column(data)
+    data$rowname <- NULL
+    
+
+    
+    
   })
+   
+  
+  output$roomStat1 <- function(){
+    data <- utilization_data()
+    
+    header_above <- c("title" = length(data))
+    names(header_above) <-  paste0("Analysis based on ",input$setRooms," rooms available\n throughout ",input$setHours," hours") 
+    
+    
+    
+    data %>%
+      kable(booktabs = T,escape = F, col.names = NULL )  %>%
+      kable_styling(bootstrap_options = "hover", full_width = T, position = "center", row_label_position = "c", font_size = 20) %>%
+      add_header_above(header_above, background = "#dddedd", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
+      #collapse_rows(columns = 1:2, valign = "top") %>%
+      row_spec(1:2,  background = "#DC298D", color = "white", font_size = 20, bold = T, align = "c")%>%
+      row_spec(3:4,  background = "#06ABEB", color = "white", font_size = 20, bold = T, align = "c")%>%
+      row_spec(5,  background = "#212070", color = "white", font_size = 20, bold = T, align = "c")
+    
+    
+  }
+  
+  
+  
+  
   
   # # Scheduled and Avg Utilization --------------------------------------------------------------------------------------------------------
   # output$avgScheduledUtilization <- renderValueBox({
@@ -9359,12 +9432,6 @@ server <- function(input, output, session) {
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
     
-    
-    
-    #
-    # 
-    # 
-    # 
 
  # opt_table <- as.datatable(formattable(opt_table, list(
  #    `Jan 2021` = formatter("span",
@@ -9375,7 +9442,7 @@ server <- function(input, output, session) {
 
  #opt_table <- opt_table %>% mutate(`Jan 2021`=ifelse(Metrics == "Booked Rate (%)", paste0(`Jan 2021`*100, "%"), `Jan 2021`))
     
-      #df <- opt_table %>% group_by(across(tot_cols)) %>% mutate(Metrics=sort(Metrics))
+ 
    
     
   })
