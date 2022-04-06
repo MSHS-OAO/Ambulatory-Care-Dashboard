@@ -4650,9 +4650,8 @@ server <- function(input, output, session) {
     
     data <- data.frame( 
       
-    
     paste0("Avg utilization per day: ", paste0(round((sum(dataUtilization$sum))/
-                                                       (length(unique(dataUtilization$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%")),
+                                                (length(unique(dataUtilization$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%")),
     
       
     paste0("Peak utilization during the day: ", paste0(
@@ -4706,6 +4705,16 @@ server <- function(input, output, session) {
       row_spec(3:4,  background = "#06ABEB", color = "white", font_size = 20, bold = T, align = "c")%>%
       row_spec(5,  background = "#212070", color = "white", font_size = 20, bold = T, align = "c")
     
+    
+    
+    data %>%
+      kable(booktabs = T,escape = F, col.names = NULL )  %>%
+      kable_styling(bootstrap_options = "hover", full_width = T, position = "center", row_label_position = "c", font_size = 20) %>%
+      add_header_above(header_above, background = "#dddedd", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
+      #collapse_rows(columns = 1:1, valign = "top") %>%
+      row_spec(1:2,  background = "#DC298D", color = "white", font_size = 20, bold = T, align = "c")%>%
+      row_spec(3:4,  background = "#06ABEB", color = "white", font_size = 20, bold = T, align = "c")%>%
+      row_spec(5,  background = "#212070", color = "white", font_size = 20, bold = T, align = "c")
     
   }
   
