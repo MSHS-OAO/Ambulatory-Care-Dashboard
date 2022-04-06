@@ -4706,16 +4706,6 @@ server <- function(input, output, session) {
       row_spec(5,  background = "#212070", color = "white", font_size = 20, bold = T, align = "c")
     
     
-    
-    data %>%
-      kable(booktabs = T,escape = F, col.names = NULL )  %>%
-      kable_styling(bootstrap_options = "hover", full_width = T, position = "center", row_label_position = "c", font_size = 20) %>%
-      add_header_above(header_above, background = "#dddedd", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
-      #collapse_rows(columns = 1:1, valign = "top") %>%
-      row_spec(1:2,  background = "#DC298D", color = "white", font_size = 20, bold = T, align = "c")%>%
-      row_spec(3:4,  background = "#06ABEB", color = "white", font_size = 20, bold = T, align = "c")%>%
-      row_spec(5,  background = "#212070", color = "white", font_size = 20, bold = T, align = "c")
-    
   }
   
   
@@ -9307,7 +9297,7 @@ server <- function(input, output, session) {
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
     
-    newpatients.ratio$Metrics <- "New Patient Ratio (%)"
+    newpatients.ratio$Metrics <- "New Patient Ratio"
     newpatients.ratio <-newpatients.ratio %>% select(cols, Metrics, everything())
     
     
@@ -9366,26 +9356,26 @@ server <- function(input, output, session) {
                        `Booked Hours` = sum(`Booked Hours`),
                        `Filled Hours` = sum(`Arrived Hours`))
     slot[is.na(slot)] <- 0
-    slot_metrics <- c( "Booked Rate (%)", "Filled Rate (%)")
+    slot_metrics <- c( "Booked Rate", "Filled Rate")
     
     ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
     ### then gather all created columns make them categories for the STatus column
     ### Spread data to make monhts in Appt.Month into columns
     slot <- slot %>%  group_by(across(!!cols), Appt.MonthYear) %>%
       summarise(
-        `Booked Rate (%)` = round(sum(`Booked Hours`)/sum(`Available Hours`),2 ),
-        `Filled Rate (%)` = round(sum(`Filled Hours`)/sum(`Available Hours`),2 ),
+        `Booked Rate` = round(sum(`Booked Hours`)/sum(`Available Hours`),2 ),
+        `Filled Rate` = round(sum(`Filled Hours`)/sum(`Available Hours`),2 ),
       ) %>%
       mutate_if(is.numeric,function(x) ifelse(is.nan(x) | is.infinite(x), NA, x)) %>%
-      mutate(`Booked Rate (%)` = formattable::percent(`Booked Rate (%)`, digits = 0),
-             `Filled Rate (%)` = formattable::percent(`Filled Rate (%)`, digits = 0)) %>%
+      mutate(`Booked Rate` = formattable::percent(`Booked Rate`, digits = 0),
+             `Filled Rate` = formattable::percent(`Filled Rate`, digits = 0)) %>%
     mutate(`Booked Rate (%)` = case_when(
-      `Booked Rate (%)` >= 0.95 ~ cell_spec(`Booked Rate (%)`, color = "green"),
-      `Booked Rate (%)` < 0.95 ~ cell_spec(`Booked Rate (%)`, color = "red")
+      `Booked Rate` >= 0.95 ~ cell_spec(`Booked Rate`, color = "green"),
+      `Booked Rate` < 0.95 ~ cell_spec(`Booked Rate`, color = "red")
     )) %>%
-    mutate(`Filled Rate (%)` = case_when(
-           `Filled Rate (%)` >= 0.85 ~ cell_spec(`Filled Rate (%)`, color = "green"),
-           `Filled Rate (%)` < 0.85 ~ cell_spec(`Filled Rate (%)`, color = "red"))) %>%
+    mutate(`Filled Rate` = case_when(
+           `Filled Rate` >= 0.85 ~ cell_spec(`Filled Rate`, color = "green"),
+           `Filled Rate` < 0.85 ~ cell_spec(`Filled Rate`, color = "red"))) %>%
       gather(variable, value, !!slot_metrics) %>%
       spread(Appt.MonthYear, value) %>%
       rename(Metrics = variable)
@@ -9428,8 +9418,8 @@ server <- function(input, output, session) {
     opt_table <- opt_table %>% select(cols, "Metrics", everything())
     
     opt_table <- opt_table %>% add_column(Target = "TBD", .after = "Metrics") 
-    opt_table <- opt_table %>% mutate(Target= case_when(Metrics=="Booked Rate (%)"~ ">= 95%", 
-                                                        Metrics=="Filled Rate (%)"~ ">= 85%",
+    opt_table <- opt_table %>% mutate(Target= case_when(Metrics=="Booked Rate"~ ">= 95%", 
+                                                        Metrics=="Filled Rate"~ ">= 85%",
                                                         Metrics=="New Patient Wait Time"~ "14 Days",
                                                         Metrics=="Average Daily Volume"~ "Variable",
                                                         TRUE ~ "TBD"))
