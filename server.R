@@ -9426,7 +9426,7 @@ server <- function(input, output, session) {
     
     
     
-    metric_order <- c("Average Daily Volume", "Booked Rate (%)", "Filled Rate (%)", "New Patient Ratio (%)", "New Patient Wait Time" , as.vector(unique(opt_table$Metrics)))
+    metric_order <- c("Average Daily Volume", "Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time" , as.vector(unique(opt_table$Metrics)))
   
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
