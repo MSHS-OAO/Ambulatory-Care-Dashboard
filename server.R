@@ -4662,12 +4662,13 @@ server <- function(input, output, session) {
                summarise(avg = round((sum(sum)/ 
                                         (length(unique(dataUtilization$Appt.DateYear))*(60*input$setRooms)))*100)))$avg),"%")),
       
-    paste0("Max number of rooms required during the day: ", paste0(
+    paste0("Max # of rooms required during the day: ", paste0(
         max((dataUtilization  %>%
                select(Appt.DateYear, timeOptionsHr_filter) %>%
                gather(Time, sum, 2:15) %>%
                group_by(Time) %>%
                summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg))),
+    
     
     paste0("% Utilization (Visits per Room): "), 
     
@@ -9329,9 +9330,10 @@ server <- function(input, output, session) {
     #### Pivot the data so the months are in the columns and shows only new patient median time   
     waitTime <- waitTime %>%
       mutate(`medWaitTime` = case_when(
-        `medWaitTime` <= 14 ~  cell_spec(medWaitTime, color = "green"),
-        `medWaitTime` > 14 ~  cell_spec(medWaitTime, color = "red")
+        `medWaitTime` <= 14 ~  cell_spec(paste0(medWaitTime," Days") , color = "green"),
+        `medWaitTime` > 14 ~  cell_spec(paste0(medWaitTime," Days") , color = "red")
       )) %>%
+      
       pivot_wider(names_from = Appt.MonthYear,
                   values_from = medWaitTime,
                   values_fill = "0")
@@ -9369,7 +9371,7 @@ server <- function(input, output, session) {
       mutate_if(is.numeric,function(x) ifelse(is.nan(x) | is.infinite(x), NA, x)) %>%
       mutate(`Booked Rate` = formattable::percent(`Booked Rate`, digits = 0),
              `Filled Rate` = formattable::percent(`Filled Rate`, digits = 0)) %>%
-    mutate(`Booked Rate (%)` = case_when(
+    mutate(`Booked Rate` = case_when(
       `Booked Rate` >= 0.95 ~ cell_spec(`Booked Rate`, color = "green"),
       `Booked Rate` < 0.95 ~ cell_spec(`Booked Rate`, color = "red")
     )) %>%
@@ -9426,7 +9428,7 @@ server <- function(input, output, session) {
     
     
     
-    metric_order <- c("Average Daily Volume", "Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time" , as.vector(unique(opt_table$Metrics)))
+    metric_order <- c("Average Daily Volume",c( "Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time") , as.vector(unique(opt_table$Metrics)))
   
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
