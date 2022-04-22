@@ -4650,38 +4650,38 @@ server <- function(input, output, session) {
     
     data <- data.frame( 
       
-    paste0("Avg utilization per day: ", paste0(round((sum(dataUtilization$sum))/
-                                                (length(unique(dataUtilization$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%")),
+    `Avg utilization per day: `= paste0(round((sum(dataUtilization$sum))/
+                                                (length(unique(dataUtilization$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%"),
     
       
-    paste0("Peak utilization during the day: ", paste0(
+    `Peak utilization during the day: `= paste0(
         max((dataUtilization  %>%
-               select(Appt.DateYear, timeOptionsHr_filter) %>%
+               select(Appt.DateYear, all_of(timeOptionsHr_filter)) %>%
                gather(Time, sum, 2:15) %>%
                group_by(Time) %>%
                summarise(avg = round((sum(sum)/ 
-                                        (length(unique(dataUtilization$Appt.DateYear))*(60*input$setRooms)))*100)))$avg),"%")),
+                                        (length(unique(dataUtilization$Appt.DateYear))*(60*input$setRooms)))*100)))$avg),"%"),
       
-    paste0("Max # of rooms required during the day: ", paste0(
+    `Max # of rooms required during the day: `= paste0(
         max((dataUtilization  %>%
-               select(Appt.DateYear, timeOptionsHr_filter) %>%
+               select(Appt.DateYear, all_of(timeOptionsHr_filter)) %>%
                gather(Time, sum, 2:15) %>%
                group_by(Time) %>%
-               summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg))),
+               summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg)),
     
     
-    paste0("% Utilization (Visits per Room): "), 
+    `% Utilization (Visits per Room): `= NA, 
     
-    paste0("% Utilization (Visits Duration): "))
+    `% Utilization (Visits Duration): `= NA)
     
     
     
     data <- as.data.frame(t(data))
     
-    #rownames(data) <- c("Avg utilization per day: ","Peak utilization during the day: ","Max # of rooms required during the day: ",
-     #                   "% Utilization (Visits per Room): ", "% Utilization (Visits Duration): " )
+    rownames(data) <- c("Avg utilization per day: ","Peak utilization during the day: ","Max # of rooms required during the day: ",
+                       "% Utilization (Visits per Room): ", "% Utilization (Visits Duration): " )
     data <- rownames_to_column(data)
-    data$rowname <- NULL
+    #data$rowname <- NULL
     
 
     
@@ -4694,14 +4694,14 @@ server <- function(input, output, session) {
     
     header_above <- c("title" = length(data))
     names(header_above) <-  paste0("Analysis based on ",input$setRooms," rooms available\n throughout ",input$setHours," hours") 
-    
+    #names(header_above) <-  paste0("Analysis based on ",setRooms," rooms available\n throughout ",setHours," hours") 
     
     
     data %>%
       kable(booktabs = T,escape = F, col.names = NULL )  %>%
       kable_styling(bootstrap_options = "hover", full_width = T, position = "center", row_label_position = "c", font_size = 20) %>%
       add_header_above(header_above, background = "#dddedd", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
-      #collapse_rows(columns = 1:2, valign = "top") %>%
+      collapse_rows(columns = 1:2, valign = "top") %>%
       row_spec(1:2,  background = "#DC298D", color = "white", font_size = 20, bold = T, align = "c")%>%
       row_spec(3:4,  background = "#06ABEB", color = "white", font_size = 20, bold = T, align = "c")%>%
       row_spec(5,  background = "#212070", color = "white", font_size = 20, bold = T, align = "c")
@@ -6637,8 +6637,12 @@ server <- function(input, output, session) {
     
     valueBoxSpark(
       value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
-      title = toupper("Average New Patients Check-in to Visit-end Time"),
-      subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(cycleTime > 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
+      #title = toupper("Average New Patients Check-in to Visit-end Time**"),
+      title = toupper("Average New Patients Check-in to Visit-end Time*"),
+      subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(cycleTime > 0))/nrow(dataArrived()),2)*100,
+                           "% of total arrived new patients based on visit timestamps" 
+                    ),
+   
       width = 6,
       color = "fuchsia"
     )
@@ -6651,7 +6655,7 @@ server <- function(input, output, session) {
       value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
       title = toupper(ifelse(length(unique(dataNewComparison()$Appt.Type)) == 1,
                              paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
-                             "Average Established Patients Check-in to Visit-end Time")),
+                             "Average Established Patients Check-in to Visit-end Time*")),
       subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
       color = "fuchsia"
@@ -6685,10 +6689,11 @@ server <- function(input, output, session) {
                      alpha = 0.8)+
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
-      labs(title = "Check-in to Visit-end Time Comparison by Visit Type",
+      labs(title = "Check-in to Visit-end Time* Comparison by Visit Type",
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
@@ -6708,7 +6713,7 @@ server <- function(input, output, session) {
       labs(title = "Distribution of NEW Appointment\nCheck-in to Visit-end Time*", 
            y = "% of Patients",
            x = "Minutes",
-           caption = "-",
+           caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"),
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
@@ -6735,11 +6740,11 @@ server <- function(input, output, session) {
       geom_histogram(aes(y = (..count..)/sum(..count..)),
                      bins = 22,
                      color="#d80b8c", fill="#fcc9e9") +
-      labs(title = paste0("Distribution of ",appt.type," Appointments\nCheck-in to Visit-end Time*"), 
+      labs(title = paste0("Distribution of ",appt.type," Appointments\nCheck-in to Visit-end Time**"), 
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = paste0("*Includes ", length(unique(data$Appt.Type)), " established visit types"))+
+           caption = paste0("*Includes ", length(unique(data$Appt.Type)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -6797,7 +6802,7 @@ server <- function(input, output, session) {
     new <- ggplot(data, aes(Appt.TM.Hr, y = factor(Appt.Day, level = level_order), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#d80b8c")+
-      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time by Hour\n"),
+      labs(title = paste0(input," NEW Appointments Check-in to Visit-end Time** by Hour\n"),
            y = NULL,
            #subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]),
            fill = "Minutes")+
@@ -6820,9 +6825,9 @@ server <- function(input, output, session) {
     other <- ggplot(data_other, aes(Appt.TM.Hr, y = factor(Appt.Day, level = level_order), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#00aeef")+
-      labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time by Hour\n"), 
+      labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time** by Hour\n"), 
            y = NULL,
-           caption = paste0("*Includes ", length(unique(data_other$Appt.Type)), " established visit types"),
+           caption = paste0("*Includes ", length(unique(data_other$Appt.Type)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out"),
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
@@ -6863,10 +6868,10 @@ server <- function(input, output, session) {
       scale_y_continuous(limits = c(0,quantile(cycle.df$cycleTime,0.75)*1.5))+
       # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
       # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
-      labs(title = "Distribution of NEW Appointment Check-in to Visit-end Time by Provider", 
+      labs(title = "Distribution of NEW Appointment Check-in to Visit-end Time** by Provider", 
            y = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "-")+
+           caption = "**Visit-end Time is the minimum of Visit-end Time and Check-out")+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")
@@ -6898,15 +6903,16 @@ server <- function(input, output, session) {
       scale_y_continuous(limits = c(0,quantile(cycle.df$cycleTime,0.75)*1.5))+
       # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
       # annotate("text",x=length(unique(cycle.df$Provider))/2,y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
-      labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Visit-end Time by Provider"), 
+      labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Visit-end Time** by Provider"), 
            y = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            # caption = paste0("*Includes ", length(unique(data$Appt.Type)), "established appointments")
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out")
            )+
       theme_new_line()+
       theme_bw()+
-      graph_theme("none")+
-      theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
+      graph_theme("none")
+      #theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
     
   })
   

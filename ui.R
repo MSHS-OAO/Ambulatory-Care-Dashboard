@@ -1188,6 +1188,7 @@ ui <- dashboardPage(
                               boxPlus(
                                 title = "Cycle Time Summary", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                "*Visit-end Time is the minimum of Visit-end Time and Check-out",
                                 br(),
                                 fluidRow(column(4, uiOutput("apptTypeControl2")),
                                          column(4, valueBoxOutput("cycleTimeCompNew", width = 12) %>%
