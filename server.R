@@ -6580,54 +6580,54 @@ server <- function(input, output, session) {
   
   ### [3. ] Day of Visit Tab -----------------------------------------------------------------------------------------------------------
   
-  # Reactive Filters for Scheduling Tab: Appointment Type & Insurance 
-  output$apptTypeControl2 <- renderUI({
-    box(
-      title = NULL,
-      width = 12, 
-      solidHeader = FALSE,
-      pickerInput("selectedApptType2", label = h4("Select Visit Type for Comparison:"), 
-                  choices = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type)),
-                  multiple=TRUE,
-                  options = pickerOptions(
-                    liveSearch = TRUE,
-                    actionsBox = TRUE,
-                    selectedTextFormat = "count > 1", 
-                    countSelectedText = "{0}/{1} Types", 
-                    dropupAuto = FALSE),
-                  selected = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type))))
-  })
+  #Reactive Filters for Scheduling Tab: Appointment Type & Insurance
+  # output$apptTypeControl2 <- renderUI({
+  #   box(
+  #     title = NULL,
+  #     width = 12,
+  #     solidHeader = FALSE,
+  #     pickerInput("selectedApptType2", label = h4("Select Visit Type for Comparison:"),
+  #                 choices = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type)),
+  #                 multiple=TRUE,
+  #                 options = pickerOptions(
+  #                   liveSearch = TRUE,
+  #                   actionsBox = TRUE,
+  #                   selectedTextFormat = "count > 1",
+  #                   countSelectedText = "{0}/{1} Types",
+  #                   dropupAuto = FALSE),
+  #                 selected = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type))))
+  # })
+
   
-  
-  output$apptTypeControl3 <- renderUI({
-    box(
-      title = NULL,
-      width = 12, 
-      solidHeader = FALSE,
-      pickerInput("selectedApptType3", label = h4("Select Visit Type for Comparison:"), 
-                  choices = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type)),
-                  multiple=TRUE,
-                  options = pickerOptions(
-                    liveSearch = TRUE,
-                    actionsBox = TRUE,
-                    selectedTextFormat = "count > 1", 
-                    countSelectedText = "{0}/{1} Types", 
-                    dropupAuto = FALSE),
-                  selected = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type))))
-    
-  })
+  # output$apptTypeControl3 <- renderUI({
+  #   box(
+  #     title = NULL,
+  #     width = 12, 
+  #     solidHeader = FALSE,
+  #     pickerInput("selectedApptType3", label = h4("Select Visit Type for Comparison:"), 
+  #                 choices = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type)),
+  #                 multiple=TRUE,
+  #                 options = pickerOptions(
+  #                   liveSearch = TRUE,
+  #                   actionsBox = TRUE,
+  #                   selectedTextFormat = "count > 1", 
+  #                   countSelectedText = "{0}/{1} Types", 
+  #                   dropupAuto = FALSE),
+  #                 selected = sort(unique((dataAll() %>% filter(New.PT3 == FALSE))$Appt.Type))))
+  #   
+  # })
   
   
   # Arrived Data with Additional Filters (Appointment Type)
   dataNewComparison <- reactive({
-    groupByFilters_3(dataArrived(),
-                     input$selectedApptType2)
+    #groupByFilters_3(dataArrived()),input$selectedApptType2)
+    dataArrived()   %>% filter(New.PT3 == FALSE)  
   })
   
   # Arrived Data with Additional Filters (Appointment Type)
   dataNewComparison2 <- reactive({
-    groupByFilters_3(dataArrived(),
-                     input$selectedApptType3)
+    #groupByFilters_3(dataArrived(), input$selectedApptType3)
+    dataArrived()   %>% filter(New.PT3 == FALSE)  
   })
   
   
@@ -6653,9 +6653,9 @@ server <- function(input, output, session) {
     
     valueBoxSpark(
       value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
-      title = toupper(ifelse(length(unique(dataNewComparison()$Appt.Type)) == 1,
-                             paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
-                             "Average Established Patients Check-in to Visit-end Time*")),
+      #title = toupper(ifelse(length(unique(dataNewComparison()$Appt.Type)) == 1,
+                            # paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
+                      title = toupper("Average Established Patients Check-in to Visit-end Time*"),
       subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
       color = "fuchsia"
@@ -6934,9 +6934,9 @@ server <- function(input, output, session) {
     
     valueBoxSpark(
       value =  paste0(round(mean((dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
-      title = toupper(ifelse(length(unique(dataNewComparison2()$Appt.Type)) == 1,
-                             paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
-                             "Avg. Established Appointments Check-in to Room-in Time")),
+      # title = toupper(ifelse(length(unique(dataNewComparison2()$Appt.Type)) == 1,
+      #                        paste0("Avg. ", input$selectedApptType3," Appointments Check-in to Room-in Time"),
+                          title = toupper("Avg. Established Appointments Check-in to Room-in Time"),
       subtitle = paste0("*Based on ",round(nrow(dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
       color = "fuchsia"
