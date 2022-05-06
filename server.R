@@ -977,7 +977,7 @@ server <- function(input, output, session) {
   #     theme_bw()+ graph_theme(legend_pos="none") + theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"), strip.background = element_rect(fill="#dddedd"))
   # })
   # 
-  # Site Comparison Tab -------------------------------------------------------------------------------------------------
+   # Site Comparison Tab -------------------------------------------------------------------------------------------------
   
   output$siteComparisonPts <- renderPlot({
     # Scheduling Arrived Data
@@ -7633,9 +7633,12 @@ server <- function(input, output, session) {
       
       volume <- full_join(volume,tot)
       
-      #### GEt rowSUms of all columns with months
-      volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
       
+      #### GEt rowSUms of all columns with months
+  
+        volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
+        
+
       
       
     }else {
@@ -7671,6 +7674,10 @@ server <- function(input, output, session) {
       # volume <- full_join(volume,tot)
       
       #### GEt rowSUms of all columns with months
+      
+      
+      
+    
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
 
       
@@ -7692,7 +7699,7 @@ server <- function(input, output, session) {
     
     volume <- volume[index]
     
-    
+   
     ## Adding "All" for aggregate total comparison
     all <- volume %>% group_by(across(!!name_2)) %>% summarise_at(vars(names(order_months),Total), sum) %>%
                        filter(across(!!name_2) !="Total")
@@ -7737,7 +7744,12 @@ server <- function(input, output, session) {
     # months <- order(as.yearmon(colnames(volume[col:(length(volume)-1)]), "%Y-%b"))
     # 
     # volume <- cbind(volume[months],Total = volume[,length(volume)])
-    volume
+   
+    # if (length(volume) == length(cols_name)+2){
+    # 
+    #   volume$Total <- NULL
+    # }
+     
     
     
   })
@@ -7798,9 +7810,12 @@ server <- function(input, output, session) {
         target = "row",
         fontWeight = styleEqual(1, "bold")
       ) %>%
-      
-      formatStyle(columns = c("Total"), fontWeight = 'bold') %>%
-      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+    
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+    
+    # if ( dtable ) if total is dtable
+    
+    formatStyle(columns = c("Total"), fontWeight = 'bold')
     
     path <- here::here("www")
     
@@ -8759,17 +8774,29 @@ server <- function(input, output, session) {
       
       
       #### Get the average daily for new patients and arrived patients 
-      waitTime <- waitTime %>% 
+      waitTime <- waitTime %>%
         pivot_wider(names_from = Appt.MonthYear,
                     values_from = medWaitTime,
-                    values_fill = 0) 
+                    values_fill = 0)
+       
+      #waitTime <- waitTime %>% spread(Appt.MonthYear, medWaitTime )
       
       #### Get total by summing all columns that are months
-      tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) 
+      #tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+       # summarise_at(vars(-!!breakdown_filters), sum) 
         #relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
       #waitTime <- full_join(waitTime,tot)
+      
+      
+      tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      
+      waitTime <- full_join(waitTime,tot) 
+      
+      
       
       
     }else{
@@ -8807,12 +8834,16 @@ server <- function(input, output, session) {
       
       
       
+      
     }
     waitTime <- setnames(waitTime, old = cols, new = cols_name)
     
     waitTime$Total_YN <- ifelse(waitTime[[name_2]] == "Total", 1,0)
     
     months_df <- waitTime[,!(names(waitTime) %in% c(cols_name, "Total", "Total_YN"))]
+    
+    
+    
     months <- order(as.yearmon(colnames(months_df), "%b %Y"))
     order_months <- months_df[months]
     
@@ -8826,6 +8857,9 @@ server <- function(input, output, session) {
     month_names_new <- as.character(lapply(month_names, function(x){paste(sapply(strsplit(x, "\\s+"), rev), collapse= '-')}))
     
     waitTime <- setnames(waitTime, old = month_names, new = month_names_new)
+    
+    
+    waitTime[month_names_new] <- lapply(waitTime[month_names_new], function(x) paste(x, "Days", sep=" "))
     
     
     # months <- order(as.yearmon(colnames(waitTime[3:(length(waitTime))]), "%Y-%b"))
@@ -9722,7 +9756,9 @@ server <- function(input, output, session) {
       noShow_perc <- noShow_perc %>% group_by(across(cols),Appt.MonthYear) %>% mutate(percentage = round((`No Show` / (Arrived + `No Show`))/total_days*100,2))
       noShow_perc <- noShow_perc %>% mutate(percentage = ifelse(percentage >= 1,round((`No Show` / (Arrived + `No Show`))/total_days*100,0), round((`No Show` / (Arrived + `No Show`))/total_days*100,2)))
       
-      noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived, -total_days) %>% pivot_wider(names_from = Appt.MonthYear, values_from = percentage)
+      noShow_perc <- noShow_perc %>% mutate(percentage= ifelse(is.na(percentage), NA, paste0(percentage, "%")))
+      #noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived, -total_days) %>% pivot_wider(names_from = Appt.MonthYear, values_from = percentage)
+      noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived, -total_days) %>% spread( Appt.MonthYear, percentage)
     }
     
     noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
@@ -9872,6 +9908,8 @@ server <- function(input, output, session) {
       
       
       if(breakdown_filters == "New.PT3"){
+        
+        
       }else {
         
         noShow_perc <- data %>%
@@ -9880,9 +9918,11 @@ server <- function(input, output, session) {
         
         noShow_perc <- noShow_perc %>% pivot_wider(names_from = Appt.Status, values_from = Total)
         
-        noShow_perc <- noShow_perc %>% group_by(across(cols),Appt.MonthYear) %>% mutate(percentage = round((`No Show` / (Arrived + `No Show`))*100,0))
+        noShow_perc <- noShow_perc %>% group_by(across(cols),Appt.MonthYear) %>% mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))
         
-        noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% pivot_wider(names_from = Appt.MonthYear, values_from = percentage)
+        #noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% pivot_wider(names_from = Appt.MonthYear, values_from = percentage)
+        
+        noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% spread(Appt.MonthYear, percentage )
       }
     
     noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
@@ -9897,6 +9937,9 @@ server <- function(input, output, session) {
     index <- c(1:length(cols_name),index)
     
     noShow_perc <- noShow_perc[index]
+    
+
+    
     
   })
   
