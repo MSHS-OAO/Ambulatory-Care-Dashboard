@@ -155,6 +155,8 @@ ui <- dashboardPage(
     
     sidebarMenu(id = "sbm",
                 menuItem("Home", tabName = "homepage", icon= icon("home")),
+                menuItem("Release", tabName = "release", icon= icon("info")),
+                menuItem("Q&A", tabName = "q&a", icon= icon("question")),
                 br(),
                 #menuItem("Comparison", tabName = "comparison",
                 tags$div("Key Metrics",
@@ -375,6 +377,8 @@ ui <- dashboardPage(
                        
                        
                 )),
+        tabItem(tabName= "release"),
+        tabItem(tabName= "q&a"),
         
         # System Overview Tab ------------------------------------------------------------------------------------------------------------------
         tabItem(tabName = "system",
