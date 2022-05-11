@@ -3085,7 +3085,7 @@ server <- function(input, output, session) {
   
   ### KPIs Tab ------------------------------------------------------------------------------------------------------------------------
   # Volume KPI ====================================================================
-  output$kpiVolumeGraph <- renderPlot({
+  output$kpiVolumeGraph <- renderPlotly({
     kpiVolumeData <- aggregate(dataArrivedKpi()$uniqueId, by=list(dataArrivedKpi()$Appt.Year,dataArrivedKpi()$Appt.Quarter,
                                                                   dataArrivedKpi()$Appt.Month, dataArrivedKpi()$Appt.Date, dataArrivedKpi()$Appt.MonthYear, dataArrivedKpi()$Appt.DateYear), FUN=NROW)
     
@@ -3100,9 +3100,10 @@ server <- function(input, output, session) {
     kpiVolumeDataQuarter <- kpiVolumeData %>% group_by(Year, Quarter) %>% dplyr::summarise(Total = round(sum(Volume)))
     kpiVolumeDataMonth <- kpiVolumeData %>% group_by(Year, Month, YearMonth) %>% dplyr::summarise(Total = round(sum(Volume))) %>% arrange(YearMonth)
     
+    ggplotly(
     if(input$kpiTrend ==1){
       if(input$kpiFreq == 1){ #Year
-        ggplot(kpiVolumeDataYear, aes(x=Year, y=Total,group=1)) +
+         ggplot(kpiVolumeDataYear, aes(x=Year, y=Total,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Patients",
@@ -3114,8 +3115,9 @@ server <- function(input, output, session) {
           graph_theme("none") + theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           geom_point(size = 3.2)
         
+        
       } else if(input$kpiFreq == 2) { # Quarter
-        ggplot(kpiVolumeDataQuarter, aes(x=interaction(Year,Quarter,lex.order = TRUE), y=Total,group=1)) +
+         ggplot(kpiVolumeDataQuarter, aes(x=interaction(Year,Quarter,lex.order = TRUE), y=Total,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Patients",
@@ -3126,6 +3128,7 @@ server <- function(input, output, session) {
           theme_bw()+
           graph_theme("none")+
           geom_point(size = 3.2)
+        
         
       } else if(input$kpiFreq == 3){ # Month
         # kpiVolumeDataMonth$YearMonth <- as.yearmon(kpiVolumeDataMonth$YearMonth, "%Y-%m")
@@ -3145,9 +3148,10 @@ server <- function(input, output, session) {
           theme_bw()+
           graph_theme("none")+
           geom_point(size = 3.2)
+       
         
       } else { # Day
-        ggplot(kpiVolumeData, aes(x=DateYear, y=Volume,group=1)) +
+         ggplot(kpiVolumeData, aes(x=DateYear, y=Volume,group=1)) +
           geom_line(color="midnightblue") +
           geom_smooth(method='lm', col = "red", se=FALSE, size=0.5)+
           labs(x = NULL, y = "Patients",
@@ -3160,11 +3164,12 @@ server <- function(input, output, session) {
           scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))+
           geom_point(size = 3.2)
+        
       }
       
     } else { 
       if(input$kpiFreq == 1){ # Year
-        ggplot(kpiVolumeDataYear %>% mutate(Label = "Year"), aes(x=Label, y=Total, col=Year,group=Year)) +
+         ggplot(kpiVolumeDataYear %>% mutate(Label = "Year"), aes(x=Label, y=Total, col=Year,group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Patients",
@@ -3176,6 +3181,7 @@ server <- function(input, output, session) {
           graph_theme("top") + theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")+
           geom_point(size = 3.2)
+       
         
       } else if(input$kpiFreq == 2){ # Quarter 
         ggplot(kpiVolumeDataQuarter, aes(x=Quarter, y=Total, col=Year,group=Year)) +
@@ -3190,9 +3196,10 @@ server <- function(input, output, session) {
           graph_theme("top")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")+
           geom_point(size = 3.2)
+       
         
       } else if(input$kpiFreq == 3){ # Month
-        ggplot(kpiVolumeDataMonth, aes(x = factor(x=Month, level= monthOptions), y=Total, col=Year,group=Year)) +
+         ggplot(kpiVolumeDataMonth, aes(x = factor(x=Month, level= monthOptions), y=Total, col=Year,group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Patients",
@@ -3204,9 +3211,10 @@ server <- function(input, output, session) {
           graph_theme("top")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")+
           geom_point(size = 3.2)
+      
         
       } else if(input$kpiFreq == 4){ # Day
-        ggplot(kpiVolumeData, aes(x=as.Date(DateYear,"%m-%d"), y=Volume, col=Year,group=Year)) +
+          ggplot(kpiVolumeData, aes(x=as.Date(DateYear,"%m-%d"), y=Volume, col=Year,group=Year)) +
           geom_line() +
           labs(x = NULL, y = "Patients",
                title = "Comparison of Patient Volume by Day",
@@ -3219,13 +3227,15 @@ server <- function(input, output, session) {
           scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))+
           geom_point(size = 3.2)
+       
+       
       }
     }
-    
+  )
   })
   
   # Appt Status KPI ========================================================================
-  output$kpiApptStatusGraph <- renderPlot({
+  output$kpiApptStatusGraph <- renderPlotly({
     statusData <- dataAll() %>% 
       group_by(Appt.Year, Appt.Quarter, Appt.Month, Appt.Date, Appt.Status, Appt.MonthYear, Appt.DateYear) %>%
       summarise(total = n()) %>%
@@ -3280,6 +3290,7 @@ server <- function(input, output, session) {
     statusDataDay[is.na(statusDataDay)] <- 0
     statusDataDay <- reshape2::melt(statusDataDay, id.vars = c("Year","Date","DateYear"))
     
+    ggplotly(
     if(input$kpiTrend ==1){
       if(input$kpiFreq == 1){ #Year
         ggplot(statusDataYear, aes(x=Year, y=value,col=variable, group=variable)) +
@@ -3415,13 +3426,14 @@ server <- function(input, output, session) {
         
       }
     }
+  )
     
   })
   
   
   # Access KPI ========================================================================
   ## Avg New Wait Time
-  output$kpiNewWaitTimeGraph <- renderPlot({
+  output$kpiNewWaitTimeGraph <- renderPlotly({
     data <- dataAllKpi() 
     # data <- kpi.all.data %>% filter(Campus == "MSUS")
     
@@ -3429,6 +3441,7 @@ server <- function(input, output, session) {
     data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"), 2))
     data <- data %>% filter(New.PT3 == TRUE) %>% filter(wait.time >= 0)
     
+    ggplotly(
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
         data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
@@ -3565,15 +3578,18 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
       }
     }
+    )
     
   })
   
   
   # Day of Visit KPI ========================================================================
   ## Avg Check-in to Visit-end
-  output$kpiCycleTimeGraph <- renderPlot({
+  output$kpiCycleTimeGraph <- renderPlotly({
     data <- dataArrivedKpi() %>% filter(cycleTime > 0)
     # data <- kpi.arrived.data %>% filter(cycleTime > 0)
+    
+    ggplotly(
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
@@ -3714,14 +3730,15 @@ server <- function(input, output, session) {
         
       }
     }
-    
+    )
   })
   
   ## Check-in to Room-in Wait Time
-  output$kpiWaitTimeGraph <- renderPlot({
+  output$kpiWaitTimeGraph <- renderPlotly({
     data <- dataArrivedKpi() %>% filter(checkinToRoomin > 0)
     # data <- kpi.arrived.data %>% filter(checkinToRoomin > 0)
     
+    ggplotly(
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
         data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
@@ -3861,7 +3878,7 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
       }
     }
-    
+    ) 
   })
   
   ### Scheduling Tab -------------------------------------------------------------------------------------------------------------------
@@ -7749,7 +7766,7 @@ server <- function(input, output, session) {
     # 
     #   volume$Total <- NULL
     # }
-     
+    #  
     
     
   })
@@ -7811,11 +7828,16 @@ server <- function(input, output, session) {
         fontWeight = styleEqual(1, "bold")
       ) %>%
     
-      formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')%>%
+      formatStyle(columns = c("Total"), fontWeight = 'bold')
     
-    # if ( dtable ) if total is dtable
+     # 
+     # if (c("Total") %in% names(dtable) ) {
+     #   DT::datatable(dtable)   %>%
+     #     formatStyle(columns = c("Total"), fontWeight = 'bold')
+     # }
+     # 
     
-    formatStyle(columns = c("Total"), fontWeight = 'bold')
     
     path <- here::here("www")
     

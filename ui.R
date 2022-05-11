@@ -707,28 +707,33 @@ ui <- dashboardPage(
                               boxPlus(
                                 title = "Volume KPIs", width = 12, status = "primary", height = "500px",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("kpiVolumeGraph", height="450px") %>% 
+                                #plotOutput("kpiVolumeGraph", height="450px") %>% 
+                                plotlyOutput("kpiVolumeGraph", height="450px") %>% 
                                   withSpinner(type = 5, color = "#d80b8c")
                               ),
                               boxPlus(
                                 title = "Scheduling KPIs", width = 12, status = "primary", height = "850px",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("kpiApptStatusGraph", height="800px") %>% 
+                                #plotOutput("kpiApptStatusGraph", height="800px") %>% 
+                                plotlyOutput("kpiApptStatusGraph", height="800px") %>% 
                                   withSpinner(type = 5, color = "#d80b8c")
                               ),
                               boxPlus(
                                 title = "Access KPIs", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                plotOutput("kpiNewWaitTimeGraph", height="450px") %>% 
+                                #plotOutput("kpiNewWaitTimeGraph", height="450px") %>% 
+                                plotlyOutput("kpiNewWaitTimeGraph", height="450px") %>% 
                                   withSpinner(type = 5, color = "#d80b8c")
                               ),
                               boxPlus(
                                 title = "Cycle Time KPIs", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 column(12,
-                                       plotOutput("kpiCycleTimeGraph", height="450px") %>% 
+                                       #plotOutput("kpiCycleTimeGraph", height="450px") %>%
+                                        plotlyOutput("kpiCycleTimeGraph", height="450px") %>%   
                                          withSpinner(type = 5, color = "#d80b8c"),hr(),
-                                       plotOutput("kpiWaitTimeGraph", height="450px") %>% 
+                                       #plotOutput("kpiWaitTimeGraph", height="450px") %>% 
+                                        plotlyOutput("kpiWaitTimeGraph", height="450px") %>%
                                          withSpinner(type = 5, color = "#d80b8c"))
                               )
                        )
