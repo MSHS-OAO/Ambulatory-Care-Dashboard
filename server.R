@@ -109,10 +109,11 @@ observeEvent(input$selectedProvider_access, {
     specialty <- input$selectedSpecialty_access
     department <- input$selectedDepartment_access
     resource <- input$selectedResource_access
+    provider <- input$selectedProvider_access
     visit_choices <- access_tbl %>% filter(CAMPUS %in% campus & 
                                              CAMPUS_SPECIALTY %in% specialty  & 
                                              DEPARTMENT %in% department  &
-                                             PROVIDER %in% resource) %>% 
+                                             PROVIDER %in% provider) %>% 
                                              select( VISIT_METHOD)  %>% 
                                              mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
     
