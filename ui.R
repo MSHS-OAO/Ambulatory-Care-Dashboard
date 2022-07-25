@@ -314,7 +314,7 @@ ui <- dashboardPage(
                        textOutput("newpatients"),
                        tags$head(tags$style("#newpatients{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
                        fluidRow(
-                         boxPlus(
+                         box(
                            title = "New Patient Visit Ratio", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            tabBox(
@@ -328,7 +328,7 @@ ui <- dashboardPage(
                                       plotOutput("newPtRatioByProv", height = "550px") %>% 
                                         withSpinner(type = 5, color = "#d80b8c"))))),
                        fluidRow(
-                         boxPlus(
+                         box(
                            title = "New Patient Wait Time", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            tabBox(
@@ -342,7 +342,7 @@ ui <- dashboardPage(
                                       plotOutput("newPtWaitTimeByProv", height = "550px") %>%
                                         withSpinner(type = 5, color = "#d80b8c"))))),
                        fluidRow(
-                         boxPlus(
+                         box(
                            title = "New Patient Source", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            plotOutput("newPtApptSourceByDept", height = "550px") %>%

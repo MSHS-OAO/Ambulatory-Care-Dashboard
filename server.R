@@ -2,12 +2,15 @@
 server <- function(input, output, session) {
 
 #ObserveEvent for access tab
-
+  
 observeEvent(input$selectedCampus_access,{
   if(is.null(input$filter_list)){
-    specialty_choices <-  access_tbl %>% filter(CAMPUS %in% input$selectedCampus_access) %>% 
+    campus <- input$selectedCampus_access
+    specialty_choices <-  access_tbl %>% filter(CAMPUS %in% campus) %>% 
       select( CAMPUS_SPECIALTY)  %>% mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
-    specialty_choices <- sort(access_specialty_choices$CAMPUS_SPECIALTY)
+    print("test")
+    specialty_choices <- sort(specialty_choices$CAMPUS_SPECIALTY)
+    print("test1")
     updatePickerInput(session,
                       inputId = "selectedSpecialty_access",
                       choices = specialty_choices,
@@ -24,21 +27,23 @@ ignoreNULL = FALSE)
 
 observeEvent(input$selectedSpecialty_access,{
   if(is.null(input$filter_list)){
+    if(!is.null(input$selectedSpecialty_access)){
     campus <- input$selectedCampus_access
     specialty <- input$selectedSpecialty_access
     
-    access_department_choices <- access_tbl %>% filter(CAMPUS %in% campus  & 
-                                                  CAMPUS_SPECIALTY %in% specialty) %>% select(DEPARTMENT)  %>%
+    department_choices <- access_tbl %>% filter(CAMPUS %in% campus  & 
+                              CAMPUS_SPECIALTY %in% specialty) %>% select(DEPARTMENT)  %>%
       mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
-    department_choices <- sort(access_department_choices$DEPARTMENT )
+    
+    department_choices <- sort(department_choices$DEPARTMENT )
     updatePickerInput(session,
                       inputId = "selectedDepartment_access",
                       choices = department_choices,
                       selected = department_choices
     )
-    
-  }
-  
+    }
+ 
+  } 
 },
 ignoreInit = TRUE,
 ignoreNULL = FALSE)
@@ -46,6 +51,7 @@ ignoreNULL = FALSE)
 
 observeEvent(input$selectedDepartment_access,{
   if(is.null(input$filter_list)){
+    if (!is.null(input$selectedDepartment_access)){
     
     campus <- input$selectedCampus_access
     specialty <- input$selectedSpecialty_access
@@ -64,9 +70,10 @@ observeEvent(input$selectedDepartment_access,{
                       choices = provider_choices,
                       selected = provider_choices
     )
+  
+    }
+    
   }
-  
-  
 },
 ignoreInit = TRUE,
 ignoreNULL = FALSE)
@@ -74,6 +81,7 @@ ignoreNULL = FALSE)
 
 observeEvent(input$selectedResource_access,{
   if(is.null(input$filter_list)){
+    if(!is.null(input$selectedResource_access)){
     
     campus <- input$selectedCampus_access
     specialty <- input$selectedSpecialty_access
@@ -95,7 +103,7 @@ observeEvent(input$selectedResource_access,{
     )
   }
   
-  
+  }
 },
 ignoreInit = TRUE,
 ignoreNULL = FALSE)
@@ -104,7 +112,8 @@ ignoreNULL = FALSE)
 
 observeEvent(input$selectedProvider_access, {
   if(is.null(input$filter_list)){
-    
+    if(!is.null(input$selectedProvider_access)){
+    print("1-1")
     campus <- input$selectedCampus_access
     specialty <- input$selectedSpecialty_access
     department <- input$selectedDepartment_access
@@ -116,7 +125,7 @@ observeEvent(input$selectedProvider_access, {
                                              PROVIDER %in% provider) %>% 
                                              select( VISIT_METHOD)  %>% 
                                              mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
-    
+    print("2-1")
     visit_choices <- sort(visit_choices$VISIT_METHOD)
     
     updatePickerInput(session,
@@ -124,6 +133,7 @@ observeEvent(input$selectedProvider_access, {
                       choices = visit_choices,
                       selected = visit_choices
     )
+    }
   }
 },
 ignoreInit = TRUE,
@@ -132,6 +142,7 @@ ignoreNULL = FALSE)
 observeEvent(list(input$selectedVisitMethod_access#,input$selectedProvider_access
                   ), {
   if(is.null(input$filter_list)){
+    if(!is.null(input$selectedVisitMethod_access)){
     
     print("1")
     campus <- input$selectedCampus_access
@@ -160,6 +171,7 @@ observeEvent(list(input$selectedVisitMethod_access#,input$selectedProvider_acces
                       choices = prc_choices,
                       selected = prc_choices
     )
+    }
   }
 },
 ignoreInit = TRUE,
@@ -267,7 +279,7 @@ output$newPtRatioByDept <- renderPlot({
     labs(x=NULL, y=NULL,
          #title = "New Patient Ratio Trending over Time",
          title = "Monthly New Patient Ratio",
-         subtitle = paste0("Based on data from ",isolate(input$dateRange_access[1])," to ",isolate(input$dateRange_access[2]))
+        # subtitle = paste0("Based on data from ",isolate(input$dateRange_access[1])," to ",isolate(input$dateRange_access[2]))
     )+
     theme_new_line()+
     theme_bw()+
@@ -286,6 +298,7 @@ output$newPtRatioByDept <- renderPlot({
 # New Patient Ratio by Provideer
 output$newPtRatioByProv <- renderPlot({
   data <- dataArrived_access() 
+  #data <- arrived_access_subset
   # data <- bind_rows(kpi.all.data[arrived.data.rows,], future_access_data[future.data.rows,]) %>%
   #            filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
   # data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
@@ -293,6 +306,8 @@ output$newPtRatioByProv <- renderPlot({
   #data <- data %>% mutate(Appt.Made.MonthYear = format(as.Date(APPT_MADE_DTTM, format="%m/%d/%Y"), "%Y-%m"))
   
   data <- data %>% mutate(Appt.Made.MonthYear = TO_CHAR(APPT_MADE_DTTM, "YYYY-mm"))
+  
+ 
   
   newpatients.ratio <- data %>%
     group_by(PROVIDER, Appt.Made.MonthYear,NEW_PT3) %>%
@@ -304,8 +319,8 @@ output$newPtRatioByProv <- renderPlot({
   newpatients.ratio$ratio <- round(newpatients.ratio$`TRUE` / (newpatients.ratio$`FALSE` + newpatients.ratio$`TRUE`),2)
   #newpatients.ratio$Appt.MonthYear <- as.Date(paste0(newpatients.ratio$Appt.MonthYear, "-01"), format="%Y-%m-%d") ## Create date-year column
   
-  ggplot(newpatients.ratio, aes(x=Appt.Made.MonthYear, y=ratio, group = Provider)) +
-    geom_line(aes(color=Provider), size=1) +
+  ggplot(newpatients.ratio, aes(x=Appt.Made.MonthYear, y=ratio, group = PROVIDER)) +
+    geom_line(aes(color=PROVIDER), size=1) +
     # scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
     scale_color_MountSinai("main", reverse = TRUE, labels = wrap_format(25))+
     labs(x=NULL, y=NULL, 
@@ -317,7 +332,7 @@ output$newPtRatioByProv <- renderPlot({
     graph_theme("bottom")+
     scale_y_continuous(labels = scales::percent_format(accuracy = 1), expand = c(0,0), limits = c(0,max(newpatients.ratio$ratio)*1.5))+
     theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+
-    geom_point(aes(color=Provider), size = 3.2)
+    geom_point(aes(color=PROVIDER), size = 3.2)
   # scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 week",
   #              date_minor_breaks = "1 day", expand = c(0, 0.6))
   
@@ -330,7 +345,7 @@ output$newPtWaitTimeByDept <- renderPlot({
   #data <- bind_rows(kpi.all.data[all.data.rows,], future_access_data) %>% filter(Campus == "MSUS")
   
   data <- data %>% mutate(wait.time = APPT_DTTM - APPT_MADE_DTTM)
-  
+ 
   #data$wait.time <- as.numeric(round(difftime(data$APPT_DTTM, data$APPT_MADE_DTTM,  units = "days"),2))
   
   #data <- data %>% mutate(Appt.Made.MonthYear = format(as.Date(APPT_MADE_DTTM, format="%m/%d/%Y"), "%Y-%m"))
@@ -340,7 +355,7 @@ output$newPtWaitTimeByDept <- renderPlot({
   waitTime <- data %>%
     filter(wait.time >= 0) %>%
     group_by(Appt.Made.MonthYear, NEW_PT3) %>%
-    dplyr::summarise(medWaitTime = round(median(wait.time))) %>%
+    dplyr::summarise(medWaitTime = round(median(wait.time, na.rm = TRUE))) %>%
     filter(NEW_PT3 %in% c("TRUE","FALSE")) %>% collect()
   
   waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == TRUE, "New","Established")
@@ -388,6 +403,7 @@ output$newPtWaitTimeByProv <- renderPlot({
   # data <- all.data %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
   #data <- bind_rows(kpi.all.data[all.data.rows,], future_access_data) %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
   
+  test3 <<- data %>% collect()
   #data <- data %>% mutate(Appt.Made.MonthYear = format(as.Date(APPT_MADE_DTTM, format="%m/%d/%Y"), "%Y-%m"))
   data <- data %>% mutate(Appt.Made.MonthYear = TO_CHAR(APPT_MADE_DTTM, "YYYY-mm"))
   
@@ -396,8 +412,8 @@ output$newPtWaitTimeByProv <- renderPlot({
   
   waitTime <- data %>%
     filter(wait.time >= 0) %>%
-    group_by(Provider, Appt.Made.MonthYear, NEW_PT3) %>%
-    dplyr::summarise(medWaitTime = round(median(wait.time))) %>% collect()
+    group_by(PROVIDER, Appt.Made.MonthYear, NEW_PT3) %>%
+    dplyr::summarise(medWaitTime = round(median(wait.time, na.rm = TRUE))) %>% collect()
   
   waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == TRUE, "New","Established")
   #waitTime$Appt.MonthYear <- as.Date(paste0(waitTime$Appt.MonthYear, "-01"), format="%Y-%m-%d") ## Create date-year column
@@ -405,8 +421,8 @@ output$newPtWaitTimeByProv <- renderPlot({
   waitTime <- waitTime %>% spread(NEW_PT3, medWaitTime)
   waitTime[is.na(waitTime)] <- 0
   waitTime <- waitTime %>% gather(variable, value, 3:4)
-  ggplot(waitTime %>% filter(variable == "Established"), aes(x=Appt.Made.MonthYear, y=value, group=Provider)) +
-    geom_line(aes(color=Provider), size=1) +
+  ggplot(waitTime %>% filter(variable == "Established"), aes(x=Appt.Made.MonthYear, y=value, group=PROVIDER)) +
+    geom_line(aes(color=PROVIDER), size=1) +
     # geom_hline(yintercept=14, linetype="dashed", color = "red", size=1)+
     scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
     labs(x=NULL, y=NULL, 
@@ -420,7 +436,7 @@ output$newPtWaitTimeByProv <- renderPlot({
     scale_y_continuous(expand = c(0,0), limits = c(0,max(waitTime$value)*1.5))+
     # scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 week",
     #              date_minor_breaks = "1 day", expand = c(0, 0.6))+
-    geom_point(aes(color=Provider), size = 3.2)
+    geom_point(aes(color=PROVIDER), size = 3.2)
 })
 
 
@@ -430,6 +446,7 @@ output$newPtApptSourceByDept <- renderPlot({
   #data <- bind_rows(kpi.all.data[arrived.data.rows,], future_access_data[future.data.rows,])
   # data <- kpi.all.data[arrivedNoShow.data.rows,]
   
+ 
   newpatients.ratio <- data %>%
     group_by(APPT_SOURCE_NEW, NEW_PT3) %>%
     filter(NEW_PT3 == "TRUE") %>%
@@ -474,7 +491,7 @@ output$newPtApptSourceByDept <- renderPlot({
   waitTime <- data %>%
     filter(wait.time >= 0) %>%
     group_by(APPT_SOURCE_NEW, NEW_PT3) %>%
-    dplyr::summarise(medWaitTime = round(median(wait.time))) %>%
+    dplyr::summarise(medWaitTime = round(median(wait.time, na.rm = TRUE))) %>%
     filter(NEW_PT3 == "TRUE") %>% collect() 
   waitTime$target <- 14
   
@@ -536,7 +553,7 @@ output$newPtApptSourceByDept <- renderPlot({
   
   noShows$APPT_SOURCE_NEW <- ifelse(noShows$APPT_SOURCE_NEW == "Other", "Practice", noShows$APPT_SOURCE_NEW)
   
-  #test2 <<- noShows
+
   
   
   newNoShow <-
