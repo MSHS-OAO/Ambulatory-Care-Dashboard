@@ -13,7 +13,7 @@ access_specialty_choices <- sort(access_specialty_choices$CAMPUS_SPECIALTY)
   
   
 access_department_choices <-  access_tbl %>% filter(CAMPUS %in% "MSUS" & 
-                                        CAMPUS_SPECIALTY %in% access_specialty_choices) %>% select( DEPARTMENT)  %>%
+                                        CAMPUS_SPECIALTY %in% "Allergy") %>% select( DEPARTMENT)  %>%
                                          mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
 access_department_choices <- sort(access_department_choices$DEPARTMENT )
   
@@ -468,7 +468,7 @@ ui <- dashboardPage(
                                      selectedTextFormat = "count > 1",
                                      countSelectedText = "{0}/{1} Departments",
                                      dropupAuto = FALSE),
-                                   selected =access_department_choices[1])),
+                                   selected =access_department_choices)),
                      box(
                        title = "Select Resource Type:",
                        width = 12,

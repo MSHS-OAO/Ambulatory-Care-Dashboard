@@ -269,13 +269,13 @@ table_theme <- function(){
 
 
 # connect to SQL
-con <- dbConnect(odbc(),
-                 Driver = "Oracle 21_5 ODBC driver",
-                 Trusted_Connection = "True",
-                 uid = 'aghaer01',
-                 pwd = "5VWtKW*yxf" )
+# con <- dbConnect(odbc(),
+#                  Driver = "Oracle 21_5 ODBC driver",
+#                  Trusted_Connection = "True",
+#                  uid = 'aghaer01',
+#                  pwd = "5VWtKW*yxf" )
 
-#con <- dbConnect(odbc(), "OAO Cloud DB")
+con <- dbConnect(odbc(), "OAO Cloud DB")
 
 
 
