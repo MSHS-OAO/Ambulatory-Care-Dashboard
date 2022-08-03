@@ -4,179 +4,187 @@ server <- function(input, output, session) {
 #ObserveEvent for access tab
   
 observeEvent(input$selectedCampus_access,{
-  if(is.null(input$filter_list)){
-    campus <- input$selectedCampus_access
-    specialty_choices <-  access_tbl %>% filter(CAMPUS %in% campus) %>% 
-      select( CAMPUS_SPECIALTY)  %>% mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
-    print("test")
-    specialty_choices <- sort(specialty_choices$CAMPUS_SPECIALTY)
-    print("test1")
-    updatePickerInput(session,
-                      inputId = "selectedSpecialty_access",
-                      choices = specialty_choices,
-                      selected = specialty_choices[1]
-    )
-  }
-  
-},
-ignoreInit = TRUE,
-ignoreNULL = FALSE)
-
-
-
-
-observeEvent(input$selectedSpecialty_access,{
-  if(is.null(input$filter_list)){
-    if(!is.null(input$selectedSpecialty_access)){
-    campus <- input$selectedCampus_access
-    specialty <- input$selectedSpecialty_access
-    
-    department_choices <- access_tbl %>% filter(CAMPUS %in% campus  & 
-                              CAMPUS_SPECIALTY %in% specialty) %>% select(DEPARTMENT)  %>%
-      mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
-    
-    department_choices <- sort(department_choices$DEPARTMENT )
-    updatePickerInput(session,
-                      inputId = "selectedDepartment_access",
-                      choices = department_choices,
-                      selected = department_choices
-    )
+    if(is.null(input$filter_list)){
+      if(!is.null(input$selectedCampus_access)){
+        
+      campus <- input$selectedCampus_access
+      
+      specialty_choices <-  access_tbl %>% filter(CAMPUS %in% campus) %>% 
+        select( CAMPUS_SPECIALTY)  %>% mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+      specialty_choices <- sort(specialty_choices$CAMPUS_SPECIALTY, na.last= T)
+      updatePickerInput(session,
+                        inputId = "selectedSpecialty_access",
+                        choices = specialty_choices,
+                        selected = specialty_choices[1]
+      )
     }
+  }
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+  
+  
+  
+  observeEvent(list(input$selectedSpecialty_access, 
+                    input$selectedCampus_access), {
+    if(is.null(input$filter_list)) {
+      if(!is.null(input$selectedSpecialty_access)){
+        if(!is.null(input$selectedCampus_access)){
+        campus <- input$selectedCampus_access
+        specialty <- input$selectedSpecialty_access
+        
+        department_choices <- access_tbl %>% filter(CAMPUS %in% campus  & 
+                                         CAMPUS_SPECIALTY %in% specialty) %>%
+                                          select(DEPARTMENT)  %>%
+          mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
+        
+        department_choices <- sort(department_choices$DEPARTMENT, na.last= T)
+        
+        updatePickerInput(session,
+                          inputId = "selectedDepartment_access",
+                          choices = department_choices,
+                          selected = department_choices
+        )
+      }
+    }
+    } 
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
  
-  } 
-},
-ignoreInit = TRUE,
-ignoreNULL = FALSE)
-
-
-observeEvent(input$selectedDepartment_access,{
-  if(is.null(input$filter_list)){
-    if (!is.null(input$selectedDepartment_access)){
-    
-    campus <- input$selectedCampus_access
-    specialty <- input$selectedSpecialty_access
-    department <- input$selectedDepartment_access
-    
-    provider_choices <- access_tbl %>% 
-      filter(CAMPUS %in% campus  & 
-               CAMPUS_SPECIALTY %in% specialty  & 
-               DEPARTMENT %in% department ) %>% 
-      select( PROVIDER)  %>% 
-      mutate(PROVIDER= unique(PROVIDER)) %>% collect()
-    
-    provider_choices <- sort(provider_choices$PROVIDER)
-    updatePickerInput(session,
-                      inputId = "selectedProvider_access",
-                      choices = provider_choices,
-                      selected = provider_choices
-    )
   
+  observeEvent(list(input$selectedDepartment_access),{
+    if(is.null(input$filter_list)){
+      if(!is.null(input$selectedDepartment_access)){
+
+        campus <- input$selectedCampus_access
+        specialty <- input$selectedSpecialty_access
+        department <- input$selectedDepartment_access
+
+        print("prov")
+        provider_choices <- access_tbl %>%
+          filter(CAMPUS %in% campus  &
+                   CAMPUS_SPECIALTY %in% specialty  &
+                   DEPARTMENT %in% department ) %>%
+          select( PROVIDER)  %>%
+          mutate(PROVIDER= unique(PROVIDER)) %>% collect()
+
+        print("prov1")
+
+        provider_choices <- sort(provider_choices$PROVIDER, na.last= T)
+        updatePickerInput(session,
+                          inputId = "selectedProvider_access",
+                          choices = provider_choices,
+                          selected = provider_choices
+        )
+
+      }
     }
-    
-  }
-},
-ignoreInit = TRUE,
-ignoreNULL = FALSE)
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
 
-
-observeEvent(input$selectedResource_access,{
-  if(is.null(input$filter_list)){
-    if(!is.null(input$selectedResource_access)){
-    
-    campus <- input$selectedCampus_access
-    specialty <- input$selectedSpecialty_access
-    department <- input$selectedDepartment_access
-    
-    provider_choices <- access_tbl %>% 
-      filter(CAMPUS %in% campus  & 
-               CAMPUS_SPECIALTY %in% specialty  & 
-               DEPARTMENT %in% department ) %>% 
-      select( PROVIDER)  %>% 
-      mutate(PROVIDER= unique(PROVIDER)) %>% collect()
-    
-    provider_choices <- sort(provider_choices$PROVIDER)
-    
-    updatePickerInput(session,
-                      inputId = "selectedProvider_access",
-                      choices = provider_choices,
-                      selected = provider_choices
-    )
-  }
   
-  }
-},
-ignoreInit = TRUE,
-ignoreNULL = FALSE)
+  observeEvent(input$selectedResource_access,{
+    if(is.null(input$filter_list)||
+       !is.null(input$selectedResource_access)){
+
+        campus <- input$selectedCampus_access
+        specialty <- input$selectedSpecialty_access
+        department <- input$selectedDepartment_access
+        
+        provider_choices <- access_tbl %>%
+          filter(CAMPUS %in% campus  &
+                   CAMPUS_SPECIALTY %in% specialty  &
+                   DEPARTMENT %in% department ) %>%
+          select( PROVIDER)  %>%
+          mutate(PROVIDER= unique(PROVIDER)) %>% collect()
+
+        provider_choices <- sort(provider_choices$PROVIDER, na.last= T)
+        print("resource")
+
+        updatePickerInput(session,
+                          inputId = "selectedProvider_access",
+                          choices = provider_choices,
+                          selected = provider_choices
+        )
+      }
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
 
 
-
-observeEvent(input$selectedProvider_access, {
-  if(is.null(input$filter_list)){
-    if(!is.null(input$selectedProvider_access)){
-    print("1-1")
-    campus <- input$selectedCampus_access
-    specialty <- input$selectedSpecialty_access
-    department <- input$selectedDepartment_access
-    resource <- input$selectedResource_access
-    provider <- input$selectedProvider_access
-    visit_choices <- access_tbl %>% filter(CAMPUS %in% campus & 
-                                             CAMPUS_SPECIALTY %in% specialty  & 
-                                             DEPARTMENT %in% department  &
-                                             PROVIDER %in% provider) %>% 
-                                             select( VISIT_METHOD)  %>% 
-                                             mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
-    print("2-1")
-    visit_choices <- sort(visit_choices$VISIT_METHOD)
-    
-    updatePickerInput(session,
-                      inputId = "selectedVisitMethod_access",
-                      choices = visit_choices,
-                      selected = visit_choices
-    )
+  
+  
+  
+  observeEvent(input$selectedProvider_access, {
+    if(is.null(input$filter_list)){
+      if(!is.null(input$selectedProvider_access)){
+        print("1-1")
+        campus <- input$selectedCampus_access
+        specialty <- input$selectedSpecialty_access
+        department <- input$selectedDepartment_access
+        resource <- input$selectedResource_access
+        provider <- input$selectedProvider_access
+        
+        visit_choices <- access_tbl %>% filter(CAMPUS %in% campus & 
+                                               CAMPUS_SPECIALTY %in% specialty & 
+                                               DEPARTMENT %in% department  &
+                                               PROVIDER %in% provider) %>% 
+          select( VISIT_METHOD)  %>% 
+          mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
+        print("2-1")
+        visit_choices <- sort(visit_choices$VISIT_METHOD, na.last= T)
+        
+        updatePickerInput(session,
+                          inputId = "selectedVisitMethod_access",
+                          choices = visit_choices,
+                          selected = visit_choices
+        )
+      }
     }
-  }
-},
-ignoreInit = TRUE,
-ignoreNULL = FALSE)
-
-observeEvent(list(input$selectedVisitMethod_access#,input$selectedProvider_access
-                  ), {
-  if(is.null(input$filter_list)){
-    if(!is.null(input$selectedVisitMethod_access)){
-    
-    print("1")
-    campus <- input$selectedCampus_access
-    specialty <- input$selectedSpecialty_access
-    department <- input$selectedDepartment_access
-    resource <- input$selectedResource_access
-    provider <- input$selectedProvider_access
-    visit_method <- input$selectedVisitMethod_access
-    
-    prc_choices <-  access_tbl %>% 
-      filter(CAMPUS %in%  campus & 
-               CAMPUS_SPECIALTY %in% specialty & 
-               DEPARTMENT %in% department &
-               RESOURCES   %in% resource &
-               PROVIDER %in% provider &
-               VISIT_METHOD %in% visit_method) %>% 
-               select(APPT_TYPE )  %>% 
-               mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
-    
-    print("2")
-             
-             
-       prc_choices <- sort(prc_choices$APPT_TYPE)
-    updatePickerInput(session,
-                      inputId = "selectedPRCName_access",
-                      choices = prc_choices,
-                      selected = prc_choices
-    )
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+  
+  observeEvent(list(input$selectedVisitMethod_access,
+                    input$selectedProvider_access), {
+    if(is.null(input$filter_list)){
+      if(!is.null(input$selectedVisitMethod_access)){
+        if(!is.null(input$selectedProvider_access)){
+        
+        campus <- input$selectedCampus_access
+        specialty <- input$selectedSpecialty_access
+        department <- input$selectedDepartment_access
+        resource <- input$selectedResource_access
+        provider <- input$selectedProvider_access
+        visit_method <- input$selectedVisitMethod_access
+        
+        prc_choices <-  access_tbl %>% 
+          filter(CAMPUS %in%  campus & 
+                   CAMPUS_SPECIALTY %in% specialty & 
+                   DEPARTMENT %in% department &
+                   RESOURCES   %in% resource &
+                   PROVIDER %in% provider &
+                   VISIT_METHOD %in% visit_method) %>% 
+          select(APPT_TYPE )  %>% 
+          mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+      
+        
+        prc_choices <- sort(prc_choices$APPT_TYPE, na.last= T)
+        updatePickerInput(session,
+                          inputId = "selectedPRCName_access",
+                          choices = prc_choices,
+                          selected = prc_choices
+        )
+        }
+      }
     }
-  }
-},
-ignoreInit = TRUE,
-ignoreNULL = FALSE)
-
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+  
+  
 
 
 # Reactive data for Access tab
@@ -250,28 +258,54 @@ output$newpatients <- renderText({
 
 # New Patient Ratio by Department
 output$newPtRatioByDept <- renderPlot({
-  data <- dataArrived_access() #%>% collect()
-  #data <- dataAll_access
-  #data <- bind_rows(kpi.all.data[arrived.data.rows,], future_access_data[future.data.rows,])
-  #data <- kpi.all.data[arrived.data.rows,]
+  data <- dataArrived_access()
+  #data <- arrived_access_subset %>% filter(CAMPUS== "MSQ", CAMPUS_SPECIALTY== "*No specialty") 
   
   
-  # data <- data %>% mutate(Appt.Made.MonthYear = format(as.Date(APPT_MADE_DTTM, format="%m/%d/%Y"), "%Y-%m"))
-
   data <- data %>% mutate(Appt.Made.MonthYear = TO_CHAR(APPT_MADE_DTTM, "YYYY-mm"))
   
-  #data <- data %>% filter(Campus== "MSBI")
+  campus <- input$selectedCampus_access
+  
+ 
+  specialty_choices <- arrived_access_subset %>% filter(CAMPUS== campus) %>% 
+    select( CAMPUS_SPECIALTY)  %>% mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+  
+  specialty_choices <- c(specialty_choices$CAMPUS_SPECIALTY)
+  
+  glob_data <<- data 
+  
   
   newpatients.ratio <- data %>%
     group_by(Appt.Made.MonthYear, NEW_PT3) %>%
     dplyr::summarise(Total = n()) %>% collect() %>%
     spread(NEW_PT3, Total)
   
+
+  
+  validate(need(nrow(newpatients.ratio)> 0, paste0("Specialties available for ", 
+                          campus, " are ", paste0(specialty_choices, collapse= ", ") , "." )))
+                                                  
+  
+  col_names <- c("Appt.Made.MonthYear", "TRUE", "FALSE")
+  col_index <- which(!(col_names %in% names(newpatients.ratio)))
+  column_to_add <- col_names[col_index]
+  
+  if(length(column_to_add)>0){
+    for (i in 1:length(column_to_add)){
+    newpatients.ratio[[column_to_add[i]]] <- 0
+  }}
+  
+  
   newpatients.ratio$`<NA>` <- NULL
+  newpatients.ratio[is.na(newpatients.ratio)] <- 0
+  
+  
+  
   
   newpatients.ratio$ratio <- round(newpatients.ratio$`TRUE` / (newpatients.ratio$`FALSE` + newpatients.ratio$`TRUE`),2)
   #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
-  newpatients.ratio[is.na(newpatients.ratio)] <- 0
+  
+  new_test <<- newpatients.ratio
   
   
   ggplot(newpatients.ratio, aes(x=Appt.Made.MonthYear, y=ratio, group=1)) +
@@ -298,7 +332,8 @@ output$newPtRatioByDept <- renderPlot({
 # New Patient Ratio by Provideer
 output$newPtRatioByProv <- renderPlot({
   data <- dataArrived_access() 
-  #data <- arrived_access_subset
+  #data <- arrived_access_subset %>% filter(CAMPUS== "MSQ", CAMPUS_SPECIALTY== "*No specialty")
+  
   # data <- bind_rows(kpi.all.data[arrived.data.rows,], future_access_data[future.data.rows,]) %>%
   #            filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
   # data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
@@ -307,12 +342,32 @@ output$newPtRatioByProv <- renderPlot({
   
   data <- data %>% mutate(Appt.Made.MonthYear = TO_CHAR(APPT_MADE_DTTM, "YYYY-mm"))
   
- 
+  campus <- input$selectedCampus_access
+  
+  
+  specialty_choices <- arrived_access_subset %>% filter(CAMPUS== campus) %>% 
+    select( CAMPUS_SPECIALTY)  %>% mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+  
+  specialty_choices <- c(specialty_choices$CAMPUS_SPECIALTY)
+  
   
   newpatients.ratio <- data %>%
-    group_by(PROVIDER, Appt.Made.MonthYear,NEW_PT3) %>%
+    group_by(PROVIDER, Appt.Made.MonthYear, NEW_PT3) %>%
     dplyr::summarise(Total = n()) %>% collect() %>%
-    spread(NEW_PT3, Total)  
+    spread(NEW_PT3, Total) 
+  
+  validate(need(nrow(newpatients.ratio)> 0, paste0("Specialties available for ", 
+                                                   campus, " are ", paste0(specialty_choices, collapse= ", ") , "." )))
+  
+  col_names <- c("PROVIDER", "Appt.Made.MonthYear", "TRUE", "FALSE")
+  col_index <- which(!(col_names %in% names(newpatients.ratio)))
+  column_to_add <- col_names[col_index]
+  
+  if(length(column_to_add)>0){
+    for (i in 1:length(column_to_add)){
+    newpatients.ratio[[column_to_add[i]]] <- 0
+  }}
+  
   
   newpatients.ratio[is.na(newpatients.ratio)] <- 0
   
@@ -340,33 +395,59 @@ output$newPtRatioByProv <- renderPlot({
 
 # New Patient Wait Time
 output$newPtWaitTimeByDept <- renderPlot({
-  data <- dataAll_access() #%>% collect()
-  # data <- kpi.all.data[all.data.rows,] %>% filter(Campus == "MSUS")
+  data <- dataAll_access() 
+  # data <- dataAll_access_subset %>% filter(CAMPUS == "MSQ" & CAMPUS_SPECIALTY==  "*No specialty")
   #data <- bind_rows(kpi.all.data[all.data.rows,], future_access_data) %>% filter(Campus == "MSUS")
   
-  data <- data %>% mutate(wait.time = APPT_DTTM - APPT_MADE_DTTM)
+  #data <- data %>% mutate(wait.time = APPT_DTTM - APPT_MADE_DTTM)
  
   #data$wait.time <- as.numeric(round(difftime(data$APPT_DTTM, data$APPT_MADE_DTTM,  units = "days"),2))
   
   #data <- data %>% mutate(Appt.Made.MonthYear = format(as.Date(APPT_MADE_DTTM, format="%m/%d/%Y"), "%Y-%m"))
-  data <- data %>% mutate(Appt.Made.MonthYear = TO_CHAR(APPT_MADE_DTTM, "YYYY-mm"))
+  data <- data %>% mutate(Appt.Made.MonthYear = TO_CHAR(APPT_MADE_DTTM, "YYYY-mm")) # %>% collect()
+  
+  test_wait_time <<- data
+  
+  campus <- input$selectedCampus_access
+  
+  
+  specialty_choices <- arrived_access_subset %>% filter(CAMPUS== campus) %>% 
+    select( CAMPUS_SPECIALTY)  %>% mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+  
+  specialty_choices <- c(specialty_choices$CAMPUS_SPECIALTY)
   
   
   waitTime <- data %>%
-    filter(wait.time >= 0) %>%
+    filter(WAIT_TIME >= 0) %>%
     group_by(Appt.Made.MonthYear, NEW_PT3) %>%
-    dplyr::summarise(medWaitTime = round(median(wait.time, na.rm = TRUE))) %>%
+    dplyr::summarise(medWaitTime = round(median(WAIT_TIME , na.rm = TRUE))) %>%
     filter(NEW_PT3 %in% c("TRUE","FALSE")) %>% collect()
+  
+  validate(need(nrow(waitTime)> 0, paste0("Specialties available for ", 
+                                                   campus, " are ", paste0(specialty_choices, collapse= ", ") , "." )))
+  
   
   waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == TRUE, "New","Established")
   #waitTime$Appt.MonthYear <- as.Date(waitTime$Appt.MonthYear, format="%Y-%m-%d") ## Create date-year column
   
-  waitTime <- waitTime %>% spread(NEW_PT3, medWaitTime) 
+  waitTime <- waitTime %>% spread(NEW_PT3, medWaitTime)
+  
+  col_names <- c("Appt.Made.MonthYear", "Established", "New")
+  col_index <- which(!(col_names %in% names(waitTime)))
+  column_to_add <- col_names[col_index]
+  
+  if(length(column_to_add)> 0){
+     for (i in 1:length(column_to_add)){
+       waitTime[[column_to_add[i]]] <- 0
+  }}
+  
+  
   #waitTime$`New Patient Target <= 14` <- 14
   waitTime[is.na(waitTime)] <- 0
   waitTime <- waitTime %>% gather(variable, value, 2:3)
   target <- 14
   
+  wait_test <<- waitTime 
   
   ggplot(waitTime, aes(x=Appt.Made.MonthYear, y=value, fill = variable))+
     #geom_line(aes(linetype=variable, color=variable, size=variable)) +
@@ -399,13 +480,23 @@ output$newPtWaitTimeByDept <- renderPlot({
 
 # New Patient Wait Time
 output$newPtWaitTimeByProv <- renderPlot({
-  data <- dataAll_access() #%>% collect()
+  data <- dataAll_access() 
+  #data <- dataAll_access_subset %>% filter(CAMPUS == "MSQ" & CAMPUS_SPECIALTY==  "*No specialty")
   # data <- all.data %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
   #data <- bind_rows(kpi.all.data[all.data.rows,], future_access_data) %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
   
-  test3 <<- data %>% collect()
+  test3 <<- data 
   #data <- data %>% mutate(Appt.Made.MonthYear = format(as.Date(APPT_MADE_DTTM, format="%m/%d/%Y"), "%Y-%m"))
   data <- data %>% mutate(Appt.Made.MonthYear = TO_CHAR(APPT_MADE_DTTM, "YYYY-mm"))
+  
+  campus <- input$selectedCampus_access
+  
+  
+  specialty_choices <- dataAll_access_subset %>% filter(CAMPUS== campus) %>% 
+    select( CAMPUS_SPECIALTY)  %>% mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+  
+  specialty_choices <- c(specialty_choices$CAMPUS_SPECIALTY)
+  
   
   #data$wait.time <- as.numeric(round(difftime(data$APPT_DTTM, data$APPT_MADE_DTTM,  units = "days"),2))
   data <- data %>% mutate(wait.time = APPT_DTTM - APPT_MADE_DTTM)
@@ -415,10 +506,29 @@ output$newPtWaitTimeByProv <- renderPlot({
     group_by(PROVIDER, Appt.Made.MonthYear, NEW_PT3) %>%
     dplyr::summarise(medWaitTime = round(median(wait.time, na.rm = TRUE))) %>% collect()
   
+  
+  # validate(need(nrow(waitTime)> 0, paste0("Specialties available for ", 
+  #                                         campus, " are ", paste0(specialty_choices, collapse= ", ") , "." )))
+  # 
+  
+  
   waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == TRUE, "New","Established")
   #waitTime$Appt.MonthYear <- as.Date(paste0(waitTime$Appt.MonthYear, "-01"), format="%Y-%m-%d") ## Create date-year column
   
   waitTime <- waitTime %>% spread(NEW_PT3, medWaitTime)
+  
+  validate(need("Established" %in% names(waitTime), "There is No Previous Patient for this Capmus"))
+  
+  # col_names <- c("PROVIDER", "Appt.Made.MonthYear", "Established", "New")
+  # col_index <- which(!(col_names %in% names(waitTime)))
+  # column_to_add <- col_names[col_index]
+  # 
+  # if(length(column_to_add)>0){
+  #   for(i in 1:length(column_to_add)){
+  #     waitTime[[column_to_add[i]]] <- 0
+  # }}
+  
+  
   waitTime[is.na(waitTime)] <- 0
   waitTime <- waitTime %>% gather(variable, value, 3:4)
   ggplot(waitTime %>% filter(variable == "Established"), aes(x=Appt.Made.MonthYear, y=value, group=PROVIDER)) +
@@ -443,14 +553,29 @@ output$newPtWaitTimeByProv <- renderPlot({
 # New Patient Wait Time
 output$newPtApptSourceByDept <- renderPlot({
   data <- dataArrived_access() 
+  #data <- arrived_access_subset %>% filter(CAMPUS == "MSQ" & CAMPUS_SPECIALTY==  "Neurology") 
   #data <- bind_rows(kpi.all.data[arrived.data.rows,], future_access_data[future.data.rows,])
   # data <- kpi.all.data[arrivedNoShow.data.rows,]
   
+  
+  campus <- input$selectedCampus_access
+  
+  
+  specialty_choices <- arrived_access_subset %>% filter(CAMPUS== campus) %>% 
+    select( CAMPUS_SPECIALTY)  %>% mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+  
+  specialty_choices <- c(specialty_choices$CAMPUS_SPECIALTY)
  
+  
   newpatients.ratio <- data %>%
     group_by(APPT_SOURCE_NEW, NEW_PT3) %>%
     filter(NEW_PT3 == "TRUE") %>%
     dplyr::summarise(Total = n()) %>% collect()
+  
+  
+  validate(need(nrow(newpatients.ratio)> 0, paste0("Specialties available for ",
+                                          campus, " are ", paste0(specialty_choices, collapse= ", ") , "." )))
+
   
 
   #newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
@@ -507,8 +632,8 @@ output$newPtApptSourceByDept <- renderPlot({
     scale_fill_MountSinai('pink')+
     labs(x=NULL, y=NULL, 
          title = "Wait Time* to New Appointment",
-         subtitle = paste0("Based on data from ",isolate(input$dateRange_access[1])," to ",isolate(input$dateRange_access[2]),
-                           "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
+         # subtitle = paste0("Based on data from ",isolate(input$dateRange_access[1])," to ",isolate(input$dateRange_access[2]),
+         #                   "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
          caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service).")+
     theme_new_line()+
     theme_bw()+
@@ -528,26 +653,37 @@ output$newPtApptSourceByDept <- renderPlot({
   
   # No Show Rate
   
-  data.noShow <- dataArrivedNoShow_access() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) #%>% collect()
-  # data.noShow <- kpi.all.data[arrivedNoShow.data.rows,] %>% filter(APPT_STATUS %in% c("Arrived", "No Show"))
-  #test_noshow <<- data.noShow
+  data.noShow <- dataArrivedNoShow_access() 
+  
+  # data.noShow <- data_arrived_noshow_subset %>% filter(CAMPUS== "MSUS" & CAMPUS_SPECIALTY=="Allergy") %>% collect()
+  
+  test_noshow <<- data.noShow
   
   noShows <- data.noShow %>%
+    #filter(CAMPUS_SPECIALTY== "Cardiology") %>%
     filter(NEW_PT3 == "TRUE") %>%
     group_by(APPT_SOURCE_NEW, APPT_STATUS) %>%
     dplyr::summarise(Total = n()) %>% collect() %>%
     spread(APPT_STATUS, Total) 
   
+  validate(need("No Show" %in% names(noShows), "There is no No Show for this selection."))
+  
+  
+  # col_names <- c("APPT_SOURCE_NEW", "Arrived", "No Show" )
+  # col_index <- which(!(col_names %in% names(noShows)))
+  # column_to_add <- col_names[col_index]
+  # 
+  # 
+  # 
+  # if(length(column_to_add)>0){
+  #   for (i in 1:length(column_to_add)){
+  #      noShows[[column_to_add[i]]] <- 0
+  # }}
   
   noShows[is.na(noShows)] <- 0
   
-  
-  if(!("No Show" %in% colnames(noShows))){
-    noShows$`No Show`<- 0 
-  }
-  
-  
   noShows$`No Show Perc` <- round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)
+  
   noShows$APPT_SOURCE_NEW[which(noShows$APPT_SOURCE_NEW == "Other")] <- "Practice"
   
   

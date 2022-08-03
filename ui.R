@@ -19,7 +19,7 @@ access_department_choices <- sort(access_department_choices$DEPARTMENT )
   
    
 access_provider_choices <-   access_tbl %>% filter(CAMPUS %in% "MSUS" & 
-                                               CAMPUS_SPECIALTY %in% access_specialty_choices & 
+                                               CAMPUS_SPECIALTY %in% "Allergy"& 
                                                  DEPARTMENT %in% access_department_choices ) %>% 
                                                    select(PROVIDER)  %>% 
                                                     mutate(PROVIDER= unique(PROVIDER)) %>% collect()
@@ -29,7 +29,7 @@ access_provider_choices <- sort(access_provider_choices$PROVIDER)
 
 
 access_visit_method <-    access_tbl %>% filter(CAMPUS %in% "MSUS" & 
-                                             CAMPUS_SPECIALTY %in% access_specialty_choices & 
+                                             CAMPUS_SPECIALTY %in% "Allergy" & 
                                               DEPARTMENT %in% access_department_choices &
                                                 PROVIDER %in% access_provider_choices) %>% 
                                                  select( VISIT_METHOD)  %>% 
@@ -39,7 +39,7 @@ access_visit_method <- sort(access_visit_method$VISIT_METHOD)
  
 
 access_PRC_name <-  access_tbl %>% filter(CAMPUS %in% "MSUS" & 
-                                       CAMPUS_SPECIALTY %in% access_specialty_choices & 
+                                       CAMPUS_SPECIALTY %in% "Allergy" & 
                                        DEPARTMENT %in% access_department_choices &
                                        PROVIDER %in% access_provider_choices &
                                        VISIT_METHOD %in% access_visit_method) %>% 
@@ -60,11 +60,11 @@ access_PRC_name <- sort(access_PRC_name$APPT_TYPE)
 
 
 access_dateRange_min <- glue("Select min(APPT_MADE_DTTM) AS minDate FROM ACCESS_SQL")
-access_dateRange_min <- dbGetQuery(con, access_dateRange_min)
+access_dateRange_min <- dbGetQuery(poolcon, access_dateRange_min)
 access_dateRange_min <- as.Date(access_dateRange_min$MINDATE, format="%Y-%m-%d")
 
 access_dateRange_max <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM ACCESS_SQL")
-access_dateRange_max <- dbGetQuery(con, access_dateRange_max)
+access_dateRange_max <- dbGetQuery(poolcon, access_dateRange_max)
 access_dateRange_max <- as.Date(access_dateRange_max$MAXDATE, format="%Y-%m-%d")
 
 access_dateRange_start <-  access_dateRange_min

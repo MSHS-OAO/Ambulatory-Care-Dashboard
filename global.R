@@ -6,6 +6,7 @@ suppressMessages({
   library(readxl)
   library(writexl)
   library(plyr)
+  library(pool)
   library(dplyr)
   library(data.table)
   library(zoo)
@@ -23,10 +24,10 @@ suppressMessages({
   library(plotly)
   library(knitr)
   library(kableExtra)
-  #library(leaflet)
+  library(leaflet)
   library(grid)
   library(gridExtra)
-  #library(eeptools)
+  library(eeptools)
   library(ggQC)
   #library(zipcode)
   library(utils)
@@ -40,7 +41,7 @@ suppressMessages({
   library(edeaR)
   library(processmapR)
   library(processmonitR)
-  #library(processanimateR)
+  library(processanimateR)
   library(tidyr)
   library(lubridate)
   library(RColorBrewer)
@@ -51,7 +52,7 @@ suppressMessages({
   library(ggforce) # for 'geom_arc_bar'
   library(packcircles) # for packed circle graph
   library(viridis)
-  #library(ggiraph)
+  library(ggiraph)
   library(treemapify)
   library(treemap)
   library(broom)
@@ -64,15 +65,15 @@ suppressMessages({
   library(here)
   library(shinyBS)
   library(shinyscreenshot)
-  #library(fasttime)
+  library(fasttime)
   library(shinycssloaders)
   library(feather)
-  #library(zipcodeR)
+  library(zipcodeR)
   library(formattable)
-  #library(shinyjs)
+  library(shinyjs)
   library(janitor)
   library(patchwork)
-  #library(pryr)
+  library(pryr)
   library(reactable)
   library(devtools)
   library(glue)
@@ -269,19 +270,26 @@ table_theme <- function(){
 
 
 # connect to SQL
-con <- dbConnect(odbc(),
-                 Driver = "Oracle 21_5 ODBC driver",
-                 Trusted_Connection = "True",
-                 uid = 'aghaer01',
-                 pwd = "5VWtKW*yxf" )
+# con <- dbConnect(odbc(),
+#                  Driver = "Oracle 21_5 ODBC driver",
+#                  Trusted_Connection = "True",
+#                  uid = 'aghaer01',
+#                  pwd = "5VWtKW*yxf" )
+# 
+
+poolcon <- dbPool(drv = odbc::odbc(),
+                  dsn = "OAO Cloud DB",
+                  username= 'aghaer01',
+                  password = "5VWtKW*yxf")
+
 
 #con <- dbConnect(odbc(), "OAO Cloud DB")
 
 
 
-access_tbl <- tbl(con, "ACCESS_SQL")
+access_tbl <- tbl(poolcon, "ACCESS_SQL")
 
-holid <- tbl(con, "HOLIDAYS")
+holid <- tbl(poolcon, "HOLIDAYS")
 
 
   
@@ -291,7 +299,7 @@ min_date <- max_date - 730
 
 
 max_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDATE FROM(Select APPT_MADE_DTTM, APPT_STATUS FROM ACCESS_SQL WHERE APPT_STATUS IN 'Arrived')")
-max_arrived <- dbGetQuery(con, max_arrived)
+max_arrived <- dbGetQuery(poolcon, max_arrived)
 max_arrived <- as.Date(max_arrived$MAXDATE, format="%Y-%m-%d")
 
 # max_arrived <- access_tbl %>% select(APPT_MADE_DTTM, APPT_STATUS )%>% filter(APPT_STATUS=="Arrived" ) %>% collect()
