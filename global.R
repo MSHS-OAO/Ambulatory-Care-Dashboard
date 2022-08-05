@@ -69,7 +69,6 @@ suppressMessages({
   library(plotly)
   library(knitr)
   library(kableExtra)
-  library(leaflet)
   library(grid)
   library(gridExtra)
   library(eeptools)
