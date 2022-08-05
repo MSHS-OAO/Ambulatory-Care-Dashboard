@@ -49,7 +49,7 @@
 # install.packages("reactable")
 # devtools::install_github("ropensci/plotly")
 
-devtools::install_github("haozhu233/kableExtra", upgrade = "never")
+
 
 suppressMessages({
   library(readxl)
@@ -127,7 +127,7 @@ suppressMessages({
 })
 
 
-
+devtools::install_github("haozhu233/kableExtra", upgrade = "never")
 
 #detach("package:kableExtra", unload = TRUE)
 #library(kableExtra)
