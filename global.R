@@ -334,22 +334,22 @@ con <- dbConnect(odbc(), "OAO Cloud DB")
 
 # ### New Location with Updated Data
 #historical.data <- readRDS("/data/Ambulatory/Data_Updated/historical_data.rds")
-# slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
-# holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
-# utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
-# population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
-# filter_path <- "/data/Ambulatory/Filters"
-# historical.data <- tbl(con,  "ACCESS_SQL")
+slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
+holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
+utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
+population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
+filter_path <- "/data/Ambulatory/Filters"
+historical.data <- tbl(con,  "ACCESS_SQL")
 
 
 
 
-slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
-population.data_filtered <- readRDS(paste0(wdpath,"/Data/population_data_filtered.rds"))
-filter_path <- paste0(wdpath, "/Filters")
-historical.data <- tbl(con,  "ACCESS_SQL_UPT")
+# slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
+# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+# utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
+# population.data_filtered <- readRDS(paste0(wdpath,"/Data/population_data_filtered.rds"))
+# filter_path <- paste0(wdpath, "/Filters")
+# historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS minDate FROM ACCESS_SQL")
 max_date_arrived <- dbGetQuery(con, max_date_arrived)
