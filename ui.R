@@ -1,47 +1,68 @@
 default_campus <- "MSUS"
-default_specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS", "Campus.Specialty"]), na.last = TRUE)
+default_campus_choices <- historical.data %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
+default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
+default_specialty_choices <-  historical.data %>% filter(CAMPUS %in% "MSUS") %>% select( CAMPUS_SPECIALTY)  %>%
+  mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+default_specialty_choices <- sort(default_specialty_choices$CAMPUS_SPECIALTY, na.last = T)
+
 default_specialty <- "Allergy"
-# default_specialty <- sort(unique(kpi.all.data[Campus == default_campus], 
-#                                   by = "Campus.Specialty"
-#                                  )[,Campus.Specialty]
-#                           )
 
-default_departments <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% "MSUS" &
-                                                  kpi.all.data$Campus.Specialty %in% default_specialty, "Department"]), na.last = TRUE) 
+
+default_departments <-  historical.data %>% filter(CAMPUS %in% "MSUS" & 
+                                                      CAMPUS_SPECIALTY %in% "Allergy") %>% select( DEPARTMENT)  %>%
+  mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
+default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
+
+
+
 default_resource_type <- c("Provider","Resource")
-default_provider <- sort(unique(kpi.all.data[
-  kpi.all.data$Campus %in% default_campus &
-    kpi.all.data$Campus.Specialty %in% default_specialty &
-    kpi.all.data$Department %in% default_departments & 
-    kpi.all.data$Resource %in% default_resource_type, "Provider"]), na.last = TRUE)
 
-default_visit_method <- sort(unique(kpi.all.data[
-    kpi.all.data$Campus %in% default_campus &
-    kpi.all.data$Campus.Specialty %in% default_specialty &
-    kpi.all.data$Department %in% default_departments & 
-    kpi.all.data$Resource %in% default_resource_type &
-    kpi.all.data$Provider %in% default_provider, "Visit.Method"]), na.last = TRUE)
+default_provider <-   historical.data %>% filter(CAMPUS %in% "MSUS" & 
+                                                     CAMPUS_SPECIALTY %in% "Allergy"& 
+                                                     DEPARTMENT %in% default_departments ) %>% 
+  select(PROVIDER)  %>% 
+  mutate(PROVIDER= unique(PROVIDER)) %>% collect()
 
-default_PRC_name <- sort(unique(kpi.all.data[
-  kpi.all.data$Campus %in% default_campus &
-    kpi.all.data$Campus.Specialty %in% default_specialty &
-    kpi.all.data$Department %in% default_departments & 
-    kpi.all.data$Resource %in% default_resource_type &
-    kpi.all.data$Provider %in% default_provider &
-    kpi.all.data$Visit.Method %in% default_visit_method, "Appt.Type"]), na.last = TRUE)
 
-dateRangeKpi_start = min((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
-dateRangeKpi_end = max((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
-dateRangeKpi_min = min((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
-dateRangeKpi_max = max((kpi.all.data[kpi.arrived.data.rows,])$Appt.DateYear) 
+default_provider <- sort(default_provider$PROVIDER, na.last = T)
+
+default_visit_method <-    historical.data %>% filter(CAMPUS %in% "MSUS" & 
+                                                  CAMPUS_SPECIALTY %in% "Allergy" & 
+                                                  DEPARTMENT %in% default_departments &
+                                                  PROVIDER %in% default_provider) %>% 
+  select( VISIT_METHOD)  %>% 
+  mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
+
+default_visit_method <- sort(default_visit_method$VISIT_METHOD, na.last = T)
+
+
+default_PRC_name <-  historical.data %>% filter(CAMPUS %in% "MSUS" & 
+                                            CAMPUS_SPECIALTY %in% "Allergy" & 
+                                            DEPARTMENT %in% default_departments &
+                                            PROVIDER %in% default_provider &
+                                            VISIT_METHOD %in% default_visit_method) %>% 
+  select(APPT_TYPE )  %>% 
+  mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+
+
+default_PRC_name <- sort(default_PRC_name$APPT_TYPE, na.last = T) 
+
 
 util_date_start = min(utilization.data$Appt.DateYear)
 util_date_end = max(utilization.data$Appt.DateYear)
 
-dateRange_min <- min((kpi.all.data[arrived.data.rows,])$Appt.DateYear)
-dateRange_max <- max((kpi.all.data[arrived.data.rows,])$Appt.DateYear)
-# dateRange_start <- paste0(format(dateRange_max %m+% months(-3), "%Y-%m"), "-01")
-dateRange_start <-  as.Date("2021-01-01")
+dateRange_max <- max_date_arrived
+
+dateRange_min <- glue("Select min(APPT_DTTM) AS minDate FROM ACCESS_SQL WHERE APPT_STATUS = 'Arrived'")
+dateRange_min <- dbGetQuery(con, dateRange_min)
+dateRange_min <- as.Date(dateRange_min$MINDATE, format="%Y-%m-%d")
+
+dateRange_start <-  dateRange_min
+
+dateRangeKpi_start = dateRange_min 
+dateRangeKpi_end = dateRange_max
+dateRangeKpi_min = dateRange_min
+dateRangeKpi_max = dateRange_max
 
 
 dateRangeSlot_start <- min(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
@@ -1553,7 +1574,7 @@ ui <- dashboardPage(
                      height = "100px",
                      solidHeader = FALSE,
                      pickerInput("selectedCampus",label=NULL,
-                                 choices=sort(unique(kpi.all.data$Campus)),
+                                 choices=default_campus_choices,
                                  multiple=FALSE,
                                  options = pickerOptions(
                                    liveSearch = TRUE,
@@ -1692,7 +1713,7 @@ ui <- dashboardPage(
                      width = 12, 
                      solidHeader = FALSE, 
                      selectInput("daysOfWeek",label = NULL,
-                                 choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
+                                 choices=daysOfWeek.options, selected = daysOfWeek.options,
                                  multiple=TRUE, selectize=TRUE))
                  ),
                  
