@@ -338,7 +338,7 @@ holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather
 utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
 population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
 filter_path <- "/data/Ambulatory/Filters"
-historical.data <- tbl(con,  "ACCESS_SQL")
+historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
 
