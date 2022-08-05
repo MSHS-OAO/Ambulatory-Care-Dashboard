@@ -50,7 +50,7 @@
 # devtools::install_github("ropensci/plotly")
 
 
-install.packages("eeptools", repos = "http://cran.us.r-project.org")
+#install.packages("eeptools", repos = "http://cran.us.r-project.org")
 suppressMessages({
   library(readxl)
   library(writexl)
