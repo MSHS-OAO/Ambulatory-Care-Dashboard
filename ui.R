@@ -54,7 +54,8 @@ util_date_end = max(utilization.data$Appt.DateYear)
 dateRange_max <- max_date_arrived
 
 dateRange_min <- glue("Select min(APPT_DTTM) AS minDate FROM ACCESS_SQL WHERE APPT_STATUS = 'Arrived'")
-dateRange_min <- dbGetQuery(con, dateRange_min)
+#dateRange_min <- dbGetQuery(con, dateRange_min)
+dateRange_min <- dbGetQuery(poolcon, dateRange_min)
 dateRange_min <- as.Date(dateRange_min$MINDATE, format="%Y-%m-%d")
 
 dateRange_start <-  dateRange_min

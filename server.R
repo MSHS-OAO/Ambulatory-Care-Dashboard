@@ -775,7 +775,7 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-    groupByFilters(population.data_filtered,
+    groupByFilters(population_tbl,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
                    input$dateRangepop[1], input$dateRangepop[2], input$daysOfWeek, input$excludeHolidays)
@@ -5012,12 +5012,15 @@ server <- function(input, output, session) {
   
   output$ins_breakdown_tb <- function(){
     
-    data <- dataArrived() %>%
-      group_by(Coverage) %>%
+    data <- dataArrived() 
+    #data <-  arrived.data.rows %>%  filter(CAMPUS== "MSUS")
+    
+    data <- data %>%
+      group_by(COVERAGE) %>%
       dplyr::summarise(`Total Arrived Patients` = n()) %>%
-      mutate(Percent = paste0(round((`Total Arrived Patients`/sum(`Total Arrived Patients`))*100, 1),"%")) %>%
+      mutate(Percent = paste0(round((`Total Arrived Patients`/sum(`Total Arrived Patients`, na.rm = T))*100, 1),"%")) %>%
       arrange(desc(`Total Arrived Patients`)) %>%
-      rename(Payer = Coverage)
+      rename(Payer = COVERAGE) %>% collect()
     
     data$Payer[is.na(data$Payer)] <- "Unknown"
     data$`Total Arrived Patients` <- prettyNum(data$`Total Arrived Patients`, big.mark = ',')
@@ -5121,28 +5124,29 @@ server <- function(input, output, session) {
   output$zipCode_tb <- function(){
     
     data <- dataArrivedPop()
-    #data <- population.data_filtered %>% filter(Campus.Specialty == "Allergy")
+    #data <- population_tbl %>% filter(CAMPUS_SPECIALTY== "Allergy")
+    #data <- population_data_filtered %>% filter(Campus.Specialty == "Allergy")
     newdata <- uniquePts_df_system(data)
     
     
     a_table <- newdata %>% 
-      filter(`Zip Code Layer: A` != "EXCLUDE") %>%
-      group_by(`Zip Code Layer: A`) %>% summarise(total = n()) %>%
+      filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
+      group_by(NEW_ZIP_CODE_LAYER_A) %>% summarise(total = n()) %>%
       arrange(-total) %>%
-      mutate(perc = round(total/sum(total),2)*100) %>%
+      mutate(perc = round(total/sum(total, na.rm = T),2)*100) %>% collect()%>%
       adorn_totals("row") %>%
       mutate(perc = paste0(perc,"%")) %>%
       `colnames<-` (c("Zip Code Layer", "total", "perc")) %>%
       mutate(Layer = `Zip Code Layer`)
     
     b_table <- newdata %>%
-      filter(`Zip Code Layer: A` != "EXCLUDE") %>%
-      group_by(`Zip Code Layer: A`, `Zip Code Layer: B`) %>% summarise(total = n()) %>%
-      arrange(-total)
+      filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
+      group_by(NEW_ZIP_CODE_LAYER_A, NEW_ZIP_CODE_LAYER_B) %>% summarise(total = n()) %>%
+      arrange(-total) %>% collect()
     
     b_table <- b_table %>%
-      mutate(perc = round(total/sum(b_table$total),2)*100) %>%
-      mutate(perc = paste0(perc,"%")) %>%
+      mutate(perc = round(total/sum(b_table$total, na.rm = T),2)*100) %>% 
+      mutate(perc = paste0(perc,"%")) %>% 
       `colnames<-` (c("Layer", "Zip Code Layer", "total", "perc")) %>%
       filter(`Layer` %in% c("Manhattan", "Out of NYS", "Long Island", "Northern New York"))
     
@@ -5154,16 +5158,26 @@ server <- function(input, output, session) {
     
     
     # Table subtitle based on date range filter
-    manhattan_ref <- which(zip_table$`Zip Code Layer` == "Manhattan")
-    out_state_ref <-  which(zip_table$`Zip Code Layer` == "Out of NYS")
-    long_is_ref <-  which(zip_table$`Zip Code Layer` == "Long Island")
-    northern_ny_ref <-  which(zip_table$`Zip Code Layer` == "Northern New York")
+    # manhattan_ref <- which(zip_table$`Zip Code Layer` == "Manhattan")
+    # out_state_ref <-  which(zip_table$`Zip Code Layer` == "Out of NYS")
+    # long_is_ref <-  which(zip_table$`Zip Code Layer` == "Long Island")
+    # northern_ny_ref <-  which(zip_table$`Zip Code Layer` == "Northern New York")
+    
+    
+    
+    
     header_above <- c("Subtitle" = 3)
     names(header_above) <- paste0(c("Based on data from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))
     total <-  which(zip_table$`Zip Code Layer` == "Total") - 1 
-    northern_ny_ref_1 <- northern_ny_ref + 1
-    northern <- c(northern_ny_ref_1:total)
+    # northern_ny_ref_1 <- northern_ny_ref + 1
+    # northern <- c(northern_ny_ref_1:total)
     #names(header_above) <- paste0(c("Based on data from "),c("test"),c(" to "),c("test"))
+    
+    main_rows <- c("Manhattan" , "Brooklyn", "Queens", "Long Island", "Nassau", "Bronx" ,  "Out of NYS",
+                   "Staten Island", "Westchester", "Northern New York")
+    
+    rows_for_indnent <- which(!zip_table$`Zip Code Layer` %in% main_rows)
+    
     
     zip_table %>%
       kable(escape = F,
@@ -5172,17 +5186,19 @@ server <- function(input, output, session) {
       add_header_above(header_above, color = "black", font_size = 16, align = "center", italic = TRUE) %>%
       add_header_above(c("Total Unique Patients by Zipcode" = length(zip_table)),
                        color = "black", font_size = 20, align = "center", line = FALSE) %>%
-      add_indent(c(manhattan_ref+1, manhattan_ref+2, manhattan_ref+3,
-                   out_state_ref+1, out_state_ref+2, out_state_ref+3, out_state_ref+4, out_state_ref+5,
-                   long_is_ref+1, long_is_ref+2,
-                   northern#northern_ny_ref+1#, northern_ny_ref+2, northern_ny_ref+3, northern_ny_ref+4, northern_ny_ref+5
-      ),
-      level_of_indent = 2) %>%
+      add_indent(c(rows_for_indnent), level_of_indent = 2) %>%
+      # add_indent(c(manhattan_ref+1, manhattan_ref+2, manhattan_ref+3,
+      #              out_state_ref+1, out_state_ref+2, out_state_ref+3, out_state_ref+4, out_state_ref+5,
+      #              long_is_ref+1, long_is_ref+2,
+      #              northern#northern_ny_ref+1#, northern_ny_ref+2, northern_ny_ref+3, northern_ny_ref+4, northern_ny_ref+5
+      # ),
+      # level_of_indent = 2) %>%
       row_spec(0, background = "#d80b8c", color = "white", bold = T) %>%
-      row_spec(c(manhattan_ref+1, manhattan_ref+2, manhattan_ref+3, out_state_ref+1, out_state_ref+2,
-                 out_state_ref+3, out_state_ref+4, out_state_ref+5, long_is_ref+1, long_is_ref+2,
-                 northern#northern_ny_ref+1#\, northern_ny_ref+2, northern_ny_ref+3, northern_ny_ref+4, northern_ny_ref+5
-      ), font_size = 14) %>%
+      # row_spec(c(manhattan_ref+1, manhattan_ref+2, manhattan_ref+3, out_state_ref+1, out_state_ref+2,
+      #            out_state_ref+3, out_state_ref+4, out_state_ref+5, long_is_ref+1, long_is_ref+2,
+      #            northern#northern_ny_ref+1#\, northern_ny_ref+2, northern_ny_ref+3, northern_ny_ref+4, northern_ny_ref+5
+      # ), font_size = 14) %>%
+      row_spec(c(rows_for_indnent), font_size = 14) %>%
       row_spec(nrow(zip_table), background = "#d80b8c", color = "white", bold = T)
     
   }
@@ -5201,7 +5217,9 @@ server <- function(input, output, session) {
     
     population.data <- dataArrivedPop()
     
-    newdata <- population.data %>% group_by(latitude, longitude) %>% dplyr::summarise(total = round(n(),0))
+    #population.data <- population_tbl %>% filter(CAMPUS_SPECIALTY== "Allergy")
+    
+    newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
     
     # Create a color palette with handmade bins.
     mybins <- round(seq(min(newdata$total), max(newdata$total), length.out=5),0)
@@ -5210,8 +5228,8 @@ server <- function(input, output, session) {
     # Prepare the text for the tooltip:
     mytext <- paste(
       "Total Visits: ", newdata$total, "<br/>", 
-      "Latitude: ", newdata$latitude, "<br/>", 
-      "Longitude: ", newdata$longitude, sep="") %>%
+      "Latitude: ", newdata$LATITUDE, "<br/>", 
+      "Longitude: ", newdata$LONGITUDE, sep="") %>%
       lapply(htmltools::HTML)
     
     # Set icons for each MSHS hospital
@@ -5226,7 +5244,7 @@ server <- function(input, output, session) {
       addTiles()  %>% 
       setView(lng = -73.98928, lat = 40.75042, zoom = 10) %>%
       addProviderTiles("CartoDB.Positron", options = providerTileOptions(noWrap = TRUE)) %>%
-      addCircleMarkers(~longitude, ~latitude, 
+      addCircleMarkers(~LONGITUDE, ~LATITUDE, 
                        fillColor = ~mypalette(total), fillOpacity = 0.7, color="white", radius=8, stroke=FALSE,
                        label = mytext,
                        labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"), textsize = "13px", direction = "auto")
