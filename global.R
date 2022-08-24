@@ -124,6 +124,7 @@ suppressMessages({
   library(glue)
   library(DBI)
   library(odbc)
+  library(pool)
 })
 
 
@@ -325,7 +326,12 @@ wdpath <- here::here()
 #wdpath <- "C:/Users/kweons01/Desktop/IP Demand Modeling Desktop/Ambulatory-Care-Dashboard-Publish"
 
 setwd(wdpath)
-con <- dbConnect(odbc(), "OAO Cloud DB")
+#con <- dbConnect(odbc(), "OAO Cloud DB")
+
+poolcon <- dbPool(drv = odbc::odbc(),
+                  dsn = "OAO Cloud DB",
+                  username= 'aghaer01',
+                  password = "5VWtKW*yxf")
 
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
@@ -333,15 +339,22 @@ con <- dbConnect(odbc(), "OAO Cloud DB")
 
 # ### New Location with Updated Data
 #historical.data <- readRDS("/data/Ambulatory/Data_Updated/historical_data.rds")
-slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
-holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
-utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
-population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
+#slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
+slot.data.subset <- readRDS("C:/Users/aghaer01/Downloads/Ambulatory-Care-Dashboard/Data/slot_data_subset.rds")
+#holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
+holid <- readRDS("C:/Users/aghaer01/Downloads/Ambulatory-Care-Dashboard/Data/slot_data_subset.rds")
+#utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
+utilization.data <- readRDS("C:/Users/aghaer01/Downloads/Ambulatory-Care-Dashboard/Data/utilization_data.rds")
+#population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
+#population.data_filtered  <- readRDS("/Data/population_data_filtered.rds")
+#population.data_filtered <- readRDS("C:/Users/aghaer01/Downloads/Ambulatory-Care-Dashboard/Data/population_data_filtered.rds")
 filter_path <- "/data/Ambulatory/Filters"
-historical.data <- tbl(con,  "ACCESS_SQL_UPT")
+#historical.data <- tbl(con,  "ACCESS_SQL_UPT")
+
+historical.data <- tbl(poolcon,  "ACCESS_SQL")
 
 
-
+population_tbl <- tbl(poolcon, "POPULATION_SQL")
 
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
 # holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
@@ -350,9 +363,10 @@ historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 # filter_path <- paste0(wdpath, "/Filters")
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
-max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS minDate FROM ACCESS_SQL")
-max_date_arrived <- dbGetQuery(con, max_date_arrived)
-max_date_arrived <- as.Date(max_date_arrived$MINDATE, format="%Y-%m-%d")
+max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM ACCESS_SQL")
+#max_date_arrived <- dbGetQuery(con, max_date_arrived)
+max_date_arrived <- dbGetQuery(poolcon, max_date_arrived)
+max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 
 ## Slot datasets
 # past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
@@ -578,7 +592,7 @@ groupByFilters_4_Test <- function(dt, campus, specialty, department, resource, v
 uniquePts_df_system <- function(data){
   
   result <- data %>%
-    arrange(MRN, Appt.DTTM) %>% group_by(MRN) %>% mutate(uniqueSystem = row_number()) %>% ungroup() %>%
+    arrange(MRN, APPT_DTTM) %>% group_by(MRN) %>% mutate(uniqueSystem = row_number()) %>% ungroup() %>%
     filter(uniqueSystem == 1)
   
   return(result)
@@ -633,3 +647,4 @@ valueBoxSpark <- function(value, title, subtitle, sparkobj = NULL, info = NULL,
 # arrived_last_date <- max((kpi.all.data[arrived.data.rows,])$Appt.DTTM)
 
 enableBookmarking(store = "server")
+
