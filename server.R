@@ -5162,9 +5162,7 @@ server <- function(input, output, session) {
     # out_state_ref <-  which(zip_table$`Zip Code Layer` == "Out of NYS")
     # long_is_ref <-  which(zip_table$`Zip Code Layer` == "Long Island")
     # northern_ny_ref <-  which(zip_table$`Zip Code Layer` == "Northern New York")
-    
-    
-    
+  
     
     header_above <- c("Subtitle" = 3)
     names(header_above) <- paste0(c("Based on data from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))

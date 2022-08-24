@@ -347,7 +347,7 @@ holid <- readRDS("C:/Users/aghaer01/Downloads/Ambulatory-Care-Dashboard/Data/slo
 utilization.data <- readRDS("C:/Users/aghaer01/Downloads/Ambulatory-Care-Dashboard/Data/utilization_data.rds")
 #population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
 #population.data_filtered  <- readRDS("/Data/population_data_filtered.rds")
-population.data_filtered <- readRDS("C:/Users/aghaer01/Downloads/Ambulatory-Care-Dashboard/Data/population_data_filtered.rds")
+#population.data_filtered <- readRDS("C:/Users/aghaer01/Downloads/Ambulatory-Care-Dashboard/Data/population_data_filtered.rds")
 filter_path <- "/data/Ambulatory/Filters"
 #historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
@@ -363,10 +363,10 @@ population_tbl <- tbl(poolcon, "POPULATION_SQL")
 # filter_path <- paste0(wdpath, "/Filters")
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
-max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS minDate FROM ACCESS_SQL")
+max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM ACCESS_SQL")
 #max_date_arrived <- dbGetQuery(con, max_date_arrived)
 max_date_arrived <- dbGetQuery(poolcon, max_date_arrived)
-max_date_arrived <- as.Date(max_date_arrived$MINDATE, format="%Y-%m-%d")
+max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 
 ## Slot datasets
 # past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)

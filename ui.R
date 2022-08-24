@@ -70,11 +70,20 @@ dateRangeSlot_start <- min(slot.data.subset[all.slot.rows,]$Appt.DateYear)
 dateRangeSlot_end <- max(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
 
 
-dateRangepop_max <- format(max(population.data_filtered$Appt.DTTM), "%Y-%m-%d")
-dateRangepop_min <- min(population.data_filtered$Appt.DTTM)
+# dateRangepop_max <- format(max(population.data_filtered$Appt.DTTM), "%Y-%m-%d")
+# dateRangepop_min <- min(population.data_filtered$Appt.DTTM)
 #dateRangepop_start <- paste0(format(as.Date(dateRangepop_max) %m+% months(-2), "%Y-%m"), "-01")
 #dateRangepop_start <- as.Date("2021-01-01")
 
+
+dateRangepop_max <- glue("Select max(APPT_DTTM) AS maxDate FROM POPULATION_SQL")
+dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
+dateRangepop_max <- as.Date(dateRangepop_max$MAXDATE, format="%Y-%m-%d")
+
+
+dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM POPULATION_SQL")
+dateRangepop_min <- dbGetQuery(poolcon, dateRangepop_min)
+dateRangepop_min <- as.Date(dateRangepop_min$MINDATE, format="%Y-%m-%d")
 
 
 
