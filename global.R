@@ -333,22 +333,34 @@ con <- dbConnect(odbc(), "OAO Cloud DB")
 
 # ### New Location with Updated Data
 #historical.data <- readRDS("/data/Ambulatory/Data_Updated/historical_data.rds")
-slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
-holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
-utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
-population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
-filter_path <- "/data/Ambulatory/Filters"
-historical.data <- tbl(con,  "ACCESS_SQL_UPT")
+# slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
+# holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
+# utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
+# population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
+# filter_path <- "/data/Ambulatory/Filters"
+# historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
 
 
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-# utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
-# population.data_filtered <- readRDS(paste0(wdpath,"/Data/population_data_filtered.rds"))
-# filter_path <- paste0(wdpath, "/Filters")
-# historical.data <- tbl(con,  "ACCESS_SQL_UPT")
+slot.data <- tbl(con, "SLOT_SQL") %>%
+  group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT_NAME, PROVIDER,
+           APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR, APPT_WEEK, APPT_DAY, APPT_TM_HR,
+           RESOURCES, HOLIDAY, APPT_DTTM) %>%
+  dplyr::summarise(AVAILABLE_HOURS = sum(AVAIL_MINUTES, na.rm = T)/60,
+                   BOOKED_HOURS = sum(BOOKED_MINUTES, na.rm = T)/60,
+                   ARRIVED_HOURS = sum(ARRIVED_MINUTES, na.rm = T)/60,
+                   CANCELED_HOURS = sum(CANCELED_MINUTES, na.rm = T)/60,
+                   NO_SHOW_HOURS = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60) %>%
+                  mutate(VISIT_METHOD = "In Person")#%>% show_query()
+
+
+holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
+population.data_filtered <- readRDS(paste0(wdpath,"/Data/population_data_filtered.rds"))
+filter_path <- paste0(wdpath, "/Filters")
+historical.data <- tbl(con,  "ACCESS_SQL_UPT_TEST") 
 
 max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS minDate FROM ACCESS_SQL")
 max_date_arrived <- dbGetQuery(con, max_date_arrived)
@@ -360,7 +372,7 @@ max_date_arrived <- as.Date(max_date_arrived$MINDATE, format="%Y-%m-%d")
 # rm(slot.data.subset)
 
 setDT(utilization.data)
-setDT(slot.data.subset)
+# setDT(slot.data.subset)
 #setDT(historical.data)
 #kpi.all.data <- historical.data[Appt.DTTM >= max_date - 3*365]
 #rm(historical.data)
@@ -416,18 +428,18 @@ canceled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled"))
 # 
 # arrivedNoShow.data.rows <-  c(noshow.data.rows, arrived.data.rows)
 # 
-past.slot.data.rows <- slot.data.subset[Appt.DateYear <= max_date_arrived, which = TRUE]
+# past.slot.data.rows <- slot.data.subset[Appt.DateYear <= max_date_arrived, which = TRUE]
+# 
+# future.slot.data.rows <- slot.data.subset[Appt.DateYear > max_date_arrived, which = TRUE]
 
-future.slot.data.rows <- slot.data.subset[Appt.DateYear > max_date_arrived, which = TRUE]
-
-all.slot.rows <- c(past.slot.data.rows,future.slot.data.rows)
+#all.slot.rows <- c(past.slot.data.rows,future.slot.data.rows)
 
 scheduled.utilization.data.rows <- utilization.data[util.type == "scheduled", which = TRUE]
 
 arrived.utilization.data.rows <- utilization.data[util.type == "actual", which = TRUE]
 
 #kpi.all.data <- as.data.frame(kpi.all.data)
-slot.data.subset <- as.data.frame(slot.data.subset)
+# slot.data.subset <- as.data.frame(slot.data.subset)
 utilization.data <- as.data.frame(utilization.data)
 
 
@@ -557,10 +569,26 @@ groupByFilters_3 <- function(dt, apptType){
 
 ## Filtered Slot Data
 groupByFilters_4 <- function(dt, campus, specialty, department, resource, provider, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
-  result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource, Provider %in% provider,
-                          Visit.Method %in% visitMethod, 
-                          mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
-  return(result)
+  # result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource, Provider %in% provider,
+  #                         Visit.Method %in% visitMethod, 
+  #                         mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
+  # return(result)
+  
+  format <- "YYYY-MM-DD HH24:MI:SS"
+  daysofweek <- toupper(daysofweek)
+  
+  result <- dt %>% filter(CAMPUS %in% campus, 
+                          CAMPUS_SPECIALTY %in% specialty, 
+                          DEPARTMENT_NAME %in% department, 
+                          #RESOURCES %in% resource, 
+                          PROVIDER %in% provider,
+                          TO_DATE(mindateRange, format) <= APPT_DTTM, 
+                          TO_DATE(maxdateRange, format) >= APPT_DTTM, 
+                          APPT_DAY %in% daysofweek#, 
+                          #!HOLIDAY %in% holidays
+  )
+  
+  
 }
 
 

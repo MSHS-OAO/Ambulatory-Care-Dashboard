@@ -739,7 +739,7 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-    groupByFilters_4(slot.data.subset[all.slot.rows,],
+    groupByFilters_4(slot.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod,
                      input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
@@ -755,7 +755,7 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-    groupByFilters_4(slot.data.subset[all.slot.rows,],
+    groupByFilters_4(slot.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod,
                      input$dateRange[1], input$dateRange[2], input$daysOfWeekslot, input$excludeHolidays)
@@ -6204,13 +6204,18 @@ server <- function(input, output, session) {
     
     data <- dataAllSlot()
     
-    booked_filled <- data %>%
+    booked_filled <- data %>% select(AVAILABLE_HOURS, BOOKED_HOURS, ARRIVED_HOURS, APPT_DTTM) %>% collect() #%>%
+    #test_book <<- booked_filled
+    
+    booked_filled <- booked_filled %>%
+      mutate(Appt.Week = floor_date(as.Date(suppressWarnings(format(APPT_DTTM, "%Y-%m-%d")), "%Y-%m-%d"), unit="week", week_start = 1)) %>%
       group_by(Appt.Week) %>%
-      summarise(`Available Hours` = round(sum(`Available Hours`),0),
-                `Booked Hours` = round(sum(`Booked Hours`),0),
-                `Filled Hours` = round(sum(`Arrived Hours`)),0) %>%
+      summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm = T),0),
+                `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = T),0),
+                `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = T)),0) %>%
       mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`*100,0),
-             `Filled Rate` = round(`Filled Hours`/`Available Hours`*100, 0)) 
+             `Filled Rate` = round(`Filled Hours`/`Available Hours`*100, 0))
+    
     
     #booked_filled$`Booked Rate` <- round(booked_filled$`Booked Hours`/booked_filled$`Available Hours`, 0)*100
     
@@ -6331,10 +6336,10 @@ server <- function(input, output, session) {
     if(input$byProvider2 == TRUE){
       
       summary.prov <- data %>%
-        group_by(Campus, Campus.Specialty, Provider, Appt.MonthYear) %>%
+        group_by(CAMPUS, CAMPUS_SPECIALTY, PROVIDER, APPT_MONTH_YEAR) %>%
         dplyr::summarise(`Available Hours` = round(sum(`Available Hours`, na.rm=TRUE),0),
                          `Booked Hours` = round(sum(`Booked Hours`),0),
-                         `Filled Hours` = round(sum(`Arrived Hours`),0)) 
+                         `Filled Hours` = round(sum(`Arrived Hours`),0)) %>% collect()
       
       summary.prov[is.na(summary.prov)] <- 0
       
@@ -6447,10 +6452,10 @@ server <- function(input, output, session) {
       
       
       summary.dept <- data %>%
-        group_by(Campus, Campus.Specialty, Appt.MonthYear) %>%
+        group_by(CAMPUS, CAMPUS_SPECIALTY, APPT_MONTH_YEAR) %>%
         dplyr::summarise(`Available Hours` = round(sum(`Available Hours`),0),
                          `Booked Hours` = round(sum(`Booked Hours`),0),
-                         `Filled Hours` = round(sum(`Arrived Hours`),0))
+                         `Filled Hours` = round(sum(`Arrived Hours`),0)) %>% collect()
       
       summary.dept[is.na(summary.dept)] <- 0
       
@@ -7318,23 +7323,23 @@ server <- function(input, output, session) {
   
   ### [3. ] Volume Comparison -----------------------------------------------------------------------------------------------------------
   output$vol_month_title <- renderText({
-    if(input$breakdown_filters == "Visit.Method"){
+    if(input$breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(input$breakdown_filters == "Appt.Type"){
+    if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "New.PT3"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
-    if(input$compare_filters == "Campus.Specialty"){
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
     }
-    if(input$compare_filters == "Department"){
+    if(input$compare_filters == "DEPARTMENT"){
       name_1 <- input$compare_filters
     }
-    if(input$compare_filters == "Provider"){
+    if(input$compare_filters == "PROVIDER"){
       name_1 <- input$compare_filters
     }
     
@@ -7342,23 +7347,24 @@ server <- function(input, output, session) {
   })
   
   output$vol_day_title <- renderText({
-    if(input$breakdown_filters == "Visit.Method"){
+    if(input$breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(input$breakdown_filters == "Appt.Type"){
+    if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "New.PT3"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
-    if(input$compare_filters == "Campus.Specialty"){
+    print(input$compare_filters)
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
     }
-    if(input$compare_filters == "Department"){
+    if(input$compare_filters == "DEPARTMENT"){
       name_1 <- input$compare_filters
     }
-    if(input$compare_filters == "Provider"){
+    if(input$compare_filters == "PROVIDER"){
       name_1 <- input$compare_filters
     }
     paste0("Average Daily Volume by ", name_1 , " and ", name_2)
@@ -7366,23 +7372,23 @@ server <- function(input, output, session) {
   
   
   output$npr_month_title <- renderText({
-    if(input$breakdown_filters == "Visit.Method"){
+    if(input$breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(input$breakdown_filters == "Appt.Type"){
+    if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "New.PT3"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
-    if(input$compare_filters == "Campus.Specialty"){
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
     }
-    if(input$compare_filters == "Department"){
+    if(input$compare_filters == "DEPARTMENT"){
       name_1 <- input$compare_filters
     }
-    if(input$compare_filters == "Provider"){
+    if(input$compare_filters == "PROVIDER"){
       name_1 <- input$compare_filters
     }
     paste0("Monthly New Patient Ratio (%) by ", name_1 , " and ", name_2)
@@ -7391,23 +7397,23 @@ server <- function(input, output, session) {
   
   
   output$new_wait_month_title <- renderText({
-    if(input$breakdown_filters == "Visit.Method"){
+    if(input$breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(input$breakdown_filters == "Appt.Type"){
+    if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "New.PT3"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
-    if(input$compare_filters == "Campus.Specialty"){
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
     }
-    if(input$compare_filters == "Department"){
+    if(input$compare_filters == "DEPARTMENT"){
       name_1 <- input$compare_filters
     }
-    if(input$compare_filters == "Provider"){
+    if(input$compare_filters == "PROVIDER"){
       name_1 <- input$compare_filters
     }
     paste0("Monthly Median New Patient Wait Time (Days) by ", name_1 , " and ", name_2)
@@ -7416,23 +7422,23 @@ server <- function(input, output, session) {
   
   
   output$new_patient_fill_rate_day_title <- renderText({
-    if(input$breakdown_filters == "Visit.Method"){
+    if(input$breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(input$breakdown_filters == "Appt.Type"){
+    if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "New.PT3"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
-    if(input$compare_filters == "Campus.Specialty"){
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
     }
-    if(input$compare_filters == "Department"){
+    if(input$compare_filters == "DEPARTMENT"){
       name_1 <- input$compare_filters
     }
-    if(input$compare_filters == "Provider"){
+    if(input$compare_filters == "PROVIDER"){
       name_1 <- input$compare_filters
     }
     
@@ -7441,23 +7447,23 @@ server <- function(input, output, session) {
   
   
   output$new_patient_fill_rate_month_title <- renderText({
-    if(input$breakdown_filters == "Visit.Method"){
+    if(input$breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(input$breakdown_filters == "Appt.Type"){
+    if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "New.PT3"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
-    if(input$compare_filters == "Campus.Specialty"){
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
     }
-    if(input$compare_filters == "Department"){
+    if(input$compare_filters == "DEPARTMENT"){
       name_1 <- input$compare_filters
     }
-    if(input$compare_filters == "Provider"){
+    if(input$compare_filters == "PROVIDER"){
       name_1 <- input$compare_filters
     }
     
@@ -7465,13 +7471,13 @@ server <- function(input, output, session) {
   })
   
   rows_group <- reactive({
-    if(input$compare_filters == "Campus.Specialty"){
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
       list <- list(0)
     }
-    if(input$compare_filters == "Department"){
+    if(input$compare_filters == "DEPARTMENT"){
       list <- list(0,1)
     }
-    if(input$compare_filters == "Provider"){
+    if(input$compare_filters == "PROVIDER"){
       list <- list(0,1,2)
     }
     list
@@ -7479,13 +7485,13 @@ server <- function(input, output, session) {
   })
   
   rows_group_opt <- reactive({
-    if(input$compare_filters_opt == "Campus.Specialty"){
+    if(input$compare_filters_opt == "CAMPUS_SPECIALTY"){
       list <- list(0)
     }
-    if(input$compare_filters_opt == "Department"){
+    if(input$compare_filters_opt == "DEPARTMENT"){
       list <- list(0,1)
     }
-    if(input$compare_filters_opt == "Provider"){
+    if(input$compare_filters_opt == "PROVIDER"){
       list <- list(0,1,2)
     }
     list
@@ -7493,13 +7499,13 @@ server <- function(input, output, session) {
   }) 
   
   rows_group_slot <- reactive({
-    if(input$compare_filters == "Campus.Specialty"){
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
       list <- list(0,1)
     }
-    if(input$compare_filters == "Department"){
+    if(input$compare_filters == "DEPARTMENT"){
       list <- list(0,1,2)
     }
-    if(input$compare_filters == "Provider"){
+    if(input$compare_filters == "PROVIDER"){
       list <- list(0,1,2,3)
     }
     list
@@ -7513,58 +7519,57 @@ server <- function(input, output, session) {
     #compare_filters <- "Campus.Specialty"
     #breakdown_filters <- "Visit.Method"
     
-    data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER) %>% collect()
-    
-    data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
-                            Visit.Method = VISIT_METHOD,
-                            Appt.Type = APPT_TYPE,
-                            Campus.Specialty = CAMPUS_SPECIALTY,
-                            Department = DEPARTMENT,
-                            Appt.DateYear = APPT_DATE_YEAR,
-                            Provider = PROVIDER,
-                            New.PT3 = NEW_PT3)
+    # data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER) %>% collect()
+    # 
+    # data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
+    #                         Visit.Method = VISIT_METHOD,
+    #                         Appt.Type = APPT_TYPE,
+    #                         Campus.Specialty = CAMPUS_SPECIALTY,
+    #                         Department = DEPARTMENT,
+    #                         Appt.DateYear = APPT_DATE_YEAR,
+    #                         Provider = PROVIDER,
+    #                         New.PT3 = NEW_PT3)
 
-    data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
+    #data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
     
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
     
-    if(breakdown_filters == "Visit.Method"){
+    if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(breakdown_filters == "Appt.Type"){
+    if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "New.PT3"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
-    
-    
-    if(compare_filters == "Campus.Specialty"){
+
+    if(compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
       cols <- c(compare_filters,breakdown_filters)
       cols_name <- c(name_1,name_2)
       tot_cols <- c(compare_filters)
     }
-    if(compare_filters == "Department"){
+    if(compare_filters == "DEPARTMENT"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
       cols_name <- c("Specialty",name_1,name_2)
-      tot_cols <- c("Campus.Specialty",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
     }
-    if(compare_filters == "Provider"){
+    if(compare_filters == "PROVIDER"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty","Department",compare_filters,breakdown_filters)
-      cols_name <- c("Specialty","Department",name_1,name_2)
-      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
+      cols_name <- c("Specialty","DEPARTMENT",name_1,name_2)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
-    if(input$breakdown_filters == "New.PT3"){
+    if(input$breakdown_filters == "NEW_PT3"){
       
       ### Group data by inputs and Month and Date.  Spread data to make columns FALSE and TRUE that determine number of new or established patients
-      volume <- data %>% group_by(across(cols),Appt.DateYear, Appt.MonthYear) %>%
-        summarise(total = n()) %>%
+      volume <- data %>% group_by(across(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
+        summarise(total = n()) %>% collect()
         spread(!!breakdown_filters, total)
       
       
@@ -7577,8 +7582,8 @@ server <- function(input, output, session) {
       #### the month divided by the total number of days we have data in the month
       volume_new <- volume %>% group_by(across(!!tot_cols)) %>%
         mutate(New = round(`TRUE`)) %>% 
-        group_by(across(!!tot_cols), Appt.MonthYear) %>%
-        summarise(avg = round(sum(New)/n())) 
+        group_by(across(!!tot_cols), APPT_MONTH_YEAR) %>%
+        summarise(avg = round(sum(New)/n())) %>% collect() 
       
       drop <- c("FALSE","TRUE", "<NA>")
       volume_new = volume_new[,!(names(volume_new) %in% drop)]
@@ -7587,7 +7592,7 @@ server <- function(input, output, session) {
       #### Take volume_new and get the Appt.Month columns and make the values into columns themselves by widening the data
       #### also added a column named so it can be used as the "New" patients group
       volume_new <- volume_new %>%
-        pivot_wider(names_from = Appt.MonthYear,
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = avg,
                     values_fill = 0) %>%
         add_column(!!breakdown_filters := "New") %>%
@@ -7598,9 +7603,9 @@ server <- function(input, output, session) {
       
       #### Create "Established" column to establish number of new patients. then group by Month and create "avg" column that is the sum of all new patients within 
       #### the month divided by the total number of days we have data in the month
-      volume_est<- volume %>% group_by(across(!!tot_cols),Appt.DateYear) %>%
+      volume_est<- volume %>% group_by(across(!!tot_cols),APPT_DATE_YEAR) %>%
         mutate(New = round(`FALSE`))%>% 
-        group_by(across(!!tot_cols), Appt.MonthYear) %>%
+        group_by(across(!!tot_cols), APPT_MONTH_YEAR) %>%
         summarise(avg = round(sum(New)/n())) 
       
       drop <- c("FALSE","TRUE", "<NA>")
@@ -7609,7 +7614,7 @@ server <- function(input, output, session) {
       #### Take volume_new and get the Appt.Month columns and make the values into columns themselves by widening the data
       #### also added a column named so it can be used as the "Establihsed" patients group
       volume_est <- volume_est %>%
-        pivot_wider(names_from = Appt.MonthYear,
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = avg,
                     values_fill = 0)%>%
         add_column(!!breakdown_filters := "Established") #%>%
@@ -7641,17 +7646,38 @@ server <- function(input, output, session) {
       
       
     }else {
-      
+      print(cols)
+      data_test <<- data
+      cols_test <<- cols
+      # 
+      # if (compare_filters == "CAMPUS_SPEACILATY" && breakdown_filters == "VISIT_METHOD"){
+      #   volume <- data %>% group_by(!!!syms(cols), APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>%
+      #     summarise(total = n()) %>%
+      #     group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+      #     summarise(avg = round(sum(total)/n())) %>% collect() %>%
+      #     pivot_wider(names_from = APPT_MONTH_YEAR,
+      #                 values_from = avg,
+      #                 values_fill = 0) 
+      # } 
+      # if (compare_filters == "CAMPUS_SPEACILATY"  && breakdown_filters == "APPT_TYPE"){
+      #   volume <- data %>% group_by(CAMPUS_SPECIALTY, APPT_TYPE, APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>%
+      #     summarise(total = n()) %>%
+      #     group_by(cols, APPT_MONTH_YEAR) %>%
+      #     summarise(avg = round(sum(total)/n())) %>% collect() %>%
+      #     pivot_wider(names_from = APPT_MONTH_YEAR,
+      #                 values_from = avg,
+      #                 values_fill = 0) 
+      # }
       #### group Data by inputs and Month and data get the total for each day then group by the Month in order to sum all the vistis within the month and 
       #### divide it by the number of days within the month in the data, then we make a wider data sets with the months values made into a column
-      volume <- data %>% group_by(across(all_of(cols)),Appt.DateYear, Appt.MonthYear) %>%
+      volume <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>% 
         summarise(total = n()) %>%
-        group_by(across(cols), Appt.MonthYear) %>%
-        summarise(avg = round(sum(total)/n())) %>%
-        pivot_wider(names_from = Appt.MonthYear,
+        group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+        summarise(avg = round(sum(total, na.rm = T)/n())) %>% collect() %>%
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = avg,
-                    values_fill = 0) 
-      
+                    values_fill = 0)
+
       
       volume[is.na(volume)] <- 0
       
@@ -7828,66 +7854,65 @@ server <- function(input, output, session) {
     # breakdown_filters <- "Visit.Method"
     # 
     
-    data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER) %>% collect()
-    
-    data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
-                            Visit.Method = VISIT_METHOD,
-                            Appt.Type = APPT_TYPE,
-                            Campus.Specialty = CAMPUS_SPECIALTY,
-                            Department = DEPARTMENT,
-                            Appt.DateYear = APPT_DATE_YEAR,
-                            Provider = PROVIDER,
-                            New.PT3 = NEW_PT3)
-    
-    
-    data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
+    # data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER) %>% collect()
+    # 
+    # data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
+    #                         Visit.Method = VISIT_METHOD,
+    #                         Appt.Type = APPT_TYPE,
+    #                         Campus.Specialty = CAMPUS_SPECIALTY,
+    #                         Department = DEPARTMENT,
+    #                         Appt.DateYear = APPT_DATE_YEAR,
+    #                         Provider = PROVIDER,
+    #                         New.PT3 = NEW_PT3)
+    # 
+    # 
+    # data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
     
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
     
-    if(breakdown_filters == "Visit.Method"){
+    if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(breakdown_filters == "Appt.Type"){
+    if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "New.PT3"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
     
-    if(compare_filters == "Campus.Specialty"){
+    if(compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
       cols <- c(compare_filters,breakdown_filters)
       cols_name <- c(name_1,name_2)
       tot_cols <- c(compare_filters)
     }
-    if(compare_filters == "Department"){
+    if(compare_filters == "DEPARTMENT"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
       cols_name <- c("Specialty",name_1,name_2)
-      tot_cols <- c("Campus.Specialty",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
     }
-    if(compare_filters == "Provider"){
+    if(compare_filters == "PROVIDER"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty","Department",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
       cols_name <- c("Specialty","Department",name_1,name_2)
-      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
-    
-    if(breakdown_filters == "New.PT3"){
+    if(breakdown_filters == "NEW_PT3"){
       
       #### Group data by inputs and Month.  Spread data to make TRUE and FALSe columns for new patietns
-      volume <- data %>% group_by(across(cols),Appt.MonthYear) %>%
-        summarise(total = n()) %>%
+      volume <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
+        summarise(total = n()) %>% collect() %>%
         spread(!!breakdown_filters, total)
       
       volume[is.na(volume)] <- 0
       
       ### Getting total new patients for month
-      volume_new <- volume %>% group_by(across(!!tot_cols),Appt.MonthYear) %>%
+      volume_new <- volume %>% group_by(across(!!tot_cols),APPT_MONTH_YEAR) %>%
         mutate(total = round(`TRUE`))
       
       drop <- c("FALSE","TRUE", "<NA>")
@@ -7895,7 +7920,7 @@ server <- function(input, output, session) {
       
       #### Pivoting new patients for each month
       volume_new <- volume_new %>%
-        pivot_wider(names_from = Appt.MonthYear,
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = total,
                     values_fill = 0) %>%
         add_column(!!breakdown_filters := "New") %>%
@@ -7904,7 +7929,7 @@ server <- function(input, output, session) {
       
       
       #### Getting total number of establihsed patietns
-      volume_est<- volume %>% group_by(across(!!tot_cols),Appt.MonthYear) %>%
+      volume_est<- volume %>% group_by(across(!!tot_cols),APPT_MONTH_YEAR) %>%
         mutate(total = round(`FALSE`))
       
       drop <- c("FALSE","TRUE", "<NA>")
@@ -7912,7 +7937,7 @@ server <- function(input, output, session) {
       
       #### Pivot data established patietns for each month 
       volume_est <- volume_est %>%
-        pivot_wider(names_from = Appt.MonthYear,
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = total,
                     values_fill = 0) %>%
         add_column(!!breakdown_filters := "Established") %>%
@@ -7938,9 +7963,9 @@ server <- function(input, output, session) {
     }else {
       
       #### Group data by inputs and Month get total for the month and pivot wider to moths are now columns
-      volume <- data %>% group_by(across(cols),Appt.MonthYear) %>%
-        summarise(total = n()) %>%
-        pivot_wider(names_from = Appt.MonthYear,
+      volume <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
+        summarise(total = n()) %>% collect() %>%
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = total,
                     values_fill = 0) 
       
@@ -8067,67 +8092,67 @@ server <- function(input, output, session) {
     # compare_filters <- "Department"
     # breakdown_filters <- "Visit.Method"
     
-    data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER) %>% collect()
+    # data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER) %>% collect()
+    # 
+    # data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
+    #                         Visit.Method = VISIT_METHOD,
+    #                         Appt.Type = APPT_TYPE,
+    #                         Campus.Specialty = CAMPUS_SPECIALTY,
+    #                         Department = DEPARTMENT,
+    #                         Appt.DateYear = APPT_DATE_YEAR,
+    #                         Provider = PROVIDER,
+    #                         New.PT3 = NEW_PT3)
     
-    data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
-                            Visit.Method = VISIT_METHOD,
-                            Appt.Type = APPT_TYPE,
-                            Campus.Specialty = CAMPUS_SPECIALTY,
-                            Department = DEPARTMENT,
-                            Appt.DateYear = APPT_DATE_YEAR,
-                            Provider = PROVIDER,
-                            New.PT3 = NEW_PT3)
     
-    
-    data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
+    #data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
     
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
-    if(breakdown_filters == "Visit.Method"){
+    if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(breakdown_filters == "Appt.Type"){
+    if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "New.PT3"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
     
-    if(compare_filters == "Campus.Specialty"){
+    if(compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
       cols <- c(compare_filters,breakdown_filters)
       cols_name <- c(name_1,name_2)
       tot_cols <- c(compare_filters)
     }
-    if(compare_filters == "Department"){
+    if(compare_filters == "DEPARTMENT"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
       cols_name <- c("Specialty",name_1,name_2)
-      tot_cols <- c("Campus.Specialty",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
     }
     if(compare_filters == "Provider"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty","Department",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
       cols_name <- c("Specialty","Department",name_1,name_2)
-      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
     
     
-    if(breakdown_filters == "New.PT3"){
+    if(breakdown_filters == "NEW_PT3"){
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-      newpatients.ratio <- data %>% group_by(across(cols),Appt.MonthYear) %>%
-        summarise(total = n()) %>%
+      newpatients.ratio <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
+        summarise(total = n()) %>% collect() %>%
         drop_na() %>%
         spread(!!breakdown_filters, total)
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
       #### Calulate new patient ratio for the whole month sum of all new patients within the month divide by sum of new and established patients
-      newpatients.ratio.new <- newpatients.ratio %>% group_by(across(!!tot_cols),Appt.MonthYear) %>%
+      newpatients.ratio.new <- newpatients.ratio %>% group_by(across(!!tot_cols),APPT_MONTH_YEAR) %>%
         mutate(ratio = round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2)*100)
       
       
@@ -8137,7 +8162,7 @@ server <- function(input, output, session) {
       
       #### Pivot the data so that month are now in a columns
       newpatients.ratio.new <- newpatients.ratio.new %>%
-        pivot_wider(names_from = Appt.MonthYear,
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = ratio,
                     values_fill = 0)%>%
         add_column(!!breakdown_filters := "New") %>%
@@ -8145,7 +8170,7 @@ server <- function(input, output, session) {
       
       
       #### Calulate est patient ratio for the whole month sum of all est patients within the month divide by sum of new and established patients
-      newpatients.ratio.est <- newpatients.ratio %>% group_by(across(!!tot_cols),Appt.MonthYear) %>%
+      newpatients.ratio.est <- newpatients.ratio %>% group_by(across(!!tot_cols),APPT_MONTH_YEAR) %>%
         mutate(ratio = round(`FALSE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2)*100)
       
       
@@ -8155,7 +8180,7 @@ server <- function(input, output, session) {
       
       #### Pivot data wider to months are their own columns
       newpatients.ratio.est <- newpatients.ratio.est %>%
-        pivot_wider(names_from = Appt.MonthYear,
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = ratio,
                     values_fill = 0)%>%
         add_column(!!breakdown_filters := "Established") %>%
@@ -8178,23 +8203,23 @@ server <- function(input, output, session) {
     }else{
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-      newpatients.ratio <- data %>% group_by(across(cols),Appt.MonthYear, New.PT3) %>%
-        summarise(total = n()) %>%
+      newpatients.ratio <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR, NEW_PT3) %>%
+        summarise(total = n()) %>% collect() %>%
         drop_na() %>%
-        spread(New.PT3, total) %>%
+        spread(NEW_PT3, total) %>%
         drop_na()
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
       ### Calculate new patient ratio by breakdown
-      newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols),Appt.MonthYear) %>%
+      newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols),APPT_MONTH_YEAR) %>%
         mutate(ratio = round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2))
       
       
       drop <- c("FALSE","TRUE", "<NA>")
       newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
       newpatients.ratio <- newpatients.ratio %>%
-        pivot_wider(names_from = Appt.MonthYear,
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = ratio,
                     values_fill = 0)
       
@@ -8726,55 +8751,55 @@ server <- function(input, output, session) {
     # breakdown_filters <- "New.PT3"
     
     
-    data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
-    
-    data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
-                            Visit.Method = VISIT_METHOD,
-                            Appt.Type = APPT_TYPE,
-                            Campus.Specialty = CAMPUS_SPECIALTY,
-                            Department = DEPARTMENT,
-                            Appt.DateYear = APPT_DATE_YEAR,
-                            Provider = PROVIDER,
-                            Appt.DTTM = APPT_DTTM,
-                            Appt.Made.DTTM = APPT_MADE_DTTM,
-                            New.PT3 = NEW_PT3)
-    
-    data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
-    
+    # data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
+    # 
+    # data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
+    #                         Visit.Method = VISIT_METHOD,
+    #                         Appt.Type = APPT_TYPE,
+    #                         Campus.Specialty = CAMPUS_SPECIALTY,
+    #                         Department = DEPARTMENT,
+    #                         Appt.DateYear = APPT_DATE_YEAR,
+    #                         Provider = PROVIDER,
+    #                         Appt.DTTM = APPT_DTTM,
+    #                         Appt.Made.DTTM = APPT_MADE_DTTM,
+    #                         New.PT3 = NEW_PT3)
+    # 
+    # data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
+    # 
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
     
     start.time <- Sys.time()
     
-    if(breakdown_filters == "Visit.Method"){
+    if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(breakdown_filters == "Appt.Type"){
+    if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "New.PT3"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
     
-    if(compare_filters == "Campus.Specialty"){
+    if(compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
       cols <- c(compare_filters,breakdown_filters)
       cols_name <- c(name_1,name_2)
       tot_cols <- c(compare_filters)
     }
-    if(compare_filters == "Department"){
+    if(compare_filters == "DEPARTMENT"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
       cols_name <- c("Specialty",name_1,name_2)
-      tot_cols <- c("Campus.Specialty",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
     }
-    if(compare_filters == "Provider"){
+    if(compare_filters == "PROVIDER"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty","Department",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
       cols_name <- c("Specialty","Department",name_1,name_2)
-      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
     end.time <- Sys.time()
@@ -8785,27 +8810,27 @@ server <- function(input, output, session) {
     
     
     
-    if(breakdown_filters == "New.PT3"){
+    if(breakdown_filters == "NEW_PT3"){
       
       
       #### Calculate wait time which is the difference between the the patients made the appt to the data of the appt
-      data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
+      #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
       
       #### Filter out for wait times grater than 0 and calculate the monthly median wait time 
       waitTime <- data %>%
-        filter(wait.time >= 0) %>%
-        group_by(across(cols), Appt.MonthYear,New.PT3) %>%
-        dplyr::summarise(medWaitTime = round(median(wait.time))) %>%
-        filter(New.PT3 %in% c("TRUE","FALSE"))
+        filter(WAIT_TIME >= 0) %>%
+        group_by(!!!syms(cols), APPT_MONTH_YEAR,NEW_PT3) %>%
+        dplyr::summarise(medWaitTime = round(median(WAIT_TIME))) %>%
+        filter(NEW_PT3 %in% c("TRUE","FALSE")) %>% collect()
       
       
       #### convert to new and established and filter out established and drop the NEW.PT3 columns
-      waitTime$New.PT3 <- ifelse(waitTime$New.PT3 == TRUE, "New","Established")
+      waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == TRUE, "New","Established")
       
       
       #### Get the average daily for new patients and arrived patients 
       waitTime <- waitTime %>% 
-        pivot_wider(names_from = Appt.MonthYear,
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = medWaitTime,
                     values_fill = 0) 
       
@@ -8819,26 +8844,26 @@ server <- function(input, output, session) {
       
     }else{
       ### Calculate wait time which is the difference between when the patient made the appt and the scheduled date
-      data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
+      #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
       
       
       #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
       waitTime <- data %>%
-        filter(wait.time >= 0) %>%
-        group_by(across(cols),Appt.MonthYear, New.PT3) %>%
-        dplyr::summarise(medWaitTime = round(median(wait.time))) %>%
-        filter(New.PT3 %in% c("TRUE","FALSE"))
+        filter(WAIT_TIME >= 0) %>%
+        group_by(!!!syms(cols),APPT_MONTH_YEAR, NEW_PT3) %>%
+        dplyr::summarise(medWaitTime = round(median(WAIT_TIME))) %>%
+        filter(NEW_PT3 %in% c("TRUE","FALSE")) %>% collect()
       
       
       #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
-      waitTime$New.PT3 <- ifelse(waitTime$New.PT3 == TRUE, "New","Established")
-      waitTime <- waitTime %>% filter(New.PT3 == "New")
-      drop <- c("New.PT3")
+      waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == TRUE, "New","Established")
+      waitTime <- waitTime %>% filter(NEW_PT3 == "New")
+      drop <- c("NEW_PT3")
       waitTime = waitTime[,!(names(waitTime) %in% drop)]
       
       #### Pivot the data so the months are in the columns and shows only new patient median time   
       waitTime <- waitTime %>%
-        pivot_wider(names_from = Appt.MonthYear,
+        pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = medWaitTime,
                     values_fill = 0)
       
@@ -8937,59 +8962,71 @@ server <- function(input, output, session) {
   
   
   booked_and_filled_month <- reactive({
-    data <- dataAllSlot_comp()
+    data <- dataAllSlot_comp() #%>% select(APPT_MONTH_YEAR, VISIT_METHOD, CAMPUS_SPECIALTY, DEPARTMENT_NAME, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, AVAILABLE_HOURS, BOOKED_HOURS, ARRIVED_HOURS) %>% collect()
     # data <- slot.data.subset[all.slot.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Specialty"
     # breakdown_filters <- "Visit.Method"
     
-    data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
+    
+    # data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
+    #                         Visit.Method = VISIT_METHOD,
+    #                         Campus.Specialty = CAMPUS_SPECIALTY,
+    #                         Department = DEPARTMENT_NAME,
+    #                         Appt.DateYear = APPT_DATE_YEAR,
+    #                         Provider = PROVIDER,
+    #                         Appt.DTTM = APPT_DTTM,
+    #                         `Available Hours` = AVAILABLE_HOURS, 
+    #                         `Booked Hours` = BOOKED_HOURS, 
+    #                         `Arrived Hours` = ARRIVED_HOURS)
+    # 
+    # data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
     
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
     
     
-    if(breakdown_filters == "Visit.Method"){
+    if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(breakdown_filters == "Appt.Type"){
+    if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "New.PT3"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
     
-    if(compare_filters == "Campus.Specialty"){
+    if(compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
       cols <- c(compare_filters,breakdown_filters)
       cols_name <- c(name_1,name_2)
       tot_cols <- c(compare_filters)
     }
-    if(compare_filters == "Department"){
+    if(compare_filters == "DEPARTMENT"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
       cols_name <- c("Specialty",name_1,name_2)
-      tot_cols <- c("Campus.Specialty",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
     }
-    if(compare_filters == "Provider"){
+    if(compare_filters == "PROVIDER"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty","Department",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
       cols_name <- c("Specialty","Department",name_1,name_2)
-      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
     
     
     slot_metrics <- c("Available Hours", "Booked Hours", "Filled Hours", "Booked Rate (%)", "Filled Rate (%)")
     
-    if(breakdown_filters != "Visit.Method"){
+    if(breakdown_filters != "VISIT_METHOD"){
       
       
       
       validate(
-        need(input$breakdown_filters != "Appt.Type", ("Slot data can only be viewed by Visit Method")),
-        need(input$breakdown_filters != "New.PT3", ("Slot data can only be viewed by Visit Method"))
+        need(input$breakdown_filters != "APPT_TYPE", ("Slot data can only be viewed by Visit Method")),
+        need(input$breakdown_filters != "NEW_PT3", ("Slot data can only be viewed by Visit Method"))
       )
       
       
@@ -8999,10 +9036,10 @@ server <- function(input, output, session) {
       
       #### Group data by inputs and month, sum all available, booked, and filled hours for the whole month
       slot <- data %>% 
-        group_by(across(cols), Appt.MonthYear)%>%
-        dplyr::summarise(`Available Hours` = round(sum(`Available Hours`, na.rm=TRUE),1),
-                         `Booked Hours` = round(sum(`Booked Hours`),1),
-                         `Filled Hours` = round(sum(`Arrived Hours`),1)) 
+        group_by(!!!syms(cols), APPT_MONTH_YEAR)%>%
+        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE),1),
+                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm=TRUE),1),
+                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm=TRUE),1)) 
       
       slot[is.na(slot)] <- 0
       
@@ -9011,8 +9048,9 @@ server <- function(input, output, session) {
       slot <- slot %>%
         mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100), "%"),
                `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100), "%")) %>%
-        gather(variable, value, !!slot_metrics) %>%
-        spread(Appt.MonthYear, value) %>%
+        collect() %>% 
+        gather(variable, value, !!slot_metrics) %>% 
+        spread(APPT_MONTH_YEAR, value) %>%
         rename(Status = variable)
       
       slot[slot == "Inf%"] <- "-"
@@ -9097,52 +9135,52 @@ server <- function(input, output, session) {
     # compare_filters <- "Specialty"
     # breakdown_filters <- "Visit.Method"
     
-    data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
+    #data$Appt.MonthYear <- as.yearmon(data$Appt.MonthYear, "%Y-%m")
     
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
     
     
-    if(breakdown_filters == "Visit.Method"){
+    if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
-    if(breakdown_filters == "Appt.Type"){
+    if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "New.PT3"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
     
-    if(compare_filters == "Campus.Specialty"){
+    if(compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
       cols <- c(compare_filters,breakdown_filters)
       cols_name <- c(name_1,name_2)
       tot_cols <- c(compare_filters)
     }
-    if(compare_filters == "Department"){
+    if(compare_filters == "DEPARTMENT"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
       cols_name <- c("Specialty",name_1,name_2)
-      tot_cols <- c("Campus.Specialty",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
     }
     if(compare_filters == "Provider"){
       name_1 <- compare_filters
-      cols <- c("Campus.Specialty","Department",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
       cols_name <- c("Specialty","Department",name_1,name_2)
-      tot_cols <- c("Campus.Specialty", "Department",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
     
     
     slot_metrics <- c("Available Hours", "Booked Hours", "Filled Hours", "Booked Rate (%)", "Filled Rate (%)")
     
-    if(breakdown_filters != "Visit.Method"){
+    if(breakdown_filters != "VISIT_METHOD"){
       
       validate(
-        need(input$breakdown_filters != "Appt.Type", ("Slot data can only be viewed by Visit Method")),
-        need(input$breakdown_filters != "New.PT3", ("Slot data can only be viewed by Visit Method"))
+        need(input$breakdown_filters != "APPT_TYPE", ("Slot data can only be viewed by Visit Method")),
+        need(input$breakdown_filters != "NEW_PT3", ("Slot data can only be viewed by Visit Method"))
       )
       
       
@@ -9151,28 +9189,28 @@ server <- function(input, output, session) {
       
       #### Group data by inputs, month, and date sum all available, booked, and filled hours for the whole month
       slot <- data %>% 
-        group_by(across(cols), Appt.MonthYear, Appt.DateYear)%>%
-        dplyr::summarise(`Available Hours` = round(sum(`Available Hours`, na.rm=TRUE),1),
-                         `Booked Hours` = sum(`Booked Hours`),
-                         `Filled Hours` = sum(`Arrived Hours`)
-        )
-      
+        group_by(!!!syms(cols), APPT_MONTH_YEAR, APPT_DATE_YEAR)%>%
+        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE),1),
+                         `Booked Hours` = sum(BOOKED_HOURS, na.rm=TRUE),
+                         `Filled Hours` = sum(ARRIVED_HOURS, na.rm=TRUE) 
+        ) 
+
       slot[is.na(slot)] <- 0
       
       
       ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
       ### then gather all created columns make them categories for the STatus column
       ### Spread data to make monhts in Appt.Month into columns
-      slot <- slot %>%  group_by(across(!!cols), Appt.MonthYear) %>%
+      slot <- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
         summarise(
           `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
           `Filled Rate (%)` = paste0(round(sum(`Filled Hours`)/sum(`Available Hours`)*100),"%"),
           `Available Hours` = round(sum(`Available Hours`)/n(),1),
           `Booked Hours` = round(sum(`Booked Hours`)/n(),1),
           `Filled Hours` = round(sum(`Filled Hours`)/n(),1)
-        ) %>%
+        ) %>% collect() %>% 
         gather(variable, value, !!slot_metrics) %>%
-        spread(Appt.MonthYear, value) %>%
+        spread(APPT_MONTH_YEAR, value) %>%
         rename(Status = variable)
       
       

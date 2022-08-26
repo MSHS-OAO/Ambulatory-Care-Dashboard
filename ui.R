@@ -65,8 +65,14 @@ dateRangeKpi_min = dateRange_min
 dateRangeKpi_max = dateRange_max
 
 
-dateRangeSlot_start <- min(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
-dateRangeSlot_end <- max(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
+# dateRangeSlot_start <- glue("Select min(APPT_DTTM) AS minDate FROM SLOT_SQL")
+# dateRangeSlot_start <- dbGetQuery(con, dateRangeSlot_start)
+# dateRangeSlot_start <- as.Date(dateRangeSlot_start$MINDATE, format="%Y-%m-%d")
+dateRangeSlot_start <- as.Date("2022-01-01", format="%Y-%m-%d")
+
+# dateRangeSlot_start <- min(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
+# dateRangeSlot_end <- max(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
+dateRangeSlot_end <- as.Date("2022-07-31", format="%Y-%m-%d")
 
 
 dateRangepop_max <- format(max(population.data_filtered$Appt.DTTM), "%Y-%m-%d")
@@ -1368,16 +1374,16 @@ ui <- dashboardPage(
                                 solidHeader = FALSE,
                                 radioButtons("compare_filters", label = h4("Compare by:"),
                                              # choices = list("Provider" = "Provider", "Specialty" = "Campus.Specialty", "Department" = "Department"),
-                                             choices = list("Specialty" = "Campus.Specialty", "Department" = "Department", "Provider" = "Provider"),
-                                             selected = "Campus.Specialty")),
+                                             choices = list("Specialty" = "CAMPUS_SPECIALTY", "Department" = "DEPARTMENT", "Provider" = "PROVIDER"),
+                                             selected = "CAMPUS_SPECIALTY")),
                               box(
                                 title = NULL,
                                 width = 12,
                                 height = "200px",
                                 solidHeader = FALSE,
                                 radioButtons("breakdown_filters", label = h4("Breakdown by:"),
-                                             choices = list("Visit Method" = "Visit.Method", "Visit Type" = "Appt.Type",  "New vs. Established Patients*" = "New.PT3"),
-                                             selected = "Visit.Method"),
+                                             choices = list("Visit Method" = "VISIT_METHOD", "Visit Type" = "APPT_TYPE",  "New vs. Established Patients*" = "NEW_PT3"),
+                                             selected = "VISIT_METHOD"),
                                 h6("*New Patients defined by CPT codes"))
                               
                        ),
@@ -1753,7 +1759,7 @@ ui <- dashboardPage(
                      width = 12, 
                      solidHeader = FALSE, 
                      selectInput("daysOfWeekslot",label = NULL,
-                                 choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
+                                 choices = daysOfWeek.options, selected = daysOfWeek.options,
                                  multiple=TRUE, selectize=TRUE))
                    
                    
