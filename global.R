@@ -338,10 +338,10 @@ poolcon <- dbPool(drv  = odbc::odbc(),
 # ### New Location with Updated Data
 #historical.data <- readRDS("/data/Ambulatory/Data_Updated/historical_data.rds")
 # slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
-# holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
-# utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
+ holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
+ utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
 # population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
-# filter_path <- "/data/Ambulatory/Filters"
+ filter_path <- "/data/Ambulatory/Filters"
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
@@ -363,9 +363,9 @@ slot.data <- tbl(poolcon, "AMBULATORY_SLOT") %>%
                   mutate(VISIT_METHOD = "In Person")#%>% show_query()
 
 
-holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
-filter_path <- paste0(wdpath, "/Filters")
+# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+# utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
+# filter_path <- paste0(wdpath, "/Filters")
 
 max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM AMBULATORY_ACCESS")
 max_date_arrived <- dbGetQuery(poolcon, max_date_arrived)
