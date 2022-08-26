@@ -124,6 +124,7 @@ suppressMessages({
   library(glue)
   library(DBI)
   library(odbc)
+  library(pool)
 })
 
 
@@ -325,7 +326,12 @@ wdpath <- here::here()
 #wdpath <- "C:/Users/kweons01/Desktop/IP Demand Modeling Desktop/Ambulatory-Care-Dashboard-Publish"
 
 setwd(wdpath)
-con <- dbConnect(odbc(), "OAO Cloud DB")
+#con <- dbConnect(odbc(), "OAO Cloud DB")
+
+poolcon <- dbPool(drv = odbc::odbc(),
+                  dsn = "OAO Cloud DB",
+                  username= 'aghaer01',
+                  password = "5VWtKW*yxf")
 
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
@@ -341,7 +347,10 @@ con <- dbConnect(odbc(), "OAO Cloud DB")
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
+historical.data <- tbl(poolcon,  "ACCESS_SQL")
 
+
+population_tbl <- tbl(poolcon, "POPULATION_SQL")
 
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
 slot.data <- tbl(con, "SLOT_SQL") %>%
@@ -362,9 +371,10 @@ population.data_filtered <- readRDS(paste0(wdpath,"/Data/population_data_filtere
 filter_path <- paste0(wdpath, "/Filters")
 historical.data <- tbl(con,  "ACCESS_SQL_UPT_TEST") 
 
-max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS minDate FROM ACCESS_SQL")
-max_date_arrived <- dbGetQuery(con, max_date_arrived)
-max_date_arrived <- as.Date(max_date_arrived$MINDATE, format="%Y-%m-%d")
+max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM ACCESS_SQL")
+#max_date_arrived <- dbGetQuery(con, max_date_arrived)
+max_date_arrived <- dbGetQuery(poolcon, max_date_arrived)
+max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 
 ## Slot datasets
 # past.slot.data <- slot.data.subset %>% filter(Appt.DTTM <= max_date, Appt.DTTM >= max_date - 365)
@@ -606,7 +616,7 @@ groupByFilters_4_Test <- function(dt, campus, specialty, department, resource, v
 uniquePts_df_system <- function(data){
   
   result <- data %>%
-    arrange(MRN, Appt.DTTM) %>% group_by(MRN) %>% mutate(uniqueSystem = row_number()) %>% ungroup() %>%
+    arrange(MRN, APPT_DTTM) %>% group_by(MRN) %>% mutate(uniqueSystem = row_number()) %>% ungroup() %>%
     filter(uniqueSystem == 1)
   
   return(result)
@@ -661,3 +671,4 @@ valueBoxSpark <- function(value, title, subtitle, sparkobj = NULL, info = NULL,
 # arrived_last_date <- max((kpi.all.data[arrived.data.rows,])$Appt.DTTM)
 
 enableBookmarking(store = "server")
+

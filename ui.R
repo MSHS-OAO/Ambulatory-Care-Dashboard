@@ -54,7 +54,8 @@ util_date_end = max(utilization.data$Appt.DateYear)
 dateRange_max <- max_date_arrived
 
 dateRange_min <- glue("Select min(APPT_DTTM) AS minDate FROM ACCESS_SQL WHERE APPT_STATUS = 'Arrived'")
-dateRange_min <- dbGetQuery(con, dateRange_min)
+#dateRange_min <- dbGetQuery(con, dateRange_min)
+dateRange_min <- dbGetQuery(poolcon, dateRange_min)
 dateRange_min <- as.Date(dateRange_min$MINDATE, format="%Y-%m-%d")
 
 dateRange_start <-  dateRange_min
@@ -75,11 +76,20 @@ dateRangeSlot_start <- as.Date("2022-01-01", format="%Y-%m-%d")
 dateRangeSlot_end <- as.Date("2022-07-31", format="%Y-%m-%d")
 
 
-dateRangepop_max <- format(max(population.data_filtered$Appt.DTTM), "%Y-%m-%d")
-dateRangepop_min <- min(population.data_filtered$Appt.DTTM)
+# dateRangepop_max <- format(max(population.data_filtered$Appt.DTTM), "%Y-%m-%d")
+# dateRangepop_min <- min(population.data_filtered$Appt.DTTM)
 #dateRangepop_start <- paste0(format(as.Date(dateRangepop_max) %m+% months(-2), "%Y-%m"), "-01")
 #dateRangepop_start <- as.Date("2021-01-01")
 
+
+dateRangepop_max <- glue("Select max(APPT_DTTM) AS maxDate FROM POPULATION_SQL")
+dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
+dateRangepop_max <- as.Date(dateRangepop_max$MAXDATE, format="%Y-%m-%d")
+
+
+dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM POPULATION_SQL")
+dateRangepop_min <- dbGetQuery(poolcon, dateRangepop_min)
+dateRangepop_min <- as.Date(dateRangepop_min$MINDATE, format="%Y-%m-%d")
 
 
 
