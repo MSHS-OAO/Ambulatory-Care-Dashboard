@@ -1,5 +1,6 @@
 CREATE View AMBULATORY_ACCESS AS 
 SELECT c.*, APPT_DATE_YEAR - DAYS_SUBTRACT AS APPT_WEEK,
+--SELECT /*+ PARALLEL(4) */ c.*, APPT_DATE_YEAR - DAYS_SUBTRACT AS APPT_WEEK,
 CASE WHEN c.Appt_Source_New_place is NULL
     THEN
         CASE INSTR(c.APPT_SOURCE, 'MYCHART') WHEN 0
@@ -53,13 +54,13 @@ FROM(
                          (a.APPT_DTTM - a.APPT_CANC_DTTM) AS Lead_Days,
                          TRIM( ',' FROM a.DEPARTMENT_NAME||','||a.PROV_NAME_WID||','||a.MRN||','||a.APPT_DTTM ) AS uniqueID,
                          TO_CHAR(a.APPT_DTTM, 'DY') AS APPT_DAY,
-                         CASE WHEN a.VISIT_GROUP_NUM = 4 THEN 'New' ELSE 'Established' END AS NEW_PT2,
+                         CASE WHEN a.VISIT_GROUP_NUM = 4 THEN 'NEW' ELSE 'ESTABLISHED' END AS NEW_PT2,
                          REGEXP_SUBSTR(a.LOS_NAME, 'NEW') AS NEW_PT3
 FROM MV_DM_PATIENT_ACCESS a
     WHERE a.CONTACT_DATE BETWEEN TO_DATE('2021-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
-                    AND TO_DATE(trunc(current_date) - (1/86400), 'YYYY-MM-DD HH24:MI:SS')
+                    AND TO_DATE('2022-08-25 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
                          OR a.APPT_MADE_DTTM BETWEEN TO_DATE('2021-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS')
-                    AND TO_DATE(trunc(current_date) - (1/86400), 'YYYY-MM-DD HH24:MI:SS')
+                    AND TO_DATE('2022-08-25 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
                 ) d
                 LEFT JOIN holidays b on d.Appt_Date_Year = b.dates
                 LEFT JOIN SUBTRACT_DAYS f on d.APPT_DAY = f.WEEKDAY

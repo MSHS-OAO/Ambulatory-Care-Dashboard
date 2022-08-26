@@ -1,6 +1,7 @@
 default_campus <- "MSUS"
 default_campus_choices <- historical.data %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
 default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
+
 default_specialty_choices <-  historical.data %>% filter(CAMPUS %in% "MSUS") %>% select( CAMPUS_SPECIALTY)  %>%
   mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
 default_specialty_choices <- sort(default_specialty_choices$CAMPUS_SPECIALTY, na.last = T)
@@ -14,7 +15,6 @@ default_departments <-  historical.data %>% filter(CAMPUS %in% "MSUS" &
 default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
 
 
-
 default_resource_type <- c("Provider","Resource")
 
 default_provider <-   historical.data %>% filter(CAMPUS %in% "MSUS" & 
@@ -22,9 +22,8 @@ default_provider <-   historical.data %>% filter(CAMPUS %in% "MSUS" &
                                                      DEPARTMENT %in% default_departments ) %>% 
   select(PROVIDER)  %>% 
   mutate(PROVIDER= unique(PROVIDER)) %>% collect()
-
-
 default_provider <- sort(default_provider$PROVIDER, na.last = T)
+
 
 default_visit_method <-    historical.data %>% filter(CAMPUS %in% "MSUS" & 
                                                   CAMPUS_SPECIALTY %in% "Allergy" & 
@@ -32,8 +31,8 @@ default_visit_method <-    historical.data %>% filter(CAMPUS %in% "MSUS" &
                                                   PROVIDER %in% default_provider) %>% 
   select( VISIT_METHOD)  %>% 
   mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
-
 default_visit_method <- sort(default_visit_method$VISIT_METHOD, na.last = T)
+
 
 
 default_PRC_name <-  historical.data %>% filter(CAMPUS %in% "MSUS" & 
@@ -43,8 +42,6 @@ default_PRC_name <-  historical.data %>% filter(CAMPUS %in% "MSUS" &
                                             VISIT_METHOD %in% default_visit_method) %>% 
   select(APPT_TYPE )  %>% 
   mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
-
-
 default_PRC_name <- sort(default_PRC_name$APPT_TYPE, na.last = T) 
 
 
@@ -53,8 +50,7 @@ util_date_end = max(utilization.data$Appt.DateYear)
 
 dateRange_max <- max_date_arrived
 
-dateRange_min <- glue("Select min(APPT_DTTM) AS minDate FROM ACCESS_SQL WHERE APPT_STATUS = 'Arrived'")
-#dateRange_min <- dbGetQuery(con, dateRange_min)
+dateRange_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_ACCESS WHERE APPT_STATUS = 'Arrived'")
 dateRange_min <- dbGetQuery(poolcon, dateRange_min)
 dateRange_min <- as.Date(dateRange_min$MINDATE, format="%Y-%m-%d")
 
@@ -65,32 +61,23 @@ dateRangeKpi_end = dateRange_max
 dateRangeKpi_min = dateRange_min
 dateRangeKpi_max = dateRange_max
 
-
-# dateRangeSlot_start <- glue("Select min(APPT_DTTM) AS minDate FROM SLOT_SQL")
-# dateRangeSlot_start <- dbGetQuery(con, dateRangeSlot_start)
+# dateRangeSlot_start <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_SLOT")
+# dateRangeSlot_start <- dbGetQuery(poolcon, dateRangeSlot_start)
 # dateRangeSlot_start <- as.Date(dateRangeSlot_start$MINDATE, format="%Y-%m-%d")
-dateRangeSlot_start <- as.Date("2022-01-01", format="%Y-%m-%d")
-
-# dateRangeSlot_start <- min(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
-# dateRangeSlot_end <- max(slot.data.subset[all.slot.rows,]$Appt.DateYear) 
-dateRangeSlot_end <- as.Date("2022-07-31", format="%Y-%m-%d")
-
-
-# dateRangepop_max <- format(max(population.data_filtered$Appt.DTTM), "%Y-%m-%d")
-# dateRangepop_min <- min(population.data_filtered$Appt.DTTM)
-#dateRangepop_start <- paste0(format(as.Date(dateRangepop_max) %m+% months(-2), "%Y-%m"), "-01")
-#dateRangepop_start <- as.Date("2021-01-01")
-
-
-dateRangepop_max <- glue("Select max(APPT_DTTM) AS maxDate FROM POPULATION_SQL")
+dateRangeSlot_start <- dateRange_min
+  
+# dateRangeSlot_end <- glue("Select max(APPT_DTTM) AS maxDate FROM AMBULATORY_SLOT")
+# dateRangeSlot_end <- dbGetQuery(poolcon, dateRangeSlot_end)
+# dateRangeSlot_end <- as.Date(dateRangeSlot_end$MAXDATE, format="%Y-%m-%d")
+dateRangeSlot_end <- dateRange_max
+  
+dateRangepop_max <- glue("Select max(APPT_DTTM) AS maxDate FROM AMBULATORY_POPULATION")
 dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
 dateRangepop_max <- as.Date(dateRangepop_max$MAXDATE, format="%Y-%m-%d")
 
-
-dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM POPULATION_SQL")
+dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_POPULATION")
 dateRangepop_min <- dbGetQuery(poolcon, dateRangepop_min)
 dateRangepop_min <- as.Date(dateRangepop_min$MINDATE, format="%Y-%m-%d")
-
 
 
 header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),

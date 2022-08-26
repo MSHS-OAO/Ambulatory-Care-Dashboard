@@ -8219,20 +8219,20 @@ server <- function(input, output, session) {
     }else{
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-      newpatients.ratio <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR, NEW_PT3) %>%
+      newpatients.ratio <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR, NEW_PT2) %>%
         summarise(total = n()) %>% collect() %>%
         drop_na() %>%
-        spread(NEW_PT3, total) %>%
+        spread(NEW_PT2, total) %>%
         drop_na()
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
       ### Calculate new patient ratio by breakdown
       newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols),APPT_MONTH_YEAR) %>%
-        mutate(ratio = round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2))
+        mutate(ratio = round(`NEW`/(sum(`NEW`, na.rm = TRUE) + sum(`ESTABLISHED`, na.rm = TRUE)),2))
       
       
-      drop <- c("FALSE","TRUE", "<NA>")
+      drop <- c("ESTABLISHED","NEW", "<NA>")
       newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
       newpatients.ratio <- newpatients.ratio %>%
         pivot_wider(names_from = APPT_MONTH_YEAR,
@@ -8272,7 +8272,14 @@ server <- function(input, output, session) {
     
     
     names_list <- colnames(newpatients.ratio[, !names(newpatients.ratio) %in% c(name_1,name_2)])
+    myfun <- function(x) {
+      if(is.numeric(x)){ 
+        ifelse(is.na(x), x, scales::percent(x)) 
+      } else x 
+    }
     
+    newpatients.ratio <- newpatients.ratio %>% mutate_each(funs(myfun))
+    print(str(newpatients.ratio))
     # for (i in names_list){
     #   
     # }
@@ -9053,9 +9060,9 @@ server <- function(input, output, session) {
       #### Group data by inputs and month, sum all available, booked, and filled hours for the whole month
       slot <- data %>% 
         group_by(!!!syms(cols), APPT_MONTH_YEAR)%>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE),1),
-                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm=TRUE),1),
-                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm=TRUE),1)) 
+        dplyr::summarise(`Available Hours` = round(sum(`Available Hours`, na.rm=TRUE),1),
+                         `Booked Hours` = round(sum(`Booked Hours`, na.rm=TRUE),1),
+                         `Filled Hours` = round(sum(`Arrived Hours`, na.rm=TRUE),1)) 
       
       slot[is.na(slot)] <- 0
       
@@ -9146,7 +9153,10 @@ server <- function(input, output, session) {
   
   
   booked_and_filled_day <- reactive({
+    print(Sys.time())
+    
     data <- dataAllSlot_comp()
+    print(Sys.time())
     # data <- slot.data.subset[all.slot.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Specialty"
     # breakdown_filters <- "Visit.Method"
@@ -9202,16 +9212,19 @@ server <- function(input, output, session) {
       
       
     }else{
+      print(Sys.time())
       
       #### Group data by inputs, month, and date sum all available, booked, and filled hours for the whole month
       slot <- data %>% 
         group_by(!!!syms(cols), APPT_MONTH_YEAR, APPT_DATE_YEAR)%>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE),1),
-                         `Booked Hours` = sum(BOOKED_HOURS, na.rm=TRUE),
-                         `Filled Hours` = sum(ARRIVED_HOURS, na.rm=TRUE) 
+        dplyr::summarise(`Available Hours` = round(sum(`Available Hours`, na.rm=TRUE),1),
+                         `Booked Hours` = sum(`Booked Hours` , na.rm=TRUE),
+                         `Filled Hours` = sum(`Arrived Hours`, na.rm=TRUE) 
         ) 
 
       slot[is.na(slot)] <- 0
+      print("test1")
+      print(Sys.time())
       
       
       ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
@@ -9229,6 +9242,8 @@ server <- function(input, output, session) {
         spread(APPT_MONTH_YEAR, value) %>%
         rename(Status = variable)
       
+      print("test2")
+      print(Sys.time())
       
       
       #### Add booked and filled rate columns( respective metric/Available Hours) multiply by 100 pivot the data so that the months are now columns

@@ -326,12 +326,10 @@ wdpath <- here::here()
 #wdpath <- "C:/Users/kweons01/Desktop/IP Demand Modeling Desktop/Ambulatory-Care-Dashboard-Publish"
 
 setwd(wdpath)
-#con <- dbConnect(odbc(), "OAO Cloud DB")
+# poolcon <- dbConnect(odbc(), "OAO Cloud DB")
 
-poolcon <- dbPool(drv = odbc::odbc(),
-                  dsn = "OAO Cloud DB",
-                  username= 'aghaer01',
-                  password = "5VWtKW*yxf")
+poolcon <- dbPool(drv  = odbc::odbc(),
+                 dsn  = "OAO Cloud DB")
 
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
@@ -347,32 +345,29 @@ poolcon <- dbPool(drv = odbc::odbc(),
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
-historical.data <- tbl(poolcon,  "ACCESS_SQL")
+historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
 
 
-population_tbl <- tbl(poolcon, "POPULATION_SQL")
+population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
 
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-slot.data <- tbl(con, "SLOT_SQL") %>%
+slot.data <- tbl(poolcon, "AMBULATORY_SLOT") %>%
   group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT_NAME, PROVIDER,
            APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR, APPT_WEEK, APPT_DAY, APPT_TM_HR,
            RESOURCES, HOLIDAY, APPT_DTTM) %>%
-  dplyr::summarise(AVAILABLE_HOURS = sum(AVAIL_MINUTES, na.rm = T)/60,
-                   BOOKED_HOURS = sum(BOOKED_MINUTES, na.rm = T)/60,
-                   ARRIVED_HOURS = sum(ARRIVED_MINUTES, na.rm = T)/60,
-                   CANCELED_HOURS = sum(CANCELED_MINUTES, na.rm = T)/60,
-                   NO_SHOW_HOURS = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60) %>%
+  dplyr::summarise(`Available Hours` = sum(AVAIL_MINUTES, na.rm = T)/60,
+                   `Booked Hours` = sum(BOOKED_MINUTES, na.rm = T)/60,
+                   `Arrived Hours` = sum(ARRIVED_MINUTES, na.rm = T)/60,
+                   `Canceled Hours` = sum(CANCELED_MINUTES, na.rm = T)/60,
+                   `No Show Hours` = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60) %>%
                   mutate(VISIT_METHOD = "In Person")#%>% show_query()
 
 
 holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
 utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
-population.data_filtered <- readRDS(paste0(wdpath,"/Data/population_data_filtered.rds"))
 filter_path <- paste0(wdpath, "/Filters")
-historical.data <- tbl(con,  "ACCESS_SQL_UPT_TEST") 
 
-max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM ACCESS_SQL")
-#max_date_arrived <- dbGetQuery(con, max_date_arrived)
+max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM AMBULATORY_ACCESS")
 max_date_arrived <- dbGetQuery(poolcon, max_date_arrived)
 max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 
