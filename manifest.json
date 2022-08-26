@@ -4515,6 +4515,39 @@
         "Built": "R 3.6.0; x86_64-w64-mingw32; 2019-05-28 20:50:35 UTC; windows"
       }
     },
+    "pool": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com/",
+      "GithubRepo": null,
+      "GithubUsername": null,
+      "GithubRef": null,
+      "GithubSha1": null,
+      "description": {
+        "Type": "Package",
+        "Package": "pool",
+        "Title": "Object Pooling",
+        "Version": "0.1.6",
+        "Authors@R": "\n    c(person(given = \"Joe\",\n             family = \"Cheng\",\n             role = c(\"aut\", \"cre\"),\n             email = \"joe@rstudio.com\"),\n      person(given = \"Barbara\",\n             family = \"Borges\",\n             role = \"aut\",\n             email = \"barb.b.ribeiro@gmail.com\"),\n      person(family = \"RStudio\",\n             role = \"cph\"))",
+        "Description": "Enables the creation of object pools, which make it\n    less computationally expensive to fetch a new object. Currently the\n    only supported pooled objects are 'DBI' connections.",
+        "License": "GPL-3",
+        "URL": "https://github.com/rstudio/pool",
+        "BugReports": "https://github.com/rstudio/pool/issues",
+        "Depends": "methods, R (>= 3.0.0)",
+        "Imports": "DBI, R6, later (>= 1.0.0)",
+        "Suggests": "testthat, tibble, dplyr, dbplyr, RSQLite, RMySQL",
+        "Encoding": "UTF-8",
+        "LazyData": "TRUE",
+        "RoxygenNote": "7.1.1",
+        "Collate": "'utils.R' 'scheduler.R' 'pool.R' 'pool-methods.R' 'object.R'\n'DBI.R' 'DBI-connection-interpolate.R' 'DBI-connection-quote.R'\n'DBI-connection-sql.R' 'DBI-connection-transaction.R'\n'DBI-connection.R' 'DBI-driver.R' 'DBI-object-deprecated.R'\n'DBI-object.R' 'DBI-pool.R' 'dbplyr.R' 'zzz-hooks.R'",
+        "NeedsCompilation": "no",
+        "Packaged": "2021-01-14 16:23:26 UTC; hadley",
+        "Author": "Joe Cheng [aut, cre],\n  Barbara Borges [aut],\n  RStudio [cph]",
+        "Maintainer": "Joe Cheng <joe@rstudio.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2021-01-14 21:20:03 UTC",
+        "Built": "R 3.6.3; ; 2021-05-12 19:42:24 UTC; windows"
+      }
+    },
     "praise": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com/",
@@ -7670,7 +7703,7 @@
   },
   "files": {
     "Access.sql": {
-      "checksum": "0264cdf3e84eeb91d40835320728b325"
+      "checksum": "5635474b9756c81f9ff9c853c039228f"
     },
     "Data/Archive 01-07-2022/historical_data.rds": {
       "checksum": "d7c2b7a46c345b829e76dbec160d321e"
@@ -7718,19 +7751,19 @@
       "checksum": "29255530c7cac8c7641c08605dbe553f"
     },
     "global.R": {
-      "checksum": "ff2bcbc3544632673e8be63c71f0a289"
+      "checksum": "d148cca578659448b27894d7f10ed19f"
     },
     "README.md": {
       "checksum": "e6b91dcda0078389d15a9d23ad3111b5"
     },
     "server.R": {
-      "checksum": "6d4ac1190e35ed5d0d7ea57b14e93ae0"
+      "checksum": "540eec4e4e320f2f70f353fd6a3b6b8e"
     },
     "SQL_slot.sql": {
-      "checksum": "1233f933e2c7e539fb3dd20be9534c84"
+      "checksum": "6f94ab78e895e7f2e39861f73a79ad61"
     },
     "ui.R": {
-      "checksum": "364929b7a01a96c79c4d7d2e6e9e7cf6"
+      "checksum": "d382239ca478b42290ef24a838a0fa8a"
     },
     "www/homepage.PNG": {
       "checksum": "6f8a16f66eae67492ae387b02ad3f00e"
