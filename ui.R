@@ -50,9 +50,11 @@ util_date_end = max(utilization.data$Appt.DateYear)
 
 dateRange_max <- max_date_arrived
 
-dateRange_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_ACCESS WHERE APPT_STATUS = 'Arrived'")
-dateRange_min <- dbGetQuery(poolcon, dateRange_min)
-dateRange_min <- as.Date(dateRange_min$MINDATE, format="%Y-%m-%d")
+# dateRange_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_ACCESS WHERE APPT_STATUS = 'Arrived'")
+# dateRange_min <- dbGetQuery(poolcon, dateRange_min)
+# dateRange_min <- as.Date(dateRange_min$MINDATE, format="%Y-%m-%d")
+dateRange_min <- "2021-01-01"
+dateRange_min <- as.Date(dateRange_min, format="%Y-%m-%d")
 
 dateRange_start <-  dateRange_min
 

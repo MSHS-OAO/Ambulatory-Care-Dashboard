@@ -1,6 +1,6 @@
 CREATE View AMBULATORY_ACCESS AS 
-SELECT c.*, APPT_DATE_YEAR - DAYS_SUBTRACT AS APPT_WEEK,
---SELECT /*+ PARALLEL(4) */ c.*, APPT_DATE_YEAR - DAYS_SUBTRACT AS APPT_WEEK,
+SELECT c.*, APPT_DATE_YEAR - DAYS_SUBTRACT AS APPT_WEEK--,
+/*
 CASE WHEN c.Appt_Source_New_place is NULL
     THEN
         CASE INSTR(c.APPT_SOURCE, 'MYCHART') WHEN 0
@@ -20,7 +20,8 @@ CASE WHEN c.Appt_Source_New_place is NULL
         END
         ELSE
         c.Appt_Source_New_place
-END AS Appt_Source_New
+END AS Appt_Source_New 
+*/
 FROM(
 SELECT d.*, b.holiday, f.DAYS_SUBTRACT
 FROM(
@@ -37,6 +38,7 @@ FROM(
                          a.PRIMARY_DX_CODE, a.ENC_CLOSED_CHARGE_STATUS, a.Y_ENC_COSIGN_TIME, a.Y_ENC_CLOSE_TIME, a.Y_ENC_OPEN_TIME, a.NPI, a.VISIT_GROUP_NUM AS NEW_PT, 
                          a.PAT_ENC_CSN_ID, a.VISITPLAN, a.ATTRIB_BILL_AREA,
                          EXTRACT(year from a.APPT_DTTM) Appt_Year,
+                         CONCAT(TO_CHAR(a.APPT_DTTM, 'HH24'), ':00') APPT_TM_HR,
                          TO_CHAR(a.APPT_DTTM, 'MON') AS Appt_Month,
                          TO_CHAR(a.APPT_DTTM, 'yyyy-mm') AS Appt_Month_Year,
                          --TO_CHAR(trunc(TO_DATE(a.APPT_DTTM, 'yyyy-mm-dd HH24:MI:SS'))) AS Appt_Date_Year,
@@ -65,5 +67,7 @@ FROM MV_DM_PATIENT_ACCESS a
                 LEFT JOIN holidays b on d.Appt_Date_Year = b.dates
                 LEFT JOIN SUBTRACT_DAYS f on d.APPT_DAY = f.WEEKDAY
                 ) c
+        
                 
+               
                 

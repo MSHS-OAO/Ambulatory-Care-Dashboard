@@ -338,10 +338,10 @@ poolcon <- dbPool(drv  = odbc::odbc(),
 # ### New Location with Updated Data
 #historical.data <- readRDS("/data/Ambulatory/Data_Updated/historical_data.rds")
 # slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
- holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
- utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
+# holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
+# utilization.data <- readRDS("/data/Ambulatory/Data_Updated/utilization_data.rds")
 # population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
- filter_path <- "/data/Ambulatory/Filters"
+# filter_path <- "/data/Ambulatory/Filters"
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
@@ -351,21 +351,19 @@ historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
 population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
 
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-slot.data <- tbl(poolcon, "AMBULATORY_SLOT") %>%
-  group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT_NAME, PROVIDER,
-           APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR, APPT_WEEK, APPT_DAY, APPT_TM_HR,
-           RESOURCES, HOLIDAY, APPT_DTTM) %>%
-  dplyr::summarise(`Available Hours` = sum(AVAIL_MINUTES, na.rm = T)/60,
-                   `Booked Hours` = sum(BOOKED_MINUTES, na.rm = T)/60,
-                   `Arrived Hours` = sum(ARRIVED_MINUTES, na.rm = T)/60,
-                   `Canceled Hours` = sum(CANCELED_MINUTES, na.rm = T)/60,
-                   `No Show Hours` = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60) %>%
-                  mutate(VISIT_METHOD = "In Person")#%>% show_query()
+slot.data <- tbl(poolcon, "AMBULATORY_SLOT") #%>%
+  # group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT_NAME, PROVIDER,
+  #          APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR, APPT_WEEK, APPT_DAY, APPT_TM_HR,
+  #          RESOURCES, HOLIDAY, APPT_DTTM) %>%
+  # dplyr::summarise(`Available Hours` = sum(AVAIL_MINUTES, na.rm = T)/60,
+  #                  `Booked Hours` = sum(BOOKED_MINUTES, na.rm = T)/60,
+  #                  `Arrived Hours` = sum(ARRIVED_MINUTES, na.rm = T)/60,
+  #                  `Canceled Hours` = sum(CANCELED_MINUTES, na.rm = T)/60,
+  #                  `No Show Hours` = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60)
 
-
-# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-# utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
-# filter_path <- paste0(wdpath, "/Filters")
+holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
+filter_path <- paste0(wdpath, "/Filters")
 
 max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM AMBULATORY_ACCESS")
 max_date_arrived <- dbGetQuery(poolcon, max_date_arrived)
@@ -400,6 +398,7 @@ arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Sh
 noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show"))
 bumped.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Bumped"))
 canceled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled"))
+canceled.bumped.rescheduled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled","Bumped","Rescheduled"))
 
 
 #sameDay <- historical.data %>% filter(APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS = 0)
@@ -544,10 +543,10 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
 groupByFilters_1 <- function(dt, apptType, insurance){
   result <- dt %>% filter(COVERAGE %in% insurance)
   if(apptType == "New"){
-    result <- result %>% filter(NEW_PT3 == "TRUE")
+    result <- result %>% filter(NEW_PT2 == "NEW")
   }
   else if(apptType == "Established"){
-    result <- result %>% filter(NEW_PT3 == "FALSE")
+    result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
   }
   else{
     result
@@ -567,7 +566,7 @@ groupByFilters_2 <- function(dt, campus, specialty, department, resource, provid
 
 ## Filtered by Appt.Type Data
 groupByFilters_3 <- function(dt, apptType){
-  result <- dt %>% filter(NEW_PT3 == "FALSE", APPT_TYPE %in% apptType)
+  result <- dt %>% filter(NEW_PT2 == "ESTABLISHED", APPT_TYPE %in% apptType)
   return(result)
 }
 
