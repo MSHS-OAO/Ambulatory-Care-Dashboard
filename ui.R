@@ -2,31 +2,31 @@ default_campus <- "MSUS"
 default_campus_choices <- historical.data %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
 default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
 
-default_specialty_choices <-  historical.data %>% filter(CAMPUS %in% "MSUS") %>% select( CAMPUS_SPECIALTY)  %>%
+default_specialty_choices <-  historical.data %>% filter(CAMPUS %in% default_campus) %>% select( CAMPUS_SPECIALTY)  %>%
   mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
 default_specialty_choices <- sort(default_specialty_choices$CAMPUS_SPECIALTY, na.last = T)
 
 default_specialty <- "Allergy"
 
 
-default_departments <-  historical.data %>% filter(CAMPUS %in% "MSUS" & 
-                                                      CAMPUS_SPECIALTY %in% "Allergy") %>% select( DEPARTMENT)  %>%
+default_departments <-  historical.data %>% filter(CAMPUS %in% default_campus & 
+                                                      CAMPUS_SPECIALTY %in% default_specialty) %>% select( DEPARTMENT)  %>%
   mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
 default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
 
 
 default_resource_type <- c("Provider","Resource")
 
-default_provider <-   historical.data %>% filter(CAMPUS %in% "MSUS" & 
-                                                     CAMPUS_SPECIALTY %in% "Allergy"& 
+default_provider <-   historical.data %>% filter(CAMPUS %in% default_campus & 
+                                                     CAMPUS_SPECIALTY %in% default_specialty& 
                                                      DEPARTMENT %in% default_departments ) %>% 
   select(PROVIDER)  %>% 
   mutate(PROVIDER= unique(PROVIDER)) %>% collect()
 default_provider <- sort(default_provider$PROVIDER, na.last = T)
 
 
-default_visit_method <-    historical.data %>% filter(CAMPUS %in% "MSUS" & 
-                                                  CAMPUS_SPECIALTY %in% "Allergy" & 
+default_visit_method <-    historical.data %>% filter(CAMPUS %in% default_campus & 
+                                                  CAMPUS_SPECIALTY %in% default_specialty & 
                                                   DEPARTMENT %in% default_departments &
                                                   PROVIDER %in% default_provider) %>% 
   select( VISIT_METHOD)  %>% 
@@ -35,8 +35,8 @@ default_visit_method <- sort(default_visit_method$VISIT_METHOD, na.last = T)
 
 
 
-default_PRC_name <-  historical.data %>% filter(CAMPUS %in% "MSUS" & 
-                                            CAMPUS_SPECIALTY %in% "Allergy" & 
+default_PRC_name <-  historical.data %>% filter(CAMPUS %in% default_campus & 
+                                            CAMPUS_SPECIALTY %in% default_specialty & 
                                             DEPARTMENT %in% default_departments &
                                             PROVIDER %in% default_provider &
                                             VISIT_METHOD %in% default_visit_method) %>% 
