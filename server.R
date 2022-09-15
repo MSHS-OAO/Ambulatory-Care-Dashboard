@@ -4913,7 +4913,7 @@ server <- function(input, output, session) {
     
     space.hour.day <- space.hour.day %>% filter(Time %in% timeOptionsHr_filter)
     
-    graph <- ggplot(space.hour.day, aes(x=Time, y=ceiling(Average_Req), col=factor(Day,level = daysOfWeek.options), group=Day))+
+    graph <- ggplot(space.hour.day, aes(x=Time, y=ceiling(Average_Req), col=factor(Day,level = daysOfWeek.options.utilization), group=Day))+
       geom_line(size=1.2)+
       labs(x=NULL, y="Number of Rooms\n",
            title = "Average Space Required by Time of Day and Day of Week",
@@ -4925,7 +4925,7 @@ server <- function(input, output, session) {
       graph_theme("top") + theme(legend.title = element_blank(), legend.direction = "horizontal", legend.key.size = unit(1.0,"cm"))+
       guides(colour = guide_legend(nrow = 1))
     
-    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
+    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options.utilization)), y=Time))+
       labs(x=NULL, y=NULL)+
       geom_tile(aes(fill=Average_Req), colour = "black", size=0.5)+
       coord_flip()+
@@ -4987,7 +4987,7 @@ server <- function(input, output, session) {
     space.hour.day$target <- 0.8
     
     
-    graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Util, col=factor(Day,level = daysOfWeek.options), group=Day))+
+    graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Util, col=factor(Day,level = daysOfWeek.options.utilization), group=Day))+
       geom_line(size=1.2)+
       labs(x=NULL, y="Utilization (%)", 
            title = "Average Space Utilization (%) by Time of Day and Day of Week",
@@ -5005,7 +5005,7 @@ server <- function(input, output, session) {
     
     space.hour.day$Average_Util <- space.hour.day$Average_Util*100
     
-    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
+    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options.utilization)), y=Time))+
       labs(x=NULL, y=NULL)+
       geom_tile(aes(fill=Average_Util), colour = "black", size=0.5)+
       coord_flip()+

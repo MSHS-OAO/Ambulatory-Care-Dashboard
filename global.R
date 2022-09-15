@@ -685,3 +685,5 @@ valueBoxSpark <- function(value, title, subtitle, sparkobj = NULL, info = NULL,
 
 enableBookmarking(store = "server")
 
+daysOfWeek.options.utilization <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+

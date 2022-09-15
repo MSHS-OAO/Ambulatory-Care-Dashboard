@@ -1797,7 +1797,7 @@ ui <- dashboardPage(
                      width = 12, 
                      solidHeader = FALSE, 
                      selectInput("daysOfWeekUtil",label = NULL,
-                                 choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
+                                 choices = daysOfWeek.options.utilization, selected = daysOfWeek.options.utilization,
                                  multiple=TRUE, selectize=TRUE))
                  ),
                  
