@@ -213,7 +213,6 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$selectedSpecialty,{
-    test()
     if(is.null(input$filter_list) && !is.null(input$selectedSpecialty)){
       # department_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
@@ -6172,7 +6171,7 @@ server <- function(input, output, session) {
     
     waitTime <- data %>%
       filter(WAIT_TIME >= 0) %>%
-      group_by(APPT_MONTH_YEAR, NEW_PT2) %>%
+      group_by(APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
       dplyr::summarise(medWaitTime = round(median(WAIT_TIME))) %>%
       filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
     #waitTime_test <<- waitTime
@@ -6187,7 +6186,7 @@ server <- function(input, output, session) {
     target <- 14
     
     
-    ggplot(waitTime, aes(x=APPT_MONTH_YEAR, y=value, fill = variable))+
+    ggplot(waitTime, aes(x=APPT_MADE_MONTH_YEAR, y=value, fill = variable))+
       #geom_line(aes(linetype=variable, color=variable, size=variable)) +
       geom_bar(stat = "identity", position = 'dodge')+
       geom_abline(slope=0, intercept=14,  col = "red",lty=2, size = 1) +
@@ -6225,7 +6224,7 @@ server <- function(input, output, session) {
     
     waitTime <- data %>%
       filter(WAIT_TIME >= 0) %>%
-      group_by(PROVIDER, APPT_MONTH_YEAR, NEW_PT2) %>%
+      group_by(PROVIDER, APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
       dplyr::summarise(medWaitTime = round(median(WAIT_TIME))) %>% collect()
     
     waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
@@ -6234,7 +6233,7 @@ server <- function(input, output, session) {
     waitTime <- waitTime %>% spread(NEW_PT2, medWaitTime)
     waitTime[is.na(waitTime)] <- 0
     waitTime <- waitTime %>% gather(variable, value, 3:4)
-    ggplot(waitTime %>% filter(variable == "Established"), aes(x=APPT_MONTH_YEAR, y=value, group=PROVIDER)) +
+    ggplot(waitTime %>% filter(variable == "Established"), aes(x=APPT_MADE_MONTH_YEAR, y=value, group=PROVIDER)) +
       geom_line(aes(color=PROVIDER), size=1) +
       # geom_hline(yintercept=14, linetype="dashed", color = "red", size=1)+
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
@@ -6255,7 +6254,7 @@ server <- function(input, output, session) {
   
   # New Patient Wait Time
   output$newPtApptSourceByDept <- renderPlot({
-    data <- dataArrived()
+    data <- dataArrived_access()
     # data <- kpi.all.data[arrivedNoShow.data.rows,]
     
     
@@ -6263,8 +6262,7 @@ server <- function(input, output, session) {
         group_by(APPT_SOURCE_NEW, NEW_PT2) %>%
       filter(NEW_PT2 == "NEW") %>%
       dplyr::summarise(Total = n()) %>% collect()
-    newpatients.ratio.test <<- newpatients.ratio
-    
+
     newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
     
     newpatients.ratio$ratio <- round(newpatients.ratio$Total / sum(newpatients.ratio$Total), 2)
@@ -6346,6 +6344,8 @@ server <- function(input, output, session) {
       group_by(APPT_SOURCE_NEW, APPT_STATUS) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
+    
+    noShows_test <<- noShows
     
     noShows[is.na(noShows)] <- 0
     
