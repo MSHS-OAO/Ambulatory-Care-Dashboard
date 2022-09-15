@@ -188,11 +188,11 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$selectedCampus,{
-    if(is.null(input$filter_list)){
+    if(is.null(input$filter_list && !is.null(input$selectedCampus))){
       #specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
       selected_campus <- input$selectedCampus
       
-      specialty_choices <-  historical.data %>% filter(CAMPUS %in% selected_campus) %>% select( CAMPUS_SPECIALTY)  %>%
+      specialty_choices <-  filters %>% filter(CAMPUS %in% selected_campus) %>% select( CAMPUS_SPECIALTY)  %>%
         mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
       specialty_choices <- sort(specialty_choices$CAMPUS_SPECIALTY, na.last = T)
       
@@ -211,15 +211,17 @@ server <- function(input, output, session) {
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
   
+  
   observeEvent(input$selectedSpecialty,{
-    if(is.null(input$filter_list)){
+    test()
+    if(is.null(input$filter_list) && !is.null(input$selectedSpecialty)){
       # department_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
       selected_campus <- input$selectedCampus
       selected_specialty <- input$selectedSpecialty
       
-      department_choices <-  historical.data %>% filter(CAMPUS %in% selected_campus & 
+      department_choices <-  filters %>% filter(CAMPUS %in% selected_campus & 
                                                            CAMPUS_SPECIALTY %in% selected_specialty) %>% select(DEPARTMENT)  %>%
         mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
       department_choices <- sort(department_choices$DEPARTMENT, na.last = T)
@@ -237,7 +239,7 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
   
   observeEvent(input$selectedDepartment,{
-    if(is.null(input$filter_list)){
+    if(is.null(input$filter_list) && !is.null(input$selectedDepartment)){
       # provider_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -249,7 +251,7 @@ server <- function(input, output, session) {
       selected_resource <- input$selectedResource
       
       
-      provider_choices <-   historical.data %>% 
+      provider_choices <-   filters %>% 
                             filter(CAMPUS %in% selected_campus & 
                             CAMPUS_SPECIALTY %in% selected_specialty & 
                             DEPARTMENT %in% selected_department &
@@ -271,7 +273,7 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
   
   observeEvent(input$selectedResource,{
-    if(is.null(input$filter_list)){
+    if(is.null(input$filter_list) && !is.null(input$selectedResource)){
       # provider_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -282,7 +284,7 @@ server <- function(input, output, session) {
       selected_department <- input$selectedDepartment
       selected_resource <- input$selectedResource
       
-      provider_choices <-   historical.data %>% 
+      provider_choices <-   filters %>% 
         filter(CAMPUS %in% selected_campus & 
                CAMPUS_SPECIALTY %in% selected_specialty & 
                DEPARTMENT %in% selected_department &
@@ -304,7 +306,7 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
   
   observeEvent(input$selectedProvider, {
-    if(is.null(input$filter_list)){
+    if(is.null(input$filter_list) && !is.null(input$selectedProvider)){
       # visit_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -321,7 +323,7 @@ server <- function(input, output, session) {
       
       
       
-      visit_choices <- historical.data %>% 
+      visit_choices <- filters %>% 
                               filter(CAMPUS %in% selected_campus & 
                                      CAMPUS_SPECIALTY %in% selected_specialty & 
                                      DEPARTMENT %in% selected_department &
@@ -343,7 +345,7 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
   
   observeEvent(list(input$selectedVisitMethod,input$selectedProvider), {
-    if(is.null(input$filter_list)){
+    if(is.null(input$filter_list) && (!is.null(input$selectedVisitMethod) || !is.null(input$selectedProvider))){
       # prc_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -363,7 +365,7 @@ server <- function(input, output, session) {
       
       
       
-      prc_choices <- historical.data %>% 
+      prc_choices <- filters %>% 
         filter(CAMPUS %in% selected_campus & 
                  CAMPUS_SPECIALTY %in% selected_specialty & 
                  DEPARTMENT %in% selected_department &
@@ -548,6 +550,22 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
+  dataAll_access <- eventReactive(list(input$update_filters,input$update_filters1),{
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_access(historical.data,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+  })
+  
   dataArrivedNoShow <- eventReactive(list(input$update_filters,input$update_filters1),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -565,6 +583,23 @@ server <- function(input, output, session) {
 
   })
   
+  dataArrivedNoShow_access <- eventReactive(list(input$update_filters,input$update_filters1),{
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_access(arrivedNoShow.data.rows,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    
+  })
+  
   dataArrived <- eventReactive(list(input$update_filters,input$update_filters1),{
     
     validate(
@@ -577,6 +612,24 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     groupByFilters(arrived.data.rows,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    
+  })
+  
+  dataArrived_access <- eventReactive(list(input$update_filters,input$update_filters1),{
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_access(arrived.data.rows,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
@@ -6046,18 +6099,18 @@ server <- function(input, output, session) {
   
   # New Patient Ratio by Department
   output$newPtRatioByDept <- renderPlot({
-    data <- dataArrived()
+    data <- dataArrived_access()
     # data <- kpi.all.data[arrived.data.rows,]
     
     newpatients.ratio <- data %>%
-      group_by(APPT_MONTH_YEAR,NEW_PT2) %>%
+      group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(NEW_PT2, Total)
     
     newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
-    ggplot(newpatients.ratio, aes(x=APPT_MONTH_YEAR, y=ratio, group=1)) +
+    ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group=1)) +
       geom_bar(stat = "identity", width = 0.8, fill = "#221f72") +
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
@@ -6068,7 +6121,7 @@ server <- function(input, output, session) {
       graph_theme("none")+
       theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1),expand = c(0, 0), limits = c(0,max(newpatients.ratio$ratio)*1.5)) +
-      stat_summary(fun.y = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..*100,"%")), group = APPT_MONTH_YEAR), geom="text", color="black", 
+      stat_summary(fun.y = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..*100,"%")), group = APPT_MADE_MONTH_YEAR), geom="text", color="black", 
                    size=5, fontface="bold.italic")+
       theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
     # scale_x_date(breaks = "day", date_labels = "%Y-%m", date_breaks = "1 week",
@@ -6079,11 +6132,11 @@ server <- function(input, output, session) {
   
   # New Patient Ratio by Provideer
   output$newPtRatioByProv <- renderPlot({
-    data <- dataArrived()
+    data <- dataArrived_access()
     # data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
     
     newpatients.ratio <- data %>%
-      group_by(PROVIDER, APPT_MONTH_YEAR,NEW_PT2) %>%
+      group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(NEW_PT2, Total)
     
@@ -6092,7 +6145,7 @@ server <- function(input, output, session) {
     newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
     #newpatients.ratio$Appt.MonthYear <- as.Date(paste0(newpatients.ratio$Appt.MonthYear, "-01"), format="%Y-%m-%d") ## Create date-year column
     
-    ggplot(newpatients.ratio, aes(x=APPT_MONTH_YEAR, y=ratio, group = PROVIDER)) +
+    ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group = PROVIDER)) +
       geom_line(aes(color=PROVIDER), size=1) +
       # scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
@@ -6112,7 +6165,7 @@ server <- function(input, output, session) {
   
   # New Patient Wait Time
   output$newPtWaitTimeByDept <- renderPlot({
-    data <- dataAll()
+    data <- dataAll_access()
     # data <- kpi.all.data[all.data.rows,] %>% filter(Campus == "MSUS")
     
     #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
@@ -6165,7 +6218,7 @@ server <- function(input, output, session) {
   
   # New Patient Wait Time
   output$newPtWaitTimeByProv <- renderPlot({
-    data <- dataAll()
+    data <- dataAll_access()
     # data <- all.data %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
     
     #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
@@ -6210,13 +6263,14 @@ server <- function(input, output, session) {
         group_by(APPT_SOURCE_NEW, NEW_PT2) %>%
       filter(NEW_PT2 == "NEW") %>%
       dplyr::summarise(Total = n()) %>% collect()
+    newpatients.ratio.test <<- newpatients.ratio
     
     newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
     
     newpatients.ratio$ratio <- round(newpatients.ratio$Total / sum(newpatients.ratio$Total), 2)
     
     newRatio <-
-      ggplot(newpatients.ratio, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/ MyChart","StayWell","Zocdoc", "FindADoc")), 
+      ggplot(newpatients.ratio, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
                                     y=ratio, group=APPT_SOURCE_NEW, fill=APPT_SOURCE_NEW)) +
       geom_bar(stat="identity", width = 0.8) +
       coord_flip() +
@@ -6254,7 +6308,7 @@ server <- function(input, output, session) {
     waitTime$APPT_SOURCE_NEW[which(waitTime$APPT_SOURCE_NEW == "Other")] <- "Practice"
     
     newWaitTime <-
-      ggplot(waitTime, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/ MyChart","StayWell","Zocdoc", "FindADoc")), 
+      ggplot(waitTime, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
                            y=medWaitTime, group=APPT_SOURCE_NEW, fill=APPT_SOURCE_NEW)) +
       geom_bar(stat="identity", width = 0.8) +
       geom_hline(aes(yintercept=target), linetype="dashed", color = "red", size=1)+
@@ -6284,7 +6338,7 @@ server <- function(input, output, session) {
     
     # No Show Rate
     
-    data.noShow <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show"))
+    data.noShow <- dataArrivedNoShow_access() %>% filter(APPT_STATUS %in% c("Arrived", "No Show"))
     # data.noShow <- arrivedNoShow.data
     
     noShows <- data.noShow %>%
@@ -6305,7 +6359,7 @@ server <- function(input, output, session) {
     
     newNoShow <-
       
-      ggplot(noShows, aes(x=factor(APPT_SOURCE_NEW, levels =  c("Practice","Access Center","My MountSinai/ MyChart","StayWell","Zocdoc", "FindADoc")), 
+      ggplot(noShows, aes(x=factor(APPT_SOURCE_NEW, levels =  c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
                           y=`No Show Perc`, group=APPT_SOURCE_NEW, fill=APPT_SOURCE_NEW)) +
       geom_bar(stat="identity", width = 0.8) +
       scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.3)+

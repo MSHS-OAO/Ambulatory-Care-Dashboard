@@ -346,6 +346,7 @@ poolcon <- dbPool(drv  = odbc::odbc(),
 
 
 historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
+filters <- tbl(poolcon, "AMBULATORY_FILTERS")
 
 
 population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
@@ -525,6 +526,24 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
                           APPT_TYPE %in% visitType, 
                           TO_DATE(mindateRange, format) <= APPT_DTTM, 
                           TO_DATE(maxdateRange, format) >= APPT_DTTM, 
+                          APPT_DAY %in% daysofweek#, 
+                          #!HOLIDAY %in% holidays
+  ) 
+}
+
+groupByFilters_access <- function(dt, campus, specialty, department, resource, provider, visitMethod, visitType, mindateRange, maxdateRange, daysofweek, holidays){
+  format <- "YYYY-MM-DD HH24:MI:SS"
+  daysofweek <- toupper(daysofweek)
+  
+  result <- dt %>% filter(CAMPUS %in% campus, 
+                          CAMPUS_SPECIALTY %in% specialty, 
+                          DEPARTMENT %in% department, 
+                          RESOURCES %in% resource, 
+                          PROVIDER %in% provider,
+                          VISIT_METHOD %in% visitMethod, 
+                          APPT_TYPE %in% visitType, 
+                          TO_DATE(mindateRange, format) <= APPT_MADE_DTTM, 
+                          TO_DATE(maxdateRange, format) >= APPT_MADE_DTTM, 
                           APPT_DAY %in% daysofweek#, 
                           #!HOLIDAY %in% holidays
   ) 
