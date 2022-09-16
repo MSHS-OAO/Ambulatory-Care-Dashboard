@@ -6104,7 +6104,10 @@ server <- function(input, output, session) {
     newpatients.ratio <- data %>%
       group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
-      spread(NEW_PT2, Total)
+      spread(NEW_PT2, Total) %>%
+      replace(is.na(.), 0)
+    
+    newpatients.ratio.test <<- newpatients.ratio
     
     newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
@@ -6119,7 +6122,8 @@ server <- function(input, output, session) {
       theme_bw()+
       graph_theme("none")+
       theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1),expand = c(0, 0), limits = c(0,max(newpatients.ratio$ratio)*1.5)) +
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1),expand = c(0, 0), limits = c(0,max(newpatients.ratio$ratio)*1.5)
+                         ) +
       stat_summary(fun.y = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..*100,"%")), group = APPT_MADE_MONTH_YEAR), geom="text", color="black", 
                    size=5, fontface="bold.italic")+
       theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
