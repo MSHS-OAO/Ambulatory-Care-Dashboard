@@ -2877,16 +2877,18 @@ server <- function(input, output, session) {
   provScheduledAppts_num <- reactive({
     numerator <- as.integer(dataArrivedNoShow() %>% summarise(total = n()) %>% collect())
     numerator_test <<- numerator
-    denominator <- length(dataArrivedNoShow() %>% select(APPT_DATE_YEAR) %>% summarise(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect())
+    denominator <- dataArrivedNoShow() %>% select(APPT_DATE_YEAR) %>% summarise(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
+    denominator <- length(denominator)
     denominator_test <<- denominator
     prettyNum(round(numerator/denominator), big.mark = ",")
   })
   
   # Average Daily Appts Scheduled
   output$provScheduledAppts <- renderValueBox({
+    provScheduledAppts_num() %>%
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
-      provScheduledAppts_num(),
+      #provScheduledAppts_num(),
       subtitle = tags$p("Avg. Appointments Scheduled per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -3987,38 +3989,36 @@ server <- function(input, output, session) {
   # Average Daily Appts Scheduled
   
   scheduledAppts_num <- reactive({
-    # data <- dataArrivedNoShow()
-    # numerator <- data %>% count(data) %>% collect()
-    # print(numerator)
-    # denominator <- data %>% count(unique(APPT_DATE_YEAR)) %>% collect()
-    # print(denominator)
-    # num <- prettyNum(round(numerator/denominator), big.mark = ",")
-    # num
-  })
-  output$scheduledAppts <- renderValueBox({
     data <- dataArrivedNoShow()
     numerator <- data %>% summarize(n()) %>% collect()
-    print(numerator)
-    denominator <- data %>% select(APPT_DATE_YEAR) %>% mutate(uni = unique(APPT_DATE_YEAR)) %>% collect()
-    denominator <- length(denominator$uni)
-    print(denominator)
+    denominator <- data %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
+    denominator <- length(denominator$APPT_DATE_YEAR)
     num <- prettyNum(round(numerator/denominator), big.mark = ",")
     num
+  })
+  output$scheduledAppts <- renderValueBox({
+    scheduledAppts_num() %>% 
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
-      num,
+      #num,
       subtitle = tags$p("Avg. Appointments Scheduled per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
   })
   
+  incompleteAppts_num <- reactive({
+    data <- dataArrivedNoShow()
+    numerator <- data %>% filter(APPT_STATUS == "No Show") %>% summarize(n()) %>% collect()
+    denominator <- data %>% summarize(n()) %>% collect()
+    num <- prettyNum(round(numerator/denominator,2)*100, big.mark = ",")
+  })
   # Average Daily Incomplete Appts
   output$incompleteAppts <- renderValueBox({
-    
+    incompleteAppts_num() %>% 
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
-      prettyNum(round(nrow(dataArrivedNoShow() %>% filter(Appt.Status != "Arrived")) / 
-                        nrow(dataArrivedNoShow()), 2)*100, big.mark = ","),
+      # prettyNum(round(nrow(dataArrivedNoShow() %>% filter(Appt.Status != "Arrived")) / 
+      #                   nrow(dataArrivedNoShow()), 2)*100, big.mark = ","),
       subtitle = tags$p("% of Incomplete Appointments", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -4454,9 +4454,13 @@ server <- function(input, output, session) {
     
     data <- dataCanceledBumpedRescheduled()
     # data <- canceled.bumped.rescheduled.data
+    numerator <- data %>% filter(APPT_STATUS == "Bumped") %>% summarise(n()) %>% collect()
+    denominator <- dataAll() %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
+    denominator <- length(denominator$APPT_DATE_YEAR)
     
     valueBox(
-      prettyNum(round(nrow(data %>% filter(Appt.Status == "Bumped"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
+      # prettyNum(round(nrow(data %>% filter(Appt.Status == "Bumped"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","),
+      prettyNum(round(numerator/denominator),big.mark=","), 
       subtitle = tags$p("Avg. Daily Bumped Appointments", style = "font-size: 160%;"), icon = NULL,
       color = "yellow"
     )
@@ -4466,10 +4470,13 @@ server <- function(input, output, session) {
   output$avgDailyCanceledBox <- renderValueBox({
     
     data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
-    
+    numerator <- data %>% filter(APPT_STATUS == "Canceled") %>% summarise(n()) %>% collect()
+    denominator <- dataAll() %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
+    denominator <- length(denominator$APPT_DATE_YEAR)
+
     valueBox(
-      prettyNum(round(nrow(data %>% filter(Appt.Status == "Canceled"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
+      # prettyNum(round(nrow(data %>% filter(Appt.Status == "Canceled"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
+      prettyNum(round(numerator/denominator),big.mark=","), 
       subtitle = tags$p("Avg. Daily Canceled Appointments", style = "font-size: 160%;"), icon = NULL,
       color = "yellow"
     )
@@ -4479,10 +4486,13 @@ server <- function(input, output, session) {
   output$avgDailyRescheduledBox <- renderValueBox({
     
     data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
+    numerator <- data %>% filter(APPT_STATUS == "Rescheduled") %>% summarise(n()) %>% collect()
+    denominator <- dataAll() %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
+    denominator <- length(denominator$APPT_DATE_YEAR)
     
     valueBox(
-      prettyNum(round(nrow(data %>% filter(Appt.Status == "Rescheduled"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
+      # prettyNum(round(nrow(data %>% filter(Appt.Status == "Rescheduled"))/length(unique(dataAll()$Appt.DateYear))),big.mark=","), 
+      prettyNum(round(numerator/denominator),big.mark=","), 
       subtitle = tags$p("Avg. Daily Rescheduled Appointments", style = "font-size: 160%;"), icon = NULL,
       color = "yellow"
     )
