@@ -7480,7 +7480,7 @@ server <- function(input, output, session) {
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT3"){
+    if(input$breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -7488,10 +7488,10 @@ server <- function(input, output, session) {
       name_1 <- "Specialty"
     }
     if(input$compare_filters == "DEPARTMENT"){
-      name_1 <- input$compare_filters
+      name_1 <- "Department"
     }
     if(input$compare_filters == "PROVIDER"){
-      name_1 <- input$compare_filters
+      name_1 <- "Provider"
     }
     
     paste0("Total Monthly Volume by ", name_1 , " and ", name_2)
@@ -7504,7 +7504,7 @@ server <- function(input, output, session) {
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT3"){
+    if(input$breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -7513,10 +7513,10 @@ server <- function(input, output, session) {
       name_1 <- "Specialty"
     }
     if(input$compare_filters == "DEPARTMENT"){
-      name_1 <- input$compare_filters
+      name_1 <- "Department"
     }
     if(input$compare_filters == "PROVIDER"){
-      name_1 <- input$compare_filters
+      name_1 <- "Provider"
     }
     paste0("Average Daily Volume by ", name_1 , " and ", name_2)
   })
@@ -7529,7 +7529,7 @@ server <- function(input, output, session) {
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT3"){
+    if(input$breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -7537,10 +7537,10 @@ server <- function(input, output, session) {
       name_1 <- "Specialty"
     }
     if(input$compare_filters == "DEPARTMENT"){
-      name_1 <- input$compare_filters
+      name_1 <- "Department"
     }
     if(input$compare_filters == "PROVIDER"){
-      name_1 <- input$compare_filters
+      name_1 <- "Provider"
     }
     paste0("Monthly New Patient Ratio (%) by ", name_1 , " and ", name_2)
   })
@@ -7554,7 +7554,7 @@ server <- function(input, output, session) {
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT3"){
+    if(input$breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -7562,10 +7562,10 @@ server <- function(input, output, session) {
       name_1 <- "Specialty"
     }
     if(input$compare_filters == "DEPARTMENT"){
-      name_1 <- input$compare_filters
+      name_1 <- "Department"
     }
     if(input$compare_filters == "PROVIDER"){
-      name_1 <- input$compare_filters
+      name_1 <- "Provider"
     }
     paste0("Monthly Median New Patient Wait Time (Days) by ", name_1 , " and ", name_2)
   })
@@ -7579,7 +7579,7 @@ server <- function(input, output, session) {
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT3"){
+    if(input$breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -7587,10 +7587,10 @@ server <- function(input, output, session) {
       name_1 <- "Specialty"
     }
     if(input$compare_filters == "DEPARTMENT"){
-      name_1 <- input$compare_filters
+      name_1 <- "Department"
     }
     if(input$compare_filters == "PROVIDER"){
-      name_1 <- input$compare_filters
+      name_1 <- "Provider"
     }
     
     paste0("Average Daily Booked and Filled Rate by ", name_1 , " and ", name_2)
@@ -7604,7 +7604,7 @@ server <- function(input, output, session) {
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT3"){
+    if(input$breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -7612,10 +7612,10 @@ server <- function(input, output, session) {
       name_1 <- "Specialty"
     }
     if(input$compare_filters == "DEPARTMENT"){
-      name_1 <- input$compare_filters
+      name_1 <- "Department"
     }
     if(input$compare_filters == "PROVIDER"){
-      name_1 <- input$compare_filters
+      name_1 <- "Provider"
     }
     
     paste0("Total Monthly Booked and Filled Rate by ", name_1 , " and ", name_2)
@@ -7693,7 +7693,7 @@ server <- function(input, output, session) {
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT3"){
+    if(breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
 
@@ -7716,7 +7716,7 @@ server <- function(input, output, session) {
       tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
-    if(input$breakdown_filters == "NEW_PT3"){
+    if(input$breakdown_filters == "NEW_PT2"){
       
       ### Group data by inputs and Month and Date.  Spread data to make columns FALSE and TRUE that determine number of new or established patients
       volume <- data %>% group_by(across(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
@@ -7784,12 +7784,16 @@ server <- function(input, output, session) {
        # summarise_at(vars(-!!breakdown_filters), sum) #%>%
         #relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
-      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) %>%
-        add_column(!!breakdown_filters := "Total") %>%
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # 
+      # volume <- full_join(volume,tot)
       
-      volume <- full_join(volume,tot)
+      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+        split( .[,tot_cols] ) %>%
+        purrr::map_df(., janitor::adorn_totals)
       
       #### GEt rowSUms of all columns with months
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
@@ -7798,8 +7802,6 @@ server <- function(input, output, session) {
       
     }else {
       print(cols)
-      data_test <<- data
-      cols_test <<- cols
       # 
       # if (compare_filters == "CAMPUS_SPEACILATY" && breakdown_filters == "VISIT_METHOD"){
       #   volume <- data %>% group_by(!!!syms(cols), APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>%
@@ -7833,13 +7835,19 @@ server <- function(input, output, session) {
       volume[is.na(volume)] <- 0
       
       
-      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum)  %>%
-        add_column(!!breakdown_filters := "Total") %>%
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum)  %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      
+      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+                  split( .[,tot_cols] ) %>%
+                  purrr::map_df(., janitor::adorn_totals)
+      
+      #test <- volume %>% group_by(CAMPUS_SPECIALTY, DEPARTMENT) %>% adorn_totals()
       
       
-      volume <- full_join(volume, tot)
+      #volume <- full_join(volume, tot) 
       
       ### Get average total by adding all the numbers in the months columns grouped by the volume filters
       #### Also added a column named by the breakdown filter to store the number Avergae Total NUmber
@@ -7855,40 +7863,42 @@ server <- function(input, output, session) {
       
       
     }
-    
+    volume_test <<- volume
     volume <- setnames(volume, old = cols, new = cols_name)
-    
-    volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
-    
+    #volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
+    volume$Total_YN <- ifelse(volume[["Specialty"]] == "Total", 1,0)
+
+    cols_name_test <<- cols_name
+ 
     
     months_df <- volume[,!(names(volume) %in% c(cols_name, "Total", "Total_YN"))]
-    months <- order(as.yearmon(colnames(months_df), "%b %Y"))
-    order_months <- months_df[months]
-    
-    
+    months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
+    #order_months <- months_df[months]
+
     index <- months+length(cols_name)
     index <- c(1:length(cols_name),index,(length(volume)-1):length(volume))
-    
+    #index <- c(1:length(cols_name),index,length(volume))
+
     volume <- volume[index]
+
     
-    
-    if(length(input$selectedSpecialty) > 1){
-      ## Adding "All" for aggregate total comparison
-      all <- volume %>% group_by(across(!!name_2)) %>% summarise_at(vars(names(order_months),Total), sum) %>%
-                         filter(across(!!name_2) !="Total")
-        
-       
-      all[cols_name[1:length(cols_name)-1]] <- ""
-      
-      all[[name_1]] <- "All"
-      all$Total_YN <- 1
-      
-      
-      all <- all %>% select(cols_name, everything())
-      
-      
-      volume <- full_join(all, volume)
-    }
+    # if(length(input$selectedSpecialty) > 1){
+    #   ## Adding "All" for aggregate total comparison
+    #   all <- volume %>% group_by(across(!!name_2)) %>% summarise_at(vars(names(order_months),Total), sum) %>%
+    #                      filter(across(!!name_2) !="Total")
+    #     
+    #    
+    #   all[cols_name[1:length(cols_name)-1]] <- ""
+    #   
+    #   all[[name_1]] <- "All"
+    #   all$Total_YN <- 1
+    #   
+    #   
+    #   all <- all %>% select(cols_name, everything())
+    #   
+    #   
+    #   volume <- full_join(all, volume)
+    # }
     
     #index <- months+length(cols_name)
     #index <- c(1:length(cols_name),index,length(volume))
@@ -8099,13 +8109,18 @@ server <- function(input, output, session) {
       volume <- full_join(volume_new,volume_est)
       
       #### Get total for each moth by adding all columns with months 
-      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) %>%
-        add_column(!!breakdown_filters := "Total") %>%
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # 
+      # 
+      # volume <- full_join(volume,tot)
       
       
-      volume <- full_join(volume,tot)
+      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+        split( .[,tot_cols] ) %>%
+        purrr::map_df(., janitor::adorn_totals)
       
       #### GEt rowSUms of all columns with months
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
@@ -8124,22 +8139,29 @@ server <- function(input, output, session) {
       volume[is.na(volume)] <- 0
       
       #### Sum all cloumns with months to get the total for the month
-      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) %>%
-        add_column(!!breakdown_filters := "Total") %>%
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
       
-      volume <- full_join(volume,tot)
+      #volume <- full_join(volume,tot)
+      
+      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+        split( .[,tot_cols] ) %>%
+        purrr::map_df(., janitor::adorn_totals)
+      
       
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
     }
     volume <- setnames(volume, old = cols, new = cols_name)
     
-    volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
+    #volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
+    
+    volume$Total_YN <- ifelse(volume[["Specialty"]] == "Total", 1,0)
     
     months_df <- volume[,!(names(volume) %in% c(cols_name, "Total", "Total_YN"))]
-    months <- order(as.yearmon(colnames(months_df), "%b %Y"))
+    months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
     order_months <- months_df[months]
     
     
@@ -8154,17 +8176,17 @@ server <- function(input, output, session) {
     volume <- setnames(volume, old = month_names, new = month_names_new)
     
     
-    if(length(input$selectedSpecialty) > 1){
-      all <- volume %>% group_by(across(!!name_2)) %>% summarise_at(vars(all_of(month_names_new),Total), sum) %>%
-        filter(across(!!name_2) !="Total")
-      
-      all[cols_name[1:length(cols_name)-1]] <- ""
-      all[[name_1]] <- "All"
-      all$Total_YN <- 1
-      all <- all %>% select(cols_name, everything())
-      
-      volume <- full_join(all, volume)
-    }
+    # if(length(input$selectedSpecialty) > 1){
+    #   all <- volume %>% group_by(across(!!name_2)) %>% summarise_at(vars(all_of(month_names_new),Total), sum) %>%
+    #     filter(across(!!name_2) !="Total")
+    #   
+    #   all[cols_name[1:length(cols_name)-1]] <- ""
+    #   all[[name_1]] <- "All"
+    #   all$Total_YN <- 1
+    #   all <- all %>% select(cols_name, everything())
+    #   
+    #   volume <- full_join(all, volume)
+    # }
     
     # volume <- cbind(volume[,1:2],round(volume[,3:length(volume)]))
     # 
@@ -8343,13 +8365,17 @@ server <- function(input, output, session) {
       
       
       #### Get total by summarising all columns with months in them 
-      tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) %>%
-        add_column(!!breakdown_filters := "Total") %>%
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # 
       
+      #newpatients.ratio <- full_join(newpatients.ratio,tot)
       
-      newpatients.ratio <- full_join(newpatients.ratio,tot)
+      newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+        split( .[,tot_cols] ) %>%
+        purrr::map_df(., janitor::adorn_totals)
       
     }else{
       
@@ -8376,23 +8402,28 @@ server <- function(input, output, session) {
       
       
       ##### sum all the columns with months in them to get the Totoal for the month
-      tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) %>%
-        add_column(!!breakdown_filters := "Total") %>%
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # 
+      # 
+      # newpatients.ratio <- full_join(newpatients.ratio,tot)
       
-      
-      newpatients.ratio <- full_join(newpatients.ratio,tot)
+      newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+        split( .[,tot_cols] ) %>%
+        purrr::map_df(., janitor::adorn_totals)
       
       
     }
     
     newpatients.ratio <- setnames(newpatients.ratio, old = cols, new = cols_name)
     
-    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[name_2]] == "Total", 1,0)
+    #newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[name_2]] == "Total", 1,0)
+    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[["Specialty"]] == "Total", 1,0)
     
     months_df <- newpatients.ratio[,!(names(newpatients.ratio) %in% c(cols_name, "Total", "Total_YN"))]
-    months <- order(as.yearmon(colnames(months_df), "%b %Y"))
+    months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
     
     
     index <- months+length(cols_name)
@@ -8409,7 +8440,7 @@ server <- function(input, output, session) {
     names_list <- colnames(newpatients.ratio[, !names(newpatients.ratio) %in% c(name_1,name_2)])
     myfun <- function(x) {
       if(is.numeric(x)){ 
-        ifelse(is.na(x), x, formattable::percent(x)) 
+        ifelse(is.na(x), x, scales::percent(x)) 
       } else x 
     }
     
@@ -8993,11 +9024,15 @@ server <- function(input, output, session) {
                     values_fill = 0) 
       
       #### Get total by summing all columns that are months
-      tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) 
+      # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) 
         #relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
       #waitTime <- full_join(waitTime,tot)
+      
+      waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+        split( .[,tot_cols] ) %>%
+        purrr::map_df(., janitor::adorn_totals)
       
       
     }else{
@@ -9026,22 +9061,27 @@ server <- function(input, output, session) {
                     values_fill = 0)
       
       
-      tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) %>%
-        add_column(!!breakdown_filters := "Total") %>%
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # 
+      # waitTime <- full_join(waitTime,tot) 
       
-      waitTime <- full_join(waitTime,tot) 
+      waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+        split( .[,tot_cols] ) %>%
+        purrr::map_df(., janitor::adorn_totals)
       
       
       
     }
     waitTime <- setnames(waitTime, old = cols, new = cols_name)
     
-    waitTime$Total_YN <- ifelse(waitTime[[name_2]] == "Total", 1,0)
+    
+    waitTime$Total_YN <- ifelse(waitTime[["Specialty"]] == "Total", 1,0)
     
     months_df <- waitTime[,!(names(waitTime) %in% c(cols_name, "Total", "Total_YN"))]
-    months <- order(as.yearmon(colnames(months_df), "%b %Y"))
+    months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
     order_months <- months_df[months]
     
     
