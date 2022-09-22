@@ -338,8 +338,8 @@ poolcon <- dbPool(drv  = odbc::odbc(),
 # ### New Location with Updated Data
 #historical.data <- readRDS("/data/Ambulatory/Data_Updated/historical_data.rds")
 # slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
- holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
- utilization.data <- readRDS("/nfs/data/Applications/Ambulatory/Data/utilization_data.rds")
+holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
+utilization.data <- readRDS("/nfs/data/Applications/Ambulatory/Data/utilization_data.rds")
 # population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
 # filter_path <- "/data/Ambulatory/Filters"
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
@@ -362,8 +362,8 @@ slot.data <- tbl(poolcon, "AMBULATORY_SLOT") #%>%
   #                  `Canceled Hours` = sum(CANCELED_MINUTES, na.rm = T)/60,
   #                  `No Show Hours` = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60)
 
-#holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
-#utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
+# holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
+# utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
 filter_path <- paste0(wdpath, "/Filters")
 
 max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM AMBULATORY_ACCESS")
@@ -471,7 +471,7 @@ timeOptions30m_filter <- c("07:00","07:30","08:00","08:30","09:00","09:30",
                            "10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30",
                            "15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00") ## Time Range by 30min Filter
 
-monthOptions <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+monthOptions <- toupper(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))
 
 # KPI Filters
 KPIvolumeOptions <- c("Appointment Volume","Appointment Status")

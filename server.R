@@ -726,7 +726,7 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-    groupByFilters(kpi.all.data,
+    groupByFilters(historical.data,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
@@ -759,7 +759,7 @@ server <- function(input, output, session) {
       need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-    groupByFilters(kpi.all.data[kpi.arrived.data.rows,],
+    groupByFilters(arrived.data.rows,
                    input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                    input$selectedVisitMethod, input$selectedPRCName, 
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
@@ -3206,15 +3206,18 @@ server <- function(input, output, session) {
   ### KPIs Tab ------------------------------------------------------------------------------------------------------------------------
   # Volume KPI ====================================================================
   output$kpiVolumeGraph <- renderPlot({
-    kpiVolumeData <- aggregate(dataArrivedKpi()$uniqueId, by=list(dataArrivedKpi()$Appt.Year,dataArrivedKpi()$Appt.Quarter,
-                                                                  dataArrivedKpi()$Appt.Month, dataArrivedKpi()$Appt.Date, dataArrivedKpi()$Appt.MonthYear, dataArrivedKpi()$Appt.DateYear), FUN=NROW)
+    data <- dataArrivedKpi()
+    # kpiVolumeData <- aggregate(dataArrivedKpi()$uniqueId, by=list(dataArrivedKpi()$Appt.Year,dataArrivedKpi()$Appt.Quarter,
+    #                                                               dataArrivedKpi()$Appt.Month, dataArrivedKpi()$Appt.Date, dataArrivedKpi()$Appt.MonthYear, dataArrivedKpi()$Appt.DateYear), FUN=NROW)
+    
+    kpiVolumeData <- data %>% group_by(APPT_YEAR, APPT_QUARTER, APPT_MONTH, APPT_DATE, APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = n()) %>% collect()
     
     # arrived.data <- kpi.all.data[arrived.data.rows,]
     # kpiVolumeData <- aggregate(arrived.data$uniqueId, by=list(arrived.data$Appt.Year,arrived.data$Appt.Quarter,
     #                                                          arrived.data$Appt.Month, arrived.data$Appt.Date, arrived.data$Appt.MonthYear, arrived.data$Appt.DateYear), FUN=NROW)
     
     colnames(kpiVolumeData) <- c("Year","Quarter","Month","Date","YearMonth","DateYear","Volume")
-    kpiVolumeData$DateYear <-as.Date(kpiVolumeData$DateYear, "%Y-%m-%d")
+    kpiVolumeData$DateYear <-as.Date(format(kpiVolumeData$DateYear, "%Y-%m-%d") , "%Y-%m-%d")
     
     kpiVolumeDataYear <- kpiVolumeData %>% group_by(Year) %>% dplyr::summarise(Total = round(sum(Volume)))
     kpiVolumeDataQuarter <- kpiVolumeData %>% group_by(Year, Quarter) %>% dplyr::summarise(Total = round(sum(Volume)))
@@ -3284,7 +3287,7 @@ server <- function(input, output, session) {
       
     } else { 
       if(input$kpiFreq == 1){ # Year
-        ggplot(kpiVolumeDataYear %>% mutate(Label = "Year"), aes(x=Label, y=Total, col=Year,group=Year)) +
+        ggplot(kpiVolumeDataYear %>% mutate(Label = "Year"), aes(x=Label, y=Total, col=factor(Year),group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Patients",
@@ -3298,7 +3301,7 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2){ # Quarter 
-        ggplot(kpiVolumeDataQuarter, aes(x=Quarter, y=Total, col=Year,group=Year)) +
+        ggplot(kpiVolumeDataQuarter, aes(x=Quarter, y=Total, col=factor(Year),group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Patients",
@@ -3312,7 +3315,7 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        ggplot(kpiVolumeDataMonth, aes(x = factor(x=Month, level= monthOptions), y=Total, col=Year,group=Year)) +
+        ggplot(kpiVolumeDataMonth, aes(x = factor(x=Month, level= monthOptions), y=Total, col=factor(Year),group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Patients",
@@ -3326,7 +3329,7 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 4){ # Day
-        ggplot(kpiVolumeData, aes(x=as.Date(DateYear,"%m-%d"), y=Volume, col=Year,group=Year)) +
+        ggplot(kpiVolumeData, aes(x=as.Date(DateYear,"%m-%d"), y=Volume, col=factor(Year),group=Year)) +
           geom_line() +
           labs(x = NULL, y = "Patients",
                title = "Comparison of Patient Volume by Day",
@@ -3346,10 +3349,18 @@ server <- function(input, output, session) {
   
   # Appt Status KPI ========================================================================
   output$kpiApptStatusGraph <- renderPlot({
-    statusData <- dataAll() %>% 
-      group_by(Appt.Year, Appt.Quarter, Appt.Month, Appt.Date, Appt.Status, Appt.MonthYear, Appt.DateYear) %>%
-      summarise(total = n()) %>%
-      `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
+    # statusData <- dataAll() %>% 
+    #   group_by(Appt.Year, Appt.Quarter, Appt.Month, Appt.Date, Appt.Status, Appt.MonthYear, Appt.DateYear) %>%
+    #   summarise(total = n()) %>%
+      # `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
+    
+    data <- dataAll()
+
+    statusData <- data %>% 
+      group_by(APPT_YEAR, APPT_QUARTER, APPT_MONTH, APPT_DATE, APPT_STATUS, APPT_MONTH_YEAR, APPT_DATE_YEAR) %>%
+      summarise(total = n()) %>% collect() %>%
+      `colnames<-` (c("Year", "Quarter", "Month","Date","Status","YearMonth","DateYear","Count"))
+    
     
     # statusData <- kpi.all.data[all.data.rows,] %>%
     #   group_by(Appt.Year, Appt.Quarter, Appt.Month, Appt.Date, Appt.Status, Appt.MonthYear, Appt.DateYear) %>%
@@ -3469,7 +3480,7 @@ server <- function(input, output, session) {
       }
     } else {
       if(input$kpiFreq == 1){ # Year
-        ggplot(statusDataYear %>% mutate(Label = "Year"), aes(x=Label, y=value, col=Year,group=Year)) +
+        ggplot(statusDataYear %>% mutate(Label = "Year"), aes(x=Label, y=value, col=factor(Year),group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = NULL,
@@ -3485,7 +3496,7 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2){ # Quarter
-        ggplot(statusDataQuarter, aes(x=Quarter, y=value, col=Year,group=Year)) +
+        ggplot(statusDataQuarter, aes(x=Quarter, y=value, col=factor(Year),group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = NULL, 
@@ -3501,7 +3512,7 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        ggplot(statusDataMonth, aes(x=factor(Month, level = monthOptions), y=value, col=Year,group=Year)) +
+        ggplot(statusDataMonth, aes(x=factor(Month, level = monthOptions), y=value, col=factor(Year),group=Year)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = NULL, 
@@ -3517,7 +3528,7 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 4){ # Day
-        ggplot(statusDataDay, aes(x=as.Date(DateYear,"%m-%d"), y=value, col=Year,group=Year)) +
+        ggplot(statusDataDay, aes(x=as.Date(DateYear,"%m-%d"), y=value, col=factor(Year),group=Year)) +
           geom_line() +
           labs(x = NULL, y = NULL, 
                title = "Historical Trend of Scheduling Status by Day",
@@ -3546,13 +3557,13 @@ server <- function(input, output, session) {
     # data <- kpi.all.data %>% filter(Campus == "MSUS")
     
     
-    data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"), 2))
-    data <- data %>% filter(New.PT3 == TRUE) %>% filter(wait.time >= 0)
+    # data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"), 2))
+    data <- data %>% filter(NEW_PT2 == "NEW") %>% filter(WAIT_TIME >= 0)
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
-        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=Appt.Year, y=mean, group=1)) +
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=APPT_YEAR, y=mean, group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days",
@@ -3565,9 +3576,9 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2) { # Quarter
-        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>%
-          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>%
+          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=interaction(APPT_YEAR,APPT_QUARTER,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days",
@@ -3580,9 +3591,9 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(Appt.MonthYear) %>% 
-          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.MonthYear,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(APPT_MONTH_YEAR) %>% 
+          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=interaction(APPT_MONTH_YEAR,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days", 
@@ -3596,9 +3607,9 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else { # Day
-        data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>%
-          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE)))
-        data_filter$DateYear <- as.Date(with(data_filter, paste(Appt.Year, Appt.Date,sep="-")), "%Y-%m-%d")
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE) %>%
+          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        data_filter$DateYear <- as.Date(with(data_filter, paste(APPT_YEAR, APPT_DATE,sep="-")), "%Y-%m-%d")
         ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean, group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Days",
@@ -3614,9 +3625,9 @@ server <- function(input, output, session) {
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
-        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
-          mutate(Label = "Year")
-        ggplot(data_filter, aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% 
+          mutate(Label = "Year") %>% collect()
+        ggplot(data_filter, aes(x=Label, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days", 
                title = "Average Wait Time to New Appointment by Year",
@@ -3629,10 +3640,10 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2){ # Quarter 
-        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
-          mutate(Label = "Quarter")
-        ggplot(data_filter, aes(x=Appt.Quarter, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
+          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% 
+          mutate(Label = "Quarter") %>% collect()
+        ggplot(data_filter, aes(x=APPT_QUARTER, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days", 
@@ -3646,12 +3657,12 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
-          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>% 
-          mutate(Label = "Month") #%>%
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_MONTH) %>% 
+          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% 
+          mutate(Label = "Month") %>% collect()
         #rename(Appt.Year = Year)
         
-        ggplot(data_filter, aes(x = factor(Appt.Month, level = monthOptions), y=mean, col=Appt.Year,group=Appt.Year)) +
+        ggplot(data_filter, aes(x = factor(APPT_MONTH, level = monthOptions), y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days",
@@ -3666,10 +3677,10 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 4){ # Day
-        data_filter <- data %>% group_by(Appt.DateYear, Appt.Year) %>%
-          dplyr::summarise(mean = round(mean(wait.time, na.rm=TRUE))) %>%
-          mutate(Label = "Date")
-        ggplot(data_filter, aes(x = Appt.DateYear, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_DATE_YEAR, APPT_YEAR) %>%
+          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>%
+          mutate(Label = "Date") %>% collect() %>% mutate(APPT_DATE_YEAR = as.Date(format(APPT_DATE_YEAR, "%Y-%m-%d"), "%Y-%m-%d"))
+        ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           labs(x = NULL, y = "Days",
                title = "Average Wait Time to New Appointment by Day",
@@ -3692,13 +3703,14 @@ server <- function(input, output, session) {
   # Day of Visit KPI ========================================================================
   ## Avg Check-in to Visit-end
   output$kpiCycleTimeGraph <- renderPlot({
-    data <- dataArrivedKpi() %>% filter(cycleTime > 0)
+    data <- dataArrivedKpi() %>% filter(CYCLETIME > 0)
     # data <- kpi.arrived.data %>% filter(cycleTime > 0)
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
-        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=Appt.Year, y=mean, group=1)) +
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>%
+          collect()
+        ggplot(data_filter, aes(x=APPT_YEAR, y=mean, group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
@@ -3711,9 +3723,9 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2) { # Quarter
-        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
+          dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=interaction(APPT_YEAR,APPT_QUARTER,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
@@ -3726,9 +3738,9 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(Appt.MonthYear) %>% 
-          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.MonthYear,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(APPT_MONTH_YEAR) %>% 
+          dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=interaction(APPT_MONTH_YEAR,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
@@ -3741,9 +3753,9 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else { # Day
-        data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
-          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE)))
-        data_filter$DateYear <- as.Date(with(data_filter, paste(Appt.Year, Appt.Date,sep="-")), "%Y-%m-%d")
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE) %>% 
+          dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% collect()
+        data_filter$DateYear <- as.Date(with(data_filter, paste(APPT_YEAR, APPT_DATE,sep="-")), "%Y-%m-%d")
         ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
           #ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
@@ -3761,9 +3773,9 @@ server <- function(input, output, session) {
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
-        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
-          mutate(Label = "Year")
-        ggplot(data_filter, aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% 
+          mutate(Label = "Year") %>% collect()
+        ggplot(data_filter, aes(x=Label, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)",  
@@ -3778,10 +3790,10 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2){ # Quarter 
-        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
-          mutate(Label = "Quarter")
-        ggplot(data_filter, aes(x=Appt.Quarter, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
+          dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% 
+          mutate(Label = "Quarter") %>% collect()
+        ggplot(data_filter, aes(x=APPT_QUARTER, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
@@ -3796,10 +3808,10 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
-          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
-          mutate(Label = "Month")
-        ggplot(data_filter, aes(x = factor(Appt.Month, level = monthOptions), y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_MONTH) %>% 
+          dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% 
+          mutate(Label = "Month") %>% collect()
+        ggplot(data_filter, aes(x = factor(APPT_MONTH, level = monthOptions), y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)",
@@ -3814,10 +3826,10 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 4){ # Day
-        data_filter <- data %>% group_by(Appt.Year, Appt.DateYear) %>% 
-          dplyr::summarise(mean = round(mean(cycleTime, na.rm=TRUE))) %>% 
-          mutate(Label = "Date")
-        ggplot(data_filter, aes(x = Appt.DateYear, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE_YEAR) %>% 
+          dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% 
+          mutate(Label = "Date") %>% collect() %>% mutate(APPT_DATE_YEAR = as.Date(format(APPT_DATE_YEAR, "%Y-%m-%d"), "%Y-%m-%d"))
+        ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Visit-End Time (Min.) by Day",
@@ -3839,13 +3851,14 @@ server <- function(input, output, session) {
   
   ## Check-in to Room-in Wait Time
   output$kpiWaitTimeGraph <- renderPlot({
-    data <- dataArrivedKpi() %>% filter(checkinToRoomin > 0)
+    data <- dataArrivedKpi() %>% filter(CHECKINTOROOMIN > 0)
     # data <- kpi.arrived.data %>% filter(checkinToRoomin > 0)
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
-        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=Appt.Year, y=mean, group=1)) +
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>%
+          collect()
+        ggplot(data_filter, aes(x=APPT_YEAR, y=mean, group=1)) +
           #stat_summary(fun.y="mean", geom="line")+
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
@@ -3859,9 +3872,9 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2) { # Quarter
-        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.Year,Appt.Quarter,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
+          dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=interaction(APPT_YEAR,APPT_QUARTER,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
@@ -3874,9 +3887,9 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(Appt.MonthYear) %>% 
-          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
-        ggplot(data_filter, aes(x=interaction(Appt.MonthYear,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(APPT_MONTH_YEAR) %>% 
+          dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=interaction(APPT_MONTH_YEAR,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
@@ -3890,9 +3903,9 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else { # Day
-        data_filter <- data %>% group_by(Appt.Year, Appt.Date) %>% 
-          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE)))
-        data_filter$DateYear <- as.Date(with(data_filter, paste(Appt.Year, Appt.Date,sep="-")), "%Y-%m-%d")
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE) %>% 
+          dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>% collect()
+        data_filter$DateYear <- as.Date(with(data_filter, paste(APPT_YEAR, APPT_DATE,sep="-")), "%Y-%m-%d")
         ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
@@ -3909,9 +3922,9 @@ server <- function(input, output, session) {
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
-        data_filter <- data %>% group_by(Appt.Year) %>% dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
-          mutate(Label = "Year")
-        ggplot(data_filter, aes(x=Label, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>% 
+          mutate(Label = "Year") %>% collect()
+        ggplot(data_filter, aes(x=Label, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
@@ -3926,10 +3939,10 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2){ # Quarter 
-        data_filter <- data %>% group_by(Appt.Year, Appt.Quarter) %>% 
-          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
-          mutate(Label = "Quarter")
-        ggplot(data_filter, aes(x=Appt.Quarter, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
+          dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>% 
+          mutate(Label = "Quarter") %>% collect()
+        ggplot(data_filter, aes(x=APPT_QUARTER, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
@@ -3944,10 +3957,10 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(Appt.Year, Appt.Month) %>% 
-          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
-          mutate(Label = "Month")
-        ggplot(data_filter, aes(x = factor(Appt.Month, level = monthOptions), y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_MONTH) %>% 
+          dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>% 
+          mutate(Label = "Month") %>% collect()
+        ggplot(data_filter, aes(x = factor(APPT_MONTH, level = monthOptions), y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
@@ -3962,10 +3975,10 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 4){ # Day
-        data_filter <- data %>% group_by(Appt.Year, Appt.DateYear) %>% 
-          dplyr::summarise(mean = round(mean(checkinToRoomin, na.rm=TRUE))) %>% 
-          mutate(Label = "Date")
-        ggplot(data_filter, aes(x = Appt.DateYear, y=mean, col=Appt.Year,group=Appt.Year)) +
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE_YEAR) %>% 
+          dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>% 
+          mutate(Label = "Date") %>% collect() %>% mutate(APPT_DATE_YEAR = as.Date(format(APPT_DATE_YEAR, "%Y-%m-%d"), "%Y-%m-%d"))
+        ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           labs(x = NULL, y = "Time (min)", 
                title = "Average Check-in to Room-in Time (Min.) by Day",
@@ -4250,8 +4263,14 @@ server <- function(input, output, session) {
   
   # Total No Shows per Day
   output$avgDailyNoShow_Count <- renderValueBox({
+    data <- dataNoShow_1()
+    numerator <- data %>% filter(APPT_STATUS == "No Show") %>% summarise(n()) %>% collect()
+    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS == "Arrived") %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
+    denominator <- length(denominator$APPT_DATE_YEAR)
+    
     valueBox(
-      prettyNum(round(nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / length(unique((dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
+      # prettyNum(round(nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / length(unique((dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
+      prettyNum(round(numerator/denominator),big.mark=","), 
       subtitle = tags$p("Avg. No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -4259,9 +4278,13 @@ server <- function(input, output, session) {
   
   # % No Shows per Day
   output$avgDailyNoShow_Perc <- renderValueBox({
+    numerator <- dataNoShow_1() %>% filter(APPT_STATUS == "No Show") %>% summarise(n()) %>% collect()
+    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% summarise(n()) %>% collect()
     valueBox(
-      paste0(round((nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
-                      nrow(dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))))*100,1), "%"),
+      # paste0(round((nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
+      #                 nrow(dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))))*100,1), "%"),
+      paste0(round((numerator / 
+                      denominator)*100,1), "%"),
       subtitle = tags$p("No Show Rate (%)", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
@@ -6787,12 +6810,18 @@ server <- function(input, output, session) {
   # (1) Cycle Times --------------------------------------------------------------------------
   
   output$cycleTimeCompNew <- renderValueBox({
+    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT2 == "NEW") %>% select(CYCLETIME) %>%
+      summarise(CYCLETIME = round(mean(CYCLETIME, na.rm = T))) %>%
+      collect()
+    perc <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT2 == "NEW") %>% summarize(n()) %>% collect() /
+            dataArrived() %>% filter(NEW_PT2 == "NEW")%>% summarize(n()) %>% collect()
     
     valueBoxSpark(
-      value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
+      # value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
+      value =  paste0(data$CYCLETIME," min"),
       #title = toupper("Average New Patients Check-in to Visit-end Time**"),
       title = toupper("Average New Patients Check-in to Visit-end Time*"),
-      subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(cycleTime > 0))/nrow(dataArrived()),2)*100,
+      subtitle = paste0("*Based on ",round(perc,2)*100,
                            "% of total arrived new patients based on visit timestamps" 
                     ),
    
@@ -6803,13 +6832,19 @@ server <- function(input, output, session) {
   })
   
   output$cycleTimeCompOther <- renderValueBox({
+    data <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT2 == "ESTABLISHED") %>% select(CYCLETIME) %>%
+      summarise(CYCLETIME = mean(CYCLETIME, na.rm = T)) %>% collect()
     
+    perc <- dataNewComparison() %>% filter(CYCLETIME > 0 , NEW_PT2 == "ESTABLISHED") %>% summarise(n()) %>% collect() / 
+            dataArrived() %>% filter(NEW_PT2 == "ESTABLISHED")%>% summarise(n()) %>% collect()
     valueBoxSpark(
-      value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
+      # value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
+      value =  paste0(round(data$CYCLETIME)," min"),
       title = toupper(ifelse(length(unique(dataNewComparison()$Appt.Type)) == 1,
                              paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
                              "Average Established Patients Check-in to Visit-end Time*")),
-      subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
+      # subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
+      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
       color = "fuchsia"
     )
@@ -7071,11 +7106,18 @@ server <- function(input, output, session) {
   # (2) Room-in Times ----------------------------------------------------------------------
   
   output$roomInTimeCompNew <- renderValueBox({
+    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "NEW") %>% select(CHECKINTOROOMIN) %>%
+      summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T))  %>% collect()
+    
+    perc <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "NEW") %>% summarise(n()) %>% collect() /
+            dataArrived() %>% filter(NEW_PT2 == "NEW") %>% summarise(n()) %>% collect()
     
     valueBoxSpark(
-      value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
+      # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
+      value =  paste0(round(data)," min"),
       title = toupper("Avg. New Appointments Check-in to Room-in Time"),
-      subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
+      # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
+      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
       width = 6,
       color = "fuchsia"
     )
@@ -7083,13 +7125,21 @@ server <- function(input, output, session) {
   })
   
   output$roomInTimeCompOther <- renderValueBox({
+    data <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "ESTABLISHED") %>% select(CHECKINTOROOMIN) %>%
+      summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T)) %>% collect()
+    
+    perc <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "ESTABLISHED") %>%
+            summarise(n()) %>% collect() / dataArrived() %>% filter(NEW_PT2 == "ESTABLISHED") %>%
+            summarise(n()) %>% collect()
     
     valueBoxSpark(
-      value =  paste0(round(mean((dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
+      # value =  paste0(round(mean((dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
+      value =  paste0(round(data)," min"),
       title = toupper(ifelse(length(unique(dataNewComparison2()$Appt.Type)) == 1,
                              paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
                              "Avg. Established Appointments Check-in to Room-in Time")),
-      subtitle = paste0("*Based on ",round(nrow(dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
+      # subtitle = paste0("*Based on ",round(nrow(dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
+      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
       color = "fuchsia"
     )
