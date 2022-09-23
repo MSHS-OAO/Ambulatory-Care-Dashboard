@@ -5209,7 +5209,7 @@ server <- function(input, output, session) {
   
   output$ins_breakdown_tb <- function(){
     
-    data <- dataArrived() 
+    data <- dataArrivedPop() 
     #data <-  arrived.data.rows %>%  filter(CAMPUS== "MSUS")
     
     data <- data %>%
@@ -5400,16 +5400,8 @@ server <- function(input, output, session) {
   
   
   output$population1 <- renderLeaflet({
-    # #data(zipcode)
-    # zipcode <- read_feather(here::here("Data/zipcode.feather"))
-    # 
-    # population.data <- 
-    #   dataArrived()[,c("Campus","Campus.Specialty","Department","MRN","Zip.Code","Sex","Coverage","uniqueId")]
-    # 
-    # population.data$zip <- normalize_zip(population.data$Zip.Code)
-    # 
-    # population.data <- merge(population.data, zipcode, by.x='zip', by.y='zip')
     
+    # population.data <- dataArrivedPop()
     population.data <- dataArrivedPop()
     
     #population.data <- population_tbl %>% filter(CAMPUS_SPECIALTY== "Allergy")

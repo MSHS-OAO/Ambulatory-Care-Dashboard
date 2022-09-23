@@ -77,9 +77,10 @@ dateRangepop_max <- glue("Select max(APPT_DTTM) AS maxDate FROM AMBULATORY_POPUL
 dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
 dateRangepop_max <- as.Date(dateRangepop_max$MAXDATE, format="%Y-%m-%d")
 
-dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_POPULATION")
-dateRangepop_min <- dbGetQuery(poolcon, dateRangepop_min)
-dateRangepop_min <- as.Date(dateRangepop_min$MINDATE, format="%Y-%m-%d")
+# dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_POPULATION")
+# dateRangepop_min <- dbGetQuery(poolcon, dateRangepop_min)
+# dateRangepop_min <- as.Date(dateRangepop_min$MINDATE, format="%Y-%m-%d")
+dateRangepop_min <- dateRange_min
 
 
 header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),
@@ -1726,18 +1727,18 @@ ui <- dashboardPage(
                    condition = "input.sbm=='population'",
                    box(
                      title = "Select Date Range:",
-                     width = 12, 
+                     width = 12,
                      height = "100px",
-                     solidHeader = FALSE, 
+                     solidHeader = FALSE,
                      dateRangeInput("dateRangepop", label = NULL,
                                     start = dateRangepop_min, end = dateRangepop_max,
                                     min = dateRangepop_min, max = dateRangepop_max)),
                    box(
                      title = "Select Days of Week:",
-                     width = 12, 
-                     solidHeader = FALSE, 
+                     width = 12,
+                     solidHeader = FALSE,
                      selectInput("daysOfWeek",label = NULL,
-                                 choices=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"), selected = daysOfWeek.options,
+                                 choices=daysOfWeek.options, selected = daysOfWeek.options,
                                  multiple=TRUE, selectize=TRUE))
                  ),
                  
