@@ -3211,7 +3211,8 @@ server <- function(input, output, session) {
     #                                                               dataArrivedKpi()$Appt.Month, dataArrivedKpi()$Appt.Date, dataArrivedKpi()$Appt.MonthYear, dataArrivedKpi()$Appt.DateYear), FUN=NROW)
     
     kpiVolumeData <- data %>% group_by(APPT_YEAR, APPT_QUARTER, APPT_MONTH, APPT_DATE, APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = n()) %>% collect()
-    
+    kpiVolumeData$APPT_YEAR <- as.character(kpiVolumeData$APPT_YEAR)
+    print(str(kpiVolumeData))
     # arrived.data <- kpi.all.data[arrived.data.rows,]
     # kpiVolumeData <- aggregate(arrived.data$uniqueId, by=list(arrived.data$Appt.Year,arrived.data$Appt.Quarter,
     #                                                          arrived.data$Appt.Month, arrived.data$Appt.Date, arrived.data$Appt.MonthYear, arrived.data$Appt.DateYear), FUN=NROW)
@@ -3360,6 +3361,7 @@ server <- function(input, output, session) {
       group_by(APPT_YEAR, APPT_QUARTER, APPT_MONTH, APPT_DATE, APPT_STATUS, APPT_MONTH_YEAR, APPT_DATE_YEAR) %>%
       summarise(total = n()) %>% collect() %>%
       `colnames<-` (c("Year", "Quarter", "Month","Date","Status","YearMonth","DateYear","Count"))
+    statusData$Year <- as.character(statusData$Year)
     
     
     # statusData <- kpi.all.data[all.data.rows,] %>%
@@ -3563,6 +3565,7 @@ server <- function(input, output, session) {
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
         data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=APPT_YEAR, y=mean, group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
@@ -3578,6 +3581,7 @@ server <- function(input, output, session) {
       } else if(input$kpiFreq == 2) { # Quarter
         data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>%
           dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=interaction(APPT_YEAR,APPT_QUARTER,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
@@ -3609,6 +3613,7 @@ server <- function(input, output, session) {
       } else { # Day
         data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE) %>%
           dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         data_filter$DateYear <- as.Date(with(data_filter, paste(APPT_YEAR, APPT_DATE,sep="-")), "%Y-%m-%d")
         ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean, group=1)) +
           geom_line(color="midnightblue") +
@@ -3627,6 +3632,7 @@ server <- function(input, output, session) {
       if(input$kpiFreq == 1){ # Year
         data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% 
           mutate(Label = "Year") %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=Label, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days", 
@@ -3710,6 +3716,7 @@ server <- function(input, output, session) {
       if(input$kpiFreq == 1){ #Year
         data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>%
           collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=APPT_YEAR, y=mean, group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
@@ -3725,6 +3732,7 @@ server <- function(input, output, session) {
       } else if(input$kpiFreq == 2) { # Quarter
         data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
           dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=interaction(APPT_YEAR,APPT_QUARTER,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
@@ -3775,6 +3783,7 @@ server <- function(input, output, session) {
       if(input$kpiFreq == 1){ # Year
         data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% 
           mutate(Label = "Year") %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=Label, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
@@ -3793,6 +3802,7 @@ server <- function(input, output, session) {
         data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
           dplyr::summarise(mean = round(mean(CYCLETIME, na.rm=TRUE))) %>% 
           mutate(Label = "Quarter") %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=APPT_QUARTER, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
@@ -3858,6 +3868,7 @@ server <- function(input, output, session) {
       if(input$kpiFreq == 1){ #Year
         data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>%
           collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=APPT_YEAR, y=mean, group=1)) +
           #stat_summary(fun.y="mean", geom="line")+
           geom_line(color="midnightblue") +
@@ -3874,6 +3885,7 @@ server <- function(input, output, session) {
       } else if(input$kpiFreq == 2) { # Quarter
         data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
           dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=interaction(APPT_YEAR,APPT_QUARTER,lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
@@ -3924,6 +3936,7 @@ server <- function(input, output, session) {
       if(input$kpiFreq == 1){ # Year
         data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(CHECKINTOROOMIN, na.rm=TRUE))) %>% 
           mutate(Label = "Year") %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
         ggplot(data_filter, aes(x=Label, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
