@@ -378,7 +378,7 @@ max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 # future.slot.data <- slot.data.subset %>% filter(Appt.DTTM > max_date, Appt.DTTM <= max_date + 90)
 # rm(slot.data.subset)
 
-setDT(utilization.data)
+#setDT(utilization.data)
 # setDT(slot.data.subset)
 #setDT(historical.data)
 #kpi.all.data <- historical.data[Appt.DTTM >= max_date - 3*365]
@@ -442,13 +442,13 @@ canceled.bumped.rescheduled.data.rows <- historical.data %>% filter(APPT_STATUS 
 
 #all.slot.rows <- c(past.slot.data.rows,future.slot.data.rows)
 
-scheduled.utilization.data.rows <- utilization.data[util.type == "scheduled", which = TRUE]
-
-arrived.utilization.data.rows <- utilization.data[util.type == "actual", which = TRUE]
+# scheduled.utilization.data.rows <- utilization.data[util.type == "scheduled", which = TRUE]
+# 
+# arrived.utilization.data.rows <- utilization.data[util.type == "actual", which = TRUE]
 
 #kpi.all.data <- as.data.frame(kpi.all.data)
 # slot.data.subset <- as.data.frame(slot.data.subset)
-utilization.data <- as.data.frame(utilization.data)
+#utilization.data <- as.data.frame(utilization.data)
 
 
 ### (6) Shiny App Components Set-up -------------------------------------------------------------------------------
@@ -492,19 +492,19 @@ Time <- rep(timeOptionsHr, 7)
 Day <- rep(daysOfWeek.options, each = 24)
 byDayTime.df <- as.data.frame(cbind(Day,Time)) ## Empty data frame for day of week by time (hour)
 
-dateInData <- length(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear))
-Date <- rep(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear), each = 24)
-Time <- rep(timeOptionsHr, dateInData)
-byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (hour)
+# dateInData <- length(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear))
+# Date <- rep(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear), each = 24)
+# Time <- rep(timeOptionsHr, dateInData)
+# byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (hour)
 
 Time <- rep(timeOptions30m, 7)
 Day <- rep(daysOfWeek.options, each = 48)
 byDayTime30m.df <- as.data.frame(cbind(Day,Time)) ## Empty data frame for day of week by time (30-min)
 
-dateInData <- length(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear))
-Date <- rep(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear), each = 24)
-Time <- rep(timeOptionsHr, dateInData)
-byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (30-min)
+# dateInData <- length(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear))
+# Date <- rep(unique(utilization.data[arrived.utilization.data.rows,]$Appt.DateYear), each = 24)
+# Time <- rep(timeOptionsHr, dateInData)
+# byDateTime.df <- as.data.frame(cbind(Date,Time)) ## Empty data frame for date and time (30-min)
 
 byTime.df <- as.data.frame(timeOptionsHr)
 colnames(byTime.df) <- c("Time") ## Empty data frame for time (hour)
