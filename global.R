@@ -338,7 +338,7 @@ poolcon <- dbPool(drv  = odbc::odbc(),
 # ### New Location with Updated Data
 #historical.data <- readRDS("/data/Ambulatory/Data_Updated/historical_data.rds")
 # slot.data.subset <- readRDS("/data/Ambulatory/Data_Updated/slot_data.rds")
-holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
+# holid <- as.data.frame(read_feather("/data/Ambulatory/Data_Updated/holid.feather"))
 utilization.data <- readRDS("/nfs/data/Applications/Ambulatory/Data/utilization_data.rds")
 # population.data_filtered  <- readRDS("/data/Ambulatory/Data_Updated/population_data.rds")
 # filter_path <- "/data/Ambulatory/Filters"
@@ -347,6 +347,8 @@ utilization.data <- readRDS("/nfs/data/Applications/Ambulatory/Data/utilization_
 
 historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
 filters <- tbl(poolcon, "AMBULATORY_FILTERS")
+holid <- tbl(poolcon, "HOLIDAYS")
+holid <- holid %>% distinct(HOLIDAY) %>% rename(holiday = HOLIDAY) %>% collect()
 
 
 population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
