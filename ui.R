@@ -45,8 +45,14 @@ default_PRC_name <-  historical.data %>% filter(CAMPUS %in% default_campus &
 default_PRC_name <- sort(default_PRC_name$APPT_TYPE, na.last = T) 
 
 
-util_date_start = min(utilization.data$Appt.DateYear)
-util_date_end = max(utilization.data$Appt.DateYear)
+# util_date_start = min(utilization.data$Appt.DateYear)
+# util_date_end = max(utilization.data$Appt.DateYear)
+
+util_date_start <- utilization.data %>% summarise(start = min(APPT_DATE_YEAR, na.rm = T)) %>% collect()
+util_date_start <- format(util_date_start$start, "%Y-%m-%d")
+
+util_date_end <- utilization.data %>% summarise(start = max(APPT_DATE_YEAR, na.rm = T)) %>% collect()
+util_date_end <- format(util_date_end$start, "%Y-%m-%d")
 
 dateRange_max <- max_date_arrived
 
