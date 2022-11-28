@@ -48,19 +48,26 @@ default_PRC_name <- sort(default_PRC_name$APPT_TYPE, na.last = T)
 # util_date_start = min(utilization.data$Appt.DateYear)
 # util_date_end = max(utilization.data$Appt.DateYear)
 
-util_date_start <- utilization.data %>% summarise(start = min(APPT_DATE_YEAR, na.rm = T)) %>% collect()
-util_date_start <- format(util_date_start$start, "%Y-%m-%d")
+# util_date_start <- utilization.data %>% select(APPT_DATE_YEAR) %>% summarise(start = min(APPT_DATE_YEAR, na.rm = T)) %>% collect()
+# util_date_start <- format(util_date_start$start, "%Y-%m-%d")
+# 
+# util_date_end <- utilization.data %>% select(APPT_DATE_YEAR) %>% summarise(start = max(APPT_DATE_YEAR, na.rm = T)) %>% collect()
+# util_date_end <- format(util_date_end$start, "%Y-%m-%d")
 
-util_date_end <- utilization.data %>% summarise(start = max(APPT_DATE_YEAR, na.rm = T)) %>% collect()
-util_date_end <- format(util_date_end$start, "%Y-%m-%d")
+ 
 
 dateRange_max <- max_date_arrived
+
+
 
 # dateRange_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_ACCESS WHERE APPT_STATUS = 'Arrived'")
 # dateRange_min <- dbGetQuery(poolcon, dateRange_min)
 # dateRange_min <- as.Date(dateRange_min$MINDATE, format="%Y-%m-%d")
 dateRange_min <- "2021-01-01"
 dateRange_min <- as.Date(dateRange_min, format="%Y-%m-%d")
+
+util_date_start <- dateRange_min
+util_date_end <- dateRange_max
 
 dateRange_start <-  dateRange_min
 
@@ -1804,7 +1811,7 @@ ui <- dashboardPage(
                      width = 12, 
                      solidHeader = FALSE, 
                      selectInput("daysOfWeekUtil",label = NULL,
-                                 choices = daysOfWeek.options.utilization, selected = daysOfWeek.options.utilization,
+                                 choices = daysOfWeek.options, selected = daysOfWeek.options,
                                  multiple=TRUE, selectize=TRUE))
                  ),
                  

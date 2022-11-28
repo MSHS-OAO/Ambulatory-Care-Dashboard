@@ -828,7 +828,8 @@ server <- function(input, output, session) {
     groupByFilters_2(utilization.data,
                      input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
                      input$selectedVisitMethod, input$selectedPRCName, 
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeekUtil, input$excludeHolidays, input$utilType)
+                     #input$excludeHolidays,
+                     input$dateRangeUtil[1], input$dateRangeUtil[2], input$daysOfWeekUtil,  input$utilType)
   }) 
   
   # [2.3] All pre-processed data for access tabs --------------------------------------------------------------------------------------
@@ -4834,30 +4835,32 @@ server <- function(input, output, session) {
   
   utilization_data <- reactive({
     
-    dataUtilization <- dataUtilization() %>% filter(comparison == 0)
-     
-    #dataUtilization <- utilization.data %>% filter(comparison == 0)
+    dataUtilization <- dataUtilization() 
+    #dataUtilization <- utilization.data  %>% filter(CAMPUS %in% default_campus, CAMPUS_SPECIALTY %in% default_specialty)
+    
+    
+    dataUtilization <- dataUtilization %>% select(SUM, APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>% collect()
     
     data <- data.frame( 
       
-    `Avg utilization per day: `= paste0(round((sum(dataUtilization$sum))/
-                                                (length(unique(dataUtilization$Appt.DateYear))*(60*input$setHours*input$setRooms))*100),"%"),
+    `Avg utilization per day: `= paste0(round((sum(dataUtilization$SUM))/
+                                                (length(unique(dataUtilization$APPT_DATE_YEAR))*(60*input$setHours*input$setRooms))*100),"%"),
     
       
     `Peak utilization during the day: `= paste0(
         max((dataUtilization  %>%
-               select(Appt.DateYear, all_of(timeOptionsHr_filter)) %>%
-               gather(Time, sum, 2:15) %>%
+               select(APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>%
+               gather(Time, SUM, 2:15) %>%
                group_by(Time) %>%
-               summarise(avg = round((sum(sum)/ 
-                                        (length(unique(dataUtilization$Appt.DateYear))*(60*input$setRooms)))*100)))$avg),"%"),
+               summarise(avg = round((sum(SUM, na.rm = T)/ 
+                                        (length(unique(dataUtilization$APPT_DATE_YEAR))*(60*input$setRooms)))*100)))$avg),"%"),
       
     `Max # of rooms required during the day: `= paste0(
         max((dataUtilization  %>%
-               select(Appt.DateYear, all_of(timeOptionsHr_filter)) %>%
-               gather(Time, sum, 2:15) %>%
+               select(APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>%
+               gather(Time, SUM, 2:15) %>%
                group_by(Time) %>%
-               summarise(avg = ceiling((sum(sum)/length(unique(Appt.DateYear)))/60)))$avg))#,
+               summarise(avg = ceiling((sum(SUM, na.rm = T)/length(unique(APPT_DATE_YEAR)))/60)))$avg))#,
     
     
     #`% Utilization (Visits per Room): `= NA, 
@@ -4875,7 +4878,7 @@ server <- function(input, output, session) {
     data <- rownames_to_column(data)
     #data$rowname <- NULL
     
-
+    
     
     
   })
@@ -4883,6 +4886,7 @@ server <- function(input, output, session) {
   
   output$roomStat1 <- function(){
     data <- utilization_data()
+    
     
     header_above <- c("title" = length(data))
     names(header_above) <-  paste0("Analysis based on ",input$setRooms," rooms available\n throughout ",input$setHours," hours") 
@@ -4929,40 +4933,60 @@ server <- function(input, output, session) {
   
   # Average Number of Rooms Required -----------------------------------------------
   output$spaceUsed <- renderPlot({
-    data <- dataUtilization() %>% filter(comparison == 0)
+    data <- dataUtilization() 
     
     # data <- as.data.frame(utilization.data[arrived.utilization.data.rows,])
+    # data <- utilization.data %>% filter(CAMPUS %in% "MSUS" , CAMPUS_SPECIALTY== "Allergy")
+    
+    data_test <<- data
     
     # Days of Week Table
+    
     daysOfWeek.Table <- 
       data %>%
-      group_by(Appt.Day, Appt.DateYear) %>%
+      group_by(APPT_DAY, APPT_DATE_YEAR) %>%
       dplyr::summarise(total = n()) %>%
-      group_by(Appt.Day) %>%
-      dplyr::summarise(count = n())
+      group_by(APPT_DAY) %>%
+      dplyr::summarise(count = n()) %>% 
+      collect()
     
-    c.start <- which(colnames(data)=="07:00")
-    c.end <- which(colnames(data)=="20:00")
+    #c.start <- which(colnames(data)=="07:00")
+    #c.end <- which(colnames(data)=="20:00")
     
-    space.hour.day <- aggregate(data[c(c.start:c.end)], list(data$Appt.Day),FUN = sum)
-    space.hour.day <- reshape2::melt(space.hour.day, id=c("Group.1"))
-    space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$Appt.Day,space.hour.day$Group.1)]
+    #space.hour.day <- aggregate(data[c(c.start:c.end)], list(data$APPT_DAY),FUN = sum)
+    #space.hour.day <- reshape2::melt(space.hour.day, id=c("Group.1"))
+    
+    
+    space.hour.day <- data %>% group_by(APPT_DAY) %>% 
+      summarise(across(c("07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+                         "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"), ~ sum(.x, na.rm = TRUE))) %>% collect()
+    
+   
+    
+    space.hour.day <- reshape2::melt(space.hour.day, id=c("APPT_DAY"))
+    space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$APPT_DAY, space.hour.day$APPT_DAY)]
     
     space.hour.day$average <- round(space.hour.day$value/(space.hour.day$days*60), 1)
     names(space.hour.day) <- c("Day","Time","Total_Dur","Days","Average_Req")
     
     byDayTime.df <- byDayTime.df[which(byDayTime.df$Day %in% unique(space.hour.day$Day)),]
     
+    space.hour.day <- space.hour.day %>% mutate(Time= gsub('`', "", Time))
+                                                  
+      
     space.hour.day <- as.data.frame(merge(byDayTime.df,space.hour.day, by.x = c("Day","Time"), by.y = c("Day","Time"), all = TRUE))
     space.hour.day[is.na(space.hour.day)] <- 0
     
+    
+    
     space.hour.day <- space.hour.day %>% filter(Time %in% timeOptionsHr_filter)
     
-    graph <- ggplot(space.hour.day, aes(x=Time, y=ceiling(Average_Req), col=factor(Day,level = daysOfWeek.options.utilization), group=Day))+
+    graph <- ggplot(space.hour.day, aes(x=Time, y=ceiling(Average_Req), col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
       labs(x=NULL, y="Number of Rooms\n",
            title = "Average Space Required by Time of Day and Day of Week",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2])))+
+           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           )+
       scale_color_MountSinai("main")+
       geom_point(size = 3.2) +
       theme_new_line()+
@@ -4970,7 +4994,7 @@ server <- function(input, output, session) {
       graph_theme("top") + theme(legend.title = element_blank(), legend.direction = "horizontal", legend.key.size = unit(1.0,"cm"))+
       guides(colour = guide_legend(nrow = 1))
     
-    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options.utilization)), y=Time))+
+    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
       labs(x=NULL, y=NULL)+
       geom_tile(aes(fill=Average_Req), colour = "black", size=0.5)+
       coord_flip()+
@@ -4998,23 +5022,34 @@ server <- function(input, output, session) {
   
   # Average Utilization by Time of Day
   output$spaceUtil <- renderPlot({
-    data <- dataUtilization() %>% filter(comparison == 0)
+    data <- dataUtilization() 
     # data <- utilization.data[arrived.utilization.data.rows,]
+    #data <- utilization.data %>% filter(CAMPUS %in% default_campus, CAMPUS_SPECIALTY)
     
     # Days of Week Table
     daysOfWeek.Table <- 
       data %>%
-      group_by(Appt.Day, Appt.DateYear) %>%
+      group_by(APPT_DAY, APPT_DATE_YEAR) %>%
       dplyr::summarise(total = n()) %>%
-      group_by(Appt.Day) %>%
-      dplyr::summarise(count = n())
+      group_by(APPT_DAY) %>%
+      dplyr::summarise(count = n()) %>% 
+      collect()
     
-    c.start <- which(colnames(data)=="07:00")
-    c.end <- which(colnames(data)=="20:00")
+    #c.start <- which(colnames(data)=="07:00")
+    #c.end <- which(colnames(data)=="20:00")
     
-    space.hour.day <- aggregate(data[c(c.start:c.end)], list(data$Appt.Day),FUN = sum)
-    space.hour.day <- reshape2::melt(space.hour.day, id=c("Group.1"))
-    space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$Appt.Day,space.hour.day$Group.1)]
+    #space.hour.day <- aggregate(data[c(c.start:c.end)], list(data$APPT_DAY),FUN = sum)
+    #space.hour.day <- reshape2::melt(space.hour.day, id=c("Group.1"))
+    #space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$APPT_DAY,space.hour.day$Group.1)]
+    
+    space.hour.day <- data %>% group_by(APPT_DAY) %>% 
+      summarise(across(c("07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+                         "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"), ~ sum(.x, na.rm = T))) %>% collect()
+    
+    space.hour.day <- reshape2::melt(space.hour.day, id=c("APPT_DAY"))
+    space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$APPT_DAY, space.hour.day$APPT_DAY)]
+    
+   
     
     space.hour.day$utilization <- round(space.hour.day$value/(space.hour.day$days*60*input$setRooms), 1)
     #space.hour.day$utilization <- round(space.hour.day$value/(space.hour.day$days*60*8), 1)
@@ -5022,6 +5057,7 @@ server <- function(input, output, session) {
     names(space.hour.day) <- c("Day","Time","Total_Dur","Days","Average_Util")
     #space.hour.day$Average_Util <- space.hour.day$Average_Util*100
     
+    space.hour.day <- space.hour.day %>% mutate(Time= gsub('`', "", Time))
     byDayTime.df <- byDayTime.df[which(byDayTime.df$Day %in% unique(space.hour.day$Day)),]
     
     space.hour.day <- as.data.frame(merge(byDayTime.df,space.hour.day, by.x = c("Day","Time"), by.y = c("Day","Time"), all = TRUE))
@@ -5032,11 +5068,12 @@ server <- function(input, output, session) {
     space.hour.day$target <- 0.8
     
     
-    graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Util, col=factor(Day,level = daysOfWeek.options.utilization), group=Day))+
+    graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Util, col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
       labs(x=NULL, y="Utilization (%)", 
            title = "Average Space Utilization (%) by Time of Day and Day of Week",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2])))+
+           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           )+
       scale_color_MountSinai("main")+
       #geom_hline(yintercept = .8, color = "red", linetype="dashed")+
       geom_hline(aes(yintercept = .8), color = "red", linetype="dashed")+
@@ -5050,7 +5087,7 @@ server <- function(input, output, session) {
     
     space.hour.day$Average_Util <- space.hour.day$Average_Util*100
     
-    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options.utilization)), y=Time))+
+    table <- ggplot(space.hour.day, aes(x=factor(Day, levels = rev(daysOfWeek.options)), y=Time))+
       labs(x=NULL, y=NULL)+
       geom_tile(aes(fill=Average_Util), colour = "black", size=0.5)+
       coord_flip()+
@@ -5080,13 +5117,26 @@ server <- function(input, output, session) {
   
   # Rooms Required by Percentile 
   output$spaceUsedPerc <- renderPlot({
-    data <- dataUtilization() %>% filter(comparison == 0)
+    data <- dataUtilization() 
     
-    c.start <- which(colnames(data)=="07:00")
-    c.end <- which(colnames(data)=="20:00")
+   
     
-    space.hour <- aggregate(data[c(c.start:c.end)], list(data$Appt.DateYear),FUN = sum)
-    space.hour <- reshape2::melt(space.hour, id=c("Group.1"))
+    # c.start <- which(colnames(data)=="H_07_00")
+    # c.end <- which(colnames(data)=="H_20_00")
+    # 
+    # space.hour <- aggregate(data[c(c.start:c.end)], list(data$APPT_DATE_YEAR),FUN = sum)
+    # space.hour <- reshape2::melt(space.hour, id=c("Group.1"))
+    
+    space.hour <- data %>% group_by(APPT_DATE_YEAR) %>% 
+      summarise(across(c("07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+                         "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"), ~ sum(.x, na.rm = T))) %>% collect()
+    
+    
+    
+    space.hour <- reshape2::melt(space.hour, id=c("APPT_DATE_YEAR"))
+    space.hour <- space.hour %>% mutate(variable= gsub('`', "", variable))
+    
+    space.hour[is.na(space.hour)] <- 0
     
     space.hour <- space.hour %>%
       group_by(variable) %>%
@@ -5095,7 +5145,9 @@ server <- function(input, output, session) {
         `70th Percentile`= round(quantile(value, probs=0.75)/60,1),
         `90th Percentile`= round(quantile(value, probs=0.90)/60,1))
     
-    colnames(space.hour)[1] <- "Time"
+    space.hour <- space.hour %>% rename(Time= variable)
+    
+    #colnames(space.hour)[1] <- "Time"
     
     space.hour <- as.data.frame(reshape2::melt(space.hour, id=c("Time")))
     
@@ -5106,7 +5158,8 @@ server <- function(input, output, session) {
       scale_y_continuous(limits=c(0, max(space.hour$value)*1.2))+
       labs(x=NULL, y="Number of Rooms\n",
            title = "Space Required by Percentile by Time of Day",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2])))+
+           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           )+
       scale_color_MountSinai("main")+
       geom_point(size = 3.2) +
       theme_new_line()+
@@ -5144,31 +5197,44 @@ server <- function(input, output, session) {
   
   # Utilization by Percentile
   output$spaceUtilPerc <- renderPlot({
-    data <- dataUtilization() %>% filter(comparison == 0)
+    data <- dataUtilization() 
     #data <- utilization.data %>% filter(comparison == 0)
     
-    c.start <- which(colnames(data)=="07:00")
-    c.end <- which(colnames(data)=="20:00")
+    test_data <<- data
     
-    space.hour <- aggregate(data[c(c.start:c.end)], list(data$Appt.DateYear),FUN = sum)
-    space.hour <- reshape2::melt(space.hour, id=c("Group.1"))
+    # c.start <- which(colnames(data)=="07:00")
+    # c.end <- which(colnames(data)=="20:00")
+    # 
+    # space.hour <- aggregate(data[c(c.start:c.end)], list(data$Appt.DateYear),FUN = sum)
+    # space.hour <- reshape2::melt(space.hour, id=c("Group.1"))
+    
+    space.hour <- data %>% group_by(APPT_DATE_YEAR) %>% 
+      summarise(across(c("07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+                         "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"), ~ sum(.x, na.rm = TRUE))) %>% collect()
+    
+    space.hour <- reshape2::melt(space.hour, id=c("APPT_DATE_YEAR"))
+    
+    space.hour <- space.hour %>% mutate(variable= gsub('`', "", variable))
+    
+    space.hour[is.na(space.hour)] <- 0
     
     space.hour <- space.hour %>%
       group_by(variable) %>%
       dplyr::summarise( 
-        Median = round(quantile(value, probs=0.5)/(60*input$setRooms),0),
-        `70th Percentile`= round(quantile(value, probs=0.75)/(60*input$setRooms),0),
-        `90th Percentile`= round(quantile(value, probs=0.90)/(60*input$setRooms),0))
+        Median = round(quantile(value, probs=0.5)/(60*input$setRooms),2),
+        `70th Percentile`= round(quantile(value, probs=0.75)/(60*input$setRooms),2),
+        `90th Percentile`= round(quantile(value, probs=0.90)/(60*input$setRooms),2))
     
     # space.hour <- space.hour %>%
     #   group_by(variable) %>%
-    #   dplyr::summarise( 
-    #     Median = quantile(value, probs=0.5)/(60*8),
-    #     `70th Percentile`= quantile(value, probs=0.75)/(60*8),
-    #     `90th Percentile`= quantile(value, probs=0.90)/(60*8))
+    #   dplyr::summarise(
+    #     Median = round(quantile(value, probs=0.5)/(60*8),2),
+    #     `70th Percentile`= round(quantile(value, probs=0.75)/(60*8),2),
+    #     `90th Percentile`= round(quantile(value, probs=0.90)/(60*8), 2))
     
     
-    colnames(space.hour)[1] <- "Time"
+    space.hour <- space.hour %>% rename(Time= variable)
+    #colnames(space.hour)[1] <- "Time"
     space.hour <- as.data.frame(reshape2::melt(space.hour, id=c("Time")))
     
     space.hour <- space.hour %>% filter(Time %in% timeOptionsHr_filter)
@@ -5178,7 +5244,8 @@ server <- function(input, output, session) {
       scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0,max(space.hour$value)*1.2))+
       labs(x=NULL, y="Utilization (%)", 
            title = "Space Utilization (%) by Percentile by Time of Day",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2])))+
+           #subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           )+
       scale_color_MountSinai("main")+
       geom_point(size = 3.2) +
       theme_new_line()+
@@ -5187,6 +5254,8 @@ server <- function(input, output, session) {
     guides(colour = guide_legend(nrow = 1))
     
     space.hour$value <- space.hour$value*100
+    
+    
     
     table <- ggplot(space.hour, aes(x=variable, y=Time))+
       labs(x=NULL, y=NULL)+
