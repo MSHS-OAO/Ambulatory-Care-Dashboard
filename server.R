@@ -188,13 +188,18 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$selectedCampus,{
-    if(is.null(input$filter_list && !is.null(input$selectedCampus))){
+    print("0")
+    if(is.null(input$filter_list) && !is.null(input$selectedCampus)){
+      print("1")
       #specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
       selected_campus <- input$selectedCampus
+      
+      print("2")
       
       specialty_choices <-  filters %>% filter(CAMPUS %in% selected_campus) %>% select( CAMPUS_SPECIALTY)  %>%
         mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
       specialty_choices <- sort(specialty_choices$CAMPUS_SPECIALTY, na.last = T)
+      print("3")
       
       
       updatePickerInput(session,
@@ -5200,7 +5205,6 @@ server <- function(input, output, session) {
     data <- dataUtilization() 
     #data <- utilization.data %>% filter(comparison == 0)
     
-    test_data <<- data
     
     # c.start <- which(colnames(data)=="07:00")
     # c.end <- which(colnames(data)=="20:00")
@@ -6212,9 +6216,7 @@ server <- function(input, output, session) {
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(NEW_PT2, Total) %>%
       replace(is.na(.), 0)
-    
     newpatients.ratio.test <<- newpatients.ratio
-    
     newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
@@ -9654,7 +9656,7 @@ server <- function(input, output, session) {
     # compare_filters <- "Provider"
     
     data <- dataArrived()
-    data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT2, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
+    data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT2, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM)%>% collect()
     
     data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
                             Visit.Method = VISIT_METHOD,
