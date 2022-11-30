@@ -188,13 +188,9 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$selectedCampus,{
-    print("0")
     if(is.null(input$filter_list) && !is.null(input$selectedCampus)){
-      print("1")
       #specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
       selected_campus <- input$selectedCampus
-      
-      print("2")
       
       specialty_choices <-  filters %>% filter(CAMPUS %in% selected_campus) %>% select( CAMPUS_SPECIALTY)  %>%
         mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
