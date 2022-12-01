@@ -1489,8 +1489,8 @@ ui <- dashboardPage(
                                 height = "200px",
                                 solidHeader = FALSE,
                                 radioButtons("compare_filters_opt", label = h4("Compare by:"),
-                                             choices = list("Specialty" = "Campus.Specialty", "Department" = "Department", "Provider" = "Provider"),
-                                             selected = "Campus.Specialty")),
+                                             choices = list("Specialty" = "CAMPUS_SPECIALTY", "Department" = "DEPARTMENT", "Provider" = "PROVIDER"),
+                                             selected = "CAMPUS_SPECIALTY")),
                               
                               
                        ),
