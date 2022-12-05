@@ -1,6 +1,6 @@
 server <- function(input, output, session) {
   
-  
+  #callModule(profvis_server, "profiler")
   observeEvent(input$update_filters,{print(is.null(input$update_filters))})
   
   user <- reactive({
@@ -2200,6 +2200,7 @@ server <- function(input, output, session) {
   })
   
   output$practiceName_volume <- renderText({
+    print("rendertext")
     paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
@@ -4062,8 +4063,8 @@ server <- function(input, output, session) {
     #   summarise(value = round(n()/length(unique(kpi.all.data[arrived.data.rows,]$Appt.DateYear)))) %>%
     #   arrange(desc(value)) 
     data <- data %>% select(APPT_STATUS, APPT_DATE_YEAR) %>% collect()
-    total_arrived <- dataArrived() %>% select(APPT_DATE_YEAR) %>% collect()
-
+    total_arrived <<- dataArrived() %>% select(APPT_DATE_YEAR) %>% collect()
+    data_test<<- data
     sameDay <- data %>%
       group_by(APPT_STATUS) %>%
       summarise(value = round(n()/length(unique(total_arrived$APPT_DATE_YEAR)))) %>%
@@ -5731,24 +5732,31 @@ server <- function(input, output, session) {
   }
   
   output$volume1 <- renderPlotly({
-    
+    print("volume1")
     data <- dataArrived()
-    
     # data <- arrived.data %>% filter(!holiday %in% c("Christmas"))
     # data <- setDT(data)
     # 
     # pts.count <- data[,list(Volume = .N), by = list(Appt.DateYear)]  
     # 
     
-    data <- data %>% select(UNIQUEID, APPT_DATE_YEAR) %>% collect()
-    pts.count <- aggregate(data$UNIQUEID,
-                           by=list(data$APPT_DATE_YEAR), FUN=NROW)
+    # data <- data %>% select(UNIQUEID, APPT_DATE_YEAR) %>% collect()
+    data <- data %>% select(UNIQUEID, APPT_DATE_YEAR)
+    
+    pts.count <<- data %>% group_by(APPT_DATE_YEAR) %>% summarise(total = n()) %>%
+                      collect()
+
+    
+    # pts.count <- aggregate(data$UNIQUEID,
+    #                        by=list(data$APPT_DATE_YEAR), FUN=NROW)
     
     # pts.count <- aggregate(arrived.data$uniqueId,
     #                        by=list(arrived.data$Appt.DateYear), FUN=NROW)
     
     names(pts.count) <- c("Date","Volume")
     pts.count$Date <- as.Date(pts.count$Date, format="%Y-%m-%d")
+    
+    pts.count <- pts.count[order(as.Date(pts.count$Date, format="%Y-%m-%d")),]
     
     volume_fig <- plot_ly(pts.count, x = ~Date, y = ~Volume, name = 'Patients', type = "scatter", mode = 'lines+markers', 
                           hoverinfo = "text", hovertext = ifelse(pts.count$Volume == 1,paste0(pts.count$Date, ": ",pts.count$Volume, " ", "Patient"),paste0(pts.count$Date, ": ",pts.count$Volume, " ", "Patients")))#,
@@ -5812,7 +5820,7 @@ server <- function(input, output, session) {
   # Total Monthly Patient Volume
   
   output$volume2 <- renderPlot({
-    
+    print("volume2")
     data <- dataArrived()
     #data_test <<- data
     #data <- setDT(data)
@@ -5827,7 +5835,7 @@ server <- function(input, output, session) {
     #                           by=list(data$APPT_MONTH_YEAR, data$VISIT_METHOD), FUN=NROW)
     
     pts.by.month <- data %>% group_by(APPT_MONTH_YEAR, VISIT_METHOD) %>% summarise(total = n()) %>% collect()
-    
+
     names(pts.by.month) <- c("Month", "Visit.Method", "Volume")
     pts.by.month$Volume <- as.numeric(pts.by.month$Volume)
     #pts.by.month$Month <- as.yearmon(pts.by.month$Month, format="%Y-%m")
@@ -5908,7 +5916,7 @@ server <- function(input, output, session) {
   })
   # Average Daily Patient Volume by Day of Week
   output$volume3 <- renderPlot({
-    
+    print("volume3")
     # data <- dataArrived()
     # #data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider == "ABBOTT, ASHLEY")
     # 
@@ -5996,7 +6004,7 @@ server <- function(input, output, session) {
   # Daily Volume Distribution by Month
   output$volume4 <- renderPlot({
     
-    
+    print("volume4")
     data <- dataArrived()
     data <- data %>% select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE) #%>% collect()
     
@@ -6094,6 +6102,7 @@ server <- function(input, output, session) {
   # Daily Volume Distribution by Day of Week
   output$volume5 <- renderPlot({
     
+    print("volume5")
     data <- dataArrived()
     #data <- data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider == "ABBOTT, ASHLEY") %>% filter(Appt.DateYear >= "2021-01-01")
     data <- data %>% select(APPT_MONTH_YEAR, APPT_DATE, APPT_DAY) #%>% collect()

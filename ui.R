@@ -355,6 +355,8 @@ ui <- dashboardPage(
         # HomePage ------------------------------------------------------------------------------------------------------------------
         tabItem(tabName = "homepage",
                 column(12,
+                       #profvis_ui("profiler"),
+                       
                        # setBackgroundImage(
                        #   src = "MS_RGB_Vrtl_test.png", shinydashboard = TRUE
                        # ),
@@ -814,7 +816,7 @@ ui <- dashboardPage(
                        tags$style("#practiceName1{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                        textOutput("practiceName_volume"),
                        tags$head(tags$style("#practiceName_volume{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                       #profvis_ui("profiler"),
+                       # profvis_ui("profiler"),
                        # fluidRow(
                        #   column(4,
                        #          box(
