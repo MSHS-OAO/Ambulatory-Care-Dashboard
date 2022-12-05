@@ -406,7 +406,7 @@ max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 date_format <- "YYYY-MM-DD HH24:MI:SS"
 # ## Other datasets Rows DataTable
 arrived.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Arrived"))
-arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS == 0)) %>% show_query()
+arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS == 0))
 #arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")))
 noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show"))
 bumped.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Bumped"))
