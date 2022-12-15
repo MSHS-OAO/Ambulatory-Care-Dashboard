@@ -328,11 +328,11 @@ wdpath <- here::here()
 setwd(wdpath)
 # poolcon <- dbConnect(odbc(), "OAO Cloud DB")
 
-# poolcon <- dbPool(drv  = odbc::odbc(),
-#                  dsn  = "OAO Cloud DB Oracle")
-poolcon <- dbConnect(odbc(), "OracleODBC-21_5",
-                      uid = "villea04",
-                      pwd = "qKQvPoSilm21T*qVr")
+poolcon <- dbPool(drv  = odbc::odbc(),
+                 dsn  = "OAO Cloud DB Oracle")
+# poolcon <- dbConnect(odbc(), "OracleODBC-21_5",
+#                       uid = "villea04",
+#                       pwd = "qKQvPoSilm21T*qVr")
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
 ### RStudio COnnect Data Read In
