@@ -9867,6 +9867,7 @@ server <- function(input, output, session) {
     ### Spread data to make monhts in Appt.Month into columns
     slot <- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       filter(AVAILABLE_HOURS > 0) %>%
+      filter(!is.na(AVAILABLE_HOURS)) %>%
       summarise(
         `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
         `Filled Rate` = round(sum(`Filled Hours`, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
