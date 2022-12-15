@@ -4063,12 +4063,14 @@ server <- function(input, output, session) {
     #   summarise(value = round(n()/length(unique(kpi.all.data[arrived.data.rows,]$Appt.DateYear)))) %>%
     #   arrange(desc(value)) 
     data <- data %>% select(APPT_STATUS, APPT_DATE_YEAR) %>% collect()
-    total_arrived <<- dataArrived() %>% select(APPT_DATE_YEAR) %>% collect()
-    data_test<<- data
+    total_arrived <- dataArrived() %>% select(APPT_DATE_YEAR) %>% collect()
     sameDay <- data %>%
       group_by(APPT_STATUS) %>%
       summarise(value = round(n()/length(unique(total_arrived$APPT_DATE_YEAR)))) %>%
       arrange(desc(value)) 
+    
+    
+    sameDay <- sameDay %>% mutate(value = ifelse(value == 0,1,value))
     
     sameDay$APPT_STATUS <- as.character(sameDay$APPT_STATUS)
     
@@ -4101,8 +4103,6 @@ server <- function(input, output, session) {
       dplyr::summarise(total = n()) %>% collect() %>%
       group_by(APPT_TM_HR, APPT_STATUS) %>%
       dplyr::summarise(avg = round(mean(total)))
-    
-    #data_test <<- data
     
     data <- dcast(data, APPT_TM_HR ~ APPT_STATUS, sum)
     
@@ -4607,7 +4607,6 @@ server <- function(input, output, session) {
   output$sameDayBumpedCanceledRescheduled <- renderPlot({
     # data <- dataNoShow() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
     data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
-    #data_test <<- data
     # data <- noShow.data %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
     rows <- historical.data %>% filter(TO_DATE(max_date_arrived, "YYYY-MM-DD HH24:MI:SS") <= APPT_DTTM) %>% select(APPT_DATE_YEAR) %>% collect()
     rows <- length(unique(rows$APPT_DATE_YEAR))
@@ -4939,8 +4938,6 @@ server <- function(input, output, session) {
     
     # data <- as.data.frame(utilization.data[arrived.utilization.data.rows,])
     # data <- utilization.data %>% filter(CAMPUS %in% "MSUS" , CAMPUS_SPECIALTY== "Allergy")
-    
-    data_test <<- data
     
     # Days of Week Table
     
@@ -5822,15 +5819,13 @@ server <- function(input, output, session) {
   output$volume2 <- renderPlot({
     print("volume2")
     data <- dataArrived()
-    #data_test <<- data
     #data <- setDT(data)
     #data <- unique(data, by = "uniqueId")
     
     #pts.by.month <- data[,list(Volume = .N), by = list(Appt.MonthYear,Visit.Method)]  
     
     data <- data %>% select(UNIQUEID, APPT_MONTH_YEAR, VISIT_METHOD) #%>% collect()
-    #data_test <<- data
-    
+
     # pts.by.month <- aggregate(data$UNIQUEID,
     #                           by=list(data$APPT_MONTH_YEAR, data$VISIT_METHOD), FUN=NROW)
     
@@ -6007,9 +6002,10 @@ server <- function(input, output, session) {
     print("volume4")
     data <- dataArrived()
     data <- data %>% select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE) #%>% collect()
+    data_test <<- data
     
     pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE) %>% summarise(total = n()) %>% collect()
-   
+    pts.dist.test <<- pts.dist
     # pts.dist <- aggregate(data$UNIQUEID,
     #                       by=list(data$APPT_MONTH_YEAR, data$APPT_DATE), FUN=NROW)
 
@@ -6020,6 +6016,7 @@ server <- function(input, output, session) {
     pts.dist$Month <- as.yearmon(pts.dist$Month, format="%Y-%m")
     pts.dist$Month <- as.Date(pts.dist$Month, format="%Y-%m")
     pts.dist <- pts.dist[order(pts.dist$Month),]
+    pts.dist <- pts.dist %>% ungroup()
     
     # data <- dataArrived()
     # #data <- data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider == "ABBOTT, ASHLEY")
@@ -6037,19 +6034,27 @@ server <- function(input, output, session) {
     # pts.dist.summary <- 
     #   pts.dist.summary[order(as.yearmon(pts.dist.summary$Month,format="%b-%Y")),]
     
+    pts.dist <- pts.dist %>% ungroup()
     
+    min_date <- min(pts.dist$Month)
+    max_date <- max(pts.dist$Month)
     g1 <- ggplot(pts.dist, aes(x=Month, y=Volume, group=Month))+
       geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
       stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
       labs(x = NULL, y = "Patients",
-           title = "Daily Patient Volume Distribution by Month - All Visits",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
-      scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m")+
+           title = "Daily Patient Volume Distribution by Month - All Visits"#,
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           )+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
-    
+      theme(axis.text.x = element_text(size = 16, angle = 0, hjust = 0.5)) +
+      # scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m",
+      #              limits = c(as.Date("2021-01-01"), as.Date("2022-12-31"))
+      #              )
+      scale_x_date(breaks = seq.Date(from = as.Date(min_date), 
+                                     to = as.Date(max_date), by = "month"), date_labels = "%Y-%m")
+      
     #setDT(data)
     #pts.dist <- data[,list(Volume = .N), by = list(APPT_MONTH_YEAR, APPT_DATE)] 
     
@@ -6068,6 +6073,12 @@ server <- function(input, output, session) {
       group_by(Month) %>%
       dplyr::summarise(Avg = round(mean(Volume)), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
     
+    pts.dist.summary <- pts.dist.summary %>%
+                        mutate(Month = as.Date(paste0(Month, "-01"))) %>%
+                        complete(Month = seq.Date(min(Month), max(Month), by="month")) %>%
+                        mutate(Month = format(Month, "%Y-%m"))
+                      
+    
     pts.dist.summary <- 
       pts.dist.summary[order(as.yearmon(pts.dist.summary$Month,format="%Y-%m")),]
     
@@ -6082,17 +6093,36 @@ server <- function(input, output, session) {
     } else{
       hline_y <- seq(1.5, 0.5+n, by= 1)
     }
+    data_melt$Month <- as.yearmon(data_melt$Month, format="%Y-%m")
+    data_melt$Month <- as.Date(data_melt$Month, format="%Y-%m")
+    data_melt[is.na(data_melt)] <- 0
     
     g2 <- ggplot(data_melt, aes(x = Month, y = variable, label = value))+
       scale_color_MountSinai('dark' )+
       geom_text(size = 5, vjust = "center", hjust = "center", fontface  = "bold")+
       geom_hline(yintercept = hline_y, colour='black')+
-      geom_vline(xintercept = 0, colour = 'black')+
-      scale_x_discrete(position = "top") + 
       labs(y = NULL, x = NULL, fill = "AssociationListA")+
       theme_minimal() +
-      table_theme()
+      table_theme() +
+      scale_x_date(breaks = seq.Date(from = as.Date(min_date),
+                                     to = as.Date(max_date), by = "month"))+
+      geom_vline(xintercept = 0, colour = 'black') +
+      theme(panel.grid.minor.x = element_blank()) +
+      theme(axis.text.x=element_blank())
     
+    
+    # g2 <- ggplot(data_melt, aes(x = Month, y = variable, label = value))+
+    #   scale_color_MountSinai('dark' )+
+    #   geom_text(size = 5, vjust = "center", hjust = "center", fontface  = "bold")+
+    #   geom_hline(yintercept = hline_y, colour='black')+
+    #   geom_vline(xintercept = 0, colour = 'black')
+    #   labs(y = NULL, x = NULL, fill = "AssociationListA")+
+    #   theme_minimal() +
+    #   table_theme() +
+    #   scale_x_date(breaks = seq.Date(from = as.Date(min_date), 
+    #                                  to = as.Date(max_date), by = "month"))+
+    #   theme(panel.grid.minor.x = element_blank()) +
+    #   theme(axis.text.x=element_blank())
     
     g1 + g2 + plot_layout(ncol = 1, heights = c(7, 0.67 * length(unique(data_melt$variable))))
     
@@ -6122,7 +6152,7 @@ server <- function(input, output, session) {
       stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
       labs(x = NULL, y = "Patients",
            title = "Daily Patient Volume Distribution by Day of Week - All Visits",
-           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
            )+
       theme_new_line()+
       theme_bw()+
@@ -6513,7 +6543,6 @@ server <- function(input, output, session) {
     #data <- slot.data.subset[all.slot.rows,] %>% filter(Campus.Specialty == "Allergy")
     print(paste0("Start of slot graph function ", Sys.time()))
     data <- dataAllSlot()
-    data_slot_test <<- data
     print(paste0("End of slot reactive ", Sys.time()))
     
     booked_filled <- data %>% select(AVAILABLE_HOURS, BOOKED_HOURS, ARRIVED_HOURS, APPT_WEEK) #%>% collect() #%>%
@@ -8391,7 +8420,6 @@ server <- function(input, output, session) {
   
   patient_ratio_month <- reactive({
     data <- dataArrived() #%>% filter(Resource == "Provider")
-    data_test <<- data
     # data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Department"
     # breakdown_filters <- "Visit.Method"
@@ -9681,7 +9709,7 @@ server <- function(input, output, session) {
     #data  <- data %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     compare_filters <- input$compare_filters_opt
     
-    
+    print("1")
     
     if(compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
@@ -9705,31 +9733,36 @@ server <- function(input, output, session) {
     #### group Data by inputs and Month and data get the total for each day then group by the Month in order to sum all the vistis within the month and 
     #### divide it by the number of days within the month in the data, then we make a wider data sets with the months values made into a column
     
+    print("2")
     volume <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
-      summarise(total = n()) %>% collect() %>%
-      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
-      group_by(across(cols), APPT_MONTH_YEAR) %>%
+      summarise(total = n()) %>% 
+      group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       summarise(avg = round(sum(total)/n())) %>%
+      collect() %>%
+      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
       pivot_wider(names_from = APPT_MONTH_YEAR,
                   values_from = avg,
                   values_fill = 0) 
     
     volume[is.na(volume)] <- 0
     
+    print("3")
     volume$Metrics <- "Average Daily Volume"
     volume <- volume %>% select(cols, Metrics, everything())
     
+    data_access <- dataArrived_access()
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-    newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MONTH_YEAR, NEW_PT3) %>%
+    newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
       summarise(total = n()) %>% collect()%>%
-      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+      mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
-      spread(NEW_PT3, total) %>%
+      spread(NEW_PT2, total) %>%
       drop_na()
     
+    print("4")
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
-    col_names <- c(cols, "APPT_MONTH_YEAR",  "NEW", "ESTABLISHED")
+    col_names <- c(cols, "APPT_MADE_MONTH_YEAR",  "NEW", "ESTABLISHED")
     
     col_index <- which(!(col_names %in% colnames(newpatients.ratio)))
     
@@ -9740,8 +9773,10 @@ server <- function(input, output, session) {
       newpatients.ratio[[col_to_add]] <- NA
     }
     
+    print("5")
+    
     ### Calculate new patient ratio by breakdown
-    newpatients.ratio <- newpatients.ratio %>% group_by( APPT_MONTH_YEAR) %>%
+    newpatients.ratio <- newpatients.ratio %>% group_by( APPT_MADE_MONTH_YEAR) %>%
       mutate(ratio = round(`NEW`/(sum(`NEW`, na.rm = TRUE) + sum(`ESTABLISHED`, na.rm = TRUE)), 2)) 
       
     
@@ -9753,11 +9788,11 @@ server <- function(input, output, session) {
     
     drop <- c("ESTABLISHED","NEW", "<NA>")
     newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
-    newpatients.ratio <- newpatients.ratio %>% spread(APPT_MONTH_YEAR, ratio)
+    newpatients.ratio <- newpatients.ratio %>% spread(APPT_MADE_MONTH_YEAR, ratio)
     #newpatients.ratio[is.na(newpatients.ratio)] <- "0%"
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
-    
+    print("6")
     newpatients.ratio$Metrics <- "New Patient Ratio"
     newpatients.ratio <-newpatients.ratio %>% select(cols, Metrics, everything())
     
@@ -9774,18 +9809,18 @@ server <- function(input, output, session) {
     #waitTime <- waitTime  %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     
     #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
-    waitTime <- data %>%
+    waitTime <- data_access %>%
       filter(WAIT_TIME >= 0) %>% 
-      group_by(!!!syms(cols), APPT_MONTH_YEAR, NEW_PT3) %>% 
+      group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>% 
       dplyr::summarise(medWaitTime = round(median(WAIT_TIME))) %>%
-      filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% collect() %>%
-      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
+      filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect() %>%
+      mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))
     
-    
+    print("7")
     #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
-    waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == "NEW", "New","Established")
-    waitTime <- waitTime %>% filter(NEW_PT3 == "New") 
-    drop <- c("NEW_PT3")
+    waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
+    waitTime <- waitTime %>% filter(NEW_PT2 == "New") 
+    drop <- c("NEW_PT2")
     waitTime = waitTime[,!(names(waitTime) %in% drop)]
     
     #### Pivot the data so the months are in the columns and shows only new patient median time   
@@ -9795,7 +9830,7 @@ server <- function(input, output, session) {
         `medWaitTime` > 14 ~  cell_spec(paste0(medWaitTime," Days") , color = "red")
       )) %>%
       
-      pivot_wider(names_from = APPT_MONTH_YEAR,
+      pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                   values_from = medWaitTime,
                   values_fill = "0")
     
@@ -9804,7 +9839,7 @@ server <- function(input, output, session) {
     waitTime <- waitTime %>% select(cols, Metrics, everything())
     
     
-
+    print("8")
     # Process slot data
     #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Cardiology") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     data_slot <- dataAllSlot_comp() %>% rename(DEPARTMENT= DEPARTMENT_NAME)
@@ -9825,17 +9860,19 @@ server <- function(input, output, session) {
                         
     slot[is.na(slot)] <- 0
     slot_metrics <- c( "Booked Rate", "Filled Rate")
-    
-    
+    tester <<- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>% show_query()
+    print("9")
     ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
     ### then gather all created columns make them categories for the STatus column
     ### Spread data to make monhts in Appt.Month into columns
     slot <- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       summarise(
-        `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
-        `Filled Rate` = round(sum(`Filled Hours`, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
+        `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/NULLIF(sum(AVAILABLE_HOURS, na.rm = T),0),2 ),
+        `Filled Rate` = round(sum(`Filled Hours`, na.rm = T)/NULLIF(sum(AVAILABLE_HOURS, na.rm = T),0),2 ),
       ) %>% collect() %>%
       mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
+    
+    print("9.1")
       
     slot <- slot %>%
       mutate_if(is.numeric,function(x) ifelse(is.nan(x) | is.infinite(x), NA, x)) %>%
@@ -9854,7 +9891,7 @@ server <- function(input, output, session) {
    
     
     
-
+print("10")
     #slot <- slot %>%  group_by(across(!!cols), Appt.MonthYear) %>%
      # summarise(
       #  `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
@@ -9869,23 +9906,28 @@ server <- function(input, output, session) {
     ### Bind datas by row to create the final table
     opt_table <- plyr:: rbind.fill(volume, slot, newpatients.ratio, waitTime )  
     opt_table[is.na(opt_table)] <- 0
+
+    i1 <- as.yearmon(names(opt_table))
+    opt_table <- opt_table[order(i1)]
+    
+    
     
    
     
-   
+   print("11")
     
     months_df <-  opt_table[,!(names( opt_table) %in% c(cols_name, "Metrics"))]
     months <- order(as.yearmon(colnames(months_df), "%b %Y"))
     order_months <- months_df[months]
-    
-  
-    
-    
+
+
+
+
     index <- months+length(cols_name)
     #index <- c(1:length(cols_name),index,length(opt_table))
     index <- c(1:length(cols_name),index)
     index <- sort(index, decreasing = F)
-    
+
     opt_table <- opt_table[index]
     opt_table <- opt_table %>% select(cols, "Metrics", everything())
     
@@ -9896,7 +9938,7 @@ server <- function(input, output, session) {
                                                         Metrics=="Average Daily Volume"~ "Variable",
                                                         TRUE ~ "TBD"))
     
-    
+   print("12") 
     
     metric_order <- c("Average Daily Volume",c( "Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time") , as.vector(unique(opt_table$Metrics)))
   
@@ -9953,14 +9995,14 @@ server <- function(input, output, session) {
       data <- data %>% arrange(CAMPUS_SPECIALTY)
     }
     if(compare_filters == "DEPARTMENT"){
-      name_1 <- compare_filters
+      name_1 <- "Department"
       cols <- c("Specialty",compare_filters)    
       cols_name <- c("Specialty",name_1)
       pack_rows_name <- c("CAMPUS_SPECIALTY", "DEPARTMENT")
       data <- data %>% arrange(CAMPUS_SPECIALTY, DEPARTMENT)
     }
     if(compare_filters == "PROVIDER"){
-      name_1 <- compare_filters
+      name_1 <- "Provider"
       cols <- c("Specialty","DEPARTMENT",compare_filters)
       cols_name <- c("Specialty","DEPARTMENT", name_1)
       pack_rows_name <- c("CAMPUS_SPECIALTY", "DEPARTMENT", "PROVIDER")
