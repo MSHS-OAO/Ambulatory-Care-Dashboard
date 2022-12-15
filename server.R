@@ -9842,7 +9842,7 @@ server <- function(input, output, session) {
     print("8")
     # Process slot data
     #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Cardiology") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
-    data_slot <- dataAllSlot_comp() %>% rename(DEPARTMENT= DEPARTMENT_NAME)
+    data_slot <- dataAllSlot_comp() %>% rename(DEPARTMENT= DEPARTMENT_NAME)%>% collect()
     #data_slot <- dataAllSlot_comp() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     compare_filters <- input$compare_filters_opt
     
@@ -9856,7 +9856,7 @@ server <- function(input, output, session) {
     slot <- data_slot %>% group_by(!!!syms(cols), APPT_MONTH_YEAR, APPT_DATE_YEAR)%>%
       dplyr::summarise(AVAILABLE_HOURS = round(NULLIF(sum(AVAILABLE_HOURS, na.rm=TRUE),0),1),
                        BOOKED_HOURS = NULLIF(sum(BOOKED_HOURS, na.rm=TRUE),0),
-                       `Filled Hours` = NULLIF(sum(ARRIVED_HOURS, na.rm=TRUE),0)) %>% collect()
+                       `Filled Hours` = NULLIF(sum(ARRIVED_HOURS, na.rm=TRUE),0)) 
                         
     slot[is.na(slot)] <- 0
     slot_metrics <- c( "Booked Rate", "Filled Rate")
