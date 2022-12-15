@@ -6691,27 +6691,26 @@
       "description": {
         "Package": "tidyselect",
         "Title": "Select from a Set of Strings",
-        "Version": "1.1.0",
+        "Version": "1.1.1",
         "Authors@R": "c(\n    person(\"Lionel\", \"Henry\", ,\"lionel@rstudio.com\", c(\"aut\", \"cre\")),\n    person(\"Hadley\", \"Wickham\", ,\"hadley@rstudio.com\", \"aut\"),\n    person(\"RStudio\", role = \"cph\")\n    )",
         "Description": "A backend for the selecting functions of the 'tidyverse'.\n    It makes it easy to implement select-like functions in your own\n    packages in a way that is consistent with other 'tidyverse'\n    interfaces for selection.",
         "Depends": "R (>= 3.2)",
-        "Imports": "ellipsis, glue (>= 1.3.0), purrr (>= 0.3.2), rlang (>= 0.4.6),\nvctrs (>= 0.2.2)",
+        "Imports": "ellipsis, glue (>= 1.3.0), purrr (>= 0.3.2), rlang (>= 0.4.6),\nvctrs (>= 0.3.0)",
         "Suggests": "covr, crayon, dplyr, knitr, magrittr, rmarkdown, testthat (>=\n2.3.0), tibble (>= 2.1.3), withr",
-        "License": "GPL-3",
+        "License": "MIT + file LICENSE",
         "Encoding": "UTF-8",
-        "LazyData": "true",
         "ByteCompile": "true",
-        "RoxygenNote": "7.1.0",
+        "RoxygenNote": "7.1.1",
         "URL": "https://tidyselect.r-lib.org, https://github.com/r-lib/tidyselect",
         "BugReports": "https://github.com/r-lib/tidyselect/issues",
         "VignetteBuilder": "knitr",
         "NeedsCompilation": "yes",
-        "Packaged": "2020-05-11 17:13:55 UTC; lionel",
+        "Packaged": "2021-04-29 13:41:53 UTC; lionel",
         "Author": "Lionel Henry [aut, cre],\n  Hadley Wickham [aut],\n  RStudio [cph]",
         "Maintainer": "Lionel Henry <lionel@rstudio.com>",
         "Repository": "CRAN",
-        "Date/Publication": "2020-05-11 23:10:07 UTC",
-        "Built": "R 3.6.3; ; 2021-03-25 15:14:53 UTC; windows"
+        "Date/Publication": "2021-04-30 06:40:02 UTC",
+        "Built": "R 3.6.3; ; 2021-05-12 21:05:58 UTC; windows"
       }
     },
     "tidyverse": {
@@ -7703,67 +7702,19 @@
   },
   "files": {
     "Access.sql": {
-      "checksum": "5635474b9756c81f9ff9c853c039228f"
-    },
-    "Data/Archive 01-07-2022/historical_data.rds": {
-      "checksum": "d7c2b7a46c345b829e76dbec160d321e"
-    },
-    "Data/Archive New data/historical_data.rds": {
-      "checksum": "c0dc4613306d96a53204929553f4a77b"
-    },
-    "Data/Data.zip": {
-      "checksum": "7be2ede5435e7ae96f2db90078ea86f0"
-    },
-    "Data/Data/historical_data.rds": {
-      "checksum": "8f7384b645bcf4853928f8e0b172bf05"
-    },
-    "Data/Data/holid.rds": {
-      "checksum": "b02fb81c6743715810ddd7299ef2a62d"
-    },
-    "Data/Data/population_data_filtered.rds": {
-      "checksum": "5879b02add8b91f843a94ba6a5bd77cc"
-    },
-    "Data/Data/slot_data_subset.rds": {
-      "checksum": "a6ea888912f89f454f29048bb0e63452"
-    },
-    "Data/Data/utilization_data.rds": {
-      "checksum": "d7331fb99254d5a4542fa4fc97e3a870"
-    },
-    "Data/historical_data.rds": {
-      "checksum": "d7c2b7a46c345b829e76dbec160d321e"
-    },
-    "Data/historical_data_upt.rds": {
-      "checksum": "5cb50887208de539c2d2068848a5ffd3"
-    },
-    "Data/holid.rds": {
-      "checksum": "a02433e1f271b0e85f711e7f2b06360d"
-    },
-    "Data/population_data_filtered.rds": {
-      "checksum": "413c2c021461b4501389d62755e730d3"
-    },
-    "Data/Slot Archive/new_slot_data_subset.rds": {
-      "checksum": "a6ea888912f89f454f29048bb0e63452"
-    },
-    "Data/slot_data_subset.rds": {
-      "checksum": "a6ea888912f89f454f29048bb0e63452"
-    },
-    "Data/utilization_data.rds": {
-      "checksum": "29255530c7cac8c7641c08605dbe553f"
+      "checksum": "5c24e2e521a27d59606eb63f586e797d"
     },
     "global.R": {
-      "checksum": "d148cca578659448b27894d7f10ed19f"
+      "checksum": "12d8c1749c175fbd711f41a080f2494d"
     },
     "README.md": {
       "checksum": "e6b91dcda0078389d15a9d23ad3111b5"
     },
     "server.R": {
-      "checksum": "540eec4e4e320f2f70f353fd6a3b6b8e"
-    },
-    "SQL_slot.sql": {
-      "checksum": "6f94ab78e895e7f2e39861f73a79ad61"
+      "checksum": "3ba4b3d021a3e7e3f1049ee6313143c1"
     },
     "ui.R": {
-      "checksum": "d382239ca478b42290ef24a838a0fa8a"
+      "checksum": "68168c4f3cf63dc7d9a68d179135913c"
     },
     "www/homepage.PNG": {
       "checksum": "6f8a16f66eae67492ae387b02ad3f00e"
@@ -7783,8 +7734,23 @@
     "www/Mappings/Master Mapping File.xlsx": {
       "checksum": "f8de156c3904fec6ecb61d723be2a942"
     },
+    "www/Mappings/Metrics_Overview.pdf": {
+      "checksum": "b60534c580578c87ccf88fbfee3c14eb"
+    },
     "www/MS_KO_Vrtl.png": {
       "checksum": "8d5206c3aceac914e8f09272d3a5cfa9"
+    },
+    "www/Quick_HowtoUse_Amb Care Tool_Intro.mp4": {
+      "checksum": "8112c6568582612a801796d99955635b"
+    },
+    "www/Sinai_logo_color.png": {
+      "checksum": "1d2ba7ac0d235e444e7a5f4f2cc3ece5"
+    },
+    "www/Sinai_logo_white.png": {
+      "checksum": "7dd52ec177a001944ae553f98ca3a6e2"
+    },
+    "www/Use_Case.png": {
+      "checksum": "62f2d72213a2f58b0869e9146b1bcfeb"
     }
   },
   "users": null
