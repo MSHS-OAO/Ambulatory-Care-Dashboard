@@ -9870,7 +9870,7 @@ server <- function(input, output, session) {
         summarise(
           `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
           `Filled Rate` = round(sum(`Filled Hours`, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
-        ) %>% #collect() %>%
+        ) %>% collect() %>%
         mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
     })
     slot[is.na(slot)] <- 0
