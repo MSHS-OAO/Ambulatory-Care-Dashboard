@@ -329,7 +329,7 @@ setwd(wdpath)
 # poolcon <- dbConnect(odbc(), "OAO Cloud DB")
 
 poolcon <- dbPool(drv  = odbc::odbc(),
-                 dsn  = "OAO Cloud DB Oracle")
+                 dsn  = "OAO Cloud DB")
 # poolcon <- dbConnect(odbc(), "OracleODBC-21_5",
 #                       uid = "villea04",
 #                       pwd = "qKQvPoSilm21T*qVr")
