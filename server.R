@@ -9856,7 +9856,7 @@ server <- function(input, output, session) {
     slot <- data_slot %>% group_by(!!!syms(cols), APPT_MONTH_YEAR, APPT_DATE_YEAR)%>%
       dplyr::summarise(AVAILABLE_HOURS = round(NULLIF(sum(AVAILABLE_HOURS, na.rm=TRUE),0),1),
                        BOOKED_HOURS = NULLIF(sum(BOOKED_HOURS, na.rm=TRUE),0),
-                       `Filled Hours` = NULLIF(sum(ARRIVED_HOURS, na.rm=TRUE),0))
+                       `Filled Hours` = NULLIF(sum(ARRIVED_HOURS, na.rm=TRUE),0)) %>% collect()
                         
     slot[is.na(slot)] <- 0
     slot_metrics <- c( "Booked Rate", "Filled Rate")
@@ -9871,7 +9871,7 @@ server <- function(input, output, session) {
       summarise(
         `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
         `Filled Rate` = round(sum(`Filled Hours`, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
-      ) %>% collect() %>%
+      ) %>% #collect() %>%
       mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
     
     print("9.1")
