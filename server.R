@@ -9857,7 +9857,7 @@ server <- function(input, output, session) {
     slot <- data_slot %>% group_by(!!!syms(cols), APPT_MONTH_YEAR, APPT_DATE_YEAR)%>%
       dplyr::summarise(AVAILABLE_HOURS = round(sum(AVAILABLE_HOURS, na.rm=TRUE),1),
                        BOOKED_HOURS = sum(BOOKED_HOURS, na.rm=TRUE),
-                       `Filled Hours` = sum(ARRIVED_HOURS, na.rm=TRUE)) #%>% collect()
+                       FILLED_HOURS = sum(ARRIVED_HOURS, na.rm=TRUE)) #%>% collect()
                         
     print("9")
     suppressWarnings({
@@ -9869,7 +9869,7 @@ server <- function(input, output, session) {
         filter(!is.na(AVAILABLE_HOURS)) %>%
         summarise(
           `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
-          `Filled Rate` = round(sum(`Filled Hours`, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
+          `Filled Rate` = round(sum(FILLED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
         ) %>% collect() %>%
         mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
     })
