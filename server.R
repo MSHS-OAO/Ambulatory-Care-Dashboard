@@ -9842,7 +9842,7 @@ server <- function(input, output, session) {
     print("8")
     # Process slot data
     #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Cardiology") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
-    data_slot <- dataAllSlot_comp() %>% collect() %>% rename(DEPARTMENT= DEPARTMENT_NAME)
+    data_slot <- dataAllSlot_comp() %>% rename(DEPARTMENT= DEPARTMENT_NAME)
     #data_slot <- dataAllSlot_comp() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     compare_filters <- input$compare_filters_opt
     
@@ -9862,17 +9862,19 @@ server <- function(input, output, session) {
     slot_metrics <- c( "Booked Rate", "Filled Rate")
  
     print("9")
-    ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
-    ### then gather all created columns make them categories for the STatus column
-    ### Spread data to make monhts in Appt.Month into columns
-    slot <- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
-      filter(AVAILABLE_HOURS > 0) %>%
-      filter(!is.na(AVAILABLE_HOURS)) %>%
-      summarise(
-        `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
-        `Filled Rate` = round(sum(`Filled Hours`, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
-      ) %>% #collect() %>%
-      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
+    suppressWarnings({
+      ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
+      ### then gather all created columns make them categories for the STatus column
+      ### Spread data to make monhts in Appt.Month into columns
+      slot <- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+        filter(AVAILABLE_HOURS > 0) %>%
+        filter(!is.na(AVAILABLE_HOURS)) %>%
+        summarise(
+          `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
+          `Filled Rate` = round(sum(`Filled Hours`, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
+        ) %>% collect() %>%
+        mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
+    })
     
     print("9.1")
       
