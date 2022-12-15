@@ -9860,8 +9860,7 @@ server <- function(input, output, session) {
                         
     slot[is.na(slot)] <- 0
     slot_metrics <- c( "Booked Rate", "Filled Rate")
-    tester <<- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>% show_query()
-    slot_test <<- slot
+ 
     print("9")
     ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
     ### then gather all created columns make them categories for the STatus column
