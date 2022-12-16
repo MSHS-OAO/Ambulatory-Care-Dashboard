@@ -6038,6 +6038,7 @@ server <- function(input, output, session) {
     
     min_date <- min(pts.dist$Month)
     max_date <- max(pts.dist$Month)
+    pts.dist$Volume <- ceiling(pts.dist$Volume)
     g1 <- ggplot(pts.dist, aes(x=Month, y=Volume, group=Month))+
       geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
       stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
