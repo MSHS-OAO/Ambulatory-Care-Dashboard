@@ -6038,7 +6038,7 @@ server <- function(input, output, session) {
     
     min_date <- min(pts.dist$Month)
     max_date <- max(pts.dist$Month)
-    pts.dist$Volume <- ceiling(pts.dist$Volume)
+    
     g1 <- ggplot(pts.dist, aes(x=Month, y=Volume, group=Month))+
       geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
       stat_summary(fun.y=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
@@ -6097,6 +6097,7 @@ server <- function(input, output, session) {
     data_melt$Month <- as.yearmon(data_melt$Month, format="%Y-%m")
     data_melt$Month <- as.Date(data_melt$Month, format="%Y-%m")
     data_melt[is.na(data_melt)] <- 0
+    data_melt$variable <- ceiling(data_melt$variable)
     
     g2 <- ggplot(data_melt, aes(x = Month, y = variable, label = value))+
       scale_color_MountSinai('dark' )+
