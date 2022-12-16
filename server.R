@@ -4066,11 +4066,9 @@ server <- function(input, output, session) {
     total_arrived <- dataArrived() %>% select(APPT_DATE_YEAR) %>% collect()
     sameDay <- data %>%
       group_by(APPT_STATUS) %>%
-      summarise(value = round(n()/length(unique(total_arrived$APPT_DATE_YEAR)))) %>%
+      summarise(value = ceiling(n()/length(unique(total_arrived$APPT_DATE_YEAR)))) %>%
       arrange(desc(value)) 
     
-    
-    sameDay <- sameDay %>% mutate(value = ifelse(value == 0,1,value))
     
     sameDay$APPT_STATUS <- as.character(sameDay$APPT_STATUS)
     
