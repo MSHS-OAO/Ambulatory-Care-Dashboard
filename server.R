@@ -6072,7 +6072,7 @@ server <- function(input, output, session) {
     pts.dist.summary <-
       pts.dist %>%
       group_by(Month) %>%
-      dplyr::summarise(Avg = round(mean(Volume)), Median = median(Volume), Min = min(Volume), Max = max(Volume), N = n())
+      dplyr::summarise(Avg = ceiling(mean(Volume)), Median = ceiling(median(Volume)), Min = ceiling(min(Volume)), Max = ceiling(max(Volume)), N = n())
     
     pts.dist.summary <- pts.dist.summary %>%
                         mutate(Month = as.Date(paste0(Month, "-01"))) %>%
@@ -6097,8 +6097,7 @@ server <- function(input, output, session) {
     data_melt$Month <- as.yearmon(data_melt$Month, format="%Y-%m")
     data_melt$Month <- as.Date(data_melt$Month, format="%Y-%m")
     data_melt[is.na(data_melt)] <- 0
-    data_melt$variable <- ceiling(data_melt$variable)
-    
+
     g2 <- ggplot(data_melt, aes(x = Month, y = variable, label = value))+
       scale_color_MountSinai('dark' )+
       geom_text(size = 5, vjust = "center", hjust = "center", fontface  = "bold")+
