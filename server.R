@@ -321,16 +321,27 @@ server <- function(input, output, session) {
       selected_provider <- input$selectedProvider
       
       
+      if(length(selected_provider) >= 1000){
+        visit_choices <- filters %>% 
+                                filter(CAMPUS %in% selected_campus & 
+                                       CAMPUS_SPECIALTY %in% selected_specialty & 
+                                       DEPARTMENT %in% selected_department &
+                                       RESOURCES %in% selected_resource) %>% 
+                                select( VISIT_METHOD)  %>% 
+                                mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
+      } else{
+        visit_choices <- filters %>% 
+          filter(CAMPUS %in% selected_campus & 
+                   CAMPUS_SPECIALTY %in% selected_specialty & 
+                   DEPARTMENT %in% selected_department &
+                   PROVIDER %in% selected_provider &
+                   RESOURCES %in% selected_resource) %>% 
+          select( VISIT_METHOD)  %>% 
+          mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
+        
+      }
       
       
-      visit_choices <- filters %>% 
-                              filter(CAMPUS %in% selected_campus & 
-                                     CAMPUS_SPECIALTY %in% selected_specialty & 
-                                     DEPARTMENT %in% selected_department &
-                                     PROVIDER %in% selected_provider &
-                                     RESOURCES %in% selected_resource) %>% 
-                              select( VISIT_METHOD)  %>% 
-                              mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
       visit_choices <- sort(visit_choices$VISIT_METHOD, na.last = T)
       
       
@@ -362,18 +373,27 @@ server <- function(input, output, session) {
       selected_provider <- input$selectedProvider
       selected_visit_method <- input$selectedVisitMethod
       
+      if(length(selected_provider) >= 1000){
+        prc_choices <- filters %>% 
+          filter(CAMPUS %in% selected_campus & 
+                   CAMPUS_SPECIALTY %in% selected_specialty & 
+                   DEPARTMENT %in% selected_department &
+                   RESOURCES %in% selected_resource &
+                   VISIT_METHOD %in% selected_visit_method) %>% 
+          select(APPT_TYPE)  %>% 
+          mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+      }else {
       
-      
-      
-      prc_choices <- filters %>% 
-        filter(CAMPUS %in% selected_campus & 
-                 CAMPUS_SPECIALTY %in% selected_specialty & 
-                 DEPARTMENT %in% selected_department &
-                 PROVIDER %in% selected_provider &
-                 RESOURCES %in% selected_resource &
-                 VISIT_METHOD %in% selected_visit_method) %>% 
-        select(APPT_TYPE)  %>% 
-        mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+        prc_choices <- filters %>% 
+          filter(CAMPUS %in% selected_campus & 
+                   CAMPUS_SPECIALTY %in% selected_specialty & 
+                   DEPARTMENT %in% selected_department &
+                   PROVIDER %in% selected_provider &
+                   RESOURCES %in% selected_resource &
+                   VISIT_METHOD %in% selected_visit_method) %>% 
+          select(APPT_TYPE)  %>% 
+          mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+      }
       prc_choices <- sort(prc_choices$APPT_TYPE, na.last = T)
       
       
