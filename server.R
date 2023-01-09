@@ -5993,7 +5993,7 @@ server <- function(input, output, session) {
     
     #pts.by.day$Day.Count <- totalDates$Day[match(pts.by.day$Day, totalDates$APPT_DAY)]
     pts.by.day <- inner_join(pts.by.day, totalDates, by = c("Day" = "APPT_DAY", "Visit.Method" = "VISIT_METHOD"))
-    pts.by.day$Avg.Volume <- as.numeric(round(pts.by.day$Volume/pts.by.day$Day.Count,1))
+    pts.by.day$Avg.Volume <- as.numeric(ceiling(pts.by.day$Volume/pts.by.day$Day.Count))
     
     factor_levels <- sort(unique(pts.by.day$Visit.Method), na.last = T)
 
