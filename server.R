@@ -251,13 +251,14 @@ server <- function(input, output, session) {
       selected_resource <- input$selectedResource
       
       
-      provider_choices <-   filters %>% 
+      provider_choices <-   #filters %>% 
+                            filters_table %>%
                             filter(CAMPUS %in% selected_campus & 
                             CAMPUS_SPECIALTY %in% selected_specialty & 
                             DEPARTMENT %in% selected_department &
                             RESOURCES %in% selected_resource) %>% 
-                            select(PROVIDER)  %>% 
-                            mutate(PROVIDER= unique(PROVIDER)) %>% collect()
+                            #select(PROVIDER)  %>% 
+                            summarise(PROVIDER= unique(PROVIDER)) #%>% collect()
       provider_choices <- sort(provider_choices$PROVIDER, na.last = T)
       
       updatePickerInput(session,
@@ -284,13 +285,14 @@ server <- function(input, output, session) {
       selected_department <- input$selectedDepartment
       selected_resource <- input$selectedResource
       
-      provider_choices <-   filters %>% 
+      provider_choices <-   #filters %>% 
+                            filters_table %>%
         filter(CAMPUS %in% selected_campus & 
                CAMPUS_SPECIALTY %in% selected_specialty & 
                DEPARTMENT %in% selected_department &
                RESOURCES %in% selected_resource) %>% 
-        select(PROVIDER)  %>% 
-        mutate(PROVIDER= unique(PROVIDER)) %>% collect()
+        #select(PROVIDER)  %>% 
+        summarise(PROVIDER= unique(PROVIDER)) #%>% collect()
       provider_choices <- sort(provider_choices$PROVIDER, na.last = T)
       
       updatePickerInput(session,
@@ -5967,6 +5969,7 @@ server <- function(input, output, session) {
     
     
     data <- dataArrived()
+    #data_test <<- dataArrived()
     #data <- data %>% select(UNIQUEID, APPT_DAY, VISIT_METHOD, APPT_DATE_YEAR) #%>% collect()
     
     
@@ -5977,7 +5980,7 @@ server <- function(input, output, session) {
     
     names(pts.by.day) <- c("Day","Visit.Method", "Volume")
     
-    totalDates <- data %>% group_by(APPT_DAY, VISIT_METHOD) %>% summarise(Day = count(unique(APPT_DATE_YEAR))) %>% collect()
+    totalDates <- data %>% group_by(APPT_DAY, VISIT_METHOD) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
     # totalDates <- as.data.frame(seq(as.Date(min(data$Appt.DTTM)), as.Date(max(data$Appt.DTTM)),by="days"))
     # names(totalDates) <- c("Dates")
     # totalDates$day <- format(as.Date(totalDates$Dates, format="%Y-%m-%d"), "%a")
@@ -5988,7 +5991,8 @@ server <- function(input, output, session) {
     # 
     # totalDates <- data %>% group_by(Visit.Method) %>% summarise(Day = distinct(Appt.DateYear))
     
-    pts.by.day$Day.Count <- totalDates$Day[match(pts.by.day$Day, totalDates$APPT_DAY)]
+    #pts.by.day$Day.Count <- totalDates$Day[match(pts.by.day$Day, totalDates$APPT_DAY)]
+    pts.by.day <- inner_join(pts.by.day, totalDates, by = c("Day" = "APPT_DAY", "Visit.Method" = "VISIT_METHOD"))
     pts.by.day$Avg.Volume <- as.numeric(round(pts.by.day$Volume/pts.by.day$Day.Count,1))
     
     factor_levels <- sort(unique(pts.by.day$Visit.Method), na.last = T)
@@ -6020,7 +6024,7 @@ server <- function(input, output, session) {
     print("volume4")
     data <- dataArrived()
     data <- data %>% select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE) #%>% collect()
-    data_test <<- data
+    #data_test <<- data
     
     pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE) %>% summarise(total = n()) %>% collect()
     pts.dist.test <<- pts.dist
