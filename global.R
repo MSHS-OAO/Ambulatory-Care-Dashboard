@@ -353,7 +353,7 @@ poolcon <- dbConnect(odbc(), "Oracle 21_8",
 
 historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
 filters <- tbl(poolcon, "AMBULATORY_FILTERS")
-library(pins)
+library(pins) 
 board <- board_folder("/data/pin")
 filters_table <- board %>% pin_read("ambulatory_filters")
 holid <- tbl(poolcon, "HOLIDAYS")

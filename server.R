@@ -80,102 +80,104 @@ server <- function(input, output, session) {
     
   })
   
+ 
   
-  
-  observeEvent(input$filter_list, {
-    user <- user()
-    
-    filter_path <- paste0(filter_path, "/", user, "/", input$filter_list, ".csv")
-    filter_df <- read_csv(filter_path)
-    
-    campus_selected <- unique(filter_df$Campus)
-    specialty_selected <- unique(filter_df$Specialty)
-    department_selected <- unique(filter_df$Department)
-    resource_selected <- unique(filter_df$Resource)
-    provider_selected <- unique(filter_df$Provider)
-    visitMethod_selected <- unique(filter_df$`Visit Method`)
-    visitType_selected <- unique(filter_df$`Visit Type`)
-    day_selected <- unique(filter_df$Days)
-    
-    specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% campus_selected, "Campus.Specialty"]))
-    
-    department_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% campus_selected &
-                                                     kpi.all.data$Campus.Specialty %in% specialty_selected, "Department"]), na.last = TRUE)
-    
-    provider_choices <- sort(unique(kpi.all.data[
-      kpi.all.data$Campus %in% campus_selected &
-        kpi.all.data$Campus.Specialty %in% specialty_selected &
-        kpi.all.data$Department %in% department_choices &
-        kpi.all.data$Resource %in% resource_selected, "Provider"]), na.last = TRUE)
-    
-    visitMethod_choices <- sort(unique(kpi.all.data[
-      kpi.all.data$Campus %in% campus_selected &
-        kpi.all.data$Campus.Specialty %in% specialty_selected &
-        kpi.all.data$Department %in% department_choices &
-        kpi.all.data$Resource %in% resource_selected &
-        kpi.all.data$Provider %in% provider_choices, "Visit.Method"]), na.last = TRUE)
-    
-    visitType_choices <- sort(unique(kpi.all.data[
-      kpi.all.data$Campus %in% campus_selected &
-        kpi.all.data$Campus.Specialty %in% specialty_selected &
-        kpi.all.data$Department %in% department_choices &
-        kpi.all.data$Resource %in% resource_selected &
-        kpi.all.data$Provider %in% provider_choices &
-        kpi.all.data$Visit.Method %in% visitMethod_choices, "Appt.Type"]), na.last = TRUE)
-    
-    
-    
-    updatePickerInput(session,
-                      inputId = "selectedCampus",
-                      selected = campus_selected
-    )
-    
-    updatePickerInput(session,
-                      inputId = "selectedSpecialty",
-                      choices = specialty_choices,
-                      selected = specialty_selected
-    )
-    
-    updatePickerInput(session,
-                      inputId = "selectedDepartment",
-                      choices = department_choices,
-                      selected = department_selected
-    )
-    
-    updateCheckboxGroupButtons(session,
-                               inputId = "selectedResource",
-                               choices = c("Provider","Resource"),
-                               checkIcon = list(
-                                 yes = icon("ok", lib = "glyphicon")),
-                               selected = resource_selected
-    )
-    
-    updatePickerInput(session,
-                      inputId = "selectedProvider",
-                      choices = provider_choices,
-                      selected = provider_selected
-    )
-    
-    updatePickerInput(session,
-                      inputId = "selectedVisitMethod",
-                      choices = visitMethod_choices,
-                      selected = visitMethod_selected
-    )
-    
-    updatePickerInput(session,
-                      inputId = "selectedPRCName",
-                      choices = visitType_choices,
-                      selected = visitType_selected
-    )
-    
-    updatePickerInput(session,
-                      inputId = "daysOfWeek",
-                      choices = daysOfWeek.options,
-                      selected = day_selected
-    )
-    
-    
-  })
+  # observeEvent(input$filter_list, {
+  #   user <- user()
+  #   
+  #   filter_path <- paste0(filter_path, "/", user, "/", input$filter_list, ".csv")
+  #   filter_df <- read_csv(filter_path)
+  #   
+  #   
+  #   campus_selected <- unique(filter_df$Campus)
+  #   specialty_selected <- unique(filter_df$Specialty)
+  #   department_selected <- unique(filter_df$Department)
+  #   resource_selected <- unique(filter_df$Resource)
+  #   provider_selected <- unique(filter_df$Provider)
+  #   visitMethod_selected <- unique(filter_df$`Visit Method`)
+  #   visitType_selected <- unique(filter_df$`Visit Type`)
+  #   day_selected <- unique(filter_df$Days)
+  #   
+  #   specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% campus_selected, "Campus.Specialty"]))
+  #   
+  #   department_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% campus_selected &
+  #                                                    kpi.all.data$Campus.Specialty %in% specialty_selected, "Department"]), na.last = TRUE)
+  #   
+  #   
+  #   provider_choices <- sort(unique(kpi.all.data[
+  #     kpi.all.data$Campus %in% campus_selected &
+  #       kpi.all.data$Campus.Specialty %in% specialty_selected &
+  #       kpi.all.data$Department %in% department_choices &
+  #       kpi.all.data$Resource %in% resource_selected, "Provider"]), na.last = TRUE)
+  #   
+  #   visitMethod_choices <- sort(unique(kpi.all.data[
+  #     kpi.all.data$Campus %in% campus_selected &
+  #       kpi.all.data$Campus.Specialty %in% specialty_selected &
+  #       kpi.all.data$Department %in% department_choices &
+  #       kpi.all.data$Resource %in% resource_selected &
+  #       kpi.all.data$Provider %in% provider_choices, "Visit.Method"]), na.last = TRUE)
+  #   
+  #   visitType_choices <- sort(unique(kpi.all.data[
+  #     kpi.all.data$Campus %in% campus_selected &
+  #       kpi.all.data$Campus.Specialty %in% specialty_selected &
+  #       kpi.all.data$Department %in% department_choices &
+  #       kpi.all.data$Resource %in% resource_selected &
+  #       kpi.all.data$Provider %in% provider_choices &
+  #       kpi.all.data$Visit.Method %in% visitMethod_choices, "Appt.Type"]), na.last = TRUE)
+  #   
+  #   
+  #   
+  #   updatePickerInput(session,
+  #                     inputId = "selectedCampus",
+  #                     selected = campus_selected
+  #   )
+  #   
+  #   updatePickerInput(session,
+  #                     inputId = "selectedSpecialty",
+  #                     choices = specialty_choices,
+  #                     selected = specialty_selected
+  #   )
+  #   
+  #   updatePickerInput(session,
+  #                     inputId = "selectedDepartment",
+  #                     choices = department_choices,
+  #                     selected = department_selected
+  #   )
+  #   
+  #   updateCheckboxGroupButtons(session,
+  #                              inputId = "selectedResource",
+  #                              choices = c("Provider","Resource"),
+  #                              checkIcon = list(
+  #                                yes = icon("ok", lib = "glyphicon")),
+  #                              selected = resource_selected
+  #   )
+  #   
+  #   updatePickerInput(session,
+  #                     inputId = "selectedProvider",
+  #                     choices = provider_choices,
+  #                     selected = provider_selected
+  #   )
+  #   
+  #   updatePickerInput(session,
+  #                     inputId = "selectedVisitMethod",
+  #                     choices = visitMethod_choices,
+  #                     selected = visitMethod_selected
+  #   )
+  #   
+  #   updatePickerInput(session,
+  #                     inputId = "selectedPRCName",
+  #                     choices = visitType_choices,
+  #                     selected = visitType_selected
+  #   )
+  #   
+  #   updatePickerInput(session,
+  #                     inputId = "daysOfWeek",
+  #                     choices = daysOfWeek.options,
+  #                     selected = day_selected
+  #   )
+  #   
+  #   
+  # })
   
   observeEvent(input$update_filters1,{
     user <- user()
@@ -204,9 +206,6 @@ server <- function(input, output, session) {
                         selected = specialty_choices
       )
     }
-    
-    
-    
     
   },
   ignoreInit = TRUE,
@@ -238,6 +237,7 @@ server <- function(input, output, session) {
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
   
+  
   observeEvent(input$selectedDepartment,{
     if(is.null(input$filter_list) && !is.null(input$selectedDepartment)){
       # provider_choices <- sort(unique(kpi.all.data[
@@ -245,22 +245,24 @@ server <- function(input, output, session) {
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
       #     kpi.all.data$Department %in% input$selectedDepartment &
       #     kpi.all.data$Resource %in% input$selectedResource, "Provider"]))
+      
       selected_campus <- input$selectedCampus
       selected_specialty <- input$selectedSpecialty
       selected_department <- input$selectedDepartment
       selected_resource <- input$selectedResource
       
-      
       provider_choices <-   #filters %>% 
-                            filters_table %>%
-                            filter(CAMPUS %in% selected_campus & 
-                            CAMPUS_SPECIALTY %in% selected_specialty & 
-                            DEPARTMENT %in% selected_department &
-                            RESOURCES %in% selected_resource) %>% 
-                            #select(PROVIDER)  %>% 
-                            summarise(PROVIDER= unique(PROVIDER)) #%>% collect()
+        filters_table %>%
+        filter(CAMPUS %in% selected_campus & 
+                 CAMPUS_SPECIALTY %in% selected_specialty & 
+                 DEPARTMENT %in% selected_department &
+                 RESOURCES %in% selected_resource) %>% 
+        #select(PROVIDER)  %>% 
+        summarise(PROVIDER= unique(PROVIDER)) %>% collect()
       provider_choices <- sort(provider_choices$PROVIDER, na.last = T)
       
+      provider_test1  <<- provider_choices
+    
       updatePickerInput(session,
                         inputId = "selectedProvider",
                         choices = provider_choices,
@@ -273,8 +275,10 @@ server <- function(input, output, session) {
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
   
-  observeEvent(input$selectedResource,{
-    if(is.null(input$filter_list) && !is.null(input$selectedResource)){
+  observeEvent(input$selectedResource, {
+    if(is.null(input$filter_list) && !is.null(input$selectedResource)
+    ){
+      print("test provider")                              
       # provider_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -286,13 +290,13 @@ server <- function(input, output, session) {
       selected_resource <- input$selectedResource
       
       provider_choices <-   #filters %>% 
-                            filters_table %>%
+        filters_table %>%
         filter(CAMPUS %in% selected_campus & 
-               CAMPUS_SPECIALTY %in% selected_specialty & 
-               DEPARTMENT %in% selected_department &
-               RESOURCES %in% selected_resource) %>% 
+                 CAMPUS_SPECIALTY %in% selected_specialty & 
+                 DEPARTMENT %in% selected_department &
+                 RESOURCES %in% selected_resource) %>% 
         #select(PROVIDER)  %>% 
-        summarise(PROVIDER= unique(PROVIDER)) #%>% collect()
+        summarise(PROVIDER= unique(PROVIDER)) %>% collect()
       provider_choices <- sort(provider_choices$PROVIDER, na.last = T)
       
       updatePickerInput(session,
@@ -306,9 +310,19 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
+
   
-  observeEvent(input$selectedProvider, {
-    if(is.null(input$filter_list) && !is.null(input$selectedProvider)){
+  observeEvent(list(input$selectedProvider, input$selectedResource),  {
+    
+    if((is.null(input$filter_list) && (!is.null(input$selectedProvider) &&
+                                       !is.null(input$selectedResource))) ||
+       
+       (!is.null(input$filter_list) && (!is.null(input$selectedProvider) &&
+                                        !is.null(input$selectedResource))))
+      
+    {
+    
+    
       # visit_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -346,7 +360,6 @@ server <- function(input, output, session) {
       
       visit_choices <- sort(visit_choices$VISIT_METHOD, na.last = T)
       
-      
       updatePickerInput(session,
                         inputId = "selectedVisitMethod",
                         choices = visit_choices,
@@ -357,8 +370,23 @@ server <- function(input, output, session) {
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
   
-  observeEvent(list(input$selectedVisitMethod,input$selectedProvider), {
-    if(is.null(input$filter_list) && (!is.null(input$selectedVisitMethod) || !is.null(input$selectedProvider))){
+  
+  observeEvent(list(input$selectedVisitMethod, input$selectedResource,
+                    input$selectedProvider), {
+    
+    if((is.null(input$filter_list) && (!is.null(input$selectedVisitMethod) &&
+                                      !is.null(input$selectedResource))) ||
+       
+       (!is.null(input$filter_list) && (!is.null(input$selectedVisitMethod) &&
+                                       !is.null(input$selectedResource))))
+       
+       {
+      if(!is.null(input$selectedProvider)){
+                                      
+      # default state
+      # 1 & (0 | 1)
+      # 1 & 1 TRUE 
+      print("this observe is for PRC")
       # prc_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -366,6 +394,9 @@ server <- function(input, output, session) {
       #     kpi.all.data$Resource %in% input$selectedResource &
       #     kpi.all.data$Provider %in% input$selectedProvider &
       #     kpi.all.data$Visit.Method %in% input$selectedVisitMethod, "Appt.Type"]))
+      
+      selected_resource <<- input$selectedResource
+      selected_provider <<- input$selectedProvider
       
       
       selected_campus <- input$selectedCampus
@@ -404,6 +435,7 @@ server <- function(input, output, session) {
                         choices = prc_choices,
                         selected = prc_choices
       )
+      }
     }
   },
   ignoreInit = TRUE,
@@ -5839,6 +5871,7 @@ server <- function(input, output, session) {
   output$volume2 <- renderPlot({
     print("volume2")
     data <- dataArrived()
+    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     #data <- setDT(data)
     #data <- unique(data, by = "uniqueId")
     
@@ -5865,11 +5898,15 @@ server <- function(input, output, session) {
     #factor_levels = c("TELEPHONE VISITS", "VIDEO_TELEHEALTH VISITS","IN PERSON", "PORTING VV TH TP")
     pts.by.month$Visit.Method <- factor(pts.by.month$Visit.Method, levels = factor_levels)
     
-    percent <- pts.by.month %>% 
+    pts.by.month <- pts.by.month %>%
       group_by(Month) %>%
       mutate(percent = paste0("(",round(Volume/sum(Volume)*100,0), "%)"))
     
-    pts.by.month <- full_join(pts.by.month,percent)
+    # percent <- pts.by.month %>% 
+    #   group_by(Month) %>%
+    #   mutate(percent = paste0("(",round(Volume/sum(Volume)*100,0), "%)"))
+    # 
+    # pts.by.month <- full_join(pts.by.month,percent)
     
     g3 <- ggplot(pts.by.month, aes(x=Month, y=Volume, group = Visit.Method, fill = Visit.Method))+
       geom_bar(position = "stack",stat="identity")+
@@ -5970,7 +6007,9 @@ server <- function(input, output, session) {
     
     data <- dataArrived()
     #data_test <<- dataArrived()
-    #data <- data %>% select(UNIQUEID, APPT_DAY, VISIT_METHOD, APPT_DATE_YEAR) #%>% collect()
+    # data <- arrived.data.rows  %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>%
+    #  select(UNIQUEID, APPT_DAY, VISIT_METHOD, APPT_DATE_YEAR)  
+                                    
     
     
     # pts.by.day <- aggregate(data$UNIQUEID, 
@@ -6022,8 +6061,11 @@ server <- function(input, output, session) {
   output$volume4 <- renderPlot({
     
     print("volume4")
-    data <- dataArrived()
-    data <- data %>% select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE) #%>% collect()
+  
+    data <- dataArrived() %>% select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE) #%>% collect()
+    # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology") %>%
+    #                                                         select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE)
+    
     #data_test <<- data
     
     pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE) %>% summarise(total = n()) %>% collect()
@@ -6039,6 +6081,7 @@ server <- function(input, output, session) {
     pts.dist$Month <- as.Date(pts.dist$Month, format="%Y-%m")
     pts.dist <- pts.dist[order(pts.dist$Month),]
     pts.dist <- pts.dist %>% ungroup()
+   
     
     # data <- dataArrived()
     # #data <- data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider == "ABBOTT, ASHLEY")
@@ -6056,7 +6099,7 @@ server <- function(input, output, session) {
     # pts.dist.summary <- 
     #   pts.dist.summary[order(as.yearmon(pts.dist.summary$Month,format="%b-%Y")),]
     
-    pts.dist <- pts.dist %>% ungroup()
+    
     
     min_date <- min(pts.dist$Month)
     max_date <- max(pts.dist$Month)
