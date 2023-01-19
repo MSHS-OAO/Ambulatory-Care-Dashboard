@@ -365,6 +365,17 @@ server <- function(input, output, session) {
                         choices = visit_choices,
                         selected = visit_choices
       )
+    } 
+    
+    if (is.null(input$selectedProvider))
+      {
+      
+      updatePickerInput(session,
+                        inputId = "selectedVisitMethod",
+                        choices = NA
+                        )
+      
+      
     }
   },
   ignoreInit = TRUE,
@@ -437,6 +448,11 @@ server <- function(input, output, session) {
       )
       }
     }
+                      if (is.null(input$selectedVisitMethod)){
+                        updatePickerInput(session,
+                                          inputId = "selectedPRCName",
+                                          choices = NA)
+                      }
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
