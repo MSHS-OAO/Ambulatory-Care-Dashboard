@@ -306,6 +306,13 @@ server <- function(input, output, session) {
       )
     }
     
+    if (is.null(input$selectedResource)){
+      updatePickerInput(session,
+                        inputId = "selectedProvider",
+                        choices = NA)
+      
+    }
+    
     
   },
   ignoreInit = TRUE,
