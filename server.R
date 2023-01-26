@@ -6209,19 +6209,28 @@ server <- function(input, output, session) {
     data_melt$Month <- as.yearmon(data_melt$Month, format="%Y-%m")
     data_melt$Month <- as.Date(data_melt$Month, format="%Y-%m")
     data_melt[is.na(data_melt)] <- 0
+    
+    data_melt_test <<- data_melt
+    month_order <- data.frame(month = unique(data_melt$Month))
+    month_order <- month_order %>% arrange(month) %>% mutate(month_year = format(month, "%Y-%m"))
+    month_order <- unique(month_order$month_year)
+    
+    data_melt$Month <- format(data_melt$Month, "%Y-%m")
+    data_melt$Month <- factor(data_melt$Month, levels = month_order)
 
     g2 <- ggplot(data_melt, aes(x = Month, y = variable, label = value))+
       scale_color_MountSinai('dark' )+
       geom_text(size = 5, vjust = "center", hjust = "center", fontface  = "bold")+
       geom_hline(yintercept = hline_y, colour='black')+
+      geom_vline(xintercept = 0, colour = 'black') +
+      scale_x_discrete(position = "top") + 
       labs(y = NULL, x = NULL, fill = "AssociationListA")+
       theme_minimal() +
-      table_theme() +
-      scale_x_date(breaks = seq.Date(from = as.Date(min_date),
-                                     to = as.Date(max_date), by = "month"))+
-      geom_vline(xintercept = 0, colour = 'black') +
-      theme(panel.grid.minor.x = element_blank()) +
-      theme(axis.text.x=element_blank())
+      table_theme() #+
+      # scale_x_date(breaks = seq.Date(from = as.Date(min_date),
+      #                                to = as.Date(max_date), by = "month"))+
+      # theme(panel.grid.minor.x = element_blank()) +
+      # theme(axis.text.x=element_blank())
     
     
     # g2 <- ggplot(data_melt, aes(x = Month, y = variable, label = value))+
