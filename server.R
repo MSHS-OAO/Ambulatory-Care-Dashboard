@@ -19,7 +19,7 @@ server <- function(input, output, session) {
     
   })
   
-  callModule(profvis_server, "profiler")
+  #callModule(profvis_server, "profiler")
   observeEvent(input$update_filters,{print(is.null(input$update_filters))})
   
   user <- reactive({
