@@ -1851,7 +1851,9 @@ ui <- dashboardPage(
                                    liveSearch = TRUE,
                                    actionsBox = TRUE,
                                    dropupAuto = FALSE),
-                                 selected = unique(holid$holiday)))
+                                 selected = NA#unique(holid$holiday)
+                                 )
+                     )
                    
                  ),
                  
