@@ -809,3 +809,28 @@ groupByFilters_volume <- function(dt, campus, specialty, department, resource, v
     )
 
 }
+
+## Schedule Optimization Tests
+tbl_schedule <- tbl(poolcon, "SCHEDULE_OPTIMIZATION")
+arrived.data.rows.schedule <- tbl_schedule %>% filter(APPT_STATUS == "Arrived")
+
+groupByFilters_schedule <- function(dt, campus, specialty, department, resource, provider, visitMethod, appt_type, mindateRange, maxdateRange, daysofweek, holidays){
+  format <- "YYYY-MM-DD HH24:MI:SS"
+  daysofweek <- toupper(daysofweek)
+  
+  
+  
+  result <- dt %>% filter(CAMPUS %in% campus, 
+                          CAMPUS_SPECIALTY %in% specialty, 
+                          DEPARTMENT %in% department, 
+                          RESOURCES %in% resource, 
+                          VISIT_METHOD %in% visitMethod, 
+                          TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
+                          TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
+                          PROVIDER %in% provider,
+                          APPT_DAY %in% daysofweek, 
+                          APPT_TYPE %in% appt_type
+                          #!HOLIDAY %in% holidays
+  )
+  
+}

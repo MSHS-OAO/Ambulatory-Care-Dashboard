@@ -1480,6 +1480,7 @@ ui <- dashboardPage(
         
         tabItem(tabName = "optimization",
                 column(11,
+                       #profvis_ui("profiler"),
                        div("Scheduling Template Optimization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        textOutput("practiceName_opt_comp"),
                        #textOutput("kpis_mem"),

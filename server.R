@@ -19,7 +19,7 @@ server <- function(input, output, session) {
     
   })
   
-  #callModule(profvis_server, "profiler")
+  callModule(profvis_server, "profiler")
   observeEvent(input$update_filters,{print(is.null(input$update_filters))})
   
   user <- reactive({
@@ -5829,7 +5829,7 @@ server <- function(input, output, session) {
   
   output$volume1 <- renderPlotly({
     print("volume1")
-    data <- dataArrived_volume()
+    data <- dataArrived()
     # data <- arrived.data %>% filter(!holiday %in% c("Christmas"))
     # data <- setDT(data)
     # 
@@ -5917,7 +5917,7 @@ server <- function(input, output, session) {
   
   output$volume2 <- renderPlot({
     print("volume2")
-    data <- dataArrived_volume()
+    data <- dataArrived()
     #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     #data <- setDT(data)
     #data <- unique(data, by = "uniqueId")
@@ -6052,7 +6052,7 @@ server <- function(input, output, session) {
     # pts.by.day$Visit.Method <- factor(pts.by.day$Visit.Method, levels = factor_levels)
     
     
-    data <- dataArrived_volume()
+    data <- dataArrived()
     #data_test <<- dataArrived()
     # data <- arrived.data.rows  %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>%
     #  select(UNIQUEID, APPT_DAY, VISIT_METHOD, APPT_DATE_YEAR)  
@@ -6109,7 +6109,7 @@ server <- function(input, output, session) {
     
     print("volume4")
   
-    data <- dataArrived_volume() %>% select(APPT_MONTH_YEAR, APPT_DATE_YEAR) #%>% collect()
+    data <- dataArrived() %>% select(APPT_MONTH_YEAR, APPT_DATE_YEAR) #%>% collect()
     # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology") %>%
     #                                                         select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE)
     
@@ -6246,7 +6246,7 @@ server <- function(input, output, session) {
   output$volume5 <- renderPlot({
     
     print("volume5")
-    data <- dataArrived_volume()
+    data <- dataArrived()
     #data <- data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider == "ABBOTT, ASHLEY") %>% filter(Appt.DateYear >= "2021-01-01")
     data <- data %>% select(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) #%>% collect()
     #data <- setDT(data)
@@ -9791,16 +9791,50 @@ server <- function(input, output, session) {
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
-
+  dataArrived_test_schedule <- eventReactive(list(input$update_filters,input$update_filters1),{
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_schedule(arrived.data.rows.schedule,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    
+  })
+  dataArrived_access_schedule <- eventReactive(list(input$update_filters,input$update_filters1),{
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_access_schedule(arrived.data.rows.schedule.access,
+                          input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                          input$selectedVisitMethod, input$selectedPRCName, 
+                          input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    
+  })
   
   schedule_opt <- reactive({
     
+    time_1 <- Sys.time()
     # Volume Data
 
     # data <- kpi.all.data %>% filter(Campus.Specialty=="Cardiology" & Appt.Status == "Arrived") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     # compare_filters <- "Provider"
     
-    data <- dataArrived()
+    data <- dataArrived_test_schedule()
     #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
     
     #data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT2, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
@@ -9846,7 +9880,7 @@ server <- function(input, output, session) {
     
     print("2")
     volume <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
-      summarise(total = n()) %>% 
+      summarise(total = sum(TOTAL_APPTS)) %>% 
       group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       summarise(avg = ceiling(sum(total)/n())) %>%
       collect() %>%
@@ -9860,12 +9894,13 @@ server <- function(input, output, session) {
     
     volume$Metrics <- "Average Daily Volume"
     volume <- volume %>% select(cols, Metrics, everything())
+    data_access_test <<- dataArrived_access_schedule()
     
-    data_access <- dataArrived_access()
+    data_access <- dataArrived_access_schedule()
     # data_access <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
     newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
-      summarise(total = n()) %>% collect()%>%
+      summarise(total = sum(TOTAL_APPTS)) %>% collect()%>%
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
       spread(NEW_PT2, total) %>%
@@ -9919,8 +9954,9 @@ server <- function(input, output, session) {
     #waitTime <- data %>% mutate(wait.time= as.numeric(round(difftime(APPT_DTTM, APPT_MADE_DTTM,  units = "days"),2)))
     #waitTime <- dataAll %>% mutate(wait.time= as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2)))
     #waitTime <- waitTime  %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
-    
+    print("3")
     #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
+    data_access <- dataArrived_access()
     waitTime <- data_access %>%
       filter(WAIT_TIME >= 0) %>% 
       group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>% 
@@ -10054,7 +10090,9 @@ print("10")
                                                         TRUE ~ "TBD"))
     
    print("12") 
+    time_2 <- Sys.time()
     
+    print(time_2 - time_1)
     metric_order <- c("Average Daily Volume",c( "Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time") , as.vector(unique(opt_table$Metrics)))
   
 
@@ -10092,6 +10130,8 @@ print("10")
     }
     paste0("Schedule Optimization by ", name_1 )
   })
+  
+  
   
   
   output$opt_comparison_tb_kable <- function(){
