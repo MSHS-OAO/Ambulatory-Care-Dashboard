@@ -9834,7 +9834,7 @@ server <- function(input, output, session) {
     # data <- kpi.all.data %>% filter(Campus.Specialty=="Cardiology" & Appt.Status == "Arrived") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     # compare_filters <- "Provider"
     
-    data <- dataArrived_test_schedule()
+    data <- dataArrived()
     #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
     
     #data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT2, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
@@ -9880,7 +9880,7 @@ server <- function(input, output, session) {
     
     print("2")
     volume <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
-      summarise(total = sum(TOTAL_APPTS)) %>% 
+      summarise(total = n()) %>% 
       group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       summarise(avg = ceiling(sum(total)/n())) %>%
       collect() %>%
@@ -9894,13 +9894,12 @@ server <- function(input, output, session) {
     
     volume$Metrics <- "Average Daily Volume"
     volume <- volume %>% select(cols, Metrics, everything())
-    data_access_test <<- dataArrived_access_schedule()
-    
-    data_access <- dataArrived_access_schedule()
+
+    data_access <- dataArrived_access()
     # data_access <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
     newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
-      summarise(total = sum(TOTAL_APPTS)) %>% collect()%>%
+      summarise(total = n()) %>% collect()%>%
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
       spread(NEW_PT2, total) %>%
