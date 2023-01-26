@@ -4468,8 +4468,7 @@ server <- function(input, output, session) {
   output$avgNoShowCount <- renderPlot({
     data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_STATUS, APPT_DAY, APPT_TM_HR, APPT_DATE_YEAR) %>% collect()
     # data <- arrivedNoShow.data
-    data_test <<- data
-    
+
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
     
     noShow_count <- data %>%
@@ -4523,7 +4522,6 @@ server <- function(input, output, session) {
   output$avgNoShowPercent <- renderPlot({
     data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_DATE_YEAR, APPT_DAY, APPT_TM_HR, APPT_STATUS) %>% collect()
     # data <- arrivedNoShow.data
-    data_test_perc <<- data
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
     
     noShow_perc <- data %>%
