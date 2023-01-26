@@ -6210,7 +6210,6 @@ server <- function(input, output, session) {
     data_melt$Month <- as.Date(data_melt$Month, format="%Y-%m")
     data_melt[is.na(data_melt)] <- 0
     
-    data_melt_test <<- data_melt
     month_order <- data.frame(month = unique(data_melt$Month))
     month_order <- month_order %>% arrange(month) %>% mutate(month_year = format(month, "%Y-%m"))
     month_order <- unique(month_order$month_year)
