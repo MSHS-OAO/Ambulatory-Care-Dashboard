@@ -614,15 +614,32 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
 
 groupByFilters_1 <- function(dt, apptType, insurance){
   result <- dt %>% filter(COVERAGE %in% insurance)
-  if(apptType == "New"){
+
+  if("New" %in% apptType && "Established" %in% apptType){
+    result <- result %>% filter(NEW_PT2 %in% c("NEW", "ESTABLISHED"))
+    print("comb")
+  }
+  if("New" %in% apptType && !("Established" %in% apptType)){
     result <- result %>% filter(NEW_PT2 == "NEW")
+    print("new")
   }
-  else if(apptType == "Established"){
+  if(!("New" %in% apptType) && ("Established" %in% apptType)){
     result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
+    print("est")
   }
-  else{
-    result
+  
+  if(!("New" %in% apptType) && !("Established" %in% apptType)){
+    result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
+    print("est")
   }
+  # if("Established" %in% apptType){
+  #   result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
+  #   print("est")
+  # }
+  # else{
+  #   result
+  #   print("res")
+  # }
   # na_result <- dt[is.na(dt$Coverage),]
   # result <- rbind(result,na_result)
   return(result)
@@ -766,3 +783,29 @@ enableBookmarking(store = "server")
 
 daysOfWeek.options.utilization <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 
+
+
+## Volume test
+
+volume_tbl <- tbl(poolcon, "VOLUME_TEST")
+volume_arrived_rows <- volume_tbl %>% filter(APPT_STATUS == "Arrived")
+
+## Filtered Scheduling Data
+groupByFilters_volume <- function(dt, campus, specialty, department, resource, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
+  format <- "YYYY-MM-DD HH24:MI:SS"
+  daysofweek <- toupper(daysofweek)
+  
+
+    
+    result <- dt %>% filter(CAMPUS %in% campus, 
+                            CAMPUS_SPECIALTY %in% specialty, 
+                            DEPARTMENT %in% department, 
+                            RESOURCES %in% resource, 
+                            VISIT_METHOD %in% visitMethod, 
+                            TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
+                            TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
+                            APPT_DAY %in% daysofweek#, 
+                            #!HOLIDAY %in% holidays
+    )
+
+}

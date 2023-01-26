@@ -69,7 +69,9 @@ dateRange_min <- as.Date(dateRange_min, format="%Y-%m-%d")
 util_date_start <- dateRange_min
 util_date_end <- dateRange_max
 
-dateRange_start <-  dateRange_min
+# dateRange_start <-  dateRange_min
+today <- Sys.Date() %m-% months(6)
+dateRange_start <- as.Date(paste0(format(today, "%Y-%m"), "-01"), "%Y-%m-%d")
 
 dateRangeKpi_start = dateRange_min 
 dateRangeKpi_end = dateRange_max
@@ -1746,7 +1748,7 @@ ui <- dashboardPage(
                      height = "100px",
                      solidHeader = FALSE,
                      dateRangeInput("dateRangepop", label = NULL,
-                                    start = dateRangepop_min, end = dateRangepop_max,
+                                    start = dateRange_start, end = dateRangepop_max,
                                     min = dateRangepop_min, max = dateRangepop_max)),
                    box(
                      title = "Select Days of Week:",
@@ -1765,7 +1767,7 @@ ui <- dashboardPage(
                      width = 12, 
                      solidHeader = FALSE, 
                      dateRangeInput("dateRangeslot", label = NULL,
-                                    start = dateRangeSlot_start, end = dateRangeSlot_end,
+                                    start = dateRange_start, end = dateRangeSlot_end,
                                     min = dateRangeSlot_start, max = dateRangeSlot_end)),
                    
                    
@@ -1787,7 +1789,7 @@ ui <- dashboardPage(
                      width = 12, 
                      solidHeader = FALSE, 
                      dateRangeInput("dateRangeKpi", label = NULL,
-                                    start = dateRangeKpi_start, end = dateRangeKpi_end,
+                                    start = dateRange_start, end = dateRangeKpi_end,
                                     min = dateRangeKpi_min, max = dateRangeKpi_max)),
                    box(
                      title = "Select Days of Week:",
@@ -1805,7 +1807,7 @@ ui <- dashboardPage(
                      width = 12, 
                      solidHeader = FALSE, 
                      dateRangeInput("dateRangeUtil", label = NULL,
-                                    start = util_date_start, end = util_date_end,
+                                    start = dateRange_start, end = util_date_end,
                                     min = util_date_start, max = util_date_end)),
                    
                    box(

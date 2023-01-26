@@ -1,5 +1,24 @@
 server <- function(input, output, session) {
   
+  ##Test for volume
+  dataArrived_volume <- eventReactive(list(input$update_filters,input$update_filters1),{
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_volume(volume_arrived_rows,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource,
+                   input$selectedVisitMethod,
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    
+  })
+  
   #callModule(profvis_server, "profiler")
   observeEvent(input$update_filters,{print(is.null(input$update_filters))})
   
@@ -4455,7 +4474,7 @@ server <- function(input, output, session) {
   output$avgNoShowCount <- renderPlot({
     data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_STATUS, APPT_DAY, APPT_TM_HR, APPT_DATE_YEAR) %>% collect()
     # data <- arrivedNoShow.data
-    
+
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
     
     noShow_count <- data %>%
@@ -4467,7 +4486,7 @@ server <- function(input, output, session) {
     days <- days %>% group_by(APPT_DAY) %>% dplyr::summarise(days = n())
     
     noShow_count$days <- days$days[match(noShow_count$APPT_DAY, days$APPT_DAY)]
-    noShow_count$avgNoShows <- round(noShow_count$Total/noShow_count$days,0)
+    noShow_count$avgNoShows <- ceiling(noShow_count$Total/noShow_count$days)
     
     noShow_count.df <- byDayTime.df %>% filter(Day %in% unique(noShow_count$APPT_DAY))
     noShow_count.df <- merge(noShow_count.df, noShow_count, by.x = c("Day","Time"), by.y = c("APPT_DAY","APPT_TM_HR"), all = TRUE)
@@ -4509,7 +4528,6 @@ server <- function(input, output, session) {
   output$avgNoShowPercent <- renderPlot({
     data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_DATE_YEAR, APPT_DAY, APPT_TM_HR, APPT_STATUS) %>% collect()
     # data <- arrivedNoShow.data
-    
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
     
     noShow_perc <- data %>%
@@ -5811,7 +5829,7 @@ server <- function(input, output, session) {
   
   output$volume1 <- renderPlotly({
     print("volume1")
-    data <- dataArrived()
+    data <- dataArrived_volume()
     # data <- arrived.data %>% filter(!holiday %in% c("Christmas"))
     # data <- setDT(data)
     # 
@@ -5819,9 +5837,9 @@ server <- function(input, output, session) {
     # 
     
     # data <- data %>% select(UNIQUEID, APPT_DATE_YEAR) %>% collect()
-    data <- data %>% select(UNIQUEID, APPT_DATE_YEAR)
+    data <- data %>% select(APPT_DATE_YEAR)
     
-    pts.count <<- data %>% group_by(APPT_DATE_YEAR) %>% summarise(total = n()) %>%
+    pts.count <- data %>% group_by(APPT_DATE_YEAR) %>% summarise(total = n()) %>%
                       collect()
 
     
@@ -5899,14 +5917,14 @@ server <- function(input, output, session) {
   
   output$volume2 <- renderPlot({
     print("volume2")
-    data <- dataArrived()
+    data <- dataArrived_volume()
     #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     #data <- setDT(data)
     #data <- unique(data, by = "uniqueId")
     
     #pts.by.month <- data[,list(Volume = .N), by = list(Appt.MonthYear,Visit.Method)]  
     
-    data <- data %>% select(UNIQUEID, APPT_MONTH_YEAR, VISIT_METHOD) #%>% collect()
+    data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD) #%>% collect()
 
     # pts.by.month <- aggregate(data$UNIQUEID,
     #                           by=list(data$APPT_MONTH_YEAR, data$VISIT_METHOD), FUN=NROW)
@@ -6034,7 +6052,7 @@ server <- function(input, output, session) {
     # pts.by.day$Visit.Method <- factor(pts.by.day$Visit.Method, levels = factor_levels)
     
     
-    data <- dataArrived()
+    data <- dataArrived_volume()
     #data_test <<- dataArrived()
     # data <- arrived.data.rows  %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>%
     #  select(UNIQUEID, APPT_DAY, VISIT_METHOD, APPT_DATE_YEAR)  
@@ -6091,14 +6109,14 @@ server <- function(input, output, session) {
     
     print("volume4")
   
-    data <- dataArrived() %>% select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE) #%>% collect()
+    data <- dataArrived_volume() %>% select(APPT_MONTH_YEAR, APPT_DATE_YEAR) #%>% collect()
     # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology") %>%
     #                                                         select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE)
     
     #data_test <<- data
     
-    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE) %>% summarise(total = n()) %>% collect()
-    pts.dist.test <<- pts.dist
+    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = n()) %>% collect()
+    pts.dist.test <- pts.dist
     # pts.dist <- aggregate(data$UNIQUEID,
     #                       by=list(data$APPT_MONTH_YEAR, data$APPT_DATE), FUN=NROW)
 
@@ -6153,7 +6171,7 @@ server <- function(input, output, session) {
     #setDT(data)
     #pts.dist <- data[,list(Volume = .N), by = list(APPT_MONTH_YEAR, APPT_DATE)] 
     
-    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE) %>% summarise(total = n()) %>% collect()
+    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = n()) %>% collect()
     
     # pts.dist <- aggregate(dataArrived()$uniqueId, 
     #                       by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date), FUN=NROW)
@@ -6228,14 +6246,14 @@ server <- function(input, output, session) {
   output$volume5 <- renderPlot({
     
     print("volume5")
-    data <- dataArrived()
+    data <- dataArrived_volume()
     #data <- data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider == "ABBOTT, ASHLEY") %>% filter(Appt.DateYear >= "2021-01-01")
-    data <- data %>% select(APPT_MONTH_YEAR, APPT_DATE, APPT_DAY) #%>% collect()
+    data <- data %>% select(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) #%>% collect()
     #data <- setDT(data)
     
     # pts.dist <- data[,list(Volume = .N), by = list(APPT_MONTH_YEAR, APPT_DATE, APPT_DAY)]  
     
-    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE, APPT_DAY) %>% summarise(total = n()) %>% collect()
+    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) %>% summarise(total = n()) %>% collect()
     
     # pts.dist <- aggregate(data$uniqueId, 
     #                       by=list(data$Appt.MonthYear, data$Appt.Date, data$Appt.Day), FUN=NROW)
@@ -6261,7 +6279,7 @@ server <- function(input, output, session) {
     
     
     # pts.dist <- data[,list(Volume = .N), by = list(APPT_MONTH_YEAR,APPT_DATE,APPT_DAY)]
-    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE, APPT_DAY) %>% summarise(total = n()) %>% collect()
+    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) %>% summarise(total = n()) %>% collect()
     
     # pts.dist <- aggregate(data$uniqueId,
     #                       by=list(data$Appt.MonthYear, data$Appt.Date, data$Appt.Day), FUN=NROW)
