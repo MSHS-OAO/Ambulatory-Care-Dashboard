@@ -617,20 +617,16 @@ groupByFilters_1 <- function(dt, apptType, insurance){
 
   if("New" %in% apptType && "Established" %in% apptType){
     result <- result %>% filter(NEW_PT2 %in% c("NEW", "ESTABLISHED"))
-    print("comb")
   }
   if("New" %in% apptType && !("Established" %in% apptType)){
     result <- result %>% filter(NEW_PT2 == "NEW")
-    print("new")
   }
   if(!("New" %in% apptType) && ("Established" %in% apptType)){
     result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
-    print("est")
   }
   
   if(!("New" %in% apptType) && !("Established" %in% apptType)){
-    result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
-    print("est")
+    result <- result
   }
   # if("Established" %in% apptType){
   #   result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
