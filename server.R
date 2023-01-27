@@ -4381,12 +4381,12 @@ server <- function(input, output, session) {
   output$avgDailyNoShow_Count <- renderValueBox({
     data <- dataNoShow_1()
     numerator <- data %>% filter(APPT_STATUS == "No Show") %>% summarise(n()) %>% collect()
-    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS == "Arrived") %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
+    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator$APPT_DATE_YEAR)
     
     valueBox(
       # prettyNum(round(nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / length(unique((dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
-      prettyNum(round(numerator/denominator),big.mark=","), 
+      prettyNum(ceiling(numerator/denominator),big.mark=","), 
       subtitle = tags$p("Avg. No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
