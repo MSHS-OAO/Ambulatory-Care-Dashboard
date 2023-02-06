@@ -127,6 +127,7 @@ suppressMessages({
   library(pool)
 })
 
+install_version("shinydashboardPlus", version = "0.7.5", repos = "http://cran.us.r-project.org")
 
 devtools::install_github("haozhu233/kableExtra", upgrade = "never")
 
@@ -134,7 +135,7 @@ devtools::install_github("haozhu233/kableExtra", upgrade = "never")
 #library(kableExtra)
 
 # ### (0) Maximize R Memory Size 
-#memory.limit(size = 8000000)
+memory.limit(size = 8000000)
 
 ### (1) Set aesthetics theme -----------------------------------------------------------------------------
 
@@ -328,15 +329,9 @@ wdpath <- here::here()
 setwd(wdpath)
 # poolcon <- dbConnect(odbc(), "OAO Cloud DB")
 
-# poolcon <- dbPool(drv  = odbc::odbc(),
-#                  dsn  = "OAO Cloud DB")
-# poolcon <- dbConnect(odbc(), "OracleODBC-21_5",
-#                       uid = "villea04",
-#                       pwd = "qKQvPoSilm21T*qVr")
+poolcon <- dbPool(drv  = odbc::odbc(),
+                 dsn  = "OAO Cloud DB")
 
-poolcon <- dbConnect(odbc(), "Oracle 21_8",
-                     uid = "villea04",
-                     pwd = "qKQvPoSilm21T*qVr")
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
 ### RStudio COnnect Data Read In
@@ -353,21 +348,9 @@ poolcon <- dbConnect(odbc(), "Oracle 21_8",
 
 historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
 filters <- tbl(poolcon, "AMBULATORY_FILTERS")
-library(pins) 
-board <- board_folder("/data/pin")
-filters_table <- board %>% pin_read("ambulatory_filters")
 holid <- tbl(poolcon, "HOLIDAYS")
 holid <- holid %>% distinct(HOLIDAY) %>% rename(holiday = HOLIDAY) %>% collect()
-utilization.data <- tbl(poolcon, "UTILIZATION_VIEW")
-
-utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_08_00",
-                                                `09:00`= "H_09_00", `10:00`= "H_10_00",
-                                                `11:00`= "H_11_00", `12:00`= "H_12_00",
-                                                `13:00`= "H_13_00", `14:00`= "H_14_00",
-                                                `15:00`= "H_15_00", `16:00`= "H_16_00",
-                                                `17:00`= "H_17_00", `18:00`= "H_18_00",
-                                                `19:00`= "H_19_00", `20:00`= "H_20_00")
-                                                
+utilization.data <- tbl(poolcon, "utilization_table")
 
 
 population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
@@ -415,8 +398,8 @@ max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 date_format <- "YYYY-MM-DD HH24:MI:SS"
 # ## Other datasets Rows DataTable
 arrived.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Arrived"))
-arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS < 1 ))
-#arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")))
+# arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS = 0))
+arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")))
 noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show"))
 bumped.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Bumped"))
 canceled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled"))
@@ -538,68 +521,36 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
   format <- "YYYY-MM-DD HH24:MI:SS"
   daysofweek <- toupper(daysofweek)
   
-  if(length(provider) >= 1000){
-  
-    result <- dt %>% filter(CAMPUS %in% campus, 
-                            CAMPUS_SPECIALTY %in% specialty, 
-                            DEPARTMENT %in% department, 
-                            RESOURCES %in% resource, 
-                            #PROVIDER %in% provider,
-                            VISIT_METHOD %in% visitMethod, 
-                            APPT_TYPE %in% visitType, 
-                            TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
-                            TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
-                            APPT_DAY %in% daysofweek#, 
-                            #!HOLIDAY %in% holidays
-    )
-  } else{
-    result <- dt %>% filter(CAMPUS %in% campus, 
-                            CAMPUS_SPECIALTY %in% specialty, 
-                            DEPARTMENT %in% department, 
-                            RESOURCES %in% resource, 
-                            PROVIDER %in% provider,
-                            VISIT_METHOD %in% visitMethod, 
-                            APPT_TYPE %in% visitType, 
-                            TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
-                            TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
-                            APPT_DAY %in% daysofweek#, 
-                            #!HOLIDAY %in% holidays
-    )
-  }
+  result <- dt %>% filter(CAMPUS %in% campus, 
+                          CAMPUS_SPECIALTY %in% specialty, 
+                          DEPARTMENT %in% department, 
+                          RESOURCES %in% resource, 
+                          PROVIDER %in% provider,
+                          VISIT_METHOD %in% visitMethod, 
+                          APPT_TYPE %in% visitType, 
+                          TO_DATE(mindateRange, format) <= APPT_DTTM, 
+                          TO_DATE(maxdateRange, format) >= APPT_DTTM, 
+                          APPT_DAY %in% daysofweek#, 
+                          #!HOLIDAY %in% holidays
+  ) 
 }
 
 groupByFilters_access <- function(dt, campus, specialty, department, resource, provider, visitMethod, visitType, mindateRange, maxdateRange, daysofweek, holidays){
   format <- "YYYY-MM-DD HH24:MI:SS"
   daysofweek <- toupper(daysofweek)
   
-  if(length(provider) >= 1000){
-  
-    result <- dt %>% filter(CAMPUS %in% campus, 
-                            CAMPUS_SPECIALTY %in% specialty, 
-                            DEPARTMENT %in% department, 
-                            RESOURCES %in% resource, 
-                            #PROVIDER %in% provider,
-                            VISIT_METHOD %in% visitMethod, 
-                            APPT_TYPE %in% visitType, 
-                            TO_DATE(mindateRange, format) <= APPT_MADE_DTTM, 
-                            TO_DATE(maxdateRange, format) >= APPT_MADE_DTTM, 
-                            APPT_DAY %in% daysofweek#, 
-                            #!HOLIDAY %in% holidays
-    ) 
-  } else {
-    result <- dt %>% filter(CAMPUS %in% campus, 
-                            CAMPUS_SPECIALTY %in% specialty, 
-                            DEPARTMENT %in% department, 
-                            RESOURCES %in% resource, 
-                            PROVIDER %in% provider,
-                            VISIT_METHOD %in% visitMethod, 
-                            APPT_TYPE %in% visitType, 
-                            TO_DATE(mindateRange, format) <= APPT_MADE_DTTM, 
-                            TO_DATE(maxdateRange, format) >= APPT_MADE_DTTM, 
-                            APPT_DAY %in% daysofweek#, 
-                            #!HOLIDAY %in% holidays
-    ) 
-  }
+  result <- dt %>% filter(CAMPUS %in% campus, 
+                          CAMPUS_SPECIALTY %in% specialty, 
+                          DEPARTMENT %in% department, 
+                          RESOURCES %in% resource, 
+                          PROVIDER %in% provider,
+                          VISIT_METHOD %in% visitMethod, 
+                          APPT_TYPE %in% visitType, 
+                          TO_DATE(mindateRange, format) <= APPT_MADE_DTTM, 
+                          TO_DATE(maxdateRange, format) >= APPT_MADE_DTTM, 
+                          APPT_DAY %in% daysofweek#, 
+                          #!HOLIDAY %in% holidays
+  ) 
 }
 
 
@@ -614,50 +565,25 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
 
 groupByFilters_1 <- function(dt, apptType, insurance){
   result <- dt %>% filter(COVERAGE %in% insurance)
-
-  if("New" %in% apptType && "Established" %in% apptType){
-    result <- result %>% filter(NEW_PT2 %in% c("NEW", "ESTABLISHED"))
-  }
-  if("New" %in% apptType && !("Established" %in% apptType)){
+  if(apptType == "New"){
     result <- result %>% filter(NEW_PT2 == "NEW")
   }
-  if(!("New" %in% apptType) && ("Established" %in% apptType)){
+  else if(apptType == "Established"){
     result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
   }
-  
-  if(!("New" %in% apptType) && !("Established" %in% apptType)){
-    result <- result
+  else{
+    result
   }
-  # if("Established" %in% apptType){
-  #   result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
-  #   print("est")
-  # }
-  # else{
-  #   result
-  #   print("res")
-  # }
   # na_result <- dt[is.na(dt$Coverage),]
   # result <- rbind(result,na_result)
   return(result)
 }
 
 ## Filtered Utilization Data
-groupByFilters_2 <- function(dt, campus, specialty, department, resource, provider, visitMethod, visitType, mindateRange, maxdateRange, daysofweek, 
-                             #holidays, 
-                             type){
-  format <- "YYYY-MM-DD HH24:MI:SS"
-  
-  if(length(provider) >= 1000) {
-    result <- dt %>% filter(CAMPUS %in% campus, CAMPUS_SPECIALTY %in% specialty, DEPARTMENT %in% department, RESOURCES %in% resource, #PROVIDER %in% provider, 
-                            VISIT_METHOD %in% visitMethod, APPT_TYPE %in% visitType, 
-                            #!HOLIDAY %in% holidays,
-                            TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, APPT_DAY %in% daysofweek, UTIL_TYPE %in% type)
-  } else {
-    result <- dt %>% filter(CAMPUS %in% campus, CAMPUS_SPECIALTY %in% specialty, DEPARTMENT %in% department, RESOURCES %in% resource, PROVIDER %in% provider, 
-                            VISIT_METHOD %in% visitMethod, APPT_TYPE %in% visitType, 
-                            #!HOLIDAY %in% holidays,
-                            TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, APPT_DAY %in% daysofweek, UTIL_TYPE %in% type)
-  }
+groupByFilters_2 <- function(dt, campus, specialty, department, resource, provider, visitMethod, visitType, mindateRange, maxdateRange, daysofweek, holidays, type){
+  result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource, Provider %in% provider, 
+                          Visit.Method %in% visitMethod, Appt.Type %in% visitType, 
+                          mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays, util.type %in% type)
   return(result)
 }
 
@@ -678,30 +604,16 @@ groupByFilters_4 <- function(dt, campus, specialty, department, resource, provid
   format <- "YYYY-MM-DD HH24:MI:SS"
   daysofweek <- toupper(daysofweek)
   
-  
-  if(length(provider) >= 1000) {
-    result <- dt %>% filter(CAMPUS %in% campus, 
-                            CAMPUS_SPECIALTY %in% specialty, 
-                            DEPARTMENT_NAME %in% department, 
-                            #RESOURCES %in% resource, 
-                            #PROVIDER %in% provider,
-                            TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
-                            TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
-                            APPT_DAY %in% daysofweek#, 
-                            #!HOLIDAY %in% holidays
-    )
-  } else{
-    result <- dt %>% filter(CAMPUS %in% campus, 
-                            CAMPUS_SPECIALTY %in% specialty, 
-                            DEPARTMENT_NAME %in% department, 
-                            #RESOURCES %in% resource, 
-                            PROVIDER %in% provider,
-                            TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
-                            TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
-                            APPT_DAY %in% daysofweek#, 
-                            #!HOLIDAY %in% holidays
-    )
-  }
+  result <- dt %>% filter(CAMPUS %in% campus, 
+                          CAMPUS_SPECIALTY %in% specialty, 
+                          DEPARTMENT_NAME %in% department, 
+                          #RESOURCES %in% resource, 
+                          PROVIDER %in% provider,
+                          TO_DATE(mindateRange, format) <= APPT_DTTM, 
+                          TO_DATE(maxdateRange, format) >= APPT_DTTM, 
+                          APPT_DAY %in% daysofweek#, 
+                          #!HOLIDAY %in% holidays
+  )
   
   
 }
@@ -779,54 +691,3 @@ enableBookmarking(store = "server")
 
 daysOfWeek.options.utilization <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 
-
-
-## Volume test
-
-volume_tbl <- tbl(poolcon, "VOLUME_TEST")
-volume_arrived_rows <- volume_tbl %>% filter(APPT_STATUS == "Arrived")
-
-## Filtered Scheduling Data
-groupByFilters_volume <- function(dt, campus, specialty, department, resource, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
-  format <- "YYYY-MM-DD HH24:MI:SS"
-  daysofweek <- toupper(daysofweek)
-  
-
-    
-    result <- dt %>% filter(CAMPUS %in% campus, 
-                            CAMPUS_SPECIALTY %in% specialty, 
-                            DEPARTMENT %in% department, 
-                            RESOURCES %in% resource, 
-                            VISIT_METHOD %in% visitMethod, 
-                            TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
-                            TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
-                            APPT_DAY %in% daysofweek#, 
-                            #!HOLIDAY %in% holidays
-    )
-
-}
-
-## Schedule Optimization Tests
-tbl_schedule <- tbl(poolcon, "SCHEDULE_OPTIMIZATION")
-arrived.data.rows.schedule <- tbl_schedule %>% filter(APPT_STATUS == "Arrived")
-
-groupByFilters_schedule <- function(dt, campus, specialty, department, resource, provider, visitMethod, appt_type, mindateRange, maxdateRange, daysofweek, holidays){
-  format <- "YYYY-MM-DD HH24:MI:SS"
-  daysofweek <- toupper(daysofweek)
-  
-  
-  
-  result <- dt %>% filter(CAMPUS %in% campus, 
-                          CAMPUS_SPECIALTY %in% specialty, 
-                          DEPARTMENT %in% department, 
-                          RESOURCES %in% resource, 
-                          VISIT_METHOD %in% visitMethod, 
-                          TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
-                          TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
-                          PROVIDER %in% provider,
-                          APPT_DAY %in% daysofweek, 
-                          APPT_TYPE %in% appt_type
-                          #!HOLIDAY %in% holidays
-  )
-  
-}
