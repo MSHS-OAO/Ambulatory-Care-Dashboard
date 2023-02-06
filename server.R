@@ -1068,7 +1068,7 @@ server <- function(input, output, session) {
   output$siteNoShowPts <- renderValueBox({
     
     valueBox(
-      prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / 
+      prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show", "Canceled"))) / 
                         length(unique((dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
       subtitle = tags$p("Avg. No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
@@ -2523,7 +2523,7 @@ server <- function(input, output, session) {
   output$pracApptStatus <- renderPlot({
     
     data <- dataNoShow()
-    # data <- kpi.all.data[noshow.data.rows,]
+    # data <- noshow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy") 
     
     # sameDay <- data %>%
     #   group_by(Appt.Status) %>%
@@ -4402,14 +4402,14 @@ server <- function(input, output, session) {
   dataArrivedNoShow_1 <- reactive({
     data <- dataArrivedNoShow()
     #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
-    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("Arrived", "No Show")),
+    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")),
                      input$selectedApptType, input$selectedInsurance)
   })
   
   dataNoShow_1 <- reactive({
     data <- dataNoShow()
     #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
-    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("No Show")),
+    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("No Show", "Canceled")),
                      input$selectedApptType, input$selectedInsurance
     )
   })
@@ -4417,8 +4417,11 @@ server <- function(input, output, session) {
   # Total No Shows per Day
   output$avgDailyNoShow_Count <- renderValueBox({
     data <- dataNoShow_1()
-    numerator <- data %>% filter(APPT_STATUS == "No Show") %>% summarise(n()) %>% collect()
-    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
+    numerator <- data %>%
+      #filter(APPT_STATUS == "No Show") %>% 
+      summarise(n()) %>% collect()
+    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+      select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator$APPT_DATE_YEAR)
     
     valueBox(
@@ -4431,8 +4434,8 @@ server <- function(input, output, session) {
   
   # % No Shows per Day
   output$avgDailyNoShow_Perc <- renderValueBox({
-    numerator <- dataNoShow_1() %>% filter(APPT_STATUS == "No Show") %>% summarise(n()) %>% collect()
-    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% summarise(n()) %>% collect()
+    numerator <- dataNoShow_1() %>% filter(APPT_STATUS == "No Show", "Canceled") %>% summarise(n()) %>% collect()
+    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% summarise(n()) %>% collect()
     valueBox(
       # paste0(round((nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
       #                 nrow(dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))))*100,1), "%"),
@@ -4445,7 +4448,12 @@ server <- function(input, output, session) {
   
   # Distribution of No Shows (%) by Lead Days 
   output$noShowLeadDays <- renderPlot({
-    data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_DTTM, APPT_MADE_DTTM, APPT_STATUS, APPT_DATE_YEAR) %>% collect()
+    data <- dataArrivedNoShow_1() 
+    
+    test_noshow1 <<- data
+    #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+    data <- data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% 
+                    select(APPT_DTTM, APPT_MADE_DTTM, APPT_STATUS, APPT_DATE_YEAR) %>% collect()
     # data <- kpi.all.data[arrivedNoShow.data.rows,] %>% filter(Campus == "MSUS")
     
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
@@ -4458,7 +4466,7 @@ server <- function(input, output, session) {
                                        ifelse(apptLeadDays <= 30 & apptLeadDays >= 15, "15-30 days",
                                               ifelse(apptLeadDays <= 14 & apptLeadDays>= 8, "8-14 days",
                                                      ifelse(apptLeadDays <= 7 & apptLeadDays >= 1, "1-7 days",
-                                                            ifelse(apptLeadDays < 0, "0 day","0 day")
+                                                            ifelse(apptLeadDays < 1, "0 day","0 day")
                                                      )
                                               )
                                        )
@@ -4509,7 +4517,8 @@ server <- function(input, output, session) {
   
   # No Shows by Time of Day 
   output$avgNoShowCount <- renderPlot({
-    data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_STATUS, APPT_DAY, APPT_TM_HR, APPT_DATE_YEAR) %>% collect()
+    data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+      select(APPT_STATUS, APPT_DAY, APPT_TM_HR, APPT_DATE_YEAR) %>% collect()
     # data <- arrivedNoShow.data
 
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
@@ -4563,7 +4572,12 @@ server <- function(input, output, session) {
   })
   
   output$avgNoShowPercent <- renderPlot({
-    data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_DATE_YEAR, APPT_DAY, APPT_TM_HR, APPT_STATUS) %>% collect()
+   
+    data <- dataArrivedNoShow_1() 
+    #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+    
+    data <- data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+       select(APPT_DATE_YEAR, APPT_DAY, APPT_TM_HR, APPT_STATUS) %>% collect()
     # data <- arrivedNoShow.data
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
     

@@ -428,7 +428,7 @@ arrived.data.rows.summary <- population_tbl_summary %>% filter(APPT_STATUS %in% 
 arrived.data.rows.npr <- population_tbl_summary_npr %>% filter(APPT_STATUS %in% c("Arrived"))
 arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS < 1 ))
 #arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")))
-noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show"))
+noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show") | (APPT_STATUS %in% c("Canceled") & LEAD_DAYS < 1 ))
 bumped.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Bumped"))
 canceled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled"))
 canceled.bumped.rescheduled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled","Bumped","Rescheduled"))
