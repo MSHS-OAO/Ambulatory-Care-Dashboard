@@ -4480,6 +4480,7 @@ server <- function(input, output, session) {
     
     status <- c('0 day','1-7 days','8-14 days','15-30 days', '> 30 days')
     
+    
       noShows_bar_tb <-
         noShows %>%
         group_by(apptLeadDays) %>%
