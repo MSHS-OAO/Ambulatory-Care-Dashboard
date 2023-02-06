@@ -7996,7 +7996,6 @@ server <- function(input, output, session) {
     #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c( "Cardiology"))
     #compare_filters <- "Campus.Specialty"
     #breakdown_filters <- "Visit.Method"
-    day_test <<- data
     # data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER) %>% collect()
     # 
     # data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
