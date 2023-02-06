@@ -916,7 +916,7 @@ ui <- dashboardPage(
                              column(3, valueBoxOutput("avgDailyNoShow_Count", width = 12) %>%
                                       withSpinner(type = 5, color = "#d80b8c")),
                              column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
-                           tags$em("*No Show Rate = No Show / (Arrived + No Show)")
+                           tags$em("*No Show Rate = (No Show + Same-day Canceled)  / (Arrived + No Show + Same-day Canceled)")
                            # h5("No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")
                          ),
                          boxPlus(

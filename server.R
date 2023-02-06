@@ -4434,7 +4434,9 @@ server <- function(input, output, session) {
   
   # % No Shows per Day
   output$avgDailyNoShow_Perc <- renderValueBox({
-    numerator <- dataNoShow_1() %>% filter(APPT_STATUS == "No Show", "Canceled") %>% summarise(n()) %>% collect()
+    numerator <- dataNoShow_1() 
+    numerator_test <<-  numerator
+    numerator <- numerator_test %>% filter(APPT_STATUS %in% c("No Show", "Canceled")) %>% summarise(n()) %>% collect()
     denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% summarise(n()) %>% collect()
     valueBox(
       # paste0(round((nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
@@ -4449,8 +4451,6 @@ server <- function(input, output, session) {
   # Distribution of No Shows (%) by Lead Days 
   output$noShowLeadDays <- renderPlot({
     data <- dataArrivedNoShow_1() 
-    
-    test_noshow1 <<- data
     #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     data <- data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% 
                     select(APPT_DTTM, APPT_MADE_DTTM, APPT_STATUS, APPT_DATE_YEAR) %>% collect()
@@ -4466,7 +4466,7 @@ server <- function(input, output, session) {
                                        ifelse(apptLeadDays <= 30 & apptLeadDays >= 15, "15-30 days",
                                               ifelse(apptLeadDays <= 14 & apptLeadDays>= 8, "8-14 days",
                                                      ifelse(apptLeadDays <= 7 & apptLeadDays >= 1, "1-7 days",
-                                                            ifelse(apptLeadDays < 1, "0 day","0 day")
+                                                            ifelse(apptLeadDays < 0, "0 day","0 day")
                                                      )
                                               )
                                        )
@@ -4479,7 +4479,6 @@ server <- function(input, output, session) {
     noShows$noShow_perc[!is.finite(noShows$noShow_perc)] <- 0
     
     status <- c('0 day','1-7 days','8-14 days','15-30 days', '> 30 days')
-    
     
       noShows_bar_tb <-
         noShows %>%
