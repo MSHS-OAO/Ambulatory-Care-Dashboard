@@ -376,8 +376,8 @@ utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_
 
 population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
 
-population_tbl_summary <- tbl(poolcon_upt, "AMBULATORY_ACCESS_SUMMARY_TABLE")
-population_tbl_summary_npr <- tbl(poolcon_upt, "AMBULATORY_ACCESS_NPR_SUMMARY_TABLE")
+ambulatory_access_tbl_summary <- tbl(poolcon_upt, "AMBULATORY_ACCESS_SUMMARY_TABLE")
+ambulatory_access_tbl_summary_npr <- tbl(poolcon_upt, "AMBULATORY_ACCESS_NPR_SUMMARY_TABLE")
 
 
 
@@ -424,8 +424,8 @@ max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 date_format <- "YYYY-MM-DD HH24:MI:SS"
 # ## Other datasets Rows DataTable
 arrived.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Arrived"))
-arrived.data.rows.summary <- population_tbl_summary %>% filter(APPT_STATUS %in% c("Arrived"))
-arrived.data.rows.npr <- population_tbl_summary_npr %>% filter(APPT_STATUS %in% c("Arrived"))
+arrived.data.rows.summary <- ambulatory_access_tbl_summary %>% filter(APPT_STATUS %in% c("Arrived"))
+arrived.data.rows.npr <- ambulatory_access_tbl_summary_npr %>% filter(APPT_STATUS %in% c("Arrived"))
 arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS < 1 ))
 #arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")))
 noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show") | (APPT_STATUS %in% c("Canceled") & LEAD_DAYS < 1 ))

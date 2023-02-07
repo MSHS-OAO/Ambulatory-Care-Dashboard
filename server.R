@@ -4436,8 +4436,11 @@ server <- function(input, output, session) {
   output$avgDailyNoShow_Perc <- renderValueBox({
     numerator <- dataNoShow_1() 
     numerator_test <<-  numerator
-    numerator <- numerator_test %>% filter(APPT_STATUS %in% c("No Show", "Canceled")) %>% summarise(n()) %>% collect()
-    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% summarise(n()) %>% collect()
+    numerator <- numerator_test %>% 
+      #filter(APPT_STATUS %in% c("No Show", "Canceled")) %>% 
+      summarise(n()) %>% collect()
+    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% 
+          summarise(n()) %>% collect()
     valueBox(
       # paste0(round((nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
       #                 nrow(dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))))*100,1), "%"),
@@ -4629,7 +4632,7 @@ server <- function(input, output, session) {
   # Total Canceled/Bumped/Rescheduled Appointments 
   output$totalBumpedCanceledRescheduledBox <- renderValueBox({
     data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
+    #data <- canceled.bumped.rescheduled.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
     
     valueBox(
       prettyNum(nrow(data),big.mark=","), 
@@ -4691,7 +4694,7 @@ server <- function(input, output, session) {
   ## Average Bumps/Canc/Resc Rate 
   output$avgBumpsCancRescRate <- renderPlot({
     data <- dataAll()
-    # data <- all.data
+    # data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
     
     apptsCanceled <- data %>%
       group_by(APPT_STATUS) %>%
@@ -4720,7 +4723,9 @@ server <- function(input, output, session) {
   ## Lead Days to Bumps/Canc/Resc 
   output$leadDaysBumpsCancResc <- renderPlot({
     data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
-    # data <- kpi.all.data[canceled.bumped.rescheduled.data.rows ,] %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
+    # data <-  historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
+    
+    lead_test <<- data
     
     lead.days.df <- data %>%
       filter(LEAD_DAYS >= 0) %>% select(LEAD_DAYS, APPT_STATUS) %>% collect() %>%
@@ -4755,17 +4760,19 @@ server <- function(input, output, session) {
   
   ## Average Daily Same-day Bumps/Canc/Resc Rate 
   output$sameDayBumpedCanceledRescheduled <- renderPlot({
-    # data <- dataNoShow() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
-    data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
+    # data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
+    data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled") & LEAD_DAYS < 1)
+    data_test_new <<- data
+    
     # data <- noShow.data %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
-    rows <- historical.data %>% filter(TO_DATE(max_date_arrived, "YYYY-MM-DD HH24:MI:SS") <= APPT_DTTM) %>% select(APPT_DATE_YEAR) %>% collect()
+    rows <- data %>% select(APPT_DATE_YEAR) %>% collect()
     rows <- length(unique(rows$APPT_DATE_YEAR))
-    #rows_test <<- rows
+    rows_test <<- rows
     
     sameDay <- data %>%
       group_by(APPT_STATUS) %>%
       summarise(total = n()) %>% collect() %>%
-      mutate(avg = round(total/rows))
+      mutate(avg = ceiling(total/rows))
     
     ggplot(sameDay, aes(reorder(APPT_STATUS, -avg), avg, fill=APPT_STATUS)) +
       geom_bar(stat="identity", width = 0.8) +
@@ -9661,8 +9668,10 @@ server <- function(input, output, session) {
     print(Sys.time())
     
     data <- dataAllSlot_comp()
+    
+    data_slot_test <<- data
     print(Sys.time())
-    # data <- slot.data.subset[all.slot.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
+    #data <- slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Specialty"
     # breakdown_filters <- "Visit.Method"
     
@@ -9739,7 +9748,7 @@ server <- function(input, output, session) {
         summarise(
           `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
           `Filled Rate (%)` = paste0(round(sum(`Filled Hours`)/sum(`Available Hours`)*100),"%"),
-          `Available Hours` = ceiling(sum(`Available Hours`)/n(),1),
+          `Available Hours` = ceiling(sum(`Available Hours`)/n()),
           `Booked Hours` = ceiling(sum(`Booked Hours`)/n()),
           `Filled Hours` = ceiling(sum(`Filled Hours`)/n())
         ) %>% collect() %>% 
