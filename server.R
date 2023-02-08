@@ -9527,7 +9527,7 @@ server <- function(input, output, session) {
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT3"){
+    if(breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -9561,7 +9561,7 @@ server <- function(input, output, session) {
       
       validate(
         need(input$breakdown_filters != "APPT_TYPE", ("Slot data can only be viewed by Visit Method")),
-        need(input$breakdown_filters != "NEW_PT3", ("Slot data can only be viewed by Visit Method"))
+        need(input$breakdown_filters != "NEW_PT2", ("Slot data can only be viewed by Visit Method"))
       )
       
       
@@ -9688,7 +9688,7 @@ server <- function(input, output, session) {
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT3"){
+    if(breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -9720,7 +9720,7 @@ server <- function(input, output, session) {
       
       validate(
         need(input$breakdown_filters != "APPT_TYPE", ("Slot data can only be viewed by Visit Method")),
-        need(input$breakdown_filters != "NEW_PT3", ("Slot data can only be viewed by Visit Method"))
+        need(input$breakdown_filters != "NEW_PT2", ("Slot data can only be viewed by Visit Method"))
       )
       
       
@@ -9745,6 +9745,8 @@ server <- function(input, output, session) {
       ### then gather all created columns make them categories for the STatus column
       ### Spread data to make monhts in Appt.Month into columns
       slot <- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+        filter(`Available Hours` > 0) %>%
+        filter(!is.na(`Available Hours`)) %>%
         summarise(
           `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
           `Filled Rate (%)` = paste0(round(sum(`Filled Hours`)/sum(`Available Hours`)*100),"%"),
