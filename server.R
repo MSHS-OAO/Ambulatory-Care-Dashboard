@@ -280,7 +280,6 @@ server <- function(input, output, session) {
         summarise(PROVIDER= unique(PROVIDER)) %>% collect()
       provider_choices <- sort(provider_choices$PROVIDER, na.last = T)
       
-      provider_test1  <<- provider_choices
     
       updatePickerInput(session,
                         inputId = "selectedProvider",
@@ -431,9 +430,7 @@ server <- function(input, output, session) {
       #     kpi.all.data$Resource %in% input$selectedResource &
       #     kpi.all.data$Provider %in% input$selectedProvider &
       #     kpi.all.data$Visit.Method %in% input$selectedVisitMethod, "Appt.Type"]))
-      
-      selected_resource <<- input$selectedResource
-      selected_provider <<- input$selectedProvider
+    
       
       
       selected_campus <- input$selectedCampus
@@ -3014,10 +3011,8 @@ server <- function(input, output, session) {
   
   provScheduledAppts_num <- reactive({
     numerator <- as.integer(dataArrivedNoShow() %>% summarise(total = n()) %>% collect())
-    numerator_test <<- numerator
     denominator <- dataArrivedNoShow() %>% select(APPT_DATE_YEAR) %>% summarise(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator)
-    denominator_test <<- denominator
     prettyNum(round(numerator/denominator), big.mark = ",")
   })
   
@@ -4435,8 +4430,7 @@ server <- function(input, output, session) {
   # % No Shows per Day
   output$avgDailyNoShow_Perc <- renderValueBox({
     numerator <- dataNoShow_1() 
-    numerator_test <<-  numerator
-    numerator <- numerator_test %>% 
+    numerator <- numerator %>% 
       #filter(APPT_STATUS %in% c("No Show", "Canceled")) %>% 
       summarise(n()) %>% collect()
     denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% 
@@ -4725,8 +4719,6 @@ server <- function(input, output, session) {
     data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
     # data <-  historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
     
-    lead_test <<- data
-    
     lead.days.df <- data %>%
       filter(LEAD_DAYS >= 0) %>% select(LEAD_DAYS, APPT_STATUS) %>% collect() %>%
       mutate(leadDays = ifelse(LEAD_DAYS > 30, "> 30 days",
@@ -4762,12 +4754,12 @@ server <- function(input, output, session) {
   output$sameDayBumpedCanceledRescheduled <- renderPlot({
     # data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
     data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled") & LEAD_DAYS < 1)
-    data_test_new <<- data
+    
     
     # data <- noShow.data %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
     rows <- data %>% select(APPT_DATE_YEAR) %>% collect()
     rows <- length(unique(rows$APPT_DATE_YEAR))
-    rows_test <<- rows
+   
     
     sameDay <- data %>%
       group_by(APPT_STATUS) %>%
@@ -6112,7 +6104,7 @@ server <- function(input, output, session) {
     
     
     data <- dataArrived_summary()
-    #data_test <<- dataArrived()
+   
     #data <- arrived.data.rows.summary  %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>%
     #  select(UNIQUEID, APPT_DAY, VISIT_METHOD, APPT_DATE_YEAR)  
                                     
@@ -6172,10 +6164,8 @@ server <- function(input, output, session) {
     # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology") %>%
     #                                                         select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE)
     
-    #data_test <<- data
-    
     pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
-    pts.dist.test <<- pts.dist
+    
     # pts.dist <- aggregate(data$UNIQUEID,
     #                       by=list(data$APPT_MONTH_YEAR, data$APPT_DATE), FUN=NROW)
 
@@ -6431,7 +6421,7 @@ server <- function(input, output, session) {
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(NEW_PT2, Total) %>%
       replace(is.na(.), 0)
-    newpatients.ratio.test <<- newpatients.ratio
+   
     newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
@@ -6501,7 +6491,7 @@ server <- function(input, output, session) {
       group_by(APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
       filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
-    #waitTime_test <<- waitTime
+ 
     
     waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
     #waitTime$Appt.MonthYear <- as.Date(waitTime$Appt.MonthYear, format="%Y-%m-%d") ## Create date-year column
@@ -6671,9 +6661,7 @@ server <- function(input, output, session) {
       group_by(APPT_SOURCE_NEW, APPT_STATUS) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
-    
-    noShows_test <<- noShows
-    
+  
     noShows[is.na(noShows)] <- 0
     
     noShows$`No Show Perc` <- round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)
@@ -6727,7 +6715,7 @@ server <- function(input, output, session) {
     print(paste0("End of slot reactive ", Sys.time()))
     
     booked_filled <- data %>% select(AVAILABLE_HOURS, BOOKED_HOURS, ARRIVED_HOURS, APPT_WEEK) #%>% collect() #%>%
-    #test_book <<- booked_filled
+   
     
     booked_filled <- booked_filled %>%
       #mutate(Appt.Week = floor_date(as.Date(suppressWarnings(format(APPT_DTTM, "%Y-%m-%d")), "%Y-%m-%d"), unit="week", week_start = 1)) %>%
@@ -7238,7 +7226,7 @@ server <- function(input, output, session) {
     # data <- kpi.all.data[arrived.data.rows,] %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
     data_other <- dataNewComparison() %>% filter(NEW_PT2 == "ESTABLISHED", CYCLETIME > 0) %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME) %>% collect()
     # data_other <- kpi.all.data[arrived.data.rows,] %>% filter(New.PT3 == FALSE, cycleTime > 0)
-    data_ther_test <<- data_other
+   
     #names <- paste(unique(data_other$Appt.Type),sep="", collapse=", ")
     
     if(input$median2 == TRUE){
@@ -7529,7 +7517,7 @@ server <- function(input, output, session) {
     # data <- arrived.data %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
     
     data_other <- dataNewComparison2() %>% filter(NEW_PT2 == "ESTABLISHED", CHECKINTOROOMIN > 0) %>% select(APPT_DAY, APPT_TM_HR, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
-    data_other_test <<- data_other
+   
     # data_other <- arrived.data %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
     
     names <- data_other %>% filter(APPT_TM_HR %in% timeOptionsHr_filter) %>% select(APPT_TYPE)
@@ -8207,9 +8195,7 @@ server <- function(input, output, session) {
     #volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
     volume$Total_YN <- ifelse(volume[["Specialty"]] == "Total", 1,0)
 
-    cols_name_test <<- cols_name
- 
-    
+   
     months_df <- volume[,!(names(volume) %in% c(cols_name, "Total", "Total_YN"))]
     months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
     #order_months <- months_df[months]
@@ -9671,7 +9657,6 @@ server <- function(input, output, session) {
     
     data <- dataAllSlot_comp()
     
-    data_slot_test <<- data
     print(Sys.time())
     #data <- slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Specialty"
@@ -9907,7 +9892,6 @@ server <- function(input, output, session) {
     
     data <- dataArrived_summary()
     
-    test_data_2<<- data
     #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
     
     #data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT2, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
@@ -10068,7 +10052,6 @@ server <- function(input, output, session) {
     # Process slot data
     #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Cardiology") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     slot <- dataAllSlot_comp() %>% rename(DEPARTMENT= DEPARTMENT_NAME)
-    data_slot_test <<- slot
     
     #slot <- data_slot_test
     #data_slot <- dataAllSlot_comp() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
@@ -10173,7 +10156,7 @@ print("10")
     metric_order <- c("Average Daily Volume",c( "Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time") , as.vector(unique(opt_table$Metrics)))
   
 
-    opt_table <<- opt_table[order(match(opt_table$Metrics, metric_order )),]
+    opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
     
 
  # opt_table <- as.datatable(formattable(opt_table, list(
