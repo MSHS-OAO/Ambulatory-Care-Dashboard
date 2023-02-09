@@ -4633,7 +4633,7 @@ server <- function(input, output, session) {
   output$totalBumpedCanceledRescheduledBox <- renderValueBox({
     data <- dataCanceledBumpedRescheduled()
     #data <- canceled.bumped.rescheduled.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
-    
+     #data_test <- test %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
     valueBox(
       prettyNum(nrow(data),big.mark=","), 
       subtitle = tags$p("Total Bumped/Canceled/Rescheduled Appointments", style = "font-size: 160%;"), icon = NULL,
@@ -9546,9 +9546,9 @@ server <- function(input, output, session) {
     }
     if(compare_filters == "PROVIDER"){
       name_1 <- "Provider"
-      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT_NAME",compare_filters,breakdown_filters)
       cols_name <- c("Specialty","Department",name_1,name_2)
-      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT_NAME",compare_filters)
     }
     
     
@@ -9581,6 +9581,8 @@ server <- function(input, output, session) {
       #### Add booked and filled rate columns( respective metric/Available Hours) multiply by 100 pivot the data so that the months are now columns
       #### and the metric oclumns become rows
       slot <- slot %>%
+        filter(`Available Hours` > 0) %>%
+        filter(!is.na(`Available Hours`)) %>%
         mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100), "%"),
                `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100), "%")) %>%
         collect() %>% 
