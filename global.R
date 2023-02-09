@@ -337,6 +337,10 @@ setwd(wdpath)
 poolcon <- dbConnect(odbc(), "Oracle 21_8",
                      uid = "villea04",
                      pwd = "qKQvPoSilm21T*qVr")
+
+poolcon_upt <- dbPool(drv = odbc::odbc(),
+                      dsn= "OAO Cloud DB Staging")
+
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
 ### RStudio COnnect Data Read In
@@ -367,21 +371,26 @@ utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_
                                                 `15:00`= "H_15_00", `16:00`= "H_16_00",
                                                 `17:00`= "H_17_00", `18:00`= "H_18_00",
                                                 `19:00`= "H_19_00", `20:00`= "H_20_00")
-                                                
+
 
 
 population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
 
+ambulatory_access_tbl_summary <- tbl(poolcon_upt, "AMBULATORY_ACCESS_SUMMARY_TABLE")
+ambulatory_access_tbl_summary_npr <- tbl(poolcon_upt, "AMBULATORY_ACCESS_NPR_SUMMARY_TABLE")
+
+
+
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
 slot.data <- tbl(poolcon, "AMBULATORY_SLOT") #%>%
-  # group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT_NAME, PROVIDER,
-  #          APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR, APPT_WEEK, APPT_DAY, APPT_TM_HR,
-  #          RESOURCES, HOLIDAY, APPT_DTTM) %>%
-  # dplyr::summarise(`Available Hours` = sum(AVAIL_MINUTES, na.rm = T)/60,
-  #                  `Booked Hours` = sum(BOOKED_MINUTES, na.rm = T)/60,
-  #                  `Arrived Hours` = sum(ARRIVED_MINUTES, na.rm = T)/60,
-  #                  `Canceled Hours` = sum(CANCELED_MINUTES, na.rm = T)/60,
-  #                  `No Show Hours` = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60)
+# group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT_NAME, PROVIDER,
+#          APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR, APPT_WEEK, APPT_DAY, APPT_TM_HR,
+#          RESOURCES, HOLIDAY, APPT_DTTM) %>%
+# dplyr::summarise(`Available Hours` = sum(AVAIL_MINUTES, na.rm = T)/60,
+#                  `Booked Hours` = sum(BOOKED_MINUTES, na.rm = T)/60,
+#                  `Arrived Hours` = sum(ARRIVED_MINUTES, na.rm = T)/60,
+#                  `Canceled Hours` = sum(CANCELED_MINUTES, na.rm = T)/60,
+#                  `No Show Hours` = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60)
 
 # holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
 # utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
@@ -415,9 +424,11 @@ max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 date_format <- "YYYY-MM-DD HH24:MI:SS"
 # ## Other datasets Rows DataTable
 arrived.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Arrived"))
+arrived.data.rows.summary <- ambulatory_access_tbl_summary %>% filter(APPT_STATUS %in% c("Arrived"))
+arrived.data.rows.npr <- ambulatory_access_tbl_summary_npr %>% filter(APPT_STATUS %in% c("Arrived"))
 arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS < 1 ))
 #arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")))
-noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show"))
+noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show") | (APPT_STATUS %in% c("Canceled") & LEAD_DAYS < 1 ))
 bumped.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Bumped"))
 canceled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled"))
 canceled.bumped.rescheduled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled","Bumped","Rescheduled"))
@@ -539,7 +550,7 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
   daysofweek <- toupper(daysofweek)
   
   if(length(provider) >= 1000){
-  
+    
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
                             DEPARTMENT %in% department, 
@@ -573,7 +584,7 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
   daysofweek <- toupper(daysofweek)
   
   if(length(provider) >= 1000){
-  
+    
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
                             DEPARTMENT %in% department, 
@@ -602,6 +613,40 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
   }
 }
 
+groupByFilters_access_npr <- function(dt, campus, specialty, department, resource, provider, visitMethod, visitType, mindateRange, maxdateRange, daysofweek, holidays){
+  format <- "YYYY-MM-DD HH24:MI:SS"
+  daysofweek <- toupper(daysofweek)
+  
+  if(length(provider) >= 1000){
+    
+    result <- dt %>% filter(CAMPUS %in% campus, 
+                            CAMPUS_SPECIALTY %in% specialty, 
+                            DEPARTMENT %in% department, 
+                            RESOURCES %in% resource, 
+                            #PROVIDER %in% provider,
+                            VISIT_METHOD %in% visitMethod, 
+                            APPT_TYPE %in% visitType, 
+                            TO_DATE(mindateRange, format) <= APPT_MADE_DATE_YEAR, 
+                            TO_DATE(maxdateRange, format) >= APPT_MADE_DATE_YEAR, 
+                            APPT_DAY %in% daysofweek#, 
+                            #!HOLIDAY %in% holidays
+    ) 
+  } else {
+    result <- dt %>% filter(CAMPUS %in% campus, 
+                            CAMPUS_SPECIALTY %in% specialty, 
+                            DEPARTMENT %in% department, 
+                            RESOURCES %in% resource, 
+                            PROVIDER %in% provider,
+                            VISIT_METHOD %in% visitMethod, 
+                            APPT_TYPE %in% visitType, 
+                            TO_DATE(mindateRange, format) <= APPT_MADE_DATE_YEAR, 
+                            TO_DATE(maxdateRange, format) >= APPT_MADE_DATE_YEAR, 
+                            APPT_DAY %in% daysofweek#, 
+                            #!HOLIDAY %in% holidays
+    ) 
+  }
+}
+
 
 
 ## Filtered No Show Data
@@ -614,7 +659,7 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
 
 groupByFilters_1 <- function(dt, apptType, insurance){
   result <- dt %>% filter(COVERAGE %in% insurance)
-
+  
   if("New" %in% apptType && "Established" %in% apptType){
     result <- result %>% filter(NEW_PT2 %in% c("NEW", "ESTABLISHED"))
   }
@@ -791,19 +836,19 @@ groupByFilters_volume <- function(dt, campus, specialty, department, resource, v
   format <- "YYYY-MM-DD HH24:MI:SS"
   daysofweek <- toupper(daysofweek)
   
-
-    
-    result <- dt %>% filter(CAMPUS %in% campus, 
-                            CAMPUS_SPECIALTY %in% specialty, 
-                            DEPARTMENT %in% department, 
-                            RESOURCES %in% resource, 
-                            VISIT_METHOD %in% visitMethod, 
-                            TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
-                            TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
-                            APPT_DAY %in% daysofweek#, 
-                            #!HOLIDAY %in% holidays
-    )
-
+  
+  
+  result <- dt %>% filter(CAMPUS %in% campus, 
+                          CAMPUS_SPECIALTY %in% specialty, 
+                          DEPARTMENT %in% department, 
+                          RESOURCES %in% resource, 
+                          VISIT_METHOD %in% visitMethod, 
+                          TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
+                          TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, 
+                          APPT_DAY %in% daysofweek#, 
+                          #!HOLIDAY %in% holidays
+  )
+  
 }
 
 ## Schedule Optimization Tests

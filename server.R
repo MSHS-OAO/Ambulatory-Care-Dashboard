@@ -280,7 +280,6 @@ server <- function(input, output, session) {
         summarise(PROVIDER= unique(PROVIDER)) %>% collect()
       provider_choices <- sort(provider_choices$PROVIDER, na.last = T)
       
-      provider_test1  <<- provider_choices
     
       updatePickerInput(session,
                         inputId = "selectedProvider",
@@ -431,9 +430,7 @@ server <- function(input, output, session) {
       #     kpi.all.data$Resource %in% input$selectedResource &
       #     kpi.all.data$Provider %in% input$selectedProvider &
       #     kpi.all.data$Visit.Method %in% input$selectedVisitMethod, "Appt.Type"]))
-      
-      selected_resource <<- input$selectedResource
-      selected_provider <<- input$selectedProvider
+    
       
       
       selected_campus <- input$selectedCampus
@@ -716,6 +713,43 @@ server <- function(input, output, session) {
     
   })
   
+  
+  dataArrived_summary <- eventReactive(list(input$update_filters,input$update_filters1),{
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters(arrived.data.rows.summary,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    
+  })
+  
+  
+  dataArrived_access_npr <- eventReactive(list(input$update_filters,input$update_filters1),{
+    
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_access_npr(arrived.data.rows.npr,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    
+  })
+  
   dataArrived_access <- eventReactive(list(input$update_filters,input$update_filters1),{
     
     validate(
@@ -728,9 +762,9 @@ server <- function(input, output, session) {
       need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     groupByFilters_access(arrived.data.rows,
-                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                   input$selectedVisitMethod, input$selectedPRCName, 
-                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+                          input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                          input$selectedVisitMethod, input$selectedPRCName, 
+                          input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
     
   })
   
@@ -1031,7 +1065,7 @@ server <- function(input, output, session) {
   output$siteNoShowPts <- renderValueBox({
     
     valueBox(
-      prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / 
+      prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show", "Canceled"))) / 
                         length(unique((dataArrivedNoShow() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
       subtitle = tags$p("Avg. No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
@@ -2486,7 +2520,7 @@ server <- function(input, output, session) {
   output$pracApptStatus <- renderPlot({
     
     data <- dataNoShow()
-    # data <- kpi.all.data[noshow.data.rows,]
+    # data <- noshow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy") 
     
     # sameDay <- data %>%
     #   group_by(Appt.Status) %>%
@@ -2977,10 +3011,8 @@ server <- function(input, output, session) {
   
   provScheduledAppts_num <- reactive({
     numerator <- as.integer(dataArrivedNoShow() %>% summarise(total = n()) %>% collect())
-    numerator_test <<- numerator
     denominator <- dataArrivedNoShow() %>% select(APPT_DATE_YEAR) %>% summarise(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator)
-    denominator_test <<- denominator
     prettyNum(round(numerator/denominator), big.mark = ",")
   })
   
@@ -3339,7 +3371,7 @@ server <- function(input, output, session) {
           graph_theme("none") + theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           geom_point(size = 3.2)
         
-      } else if(input$kpiFreq == 2) { # Quarter
+      } else if(input$kpiFreq == 2) { # Quart
         ggplot(kpiVolumeDataQuarter, aes(x=interaction(Year,Quarter,lex.order = TRUE), y=Total,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
@@ -4365,14 +4397,14 @@ server <- function(input, output, session) {
   dataArrivedNoShow_1 <- reactive({
     data <- dataArrivedNoShow()
     #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
-    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("Arrived", "No Show")),
+    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")),
                      input$selectedApptType, input$selectedInsurance)
   })
   
   dataNoShow_1 <- reactive({
     data <- dataNoShow()
     #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
-    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("No Show")),
+    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("No Show", "Canceled")),
                      input$selectedApptType, input$selectedInsurance
     )
   })
@@ -4380,8 +4412,11 @@ server <- function(input, output, session) {
   # Total No Shows per Day
   output$avgDailyNoShow_Count <- renderValueBox({
     data <- dataNoShow_1()
-    numerator <- data %>% filter(APPT_STATUS == "No Show") %>% summarise(n()) %>% collect()
-    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
+    numerator <- data %>%
+      #filter(APPT_STATUS == "No Show") %>% 
+      summarise(n()) %>% collect()
+    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+      select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator$APPT_DATE_YEAR)
     
     valueBox(
@@ -4394,8 +4429,12 @@ server <- function(input, output, session) {
   
   # % No Shows per Day
   output$avgDailyNoShow_Perc <- renderValueBox({
-    numerator <- dataNoShow_1() %>% filter(APPT_STATUS == "No Show") %>% summarise(n()) %>% collect()
-    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% summarise(n()) %>% collect()
+    numerator <- dataNoShow_1() 
+    numerator <- numerator %>% 
+      #filter(APPT_STATUS %in% c("No Show", "Canceled")) %>% 
+      summarise(n()) %>% collect()
+    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% 
+          summarise(n()) %>% collect()
     valueBox(
       # paste0(round((nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
       #                 nrow(dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))))*100,1), "%"),
@@ -4408,7 +4447,10 @@ server <- function(input, output, session) {
   
   # Distribution of No Shows (%) by Lead Days 
   output$noShowLeadDays <- renderPlot({
-    data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_DTTM, APPT_MADE_DTTM, APPT_STATUS, APPT_DATE_YEAR) %>% collect()
+    data <- dataArrivedNoShow_1() 
+    #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+    data <- data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% 
+                    select(APPT_DTTM, APPT_MADE_DTTM, APPT_STATUS, APPT_DATE_YEAR) %>% collect()
     # data <- kpi.all.data[arrivedNoShow.data.rows,] %>% filter(Campus == "MSUS")
     
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
@@ -4472,7 +4514,8 @@ server <- function(input, output, session) {
   
   # No Shows by Time of Day 
   output$avgNoShowCount <- renderPlot({
-    data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_STATUS, APPT_DAY, APPT_TM_HR, APPT_DATE_YEAR) %>% collect()
+    data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+      select(APPT_STATUS, APPT_DAY, APPT_TM_HR, APPT_DATE_YEAR) %>% collect()
     # data <- arrivedNoShow.data
 
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
@@ -4526,7 +4569,12 @@ server <- function(input, output, session) {
   })
   
   output$avgNoShowPercent <- renderPlot({
-    data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show")) %>% select(APPT_DATE_YEAR, APPT_DAY, APPT_TM_HR, APPT_STATUS) %>% collect()
+   
+    data <- dataArrivedNoShow_1() 
+    #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+    
+    data <- data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+       select(APPT_DATE_YEAR, APPT_DAY, APPT_TM_HR, APPT_STATUS) %>% collect()
     # data <- arrivedNoShow.data
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
     
@@ -4578,8 +4626,8 @@ server <- function(input, output, session) {
   # Total Canceled/Bumped/Rescheduled Appointments 
   output$totalBumpedCanceledRescheduledBox <- renderValueBox({
     data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
-    
+    #data <- canceled.bumped.rescheduled.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
+     #data_test <- test %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
     valueBox(
       prettyNum(nrow(data),big.mark=","), 
       subtitle = tags$p("Total Bumped/Canceled/Rescheduled Appointments", style = "font-size: 160%;"), icon = NULL,
@@ -4640,7 +4688,7 @@ server <- function(input, output, session) {
   ## Average Bumps/Canc/Resc Rate 
   output$avgBumpsCancRescRate <- renderPlot({
     data <- dataAll()
-    # data <- all.data
+    # data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
     
     apptsCanceled <- data %>%
       group_by(APPT_STATUS) %>%
@@ -4669,7 +4717,7 @@ server <- function(input, output, session) {
   ## Lead Days to Bumps/Canc/Resc 
   output$leadDaysBumpsCancResc <- renderPlot({
     data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
-    # data <- kpi.all.data[canceled.bumped.rescheduled.data.rows ,] %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
+    # data <-  historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
     
     lead.days.df <- data %>%
       filter(LEAD_DAYS >= 0) %>% select(LEAD_DAYS, APPT_STATUS) %>% collect() %>%
@@ -4704,17 +4752,19 @@ server <- function(input, output, session) {
   
   ## Average Daily Same-day Bumps/Canc/Resc Rate 
   output$sameDayBumpedCanceledRescheduled <- renderPlot({
-    # data <- dataNoShow() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
-    data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
+    # data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
+    data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled") & LEAD_DAYS < 1)
+    
+    
     # data <- noShow.data %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
-    rows <- historical.data %>% filter(TO_DATE(max_date_arrived, "YYYY-MM-DD HH24:MI:SS") <= APPT_DTTM) %>% select(APPT_DATE_YEAR) %>% collect()
+    rows <- data %>% select(APPT_DATE_YEAR) %>% collect()
     rows <- length(unique(rows$APPT_DATE_YEAR))
-    #rows_test <<- rows
+   
     
     sameDay <- data %>%
       group_by(APPT_STATUS) %>%
       summarise(total = n()) %>% collect() %>%
-      mutate(avg = round(total/rows))
+      mutate(avg = ceiling(total/rows))
     
     ggplot(sameDay, aes(reorder(APPT_STATUS, -avg), avg, fill=APPT_STATUS)) +
       geom_bar(stat="identity", width = 0.8) +
@@ -5829,17 +5879,18 @@ server <- function(input, output, session) {
   
   output$volume1 <- renderPlotly({
     print("volume1")
-    data <- dataArrived()
-    # data <- arrived.data %>% filter(!holiday %in% c("Christmas"))
+    data <- dataArrived_summary()
+     # data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
+     #   filter(!holiday %in% c("Christmas"))
     # data <- setDT(data)
     # 
     # pts.count <- data[,list(Volume = .N), by = list(Appt.DateYear)]  
     # 
     
     # data <- data %>% select(UNIQUEID, APPT_DATE_YEAR) %>% collect()
-    data <- data %>% select(APPT_DATE_YEAR)
+    #data <- data %>% select(APPT_DATE_YEAR)
     
-    pts.count <- data %>% group_by(APPT_DATE_YEAR) %>% summarise(total = n()) %>%
+    pts.count <- data %>% group_by(APPT_DATE_YEAR) %>% summarise(total = sum(TOTAL_APPTS)) %>%
                       collect()
 
     
@@ -5917,19 +5968,19 @@ server <- function(input, output, session) {
   
   output$volume2 <- renderPlot({
     print("volume2")
-    data <- dataArrived()
-    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
+    data <- dataArrived_summary()
+    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     #data <- setDT(data)
     #data <- unique(data, by = "uniqueId")
     
     #pts.by.month <- data[,list(Volume = .N), by = list(Appt.MonthYear,Visit.Method)]  
     
-    data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD) #%>% collect()
+    #data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD) #%>% collect()
 
     # pts.by.month <- aggregate(data$UNIQUEID,
     #                           by=list(data$APPT_MONTH_YEAR, data$VISIT_METHOD), FUN=NROW)
     
-    pts.by.month <- data %>% group_by(APPT_MONTH_YEAR, VISIT_METHOD) %>% summarise(total = n()) %>% collect()
+    pts.by.month <- data %>% group_by(APPT_MONTH_YEAR, VISIT_METHOD) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
 
     names(pts.by.month) <- c("Month", "Visit.Method", "Volume")
     pts.by.month$Volume <- as.numeric(pts.by.month$Volume)
@@ -6052,9 +6103,9 @@ server <- function(input, output, session) {
     # pts.by.day$Visit.Method <- factor(pts.by.day$Visit.Method, levels = factor_levels)
     
     
-    data <- dataArrived()
-    #data_test <<- dataArrived()
-    # data <- arrived.data.rows  %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>%
+    data <- dataArrived_summary()
+   
+    #data <- arrived.data.rows.summary  %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>%
     #  select(UNIQUEID, APPT_DAY, VISIT_METHOD, APPT_DATE_YEAR)  
                                     
     
@@ -6062,7 +6113,7 @@ server <- function(input, output, session) {
     # pts.by.day <- aggregate(data$UNIQUEID, 
     #                         by=list(data$APPT_DAY, data$VISIT_METHOD), FUN=NROW)
     
-    pts.by.day <- data %>% group_by(APPT_DAY, VISIT_METHOD) %>% summarise(total = n()) %>% collect()
+    pts.by.day <- data %>% group_by(APPT_DAY, VISIT_METHOD) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
     
     names(pts.by.day) <- c("Day","Visit.Method", "Volume")
     
@@ -6109,14 +6160,12 @@ server <- function(input, output, session) {
     
     print("volume4")
   
-    data <- dataArrived() %>% select(APPT_MONTH_YEAR, APPT_DATE_YEAR) #%>% collect()
+    data <- dataArrived_summary() #%>% select(APPT_MONTH_YEAR, APPT_DATE_YEAR) #%>% collect()
     # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology") %>%
     #                                                         select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE)
     
-    #data_test <<- data
+    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
     
-    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = n()) %>% collect()
-    pts.dist.test <- pts.dist
     # pts.dist <- aggregate(data$UNIQUEID,
     #                       by=list(data$APPT_MONTH_YEAR, data$APPT_DATE), FUN=NROW)
 
@@ -6171,7 +6220,7 @@ server <- function(input, output, session) {
     #setDT(data)
     #pts.dist <- data[,list(Volume = .N), by = list(APPT_MONTH_YEAR, APPT_DATE)] 
     
-    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = n()) %>% collect()
+    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
     
     # pts.dist <- aggregate(dataArrived()$uniqueId, 
     #                       by=list(dataArrived()$Appt.MonthYear, dataArrived()$Appt.Date), FUN=NROW)
@@ -6254,14 +6303,14 @@ server <- function(input, output, session) {
   output$volume5 <- renderPlot({
     
     print("volume5")
-    data <- dataArrived()
+    data <- dataArrived_summary()
     #data <- data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider == "ABBOTT, ASHLEY") %>% filter(Appt.DateYear >= "2021-01-01")
-    data <- data %>% select(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) #%>% collect()
+    #data <- data %>% select(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) #%>% collect()
     #data <- setDT(data)
     
     # pts.dist <- data[,list(Volume = .N), by = list(APPT_MONTH_YEAR, APPT_DATE, APPT_DAY)]  
     
-    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) %>% summarise(total = n()) %>% collect()
+    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
     
     # pts.dist <- aggregate(data$uniqueId, 
     #                       by=list(data$Appt.MonthYear, data$Appt.Date, data$Appt.Day), FUN=NROW)
@@ -6287,7 +6336,7 @@ server <- function(input, output, session) {
     
     
     # pts.dist <- data[,list(Volume = .N), by = list(APPT_MONTH_YEAR,APPT_DATE,APPT_DAY)]
-    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) %>% summarise(total = n()) %>% collect()
+    pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
     
     # pts.dist <- aggregate(data$uniqueId,
     #                       by=list(data$Appt.MonthYear, data$Appt.Date, data$Appt.Day), FUN=NROW)
@@ -6372,7 +6421,7 @@ server <- function(input, output, session) {
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(NEW_PT2, Total) %>%
       replace(is.na(.), 0)
-    newpatients.ratio.test <<- newpatients.ratio
+   
     newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
@@ -6442,7 +6491,7 @@ server <- function(input, output, session) {
       group_by(APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
       filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
-    #waitTime_test <<- waitTime
+ 
     
     waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
     #waitTime$Appt.MonthYear <- as.Date(waitTime$Appt.MonthYear, format="%Y-%m-%d") ## Create date-year column
@@ -6612,9 +6661,7 @@ server <- function(input, output, session) {
       group_by(APPT_SOURCE_NEW, APPT_STATUS) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
-    
-    noShows_test <<- noShows
-    
+  
     noShows[is.na(noShows)] <- 0
     
     noShows$`No Show Perc` <- round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)
@@ -6668,7 +6715,7 @@ server <- function(input, output, session) {
     print(paste0("End of slot reactive ", Sys.time()))
     
     booked_filled <- data %>% select(AVAILABLE_HOURS, BOOKED_HOURS, ARRIVED_HOURS, APPT_WEEK) #%>% collect() #%>%
-    #test_book <<- booked_filled
+   
     
     booked_filled <- booked_filled %>%
       #mutate(Appt.Week = floor_date(as.Date(suppressWarnings(format(APPT_DTTM, "%Y-%m-%d")), "%Y-%m-%d"), unit="week", week_start = 1)) %>%
@@ -7179,7 +7226,7 @@ server <- function(input, output, session) {
     # data <- kpi.all.data[arrived.data.rows,] %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
     data_other <- dataNewComparison() %>% filter(NEW_PT2 == "ESTABLISHED", CYCLETIME > 0) %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME) %>% collect()
     # data_other <- kpi.all.data[arrived.data.rows,] %>% filter(New.PT3 == FALSE, cycleTime > 0)
-    data_ther_test <<- data_other
+   
     #names <- paste(unique(data_other$Appt.Type),sep="", collapse=", ")
     
     if(input$median2 == TRUE){
@@ -7470,7 +7517,7 @@ server <- function(input, output, session) {
     # data <- arrived.data %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
     
     data_other <- dataNewComparison2() %>% filter(NEW_PT2 == "ESTABLISHED", CHECKINTOROOMIN > 0) %>% select(APPT_DAY, APPT_TM_HR, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
-    data_other_test <<- data_other
+   
     # data_other <- arrived.data %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
     
     names <- data_other %>% filter(APPT_TM_HR %in% timeOptionsHr_filter) %>% select(APPT_TYPE)
@@ -7954,11 +8001,10 @@ server <- function(input, output, session) {
   
   
   vol_comp_day <- reactive({
-    data <- dataArrived() #%>% filter(Resource == "Provider")
-    #data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
+    data <- dataArrived_summary() #%>% filter(Resource == "Provider")
+    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c( "Cardiology"))
     #compare_filters <- "Campus.Specialty"
     #breakdown_filters <- "Visit.Method"
-    
     # data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER) %>% collect()
     # 
     # data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
@@ -8008,7 +8054,7 @@ server <- function(input, output, session) {
     if(input$breakdown_filters == "NEW_PT2"){
       ### Group data by inputs and Month and Date.  Spread data to make columns FALSE and TRUE that determine number of new or established patients
       volume <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
-        summarise(total = n()) %>% collect() %>%
+        summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         spread(!!breakdown_filters, total)
         
 
@@ -8106,7 +8152,7 @@ server <- function(input, output, session) {
       #### group Data by inputs and Month and data get the total for each day then group by the Month in order to sum all the vistis within the month and 
       #### divide it by the number of days within the month in the data, then we make a wider data sets with the months values made into a column
       volume <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>% 
-        summarise(total = n()) %>%
+        summarise(total = sum(TOTAL_APPTS)) %>%
         group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
         summarise(avg = ceiling(sum(total, na.rm = T)/n())) %>% collect() %>%
         pivot_wider(names_from = APPT_MONTH_YEAR,
@@ -8149,9 +8195,7 @@ server <- function(input, output, session) {
     #volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
     volume$Total_YN <- ifelse(volume[["Specialty"]] == "Total", 1,0)
 
-    cols_name_test <<- cols_name
- 
-    
+   
     months_df <- volume[,!(names(volume) %in% c(cols_name, "Total", "Total_YN"))]
     months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
     #order_months <- months_df[months]
@@ -8290,12 +8334,11 @@ server <- function(input, output, session) {
   
   
   vol_comp_month <- reactive({
-    data <- dataArrived() #%>% filter(Resource == "Provider")
-    # data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
+    data <- dataArrived_summary() #%>% filter(Resource == "Provider")
+    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy"))
     # compare_filters <- "Department"
     # breakdown_filters <- "Visit.Method"
     # 
-    
     # data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT3, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER) %>% collect()
     # 
     # data <- data %>% rename(Appt.MonthYear = APPT_MONTH_YEAR,
@@ -8348,7 +8391,7 @@ server <- function(input, output, session) {
       
       #### Group data by inputs and Month.  Spread data to make TRUE and FALSe columns for new patietns
       volume <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
-        summarise(total = n()) %>% collect() %>%
+        summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         spread(!!breakdown_filters, total)
       
       volume[is.na(volume)] <- 0
@@ -8411,7 +8454,7 @@ server <- function(input, output, session) {
       
       #### Group data by inputs and Month get total for the month and pivot wider to moths are now columns
       volume <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
-        summarise(total = n()) %>% collect() %>%
+        summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         pivot_wider(names_from = APPT_MONTH_YEAR,
                     values_from = total,
                     values_fill = 0) 
@@ -8541,8 +8584,8 @@ server <- function(input, output, session) {
   
   
   patient_ratio_month <- reactive({
-    data <- dataArrived() #%>% filter(Resource == "Provider")
-    # data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
+    data <- dataArrived_access_npr() #%>% filter(Resource == "Provider")
+   #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy"))
     # compare_filters <- "Department"
     # breakdown_filters <- "Visit.Method"
     
@@ -8598,15 +8641,15 @@ server <- function(input, output, session) {
     if(breakdown_filters == "NEW_PT2"){
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-      newpatients.ratio <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
-        summarise(total = n()) %>% collect() %>%
+      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+        summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
         spread(!!breakdown_filters, total)
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
       #### Calulate new patient ratio for the whole month sum of all new patients within the month divide by sum of new and established patients
-      newpatients.ratio.new <- newpatients.ratio %>% group_by(across(!!tot_cols),APPT_MONTH_YEAR) %>%
+      newpatients.ratio.new <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
         mutate(ratio = round(NEW/(sum(NEW, na.rm = TRUE) + sum(ESTABLISHED, na.rm = TRUE)),2))
       
       
@@ -8616,7 +8659,7 @@ server <- function(input, output, session) {
       
       #### Pivot the data so that month are now in a columns
       newpatients.ratio.new <- newpatients.ratio.new %>%
-        pivot_wider(names_from = APPT_MONTH_YEAR,
+        pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                     values_from = ratio,
                     values_fill = 0)%>%
         add_column(!!breakdown_filters := "New") %>%
@@ -8624,7 +8667,7 @@ server <- function(input, output, session) {
       
       
       #### Calulate est patient ratio for the whole month sum of all est patients within the month divide by sum of new and established patients
-      newpatients.ratio.est <- newpatients.ratio %>% group_by(across(!!tot_cols),APPT_MONTH_YEAR) %>%
+      newpatients.ratio.est <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
         mutate(ratio = round(ESTABLISHED/(sum(NEW, na.rm = TRUE) + sum(ESTABLISHED, na.rm = TRUE)),2))
       
       
@@ -8634,7 +8677,7 @@ server <- function(input, output, session) {
       
       #### Pivot data wider to months are their own columns
       newpatients.ratio.est <- newpatients.ratio.est %>%
-        pivot_wider(names_from = APPT_MONTH_YEAR,
+        pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                     values_from = ratio,
                     values_fill = 0)%>%
         add_column(!!breakdown_filters := "Established") %>%
@@ -8661,22 +8704,22 @@ server <- function(input, output, session) {
     }else{
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-      newpatients.ratio <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR, NEW_PT2) %>%
-        summarise(total = n()) %>% collect() %>%
+      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
+        summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
         spread(NEW_PT2, total)
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
       ### Calculate new patient ratio by breakdown
-      newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols),APPT_MONTH_YEAR) %>%
+      newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
         mutate(ratio = round(`NEW`/(sum(`NEW`, na.rm = TRUE) + sum(`ESTABLISHED`, na.rm = TRUE)),2))
       
       
       drop <- c("ESTABLISHED","NEW", "<NA>")
       newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
       newpatients.ratio <- newpatients.ratio %>%
-        pivot_wider(names_from = APPT_MONTH_YEAR,
+        pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                     values_from = ratio,
                     values_fill = 0)
       
@@ -9470,7 +9513,7 @@ server <- function(input, output, session) {
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT3"){
+    if(breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -9489,9 +9532,9 @@ server <- function(input, output, session) {
     }
     if(compare_filters == "PROVIDER"){
       name_1 <- "Provider"
-      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT_NAME",compare_filters,breakdown_filters)
       cols_name <- c("Specialty","Department",name_1,name_2)
-      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT_NAME",compare_filters)
     }
     
     
@@ -9504,7 +9547,7 @@ server <- function(input, output, session) {
       
       validate(
         need(input$breakdown_filters != "APPT_TYPE", ("Slot data can only be viewed by Visit Method")),
-        need(input$breakdown_filters != "NEW_PT3", ("Slot data can only be viewed by Visit Method"))
+        need(input$breakdown_filters != "NEW_PT2", ("Slot data can only be viewed by Visit Method"))
       )
       
       
@@ -9524,6 +9567,8 @@ server <- function(input, output, session) {
       #### Add booked and filled rate columns( respective metric/Available Hours) multiply by 100 pivot the data so that the months are now columns
       #### and the metric oclumns become rows
       slot <- slot %>%
+        filter(`Available Hours` > 0) %>%
+        filter(!is.na(`Available Hours`)) %>%
         mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100), "%"),
                `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100), "%")) %>%
         collect() %>% 
@@ -9611,8 +9656,9 @@ server <- function(input, output, session) {
     print(Sys.time())
     
     data <- dataAllSlot_comp()
+    
     print(Sys.time())
-    # data <- slot.data.subset[all.slot.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
+    #data <- slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Specialty"
     # breakdown_filters <- "Visit.Method"
     
@@ -9629,7 +9675,7 @@ server <- function(input, output, session) {
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT3"){
+    if(breakdown_filters == "NEW_PT2"){
       name_2 <- "Patient Status"
     }
     
@@ -9661,7 +9707,7 @@ server <- function(input, output, session) {
       
       validate(
         need(input$breakdown_filters != "APPT_TYPE", ("Slot data can only be viewed by Visit Method")),
-        need(input$breakdown_filters != "NEW_PT3", ("Slot data can only be viewed by Visit Method"))
+        need(input$breakdown_filters != "NEW_PT2", ("Slot data can only be viewed by Visit Method"))
       )
       
       
@@ -9686,10 +9732,12 @@ server <- function(input, output, session) {
       ### then gather all created columns make them categories for the STatus column
       ### Spread data to make monhts in Appt.Month into columns
       slot <- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+        filter(`Available Hours` > 0) %>%
+        filter(!is.na(`Available Hours`)) %>%
         summarise(
           `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
           `Filled Rate (%)` = paste0(round(sum(`Filled Hours`)/sum(`Available Hours`)*100),"%"),
-          `Available Hours` = ceiling(sum(`Available Hours`)/n(),1),
+          `Available Hours` = ceiling(sum(`Available Hours`)/n()),
           `Booked Hours` = ceiling(sum(`Booked Hours`)/n()),
           `Filled Hours` = ceiling(sum(`Filled Hours`)/n())
         ) %>% collect() %>% 
@@ -9842,8 +9890,9 @@ server <- function(input, output, session) {
     # data <- kpi.all.data %>% filter(Campus.Specialty=="Cardiology" & Appt.Status == "Arrived") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     # compare_filters <- "Provider"
     
-    data <- dataArrived()
-    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
+    data <- dataArrived_summary()
+    
+    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
     
     #data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT2, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
     
@@ -9888,7 +9937,7 @@ server <- function(input, output, session) {
     
     print("2")
     volume <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
-      summarise(total = n()) %>% 
+      summarise(total = SUM(TOTAL_APPTS)) %>%  # it was n()
       group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       summarise(avg = ceiling(sum(total)/n())) %>%
       collect() %>%
@@ -9901,13 +9950,16 @@ server <- function(input, output, session) {
     
     
     volume$Metrics <- "Average Daily Volume"
-    volume <- volume %>% select(cols, Metrics, everything())
+    volume <- volume %>% select(all_of(cols), Metrics, everything())
+    
+    
 
-    data_access <- dataArrived_access()
-    # data_access <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
+    data_access <- dataArrived_access_npr()
+    
+    # data_access <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
     newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
-      summarise(total = n()) %>% collect()%>%
+      summarise(total = SUM(TOTAL_APPTS)) %>% collect()%>%  # it was n()
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
       spread(NEW_PT2, total) %>%
@@ -9961,9 +10013,11 @@ server <- function(input, output, session) {
     #waitTime <- data %>% mutate(wait.time= as.numeric(round(difftime(APPT_DTTM, APPT_MADE_DTTM,  units = "days"),2)))
     #waitTime <- dataAll %>% mutate(wait.time= as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2)))
     #waitTime <- waitTime  %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
-    print("3")
     #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
-    data_access <- dataArrived_access()
+    data_access <-  dataArrived_access()
+    #data_access <- arrived.data.rows.old %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
+    
+   
     waitTime <- data_access %>%
       filter(WAIT_TIME >= 0) %>% 
       group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>% 
@@ -9994,11 +10048,10 @@ server <- function(input, output, session) {
     waitTime <- waitTime %>% select(cols, Metrics, everything())
     
     
-    print("8")
+   
     # Process slot data
     #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Cardiology") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     slot <- dataAllSlot_comp() %>% rename(DEPARTMENT= DEPARTMENT_NAME)
-    data_slot_test <<- slot
     
     #slot <- data_slot_test
     #data_slot <- dataAllSlot_comp() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
@@ -10103,7 +10156,7 @@ print("10")
     metric_order <- c("Average Daily Volume",c( "Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time") , as.vector(unique(opt_table$Metrics)))
   
 
-    opt_table <<- opt_table[order(match(opt_table$Metrics, metric_order )),]
+    opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
     
 
  # opt_table <- as.datatable(formattable(opt_table, list(
