@@ -4627,7 +4627,6 @@ server <- function(input, output, session) {
   output$totalBumpedCanceledRescheduledBox <- renderValueBox({
     data <- dataCanceledBumpedRescheduled()
     #data <- canceled.bumped.rescheduled.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
-     #data_test <- test %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
     valueBox(
       prettyNum(nrow(data),big.mark=","), 
       subtitle = tags$p("Total Bumped/Canceled/Rescheduled Appointments", style = "font-size: 160%;"), icon = NULL,
@@ -4635,12 +4634,12 @@ server <- function(input, output, session) {
     )
   })
   
+ 
   # Avg Daily Canceled/Bumped/Rescheduled Appointments 
   output$avgDailyBumpedBox <- renderValueBox({
-    
     data <- dataCanceledBumpedRescheduled()
-    # data <- canceled.bumped.rescheduled.data
-    numerator <- data %>% filter(APPT_STATUS == "Bumped") %>% summarise(n()) %>% collect()
+    # data <- canceled.bumped.rescheduled.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
+    numerator <- data %>% filter(APPT_STATUS == "Bumped") %>% summarise(sum(TOTAL_APPTS)) %>% collect()
     denominator <- dataAll() %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator$APPT_DATE_YEAR)
     
@@ -4656,7 +4655,7 @@ server <- function(input, output, session) {
   output$avgDailyCanceledBox <- renderValueBox({
     
     data <- dataCanceledBumpedRescheduled()
-    numerator <- data %>% filter(APPT_STATUS == "Canceled") %>% summarise(n()) %>% collect()
+    numerator <- data %>% filter(APPT_STATUS == "Canceled") %>% summarise(sum(TOTAL_APPTS)) %>% collect()
     denominator <- dataAll() %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator$APPT_DATE_YEAR)
 
@@ -4672,7 +4671,7 @@ server <- function(input, output, session) {
   output$avgDailyRescheduledBox <- renderValueBox({
     
     data <- dataCanceledBumpedRescheduled()
-    numerator <- data %>% filter(APPT_STATUS == "Rescheduled") %>% summarise(n()) %>% collect()
+    numerator <- data %>% filter(APPT_STATUS == "Rescheduled") %>% summarise(sum(TOTAL_APPTS)) %>% collect()
     denominator <- dataAll() %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator$APPT_DATE_YEAR)
     
@@ -4717,7 +4716,8 @@ server <- function(input, output, session) {
   ## Lead Days to Bumps/Canc/Resc 
   output$leadDaysBumpsCancResc <- renderPlot({
     data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
-    # data <-  historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
+    
+    # data <-  historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
     
     lead.days.df <- data %>%
       filter(LEAD_DAYS >= 0) %>% select(LEAD_DAYS, APPT_STATUS) %>% collect() %>%
@@ -4752,9 +4752,8 @@ server <- function(input, output, session) {
   
   ## Average Daily Same-day Bumps/Canc/Resc Rate 
   output$sameDayBumpedCanceledRescheduled <- renderPlot({
-    # data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
+    # data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled") & LEAD_DAYS < 1)
     data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled") & LEAD_DAYS < 1)
-    
     
     # data <- noShow.data %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
     rows <- data %>% select(APPT_DATE_YEAR) %>% collect()
@@ -4787,7 +4786,7 @@ server <- function(input, output, session) {
   output$reasonsBumps <- renderPlot({
     
     data <- dataBumped() %>% select(APPT_DTTM, APPT_CANCEL_DTTM, CANCEL_REASON) %>% collect()
-    # data <- kpi.all.data[bumped.data.rows,] %>% filter(Campus == "MSUS")
+    #data <- bumped.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy" ) %>% collect()
     
     total <- nrow(data)
     
@@ -4929,6 +4928,7 @@ server <- function(input, output, session) {
             axis.title.y = element_blank(),
             axis.text.x = element_text(angle = 0, hjust = 0.5, size = 14, colour = "black"),
             axis.text.y = element_text(size = 14, colour = "black"))
+    
     
   })
   
