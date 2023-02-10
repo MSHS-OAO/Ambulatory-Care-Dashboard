@@ -4517,7 +4517,12 @@ server <- function(input, output, session) {
     data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
       select(APPT_STATUS, APPT_DAY, APPT_TM_HR, APPT_DATE_YEAR) %>% collect()
     # data <- arrivedNoShow.data
-
+    
+    data_arrived <- data %>% filter(APPT_STATUS %in% "Arrived") %>%
+                    group_by(APPT_DAY, APPT_TM_HR) %>%
+                      dplyr::summarise(total_arrived = n()) %>%
+                    rename(Day = APPT_DAY,
+                           Time = APPT_TM_HR)  
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
     
     noShow_count <- data %>%
@@ -4535,6 +4540,8 @@ server <- function(input, output, session) {
     noShow_count.df <- merge(noShow_count.df, noShow_count, by.x = c("Day","Time"), by.y = c("APPT_DAY","APPT_TM_HR"), all = TRUE)
     
     noShow_count.df <- noShow_count.df %>% filter(Time %in% timeOptionsHr_filter)
+    noShow_count.df <- left_join(noShow_count.df, data_arrived)
+    noShow_count.df <- noShow_count.df %>% mutate(avgNoShows = ifelse((is.na(avgNoShows) & !is.na(total_arrived)), 0, avgNoShows))
     
     #noShow_count.df$avgNoShows[is.na(noShow_count$avgNoShows)] <- 0
     ggplot(noShow_count.df, aes(x=factor(Day, levels = daysOfWeek.options), y=Time))+
