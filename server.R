@@ -800,6 +800,23 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
+  dataCanceledBumpedRescheduledAll <- eventReactive(list(input$update_filters,input$update_filters1),{
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters(canceled.bumped.rescheduled.rows,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+  })
+  
+  
   dataCanceled<- eventReactive(list(input$update_filters,input$update_filters1),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -3489,9 +3506,15 @@ server <- function(input, output, session) {
       # `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
     
     data <- dataAll()
+    
+    #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+    
+    data <- data %>% 
+      mutate(STATUS = ifelse((APPT_STATUS %in% c("Canceled") & (LEAD_DAYS < 1)),"No Show", APPT_STATUS),
+             STATUS = ifelse((APPT_STATUS %in% c("Canceled") & is.na(LEAD_DAYS)),"Canceled", STATUS))
 
     statusData <- data %>% 
-      group_by(APPT_YEAR, APPT_QUARTER, APPT_MONTH, APPT_DATE, APPT_STATUS, APPT_MONTH_YEAR, APPT_DATE_YEAR) %>%
+      group_by(APPT_YEAR, APPT_QUARTER, APPT_MONTH, APPT_DATE, STATUS, APPT_MONTH_YEAR, APPT_DATE_YEAR) %>%
       summarise(total = n()) %>% collect() %>%
       `colnames<-` (c("Year", "Quarter", "Month","Date","Status","YearMonth","DateYear","Count"))
     statusData$Year <- as.character(statusData$Year)
@@ -4637,6 +4660,9 @@ server <- function(input, output, session) {
  
   # Avg Daily Canceled/Bumped/Rescheduled Appointments 
   output$avgDailyBumpedBox <- renderValueBox({
+    
+    start_date <<- Sys.time()
+    
     data <- dataCanceledBumpedRescheduled()
     # data <- canceled.bumped.rescheduled.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
     numerator <- data %>% filter(APPT_STATUS == "Bumped") %>% summarise(sum(TOTAL_APPTS)) %>% collect()
@@ -4715,8 +4741,9 @@ server <- function(input, output, session) {
   
   ## Lead Days to Bumps/Canc/Resc 
   output$leadDaysBumpsCancResc <- renderPlot({
-    data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
+    #data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
     
+    data <- dataCanceledBumpedRescheduledAll()
     # data <-  historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled"))
     
     lead.days.df <- data %>%
@@ -4753,8 +4780,8 @@ server <- function(input, output, session) {
   ## Average Daily Same-day Bumps/Canc/Resc Rate 
   output$sameDayBumpedCanceledRescheduled <- renderPlot({
     # data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy") %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled") & LEAD_DAYS < 1)
-    data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled") & LEAD_DAYS < 1)
-    
+    #data <- dataAll() %>% filter(APPT_STATUS %in% c("Bumped","Canceled","Rescheduled") & LEAD_DAYS < 1)
+    data <- dataCanceledBumpedRescheduledAll() %>% filter(LEAD_DAYS < 1)
     # data <- noShow.data %>% filter(Appt.Status %in% c("Bumped","Canceled","Rescheduled"))
     rows <- data %>% select(APPT_DATE_YEAR) %>% collect()
     rows <- length(unique(rows$APPT_DATE_YEAR))
@@ -4888,6 +4915,8 @@ server <- function(input, output, session) {
       head(10)
     
     top10 <- as.vector(top10$CANCEL_REASON)
+    
+    end_date <<- Sys.time()
     
     if(input$percent == FALSE){
       
