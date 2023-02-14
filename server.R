@@ -3511,7 +3511,7 @@ server <- function(input, output, session) {
     
     data <- data %>% 
       mutate(STATUS = ifelse((APPT_STATUS %in% c("Canceled") & (LEAD_DAYS < 1)),"No Show", APPT_STATUS),
-             STATUS = ifelse((APPT_STATUS %in% c("Canceled") & is.na(LEAD_DAYS)),"Canceled", STATUS))
+             STATUS = ifelse((APPT_STATUS %in% c("Canceled") & is.na(LEAD_DAYS)),"Canceled", STATUS)) 
 
     statusData <- data %>% 
       group_by(APPT_YEAR, APPT_QUARTER, APPT_MONTH, APPT_DATE, STATUS, APPT_MONTH_YEAR, APPT_DATE_YEAR) %>%
@@ -3571,7 +3571,7 @@ server <- function(input, output, session) {
     
     if(input$kpiTrend ==1){
       if(input$kpiFreq == 1){ #Year
-        ggplot(statusDataYear, aes(x=Year, y=value,col=variable, group=variable)) +
+        ggplot(statusDataYear, aes(x=Year, y=value, col=variable, group=variable)) +
           geom_line() +
           geom_point() +
           facet_wrap(variable~., dir = "v", scales = "free")+
@@ -4230,7 +4230,7 @@ server <- function(input, output, session) {
     sameDay$APPT_STATUS <- as.character(sameDay$APPT_STATUS)
     
     sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Bumped")] <- "Same-day Bumped"
-    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Canceled")] <- "Same-day Canceled"
+    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Canceled")] <- "Same-day Canceled \n(No Show)"
     sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Rescheduled")] <- "Same-day Rescheduled"
     
     ggplot(sameDay, aes(reorder(APPT_STATUS, -value), value, fill=APPT_STATUS)) +
@@ -4251,7 +4251,7 @@ server <- function(input, output, session) {
   # Scheduled Patients
   output$scheduledPts <- renderPlot({
     data <- dataArrivedNoShow()
-    # data <- kpi.all.data[arrivedNoShow.data.rows,]
+    #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     
     data <- data %>%
       group_by(APPT_DATE_YEAR, APPT_TM_HR, APPT_STATUS) %>%
@@ -4272,7 +4272,7 @@ server <- function(input, output, session) {
     data$variable <- as.character(data$variable)
     
     data$variable[which(data$variable == "Bumped")] <- "Same-day Bumped"
-    data$variable[which(data$variable == "Canceled")] <- "Same-day Canceled"
+    data$variable[which(data$variable == "Canceled")] <- "Same-day Canceled (No Show)"
     data$variable[which(data$variable == "Rescheduled")] <- "Same-day Rescheduled"
     
     data <- data %>% filter(Time %in% timeOptionsHr_filter)
@@ -4286,14 +4286,15 @@ server <- function(input, output, session) {
     
     
     ggplot(data, aes(x=Time, y=value, fill=factor(variable, levels=c("Same-day Bumped", 
-                                                                     "Same-day Canceled", 
+                                                                     "Same-day Canceled (No Show)", 
                                                                      "Same-day Rescheduled", 
                                                                      "No Show","Arrived"))))+
       geom_bar(position="stack",stat="identity", width=0.7)+
       scale_fill_MountSinai(reverse = TRUE)+
       labs(x = NULL, y = "Pateints",
            title = "Average Patients by Status",
-           subtitle = paste0("Based on scheduled appointment time from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           #subtitle = paste0("Based on scheduled appointment time from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           )+
       scale_y_continuous(expand = c(0, 0), limits = c(0,max(totals$value)*1.5))+
       theme_new_line()+
       theme_bw()+
@@ -4728,7 +4729,7 @@ server <- function(input, output, session) {
       scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits=c(0,(max(apptsCanceled$percent))*1.5))+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       labs(x=NULL, y=NULL,
-           title = "Rate* of Scheduling Activities - \nBump/Cancel/Reschedule",
+           title = "Rate* of Scheduling Activities - \nBumped/Canceled/Rescheduled",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "*% of Total Appointments Scheduled.")+
       theme_new_line()+
@@ -4762,7 +4763,7 @@ server <- function(input, output, session) {
       geom_bar(position="stack",stat="identity", width=0.7)+
       scale_fill_manual(values=c("grey","#00aeef","#d80b8c","midnightblue", "#c7c6ef", "#212070"))+
       labs(x=NULL, y=NULL,
-           title = "% of Bumped/Canceled/Rescheduled \nAppointments by Lead days \nto Appt Cancellation*",
+           title = "% of Bumped/Canceled/Rescheduled \nby Lead days to Appointment*",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "*Time from appointment scheduled to status changed.")+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
@@ -4848,7 +4849,7 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Bumped Reasons by Lead Days to Bump",
+             title = "Top 10 Bumped Reasons by Lead Days to Appointment",
              subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
         scale_fill_gradient(low = "white", high = "#d80b8c", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
                             name="Total Bumped Appointments\n by Wait Time to Appointment")+
@@ -4862,7 +4863,7 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Bumped Reasons by Lead Days to Bump",
+             title = "Top 10 Bumped Reasons by Lead Days to Appointment",
              subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
         scale_fill_gradient(low = "white", high = "#d80b8c", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
                             name="Total % of Bumped \nAppointments by Wait Time to Appointment")+
@@ -4926,7 +4927,7 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Canceled Reasons by Lead Days to Cancellation",
+             title = "Top 10 Canceled Reasons by Lead Days to Appointment",
              subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
         scale_fill_gradient(low = "white", high = "#00aeef", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
                             name="Total Canceled Appointments\n by Wait Time to Appointment")+
@@ -4940,7 +4941,7 @@ server <- function(input, output, session) {
         geom_tile(color = "black")+
         coord_flip()+
         labs(x=NULL, y=NULL,
-             title = "Top 10 Canceled Reasons by Lead Days to Cancellation",
+             title = "Top 10 Canceled Reasons by Lead Days to Appointment",
              subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
         scale_fill_gradient(low = "white", high = "#00aeef", space = "Lab", na.value = "#dddedd", guide = "colourbar", 
                             name="% of Total Canceled \nAppointments by Wait Time to Appointment")+
