@@ -431,8 +431,9 @@ arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Sh
 noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show") | (APPT_STATUS %in% c("Canceled") & LEAD_DAYS < 1 ))
 bumped.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Bumped"))
 canceled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled"))
-canceled.bumped.rescheduled.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled","Bumped","Rescheduled"))
+canceled.bumped.rescheduled.data.rows <- ambulatory_access_tbl_summary %>% filter(APPT_STATUS %in% c("Canceled","Bumped","Rescheduled"))
 
+canceled.bumped.rescheduled.rows <- historical.data %>% filter(APPT_STATUS %in% c("Canceled","Bumped","Rescheduled"))
 
 #sameDay <- historical.data %>% filter(APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS = 0)
 # all.data.rows <- kpi.all.data[Appt.DTTM >= max_date - 730, which = TRUE]
