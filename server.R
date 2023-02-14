@@ -4293,7 +4293,7 @@ server <- function(input, output, session) {
       scale_fill_MountSinai(reverse = TRUE)+
       labs(x = NULL, y = "Pateints",
            title = "Average Patients by Status",
-           #subtitle = paste0("Based on scheduled appointment time from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           subtitle = paste0("Based on scheduled appointment time from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
            )+
       scale_y_continuous(expand = c(0, 0), limits = c(0,max(totals$value)*1.5))+
       theme_new_line()+
