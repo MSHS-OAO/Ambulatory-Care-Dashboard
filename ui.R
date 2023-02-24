@@ -1090,20 +1090,6 @@ ui <- dashboardPage(
                        tags$head(tags$style("#newpatients{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
                        fluidRow(
                          boxPlus(
-                           title = "New Patient Visit Ratio", width = 12, status = "primary",
-                           solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                           tabBox(
-                             title = NULL, type = "pills",
-                             id = "tabset4", width = "100%",
-                             tabPanel("Total", 
-                                      plotOutput("newPtRatioByDept", height = "550px") %>% 
-                                        withSpinner(type = 5, color = "#d80b8c")),
-                             tabPanel("By Provider",
-                                      "*Select fewer providers for better visibility",
-                                      plotOutput("newPtRatioByProv", height = "550px") %>% 
-                                        withSpinner(type = 5, color = "#d80b8c"))))),
-                       fluidRow(
-                         boxPlus(
                            title = "New Patient Wait Time", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            tabBox(
@@ -1115,6 +1101,20 @@ ui <- dashboardPage(
                              tabPanel("By Provider",
                                       "*Select Fewer Providers for Better Visibility",
                                       plotOutput("newPtWaitTimeByProv", height = "550px") %>% 
+                                        withSpinner(type = 5, color = "#d80b8c"))))),
+                       fluidRow(
+                         boxPlus(
+                           title = "New Patient Visit Ratio", width = 12, status = "primary",
+                           solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                           tabBox(
+                             title = NULL, type = "pills",
+                             id = "tabset4", width = "100%",
+                             tabPanel("Total", 
+                                      plotOutput("newPtRatioByDept", height = "550px") %>% 
+                                        withSpinner(type = 5, color = "#d80b8c")),
+                             tabPanel("By Provider",
+                                      "*Select fewer providers for better visibility",
+                                      plotOutput("newPtRatioByProv", height = "550px") %>% 
                                         withSpinner(type = 5, color = "#d80b8c"))))),
                        fluidRow(
                          boxPlus(
