@@ -7074,12 +7074,15 @@ server <- function(input, output, session) {
   
   # Reactive Filters for Scheduling Tab: Appointment Type & Insurance 
   output$apptTypeControl2 <- renderUI({
+    
+    appt_choices <- sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))
     box(
       title = NULL,
       width = 12, 
       solidHeader = FALSE,
       pickerInput("selectedApptType2", label = h4("Select Visit Type for Comparison:"), 
-                  choices = sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE)),
+                  #choices = sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE)),
+                  choices = appt_choices,
                   multiple=TRUE,
                   options = pickerOptions(
                     liveSearch = TRUE,
@@ -7087,17 +7090,23 @@ server <- function(input, output, session) {
                     selectedTextFormat = "count > 1", 
                     countSelectedText = "{0}/{1} Types", 
                     dropupAuto = FALSE),
-                  selected = sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))))
+                  selected = appt_choices
+                  #selected = sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))
+                  ))
   })
   
   
   output$apptTypeControl3 <- renderUI({
+    
+    appt_choices <- sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))
+      
     box(
       title = NULL,
       width = 12, 
       solidHeader = FALSE,
       pickerInput("selectedApptType3", label = h4("Select Visit Type for Comparison:"), 
-                  choices = sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE)),
+                  choices = appt_choices,
+                  #choices = sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE)),
                   multiple=TRUE,
                   options = pickerOptions(
                     liveSearch = TRUE,
@@ -7105,7 +7114,9 @@ server <- function(input, output, session) {
                     selectedTextFormat = "count > 1", 
                     countSelectedText = "{0}/{1} Types", 
                     dropupAuto = FALSE),
-                  selected = sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))))
+                  selected = appt_choices
+                  #selected = sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))
+                  ))
     
   })
   
@@ -7126,6 +7137,9 @@ server <- function(input, output, session) {
   # (1) Cycle Times --------------------------------------------------------------------------
   
   output$cycleTimeCompNew <- renderValueBox({
+    
+    data <- arrived.data.rows %>% filter(CAMPUS %in% "MSH- AMBULATORY CARE" & CAMPUS_SPECIALTY %in% "Pediatrics" )
+    
     data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT2 == "NEW") %>% select(CYCLETIME) %>%
       summarise(CYCLETIME = ceiling(mean(CYCLETIME, na.rm = T))) %>%
       collect()
@@ -7207,7 +7221,7 @@ server <- function(input, output, session) {
   })
   
   output$newCycleTimeBoxPlot <- renderPlot({
-    data <- dataArrived() %>% filter(CYCLETIME > 0) %>% filter(NEW_PT2 == "NEW") %>% select(CYCLETIME, NEW_PT2) %>% collect()
+    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT2 == "NEW") %>% select(CYCLETIME, NEW_PT2) %>% collect()
     # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
     
     ggplot(data, aes(x=CYCLETIME)) + 
@@ -7355,7 +7369,7 @@ server <- function(input, output, session) {
   
   
   output$newCycleTimeByProv <- renderPlot({
-    data <- dataArrived() %>% filter(CYCLETIME > 0) %>% filter(NEW_PT2 == "NEW")
+    data <- dataArrived() %>% filter(CYCLETIME > 0 , NEW_PT2 == "NEW")
     # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
     
     cycle.df <- data %>%
