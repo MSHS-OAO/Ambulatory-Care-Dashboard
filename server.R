@@ -7138,13 +7138,13 @@ server <- function(input, output, session) {
   
   output$cycleTimeCompNew <- renderValueBox({
     
-    data <- arrived.data.rows %>% filter(CAMPUS %in% "MSH- AMBULATORY CARE" & CAMPUS_SPECIALTY %in% "Pediatrics" )
+    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSH- AMBULATORY CARE" & CAMPUS_SPECIALTY %in% "Pediatrics" )
     
-    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT2 == "NEW") %>% select(CYCLETIME) %>%
+    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME) %>%
       summarise(CYCLETIME = ceiling(mean(CYCLETIME, na.rm = T))) %>%
       collect()
-    perc <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT2 == "NEW") %>% summarize(n()) %>% collect() /
-            dataArrived() %>% filter(NEW_PT2 == "NEW")%>% summarize(n()) %>% collect()
+    perc <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% summarize(n()) %>% collect() /
+            dataArrived() %>% filter(NEW_PT3 == "NEW")%>% summarize(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
@@ -7197,11 +7197,11 @@ server <- function(input, output, session) {
     }
     
     data <- data %>%
-      mutate(NEW_PT2 = ifelse(NEW_PT2 == "NEW", "NEW", APPT_TYPE)) %>%
+      mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT2))
     
     
-    ggplot(data, aes(x=CYCLETIME, fill=NEW_PT2, color=NEW_PT2)) +
+    ggplot(data, aes(x=CYCLETIME, fill=NEW_PT3, color=NEW_PT2)) +
       geom_histogram(aes(y = (..count..)/sum(..count..)),
                      # position = "identity",
                      alpha = 0.8)+
@@ -7221,9 +7221,11 @@ server <- function(input, output, session) {
   })
   
   output$newCycleTimeBoxPlot <- renderPlot({
-    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT2 == "NEW") %>% select(CYCLETIME, NEW_PT2) %>% collect()
+    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME, NEW_PT3) %>% collect()
     # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
     
+    
+  
     ggplot(data, aes(x=CYCLETIME)) + 
       geom_histogram(aes(y = (..count..)/sum(..count..)),
                      bins = 22,
@@ -7243,7 +7245,7 @@ server <- function(input, output, session) {
   })
   
   output$establishedCycleTimeBoxPlot <- renderPlot({
-    data_other <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT2 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT2, APPT_TYPE) %>% collect()
+    data_other <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
     # data_other <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type %in% c("NEW PATIENT", "FOLLOW UP"))
     
     data <- data_other
