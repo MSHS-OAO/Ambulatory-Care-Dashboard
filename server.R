@@ -7075,7 +7075,11 @@ server <- function(input, output, session) {
   # Reactive Filters for Scheduling Tab: Appointment Type & Insurance 
   output$apptTypeControl2 <- renderUI({
     
-    appt_choices <- sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))
+    appt_choices <- dataAll() %>% filter(NEW_PT3 == "ESTABLISHED") %>% select(APPT_TYPE) %>%
+      mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+    appt_choices <- sort(appt_choices$APPT_TYPE, na.last = T)
+    
+    #appt_choices <- sort(unique((dataAll() %>% filter(NEW_PT3 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))
     box(
       title = NULL,
       width = 12, 
@@ -7097,8 +7101,15 @@ server <- function(input, output, session) {
   
   
   output$apptTypeControl3 <- renderUI({
+  
     
-    appt_choices <- sort(unique((dataAll() %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))
+    #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+    
+    appt_choices <- dataAll() %>% filter(NEW_PT3 == "ESTABLISHED") %>% select(APPT_TYPE) %>%
+      mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+    appt_choices <- sort(appt_choices$APPT_TYPE, na.last = T)
+    
+    #appt_choices <- sort(unique((data %>% filter(NEW_PT3 == "ESTABLISHED") %>% select(APPT_TYPE) %>% collect())$APPT_TYPE))
       
     box(
       title = NULL,
@@ -7138,12 +7149,13 @@ server <- function(input, output, session) {
   
   output$cycleTimeCompNew <- renderValueBox({
     
-    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSH- AMBULATORY CARE" & CAMPUS_SPECIALTY %in% "Pediatrics" )
+    data_cycle <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW")
     
-    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME) %>%
+    data <- data_cycle %>% select(CYCLETIME) %>%
       summarise(CYCLETIME = ceiling(mean(CYCLETIME, na.rm = T))) %>%
       collect()
-    perc <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% summarize(n()) %>% collect() /
+    
+    perc <- data_cycle %>% summarize(n()) %>% collect() /
             dataArrived() %>% filter(NEW_PT3 == "NEW")%>% summarize(n()) %>% collect()
     
     valueBoxSpark(
@@ -7162,15 +7174,20 @@ server <- function(input, output, session) {
   })
   
   output$cycleTimeCompOther <- renderValueBox({
-    data <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT2 == "ESTABLISHED") %>% select(CYCLETIME) %>%
+    
+    data_cycle <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED")
+    
+    
+    data <- data_cycle %>% select(CYCLETIME) %>%
       summarise(CYCLETIME = mean(CYCLETIME, na.rm = T)) %>% collect()
     
-    perc <- dataNewComparison() %>% filter(CYCLETIME > 0 , NEW_PT2 == "ESTABLISHED") %>% summarise(n()) %>% collect() / 
-            dataArrived() %>% filter(NEW_PT2 == "ESTABLISHED")%>% summarise(n()) %>% collect()
+    perc <- data_cycle %>% summarise(n()) %>% collect() / 
+            dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED")%>% summarise(n()) %>% collect()
+    
     valueBoxSpark(
       # value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
       value =  paste0(ceiling(data$CYCLETIME)," min"),
-      title = toupper(ifelse(length(unique(dataNewComparison()$Appt.Type)) == 1,
+      title = toupper(ifelse(length(unique(dataNewComparison()$APPT_TYPE)) == 1,
                              paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
                              "Average Established Patients Check-in to Visit-end Time*")),
       # subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
@@ -7182,14 +7199,15 @@ server <- function(input, output, session) {
   })
   
   output$cycleTimeTrend <- renderPlot({
-    data_new <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT2 == "NEW") %>% select(CYCLETIME, NEW_PT2, APPT_TYPE) %>% collect()
+    data_new <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>%
+      select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
     # data_new <- arrived.data %>% filter(cycleTime > 0 & New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
     
-    data_other <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT2 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT2, APPT_TYPE) %>% collect()
+    data_other <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
     # data_other <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
     if(nrow(data_other) == 0){
-      
       data <- data_new
     } else{
       
@@ -7198,10 +7216,10 @@ server <- function(input, output, session) {
     
     data <- data %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
-      filter(!is.na(NEW_PT2))
+      filter(!is.na(NEW_PT3))
     
     
-    ggplot(data, aes(x=CYCLETIME, fill=NEW_PT3, color=NEW_PT2)) +
+    ggplot(data, aes(x=CYCLETIME, fill=NEW_PT3, color=NEW_PT3)) +
       geom_histogram(aes(y = (..count..)/sum(..count..)),
                      # position = "identity",
                      alpha = 0.8)+
@@ -7221,9 +7239,9 @@ server <- function(input, output, session) {
   })
   
   output$newCycleTimeBoxPlot <- renderPlot({
+    
     data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME, NEW_PT3) %>% collect()
     # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
-    
     
   
     ggplot(data, aes(x=CYCLETIME)) + 
@@ -7245,10 +7263,11 @@ server <- function(input, output, session) {
   })
   
   output$establishedCycleTimeBoxPlot <- renderPlot({
-    data_other <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
-    # data_other <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type %in% c("NEW PATIENT", "FOLLOW UP"))
+    data <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
+    # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type %in% c("NEW PATIENT", "FOLLOW UP"))
     
-    data <- data_other
+    #data <- data_other
     
     if(length(unique(data$APPT_TYPE)) == 1){
       appt.type <- unique(data$APPT_TYPE)
@@ -7264,7 +7283,7 @@ server <- function(input, output, session) {
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = paste0("*Includes ", length(unique(data$Appt.Type)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
+           caption = paste0("*Includes ", length(unique(data$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -7275,10 +7294,11 @@ server <- function(input, output, session) {
   
   
   output$cycleTimeByHour <- renderPlot({
-    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT2 == "NEW") %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME) %>% collect()
-    # data <- kpi.all.data[arrived.data.rows,] %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE)
-    data_other <- dataNewComparison() %>% filter(NEW_PT2 == "ESTABLISHED", CYCLETIME > 0) %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME) %>% collect()
-    # data_other <- kpi.all.data[arrived.data.rows,] %>% filter(New.PT3 == FALSE, cycleTime > 0)
+    
+    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME) 
+    #data <- arrived.data.rows %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME)
+    data_other <- dataNewComparison() %>% filter(NEW_PT3 == "ESTABLISHED", CYCLETIME > 0) %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME) 
+    # data_other <- arrived.data.rows  %>% filter(NEW_PT3 == "ESTABLISHED", CYCLETIME > 0) %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME)
    
     #names <- paste(unique(data_other$Appt.Type),sep="", collapse=", ")
     
@@ -7287,25 +7307,27 @@ server <- function(input, output, session) {
       data <- data %>%
         group_by(APPT_DAY, APPT_TM_HR) %>%
         summarise(avg = median(CYCLETIME)) %>%
-        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+        filter(APPT_TM_HR %in% timeOptionsHr_filter) %>% collect()
+      
       
       data_other <- data_other %>%
         group_by(APPT_DAY, APPT_TM_HR) %>%
         summarise(avg = median(CYCLETIME)) %>%
-        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+        filter(APPT_TM_HR %in% timeOptionsHr_filter) %>% collect()
+      
       
       input <- "Median"
     } else{
       
       data <- data %>%
         group_by(APPT_DAY, APPT_TM_HR) %>%
-        summarise(avg = mean(CYCLETIME)) %>%
-        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+        summarise(avg = mean(CYCLETIME, na.rm= TRUE)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter)%>% collect()
       
       data_other <- data_other %>%
         group_by(APPT_DAY, APPT_TM_HR) %>%
-        summarise(avg = mean(CYCLETIME)) %>%
-        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+        summarise(avg = mean(CYCLETIME, na.rm= TRUE)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter) %>% collect()
       
       input <- "Average"
     }
@@ -7346,7 +7368,7 @@ server <- function(input, output, session) {
       scale_fill_gradient(low="white", high="#00aeef")+
       labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time** by Hour\n"), 
            y = NULL,
-           caption = paste0("*Includes ", length(unique(data_other$Appt.Type)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out"),
+           caption = paste0("*Includes ", length(unique(data_other$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out"),
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
@@ -7371,25 +7393,33 @@ server <- function(input, output, session) {
   
   
   output$newCycleTimeByProv <- renderPlot({
-    data <- dataArrived() %>% filter(CYCLETIME > 0 , NEW_PT2 == "NEW")
-    # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
+    cycle.df <- dataArrived() %>% filter(CYCLETIME > 0 , NEW_PT3 == "NEW") %>%
+      select(PROVIDER, NEW_PT3, CYCLETIME) %>% collect() %>%
+      group_by(PROVIDER, NEW_PT3)
+      
+      
+    # data <- arrived.data.rows %>% filter(CYCLETIME > 0 , NEW_PT3 == "NEW") %>% 
+    #   filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Cardiology")%>%
+    #   select(PROVIDER, NEW_PT3, CYCLETIME) %>% collect() %>%
+    #   group_by(PROVIDER, NEW_PT3)
+      
     
-    cycle.df <- data %>%
-      select(PROVIDER, NEW_PT2, CYCLETIME) %>% collect() %>%
-      group_by(PROVIDER, NEW_PT2)
-    
-    avg.cycleTime <- data.frame(New.PT3 = c("Avg"),
-                                target =  round(mean(cycle.df$cycleTime)))
+    # cycle.df <- data %>%
+    #   select(PROVIDER, NEW_PT3, CYCLETIME) %>% collect() %>%
+    #   group_by(PROVIDER, NEW_PT3)
+    # 
+    # avg.cycleTime <- data.frame(New.PT3 = c("Avg"),
+    #                             target =  round(mean(cycle.df$CYCLETIME)))
     
     ggplot(cycle.df, aes(x = PROVIDER, y = CYCLETIME)) +
       geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
       stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-      scale_y_continuous(limits = c(0,quantile(cycle.df$cycleTime,0.75)*1.5))+
+      scale_y_continuous(limits = c(0,quantile(cycle.df$CYCLETIME,0.75)*1.5))+
       # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
       # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
       labs(title = "Distribution of NEW Appointment Check-in to Visit-end Time** by Provider", 
            y = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "**Visit-end Time is the minimum of Visit-end Time and Check-out")+
       theme_new_line()+
       theme_bw()+
@@ -7398,28 +7428,29 @@ server <- function(input, output, session) {
   })
   
   output$establishedCycleTimeByProv <- renderPlot({
-    data_other <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT2 == "ESTABLISHED") %>% select(PROVIDER, NEW_PT2, CYCLETIME, APPT_TYPE) %>% collect()
-    # data_other <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+  
+    data <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(PROVIDER, NEW_PT3, CYCLETIME, APPT_TYPE) %>% collect()
+    #data <- arrived.data.rows %>% filter(cycleTime > 0) %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(PROVIDER, NEW_PT3, CYCLETIME, APPT_TYPE)
     
-    data <- data_other
+    #data <- data_other
     
-    if(length(unique(data$Appt.Type)) == 1){
-      appt.type <- unique(data$Appt.Type)
+    if(length(unique(data$APPT_TYPE)) == 1){   # data$Appt.Type
+      appt.type <- unique(data$APPT_TYPE)
     } else{
       appt.type <- "Established"
     }
     
     cycle.df <- data %>%
-      select(PROVIDER, NEW_PT2, CYCLETIME) %>%
-      group_by(PROVIDER, NEW_PT2)
+      select(PROVIDER, NEW_PT3, CYCLETIME) %>%
+      group_by(PROVIDER, NEW_PT3) 
     
-    avg.cycleTime <- data.frame(New.PT3 = c("Avg"),
-                                target =  ceiling(mean(cycle.df$CYCLETIME)))
+    # avg.cycleTime <- data.frame(New.PT3 = c("Avg"),
+    #                             target =  ceiling(mean(cycle.df$CYCLETIME)))
     
     ggplot(cycle.df, aes(x = PROVIDER, y = CYCLETIME)) +
       geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
       stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-      scale_y_continuous(limits = c(0,quantile(cycle.df$cycleTime,0.75)*1.5))+
+      scale_y_continuous(limits = c(0,quantile(cycle.df$CYCLETIME, 0.75)*1.5))+
       # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
       # annotate("text",x=length(unique(cycle.df$Provider))/2,y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
       labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Visit-end Time** by Provider"), 
@@ -7438,11 +7469,14 @@ server <- function(input, output, session) {
   # (2) Room-in Times ----------------------------------------------------------------------
   
   output$roomInTimeCompNew <- renderValueBox({
-    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "NEW") %>% select(CHECKINTOROOMIN) %>%
+    
+    data_room <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW")
+      
+    data <-  data_room %>% select(CHECKINTOROOMIN) %>%
       summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T))  %>% collect()
     
-    perc <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "NEW") %>% summarise(n()) %>% collect() /
-            dataArrived() %>% filter(NEW_PT2 == "NEW") %>% summarise(n()) %>% collect()
+    perc <-  data_room %>% summarise(n()) %>% collect() /
+            dataArrived() %>% filter(NEW_PT3 == "NEW") %>% summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
@@ -7457,17 +7491,20 @@ server <- function(input, output, session) {
   })
   
   output$roomInTimeCompOther <- renderValueBox({
-    data <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "ESTABLISHED") %>% select(CHECKINTOROOMIN) %>%
+    
+    data_room <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED")
+    
+    data <- data_room %>% select(CHECKINTOROOMIN) %>%
       summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T)) %>% collect()
     
-    perc <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "ESTABLISHED") %>%
-            summarise(n()) %>% collect() / dataArrived() %>% filter(NEW_PT2 == "ESTABLISHED") %>%
+    perc <- data_room %>%
+            summarise(n()) %>% collect() / dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED") %>%
             summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
       value =  paste0(ceiling(data)," min"),
-      title = toupper(ifelse(length(unique(dataNewComparison2()$Appt.Type)) == 1,
+      title = toupper(ifelse(length(unique(dataNewComparison2()$APPT_TYPE)) == 1,
                              paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
                              "Avg. Established Appointments Check-in to Room-in Time")),
       # subtitle = paste0("*Based on ",round(nrow(dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
@@ -7479,10 +7516,12 @@ server <- function(input, output, session) {
   })
   
   output$roomInTimeTrend <- renderPlot({
-    data_new <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "NEW") %>% select(CHECKINTOROOMIN, NEW_PT2, APPT_TYPE) %>% collect()
+    data_new <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
+      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect()
     # data_new <- arrived.data %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE)
     
-    data_other <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0,  NEW_PT2 == "ESTABLISHED") %>% select(CHECKINTOROOMIN, NEW_PT2, APPT_TYPE) %>% collect()
+    data_other <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0,  NEW_PT3 == "ESTABLISHED") %>%
+      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect()
     # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
     if(nrow(data_other) == 0){
@@ -7492,11 +7531,11 @@ server <- function(input, output, session) {
     }
     
     data <- data %>%
-      mutate(NEW_PT2 = ifelse(NEW_PT2 == "NEW", "NEW", APPT_TYPE)) %>%
-      filter(!is.na(NEW_PT2))
+      mutate(NEW_PT3 = ifelse(NEW_PT3 == "NEW", "NEW", APPT_TYPE)) %>%
+      filter(!is.na(NEW_PT3))
     
     
-    ggplot(data, aes(x=CHECKINTOROOMIN, fill=NEW_PT2, color=NEW_PT2)) +
+    ggplot(data, aes(x=CHECKINTOROOMIN, fill=NEW_PT3, color=NEW_PT3)) +
       geom_histogram(aes(y = (..count..)/sum(..count..)),
                      # position = "identity",
                      alpha = 0.8)+
@@ -7515,7 +7554,8 @@ server <- function(input, output, session) {
   })
   
   output$newRoomInTimeBoxPlot <- renderPlot({
-    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0) %>% filter(NEW_PT2 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
+    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0) %>%
+      filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
     # data <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE)
     
     ggplot(data, aes(x=CHECKINTOROOMIN)) + 
@@ -7536,10 +7576,11 @@ server <- function(input, output, session) {
   })
   
   output$establishedRoomInTimeBoxPlot <- renderPlot({
-    data_other <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE, CHECKINTOROOMIN) %>% collect()
+    data <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(APPT_TYPE, CHECKINTOROOMIN) %>% collect()
     # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
-    data <- data_other
+    #data <- data_other
     
     if(length(unique(data$APPT_TYPE)) == 1){
       appt.type <- unique(data$APPT_TYPE)
@@ -7555,7 +7596,7 @@ server <- function(input, output, session) {
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = paste0("*Includes ", length(unique(data$Appt.Type)), " established appointments"))+
+           caption = paste0("*Includes ", length(unique(data$APPT_TYPE)), " established appointments"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -7566,10 +7607,12 @@ server <- function(input, output, session) {
   })
   
   output$roomInTimeByHour <- renderPlot({
-    data <- dataArrived() %>% filter(CHECKINTOROOMIN > 0) %>% filter(NEW_PT2 == "NEW") %>% select(APPT_DAY, APPT_TM_HR, CHECKINTOROOMIN) %>% collect()
+    data <- dataArrived() %>% filter(CHECKINTOROOMIN > 0) %>% filter(NEW_PT3 == "NEW") %>%
+      select(APPT_DAY, APPT_TM_HR, CHECKINTOROOMIN) %>% collect()
     # data <- arrived.data %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
     
-    data_other <- dataNewComparison2() %>% filter(NEW_PT2 == "ESTABLISHED", CHECKINTOROOMIN > 0) %>% select(APPT_DAY, APPT_TM_HR, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
+    data_other <- dataNewComparison2() %>% filter(NEW_PT3 == "ESTABLISHED", CHECKINTOROOMIN > 0) %>%
+      select(APPT_DAY, APPT_TM_HR, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
    
     # data_other <- arrived.data %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
     
@@ -7643,7 +7686,7 @@ server <- function(input, output, session) {
       scale_fill_gradient(low="white", high="#00aeef")+
       labs(title = paste0(input," ",appt.type," Patients Check-in to Visit-end Time by Hour\n"), 
            y = NULL,
-           caption = paste0("*Includes ", length(unique(data_other$Appt.Type)), " established visit types"),
+           caption = paste0("*Includes ", length(unique(data_other$APPT_TYPE)), " established visit types"),
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             legend.position = "right",
@@ -7667,12 +7710,12 @@ server <- function(input, output, session) {
   
   
   output$newRoomInTimeByProv <- renderPlot({
-    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0) %>% filter(NEW_PT2 == "NEW")
+    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0) %>% filter(NEW_PT3 == "NEW")
     # data <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
     
     roomin.df <- data %>%
-      select(PROVIDER, NEW_PT2, CHECKINTOROOMIN) %>% collect() %>%
-      group_by(PROVIDER, NEW_PT2)
+      select(PROVIDER, NEW_PT3, CHECKINTOROOMIN) %>% collect() %>%
+      group_by(PROVIDER, NEW_PT3)
     
     avg.roomInTime <- data.frame(New.PT3 = c("Avg"),
                                  target =  ceiling(mean(roomin.df$CHECKINTOROOMIN)))
@@ -7680,7 +7723,7 @@ server <- function(input, output, session) {
     ggplot(roomin.df, aes(x = PROVIDER, y = CHECKINTOROOMIN)) +
       geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
       stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-      scale_y_continuous(limits = c(0,quantile(roomin.df$checkinToRoomin,0.75)*1.5))+
+      scale_y_continuous(limits = c(0,quantile(roomin.df$CHECKINTOROOMIN,0.75)*1.5))+
       # geom_hline(yintercept= round(mean(roomin.df$checkinToRoomin)), linetype="dashed", color = "red")+
       # annotate("text",x=length(unique(roomin.df$Provider))/2,y=round(mean(roomin.df$checkinToRoomin))+3,size=5,color="red",label=c('Average'))+
       labs(title = "Distribution of NEW Appointment Check-in to Room-in Time by Provider", 
@@ -7693,10 +7736,10 @@ server <- function(input, output, session) {
   })
   
   output$establishedRoomInTimeByProv <- renderPlot({
-    data_other <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0) %>% select(PROVIDER, NEW_PT2, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
+    data <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0) %>% select(PROVIDER, NEW_PT3, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
     # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
-    data <- data_other
+   #data <- data_other
     
     if(length(unique(data$APPT_TYPE)) == 1){
       appt.type <- unique(data$APPT_TYPE)
@@ -7705,8 +7748,8 @@ server <- function(input, output, session) {
     }
     
     roomIn.df <- data %>%
-      select(PROVIDER, NEW_PT2, CHECKINTOROOMIN) %>%
-      group_by(PROVIDER, NEW_PT2)
+      select(PROVIDER, NEW_PT3, CHECKINTOROOMIN) %>%
+      group_by(PROVIDER, NEW_PT3)
     
     avg.roomInTime <- data.frame(New.PT3 = c("Avg"),
                                  target =  ceiling(mean(roomIn.df$CHECKINTOROOMIN)))
