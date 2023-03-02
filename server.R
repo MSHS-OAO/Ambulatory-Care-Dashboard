@@ -7262,36 +7262,102 @@ server <- function(input, output, session) {
     
   })
   
+ 
+  
   output$establishedCycleTimeBoxPlot <- renderPlot({
-    data <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
-      select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
-    # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type %in% c("NEW PATIENT", "FOLLOW UP"))
     
-    #data <- data_other
+    start_time <<- Sys.time()
+  
+    # data <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
+    #   select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
+    # # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type %in% c("NEW PATIENT", "FOLLOW UP"))
+    # 
+    # #data <- data_other
+    # 
+    # if(length(unique(data$APPT_TYPE)) == 1){
+    #   appt.type <- unique(data$APPT_TYPE)
+    # } else{
+    #   appt.type <- "Established*"
+    # }
+    # 
+    # graph <- ggplot(data, aes(x=CYCLETIME)) +
+    #   geom_histogram(aes(y = (..count..)/sum(..count..)),
+    #                  bins = 22,
+    #                  color="#d80b8c", fill="#fcc9e9") +
+    #   labs(title = paste0("Distribution of ",appt.type," Appointments\nCheck-in to Visit-end Time**"),
+    #        y = "% of Patients",
+    #        x = "Minutes",
+    #        subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+    #        caption = paste0("*Includes ", length(unique(data$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   graph_theme("none")+
+    #   theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
+    #   scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+    #   scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
     
-    if(length(unique(data$APPT_TYPE)) == 1){
-      appt.type <- unique(data$APPT_TYPE)
+    
+     
+    appt.type.data <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(APPT_TYPE) %>% mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+
+
+    # appt.type.data <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
+    #   group_by(APPT_TYPE) %>% summarise(check = 1)  %>% collect()
+
+    data_cycle <- dataNewComparison() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3) %>% mutate(bin = ifelse(between(CYCLETIME, 0, 30), "0",
+                                                                                                                                                                                       ifelse(between(CYCLETIME,30,60), "30",
+                                                                                                                                                                                              ifelse(between(CYCLETIME,60,90), "60",
+                                                                                                                                                                                                     ifelse(between(CYCLETIME,90,120), "90",
+                                                                                                                                                                                                            ifelse(between(CYCLETIME,120,150), "120",
+                                                                                                                                                                                                                   ifelse(between(CYCLETIME,150,180), "150",
+                                                                                                                                                                                                                          ifelse(between(CYCLETIME,180,210), "180",
+                                                                                                                                                                                                                                 ifelse(between(CYCLETIME,210,240), "210",
+                                                                                                                                                                                                                                        ifelse(between(CYCLETIME,240,270), "240",
+                                                                                                                                                                                                                                               ifelse(between(CYCLETIME,270,300), "270",
+                                                                                                                                                                                                                                                      ifelse(between(CYCLETIME,300,330), "300",
+                                                                                                                                                                                                                                                             ifelse(between(CYCLETIME,330,360), "330",
+                                                                                                                                                                                                                                                                    ifelse(between(CYCLETIME,360,390), "360",
+                                                                                                                                                                                                                                                                           ifelse(between(CYCLETIME,390,420), "390",
+                                                                                                                                                                                                                                                                                  ifelse(between(CYCLETIME,420,450), "420",
+                                                                                                                                                                                                                                                                                         ifelse(between(CYCLETIME,450,480), "450", "480")))))))))))))))))%>%
+      group_by(bin) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
+    data_cycle$bin <- as.numeric(data_cycle$bin)
+    data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
+
+
+    if(length(unique(appt.type.data$APPT_TYPE)) == 1){
+      appt.type <- unique(appt.type.data$APPT_TYPE)
     } else{
       appt.type <- "Established*"
     }
-    
-    ggplot(data, aes(x=CYCLETIME)) + 
-      geom_histogram(aes(y = (..count..)/sum(..count..)),
-                     bins = 22,
-                     color="#d80b8c", fill="#fcc9e9") +
-      labs(title = paste0("Distribution of ",appt.type," Appointments\nCheck-in to Visit-end Time**"), 
+
+
+    graph <- ggplot(aes(x = bin , y = percent), data = data_cycle) +
+      geom_bar(stat = 'identity') +
+      geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Distribution of ",appt.type," Appointments\nCheck-in to Visit-end Time**"),
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = paste0("*Includes ", length(unique(data$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
+           caption = paste0("*Includes ", length(unique(appt.type.data$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
-      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+      #scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+       #theme(axis.text.x = element_text(hjust = 3.5))
+
+      
+    
+    end_time <<- Sys.time()
+    
+    graph
+    
   })
   
+ 
   
   output$cycleTimeByHour <- renderPlot({
     
