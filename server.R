@@ -6457,8 +6457,6 @@ server <- function(input, output, session) {
       group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
-      group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
-      dplyr::summarise(Total = n()) %>%
       spread(NEW_PT3, Total) %>%
       replace(is.na(.), 0)
 
