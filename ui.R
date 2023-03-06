@@ -1234,10 +1234,11 @@ ui <- dashboardPage(
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 "*Visit-end Time is the minimum of Visit-end Time and Check-out",
                                 br(),
-                                fluidRow(column(4, uiOutput("apptTypeControl2"))
-                                         # column(4, valueBoxOutput("cycleTimeCompNew", width = 12) %>%
-                                         #          withSpinner(type = 5, color = "#d80b8c")),
-                                         # column(4, valueBoxOutput("cycleTimeCompOther", width = 12))
+                                fluidRow(
+                                         #column(4, uiOutput("apptTypeControl2")),
+                                         column(6, valueBoxOutput("cycleTimeCompNew", width = 12) %>%
+                                                  withSpinner(type = 5, color = "#d80b8c")),
+                                         column(6, valueBoxOutput("cycleTimeCompOther", width = 12))
                                          )),
                               boxPlus(
                                 title = "Cycle Time by Visit Type", width = 12, status = "primary",
@@ -1248,29 +1249,29 @@ ui <- dashboardPage(
                                   column(6, plotOutput("newCycleTimeBoxPlot", height = "500px") %>% 
                                            withSpinner(type = 5, color = "#d80b8c")),
                                   column(6, plotOutput("establishedCycleTimeBoxPlot", height = "500px") %>% 
-                                           withSpinner(type = 5, color = "#d80b8c")))
-                                # hr(),
-                                # fluidRow(column(12, plotOutput("cycleTimeTrend", height = "600px") %>%
-                                #                   withSpinner(type = 5, color = "#d80b8c")))
-                                )
-                              # boxPlus(
-                              #   title = "Cycle Time by Time of Day", width = 12, status = "primary",
-                              #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              #   materialSwitch(
-                              #     inputId = "median2",
-                              #     label = "Median",
-                              #     right = TRUE,
-                              #     status = "primary"),
-                              #   plotOutput("cycleTimeByHour", height = "700px") %>%
-                              #     withSpinner(type = 5, color = "#d80b8c")),
-                              # boxPlus(
-                              #   title = "Cycle Time by Provider and Visit Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
-                              #   solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                              #   "*Select fewer providers for better visibility",
-                              #   plotOutput("newCycleTimeByProv", height = "800px") %>%
-                              #     withSpinner(type = 5, color = "#d80b8c"),
-                              #   plotOutput("establishedCycleTimeByProv", height = "800px") %>%
-                              #     withSpinner(type = 5, color = "#d80b8c"))
+                                           withSpinner(type = 5, color = "#d80b8c"))),
+                                hr(),
+                                fluidRow(column(12, plotOutput("cycleTimeTrend", height = "600px") %>%
+                                                  withSpinner(type = 5, color = "#d80b8c")))
+                                ),
+                              boxPlus(
+                                title = "Cycle Time by Time of Day", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                materialSwitch(
+                                  inputId = "median2",
+                                  label = "Median",
+                                  right = TRUE,
+                                  status = "primary"),
+                                plotOutput("cycleTimeByHour", height = "700px") %>%
+                                  withSpinner(type = 5, color = "#d80b8c")),
+                              boxPlus(
+                                title = "Cycle Time by Provider and Visit Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                "*Select fewer providers for better visibility",
+                                plotOutput("newCycleTimeByProv", height = "800px") %>%
+                                  withSpinner(type = 5, color = "#d80b8c"),
+                                plotOutput("establishedCycleTimeByProv", height = "800px") %>%
+                                  withSpinner(type = 5, color = "#d80b8c"))
                        ))
         ),
         
