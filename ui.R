@@ -3,7 +3,7 @@ default_campus_choices <- historical.data %>% select(CAMPUS) %>% mutate(CAMPUS =
 default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
 
 default_specialty_choices <-  historical.data %>% filter(CAMPUS %in% default_campus) %>% select( CAMPUS_SPECIALTY)  %>%
-  mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+  summarise(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
 default_specialty_choices <- sort(default_specialty_choices$CAMPUS_SPECIALTY, na.last = T)
 
 default_specialty <- "Allergy"
@@ -11,7 +11,7 @@ default_specialty <- "Allergy"
 
 default_departments <-  historical.data %>% filter(CAMPUS %in% default_campus & 
                                                       CAMPUS_SPECIALTY %in% default_specialty) %>% select( DEPARTMENT)  %>%
-  mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
+  summarise(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
 default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
 
 
@@ -21,7 +21,7 @@ default_provider <-   historical.data %>% filter(CAMPUS %in% default_campus &
                                                      CAMPUS_SPECIALTY %in% default_specialty& 
                                                      DEPARTMENT %in% default_departments ) %>% 
   select(PROVIDER)  %>% 
-  mutate(PROVIDER= unique(PROVIDER)) %>% collect()
+  summarise(PROVIDER= unique(PROVIDER)) %>% collect()
 default_provider <- sort(default_provider$PROVIDER, na.last = T)
 
 
@@ -30,7 +30,7 @@ default_visit_method <-    historical.data %>% filter(CAMPUS %in% default_campus
                                                   DEPARTMENT %in% default_departments &
                                                   PROVIDER %in% default_provider) %>% 
   select( VISIT_METHOD)  %>% 
-  mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
+  summarise(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
 default_visit_method <- sort(default_visit_method$VISIT_METHOD, na.last = T)
 
 
@@ -41,7 +41,7 @@ default_PRC_name <-  historical.data %>% filter(CAMPUS %in% default_campus &
                                             PROVIDER %in% default_provider &
                                             VISIT_METHOD %in% default_visit_method) %>% 
   select(APPT_TYPE )  %>% 
-  mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+  summarise(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
 default_PRC_name <- sort(default_PRC_name$APPT_TYPE, na.last = T) 
 
 
