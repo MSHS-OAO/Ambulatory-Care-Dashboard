@@ -6631,8 +6631,6 @@ server <- function(input, output, session) {
     
     newpatients.ratio$ratio <- round(newpatients.ratio$Total / sum(newpatients.ratio$Total), 2)
     
-    newpatients.ratio.test <<- newpatients.ratio
-    
     newRatio <-
       ggplot(newpatients.ratio, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
                                     y=ratio, group=APPT_SOURCE_NEW, fill=APPT_SOURCE_NEW)) +
@@ -6748,7 +6746,8 @@ server <- function(input, output, session) {
         axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
         axis.text.y = element_text(size = "14"))+
       geom_text(aes(label=paste0(`No Show Perc`*100,"%")), color="black", 
-                size=5, position = position_dodge(1), hjust=-.5)
+                size=5, position = position_dodge(1), hjust=-.5) +
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, max(newpatients.ratio$ratio)*1.3))
     
     
     grid.arrange(newRatio, newNoShow, ncol=2)
