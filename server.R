@@ -6682,7 +6682,7 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('pink')+
       labs(x=NULL, y=NULL, 
-           title = "Wait Time* to New Appointment",
+           title = "Median Wait Time to New Appointment",
            subtitle = paste0("Based scheduled on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
                              "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
            # caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service)."
