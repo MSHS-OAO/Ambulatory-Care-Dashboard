@@ -593,8 +593,8 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
                             #PROVIDER %in% provider,
                             VISIT_METHOD %in% visitMethod, 
                             APPT_TYPE %in% visitType, 
-                            TO_DATE(mindateRange, format) <= APPT_MADE_DTTM, 
-                            TO_DATE(maxdateRange, format) >= APPT_MADE_DTTM, 
+                            TO_DATE(mindateRange, format) <= APPT_MADE_DATE_YEAR, 
+                            TO_DATE(maxdateRange, format) >= APPT_MADE_DATE_YEAR, 
                             APPT_DAY %in% daysofweek#, 
                             #!HOLIDAY %in% holidays
     ) 
@@ -606,8 +606,8 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
                             PROVIDER %in% provider,
                             VISIT_METHOD %in% visitMethod, 
                             APPT_TYPE %in% visitType, 
-                            TO_DATE(mindateRange, format) <= APPT_MADE_DTTM, 
-                            TO_DATE(maxdateRange, format) >= APPT_MADE_DTTM, 
+                            TO_DATE(mindateRange, format) <= APPT_MADE_DATE_YEAR, 
+                            TO_DATE(maxdateRange, format) >= APPT_MADE_DATE_YEAR, 
                             APPT_DAY %in% daysofweek#, 
                             #!HOLIDAY %in% holidays
     ) 

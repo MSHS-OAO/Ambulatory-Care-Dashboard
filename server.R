@@ -6453,21 +6453,30 @@ server <- function(input, output, session) {
     data <- dataArrived_access()
     # data <- kpi.all.data[arrived.data.rows,]
     
+    data_test <<- data
+    
+    print("1")
     newpatients.ratio <- data %>%
       group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
-      dplyr::summarise(Total = n()) %>% collect() %>%
+      dplyr::summarise(Total = n()) %>% collect() 
+    print("1.25")
+    
+    newpatients.ratio <- newpatients.ratio %>%
       spread(NEW_PT2, Total) %>%
       replace(is.na(.), 0)
+    
+    print("1.5")
    
     newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
     ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group=1)) +
-      geom_bar(stat = "identity", width = 0.8, fill = "#221f72") +
+      #geom_bar(stat = "identity", width = 0.8, fill = "#221f72") +
+      geom_line(color = "#221f72", size=1) +
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
            title = "Monthly New Patient Ratio",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -6476,7 +6485,8 @@ server <- function(input, output, session) {
                          ) +
       stat_summary(fun = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..*100,"%")), group = APPT_MADE_MONTH_YEAR), geom="text", color="black", 
                    size=5, fontface="bold.italic")+
-      theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+      theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+      geom_point(color = "#221f72", size = 3.2)
     # scale_x_date(breaks = "day", date_labels = "%Y-%m", date_breaks = "1 week",
     #              date_minor_breaks = "1 day", expand = c(0, 0.6))
     
@@ -6611,15 +6621,17 @@ server <- function(input, output, session) {
     data <- dataArrived_access()
     # data <- kpi.all.data[arrivedNoShow.data.rows,]
     
-    
+    print("2")
     newpatients.ratio <- data %>%
-        group_by(APPT_SOURCE_NEW, NEW_PT2) %>%
-      filter(NEW_PT2 == "NEW") %>%
+      filter(NEW_PT3 == "NEW") %>%
+        group_by(APPT_SOURCE_NEW, NEW_PT3) %>%
       dplyr::summarise(Total = n()) %>% collect()
 
     newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
     
     newpatients.ratio$ratio <- round(newpatients.ratio$Total / sum(newpatients.ratio$Total), 2)
+    
+    newpatients.ratio.test <<- newpatients.ratio
     
     newRatio <-
       ggplot(newpatients.ratio, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
@@ -6628,10 +6640,10 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('purple')+
       labs(x=NULL, y=NULL,
-           title = "New Patient Source*",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+           title = "New* Patient Source",
+           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
                              "\nTotal New Patients = ",prettyNum(sum(newpatients.ratio$Total), big.mark = ',')),
-           caption = "*Based on arrived patients\n**New patients defined by CPT codes (level of service).")+
+           caption = "*New patients defined by CPT codes (level of service).")+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -6650,42 +6662,42 @@ server <- function(input, output, session) {
     
     #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
     
-    waitTime <- data %>%
-      filter(WAIT_TIME >= 0) %>%
-      group_by(APPT_SOURCE_NEW, NEW_PT2) %>%
-      dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
-      filter(NEW_PT2 == "NEW") %>% collect()
-    waitTime$target <- 14
-    
-    waitTime$APPT_SOURCE_NEW[which(waitTime$APPT_SOURCE_NEW == "Other")] <- "Practice"
-    
-    newWaitTime <-
-      ggplot(waitTime, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
-                           y=medWaitTime, group=APPT_SOURCE_NEW, fill=APPT_SOURCE_NEW)) +
-      geom_bar(stat="identity", width = 0.8) +
-      geom_hline(aes(yintercept=target), linetype="dashed", color = "red", size=1)+
-      scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.3))+
-      coord_flip() +
-      scale_fill_MountSinai('pink')+
-      labs(x=NULL, y=NULL, 
-           title = "Wait Time* to New Appointment",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
-                             "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
-           caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service).")+
-      theme_new_line()+
-      theme_bw()+
-      theme(
-        plot.title = element_text(hjust=0.5, face = "bold", size = 20),
-        plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
-        plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
-        legend.position = "none",
-        axis.title.y = element_blank(),
-        axis.title.x = element_blank(),
-        axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
-        axis.text.y = element_text(size = "14"))+
-      geom_label(aes(x = 0.8, y = target, label = paste0("Target: ", target," days")), fill = "white", fontface = "bold", color = "red", size=4)+
-      geom_text(aes(label=paste0(medWaitTime," days")), color="black", 
-                size=5, position = position_dodge(1), hjust=-.5)
+    # waitTime <- data %>%
+    #   filter(WAIT_TIME >= 0) %>%
+    #   group_by(APPT_SOURCE_NEW, NEW_PT2) %>%
+    #   dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
+    #   filter(NEW_PT2 == "NEW") %>% collect()
+    # waitTime$target <- 14
+    # 
+    # waitTime$APPT_SOURCE_NEW[which(waitTime$APPT_SOURCE_NEW == "Other")] <- "Practice"
+    # 
+    # newWaitTime <-
+    #   ggplot(waitTime, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
+    #                        y=medWaitTime, group=APPT_SOURCE_NEW, fill=APPT_SOURCE_NEW)) +
+    #   geom_bar(stat="identity", width = 0.8) +
+    #   geom_hline(aes(yintercept=target), linetype="dashed", color = "red", size=1)+
+    #   scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.3))+
+    #   coord_flip() +
+    #   scale_fill_MountSinai('pink')+
+    #   labs(x=NULL, y=NULL, 
+    #        title = "Wait Time* to New Appointment",
+    #        subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+    #                          "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
+    #        caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service).")+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   theme(
+    #     plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+    #     plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
+    #     plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
+    #     legend.position = "none",
+    #     axis.title.y = element_blank(),
+    #     axis.title.x = element_blank(),
+    #     axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
+    #     axis.text.y = element_text(size = "14"))+
+    #   geom_label(aes(x = 0.8, y = target, label = paste0("Target: ", target," days")), fill = "white", fontface = "bold", color = "red", size=4)+
+    #   geom_text(aes(label=paste0(medWaitTime," days")), color="black", 
+    #             size=5, position = position_dodge(1), hjust=-.5)
     
     
     # No Show Rate
@@ -6693,6 +6705,7 @@ server <- function(input, output, session) {
     data.noShow <- dataArrivedNoShow_access() %>% filter(APPT_STATUS %in% c("Arrived", "No Show"))
     # data.noShow <- arrivedNoShow.data
     
+    print("3")
     noShows <- data.noShow %>%
       filter(NEW_PT2 == "NEW") %>%
       group_by(APPT_SOURCE_NEW, APPT_STATUS) %>%
@@ -6718,10 +6731,11 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
-           title = "New Patient No Show Rate*",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
-                             "\nNo Show Rate = Total No Shows / (Arrived + No Shows)"),
-           caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service).")+
+           title = "New Patient No Show Rate",
+           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+                             "\nNo Show Rate = Total No Shows / (Arrived + No Shows)")#,
+           #caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service)."
+           )+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -6737,7 +6751,7 @@ server <- function(input, output, session) {
                 size=5, position = position_dodge(1), hjust=-.5)
     
     
-    grid.arrange(newRatio, newWaitTime, newNoShow, ncol=3)
+    grid.arrange(newRatio, newNoShow, ncol=2)
     
   })
   
