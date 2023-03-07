@@ -7288,12 +7288,13 @@ server <- function(input, output, session) {
     
     rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
     
-    for (i in rows_to_be_included){
-      data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
-      
-    }
     
+    if (length(rows_to_be_included)>0){
+       for (i in rows_to_be_included){
+          data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+       }
     data_cycle[is.na(data_cycle)] <- 0
+    }
   
     data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
     
@@ -7390,12 +7391,13 @@ server <- function(input, output, session) {
     
     rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
     
-    for (i in rows_to_be_included){
-      data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
-      
+    if (length(rows_to_be_included)>0){
+      for (i in rows_to_be_included){
+          data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
     }
     
     data_cycle[is.na(data_cycle)] <- 0
+    }
     
     
     data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
