@@ -7139,10 +7139,10 @@ server <- function(input, output, session) {
   # })
   
   # Arrived Data with Additional Filters (Appointment Type)
-  dataNewComparison2 <- reactive({
-    groupByFilters_3(dataArrived(),
-                     input$selectedApptType3)
-  })
+  # dataNewComparison2 <- reactive({
+  #   groupByFilters_3(dataArrived(),
+  #                    input$selectedApptType3)
+  # })
   
   
   # (1) Cycle Times --------------------------------------------------------------------------
@@ -7187,11 +7187,12 @@ server <- function(input, output, session) {
     valueBoxSpark(
       # value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
       value =  paste0(ceiling(data$CYCLETIME)," min"),
-      title = toupper(ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
-                             paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
-                             "Average Established Patients Check-in to Visit-end Time*")),
+      title = toupper(
+                     #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
+                             #paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
+                             "Average Established Patients Check-in to Visit-end Time*"),
       # subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
-      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
+      subtitle = paste0("*Based on ", round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
       color = "fuchsia"
     )
@@ -7282,7 +7283,18 @@ server <- function(input, output, session) {
       group_by(bin) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
     data_cycle$bin <- as.numeric(data_cycle$bin)
-    max_value <- max(data_cycle$bin)
+    
+    main_rows <- seq(0, max(data_cycle$bin), by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
+    
+    for (i in rows_to_be_included){
+      data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+      
+    }
+    
+    data_cycle[is.na(data_cycle)] <- 0
+  
     data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
     
     
@@ -7292,11 +7304,12 @@ server <- function(input, output, session) {
       labs(title = paste0("Distribution of NEW Appointments\nCheck-in to Visit-end Time**"),
            y = "% of Patients",
            x = "Minutes",
-           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
+      scale_x_discrete()+
       #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
@@ -7372,6 +7385,19 @@ server <- function(input, output, session) {
       group_by(bin) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
     data_cycle$bin <- as.numeric(data_cycle$bin)
+    
+    main_rows <- seq(0, max(data_cycle$bin), by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
+    
+    for (i in rows_to_be_included){
+      data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+      
+    }
+    
+    data_cycle[is.na(data_cycle)] <- 0
+    
+    
     data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
 
 
@@ -7398,9 +7424,6 @@ server <- function(input, output, session) {
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
        #theme(axis.text.x = element_text(hjust = 3.5))
 
-      
-    
-    end_time <<- Sys.time()
     
     graph
     
@@ -7607,7 +7630,7 @@ server <- function(input, output, session) {
   
   output$roomInTimeCompOther <- renderValueBox({
     
-    data_room <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED")
+   data_room <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED")
     
     data <- data_room %>% select(CHECKINTOROOMIN) %>%
       summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T)) %>% collect()
@@ -7617,12 +7640,15 @@ server <- function(input, output, session) {
             summarise(n()) %>% collect()
     
     valueBoxSpark(
-      # value =  paste0(round(mean((dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
+      # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
       value =  paste0(ceiling(data)," min"),
-      title = toupper(ifelse(length(unique(dataNewComparison2()$APPT_TYPE)) == 1,
-                             paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
-                             "Avg. Established Appointments Check-in to Room-in Time")),
-      # subtitle = paste0("*Based on ",round(nrow(dataNewComparison2() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
+      title = toupper( 
+              #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
+                             #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
+                            # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
+                             "Avg. Established Appointments Check-in to Room-in Time"),
+ 
+      # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
       color = "fuchsia"
@@ -7635,7 +7661,7 @@ server <- function(input, output, session) {
       select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect()
     # data_new <- arrived.data %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE)
     
-    data_other <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0,  NEW_PT3 == "ESTABLISHED") %>%
+    data_other <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0,  NEW_PT3 == "ESTABLISHED") %>%
       select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect()
     # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
@@ -7669,29 +7695,85 @@ server <- function(input, output, session) {
   })
   
   output$newRoomInTimeBoxPlot <- renderPlot({
-    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0) %>%
-      filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
-    # data <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE)
+    # data <- data_test %>% filter(CHECKINTOROOMIN >= 0) %>%
+    #   filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
     
-    ggplot(data, aes(x=CHECKINTOROOMIN)) + 
-      geom_histogram(aes(y = (..count..)/sum(..count..)),
-                     bins = 22,
-                     color="#d80b8c", fill="#fcc9e9") +
-      labs(title = "Distribution of NEW Appointment\nCheck-in to Room-in Time", 
+    data_test <<- dataArrived()
+    
+    data_cycle <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
+      select(CHECKINTOROOMIN) %>%
+    mutate(bin = ifelse(between(CHECKINTOROOMIN, 0, 30), "0",
+                        ifelse(between(CHECKINTOROOMIN,30,60), "30",
+                               ifelse(between(CHECKINTOROOMIN,60,90), "60",
+                                      ifelse(between(CHECKINTOROOMIN,90,120), "90",
+                                             ifelse(between(CHECKINTOROOMIN,120,150), "120",
+                                                    ifelse(between(CHECKINTOROOMIN,150,180), "150",
+                                                           ifelse(between(CHECKINTOROOMIN,180,210), "180",
+                                                                  ifelse(between(CHECKINTOROOMIN,210,240), "210",
+                                                                         ifelse(between(CHECKINTOROOMIN,240,270), "240",
+                                                                                ifelse(between(CHECKINTOROOMIN,270,300), "270",
+                                                                                       ifelse(between(CHECKINTOROOMIN,300,330), "300",
+                                                                                              ifelse(between(CHECKINTOROOMIN,330,360), "330",
+                                                                                                     ifelse(between(CHECKINTOROOMIN,360,390), "360",
+                                                                                                            ifelse(between(CHECKINTOROOMIN,390,420), "390",
+                                                                                                                   ifelse(between(CHECKINTOROOMIN,420,450), "420",
+                                                                                                                          ifelse(between(CHECKINTOROOMIN,450,480), "450", "480")))))))))))))))))%>%
+      group_by(bin) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
+    data_cycle$bin <- as.numeric(data_cycle$bin)
+    
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
+    
+    if (length(rows_to_be_included > 0)){
+    
+    for (i in rows_to_be_included){
+      data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+      
+    }
+    
+    data_cycle[is.na(data_cycle)] <- 0
+    }
+    
+    data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
+    
+   ggplot(aes(x = bin , y = percent), data = data_cycle) +
+      geom_bar(stat = 'identity') +
+      geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Distribution of NEW Appointment\nCheck-in to Room-in Time**"),
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "-")+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+    #theme(axis.text.x = element_text(hjust = 3.5))
+    
+    
+    
+    # ggplot(data, aes(x=CHECKINTOROOMIN)) +
+    #   geom_histogram(aes(y = (..count..)/sum(..count..)),
+    #                  bins = 22,
+    #                  color="#d80b8c", fill="#fcc9e9") +
+    #   labs(title = "Distribution of NEW Appointment\nCheck-in to Room-in Time",
+    #        y = "% of Patients",
+    #        x = "Minutes",
+    #        #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+    #        caption = "-")+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   graph_theme("none")+
+    #   scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+    #   scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
     
   })
   
   output$establishedRoomInTimeBoxPlot <- renderPlot({
-    data <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
+    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
       select(APPT_TYPE, CHECKINTOROOMIN) %>% collect()
     # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
@@ -7710,7 +7792,7 @@ server <- function(input, output, session) {
       labs(title = paste0("Distribution of ",appt.type,"Appointments\nCheck-in to Room-in Time"), 
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = paste0("*Includes ", length(unique(data$APPT_TYPE)), " established appointments"))+
       theme_new_line()+
       theme_bw()+
@@ -7726,7 +7808,7 @@ server <- function(input, output, session) {
       select(APPT_DAY, APPT_TM_HR, CHECKINTOROOMIN) %>% collect()
     # data <- arrived.data %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
     
-    data_other <- dataNewComparison2() %>% filter(NEW_PT3 == "ESTABLISHED", CHECKINTOROOMIN > 0) %>%
+    data_other <- dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED", CHECKINTOROOMIN > 0) %>%
       select(APPT_DAY, APPT_TM_HR, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
    
     # data_other <- arrived.data %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
@@ -7851,7 +7933,7 @@ server <- function(input, output, session) {
   })
   
   output$establishedRoomInTimeByProv <- renderPlot({
-    data <- dataNewComparison2() %>% filter(CHECKINTOROOMIN >= 0) %>% select(PROVIDER, NEW_PT3, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
+    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0) %>% select(PROVIDER, NEW_PT3, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
     # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
    #data <- data_other

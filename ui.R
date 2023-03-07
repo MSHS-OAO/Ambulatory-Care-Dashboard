@@ -1286,10 +1286,11 @@ ui <- dashboardPage(
                                 title = "Room-in Time Summary", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 br(),
-                                fluidRow(column(4, uiOutput("apptTypeControl3")),
-                                         column(4, valueBoxOutput("roomInTimeCompNew", width = 12) %>%
+                                fluidRow(
+                                         #column(4, uiOutput("apptTypeControl3")),
+                                         column(6, valueBoxOutput("roomInTimeCompNew", width = 12) %>%
                                                   withSpinner(type = 5, color = "#d80b8c")),
-                                         column(4, valueBoxOutput("roomInTimeCompOther", width = 12)))),
+                                         column(6, valueBoxOutput("roomInTimeCompOther", width = 12)))),
                               boxPlus(
                                 title = "Room-in Time by Visit Type", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
