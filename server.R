@@ -7200,33 +7200,82 @@ server <- function(input, output, session) {
   })
   
   output$cycleTimeTrend <- renderPlot({
-    data_new <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>%
-      select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
-    # data_new <- arrived.data %>% filter(cycleTime > 0 & New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
+    # data_new <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>%
+    #   select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
+    # # data_new <- arrived.data %>% filter(cycleTime > 0 & New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
+    # 
+    # data_other <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
+    #   select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
+    # # data_other <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    # 
+    # if(nrow(data_other) == 0){
+    #   data <- data_new
+    # } else{
+    #   
+    #   data <- rbind(data_new, data_other)
+    # }
     
-    data_other <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
-      select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
-    # data_other <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
-    if(nrow(data_other) == 0){
-      data <- data_new
-    } else{
-      
-      data <- rbind(data_new, data_other)
-    }
-    
-    data <- data %>%
+    data <-  dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+      select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
     
     
-    ggplot(data, aes(x=CYCLETIME, fill=NEW_PT3, color=NEW_PT3)) +
-      geom_histogram(aes(y = (..count..)/sum(..count..)),
-                     # position = "identity",
-                     alpha = 0.8)+
+    data <- data %>% select(CYCLETIME, NEW_PT3) %>%
+      mutate(bin = ifelse(between(CYCLETIME, 0, 30), "0",
+                          ifelse(between(CYCLETIME,30,60), "30",
+                                 ifelse(between(CYCLETIME,60,90), "60",
+                                        ifelse(between(CYCLETIME,90,120), "90",
+                                               ifelse(between(CYCLETIME,120,150), "120",
+                                                      ifelse(between(CYCLETIME,150,180), "150",
+                                                             ifelse(between(CYCLETIME,180,210), "180",
+                                                                    ifelse(between(CYCLETIME,210,240), "210",
+                                                                           ifelse(between(CYCLETIME,240,270), "240",
+                                                                                  ifelse(between(CYCLETIME,270,300), "270",
+                                                                                         ifelse(between(CYCLETIME,300,330), "300",
+                                                                                                ifelse(between(CYCLETIME,330,360), "330",
+                                                                                                       ifelse(between(CYCLETIME,360,390), "360",
+                                                                                                              ifelse(between(CYCLETIME,390,420), "390",
+                                                                                                                     ifelse(between(CYCLETIME,420,450), "420",
+                                                                                                                            ifelse(between(CYCLETIME,450,480), "450", "480")))))))))))))))))%>%
+      group_by(bin, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+      ungroup() %>%
+      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(bin, NEW_PT3) %>%
+      mutate(percent = total_bin / total) %>%
+      mutate(bin = as.numeric(bin))
+    
+    
+    
+    
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data$bin)
+    
+    
+    if (length(rows_to_be_included)>0){
+      for (i in rows_to_be_included){
+        data[nrow(data) + 1 , 1] <- main_rows[i]
+      }
+      
+    }
+  
+    data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    
+    data <- unique(data)
+    data <- data %>%  group_by(bin, NEW_PT3) %>%
+      mutate(bin = factor(bin, levels = sort(bin)))
+    
+    #data$bin <- factor(data$bin,levels = sort(data$bin))
+    
+    
+    ggplot(aes(x = bin , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+      geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
-      labs(title = "Check-in to Visit-end Time* Comparison by Visit Type",
+      #geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Check-in to Visit-end Time* Comparison by Visit Type"),
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
@@ -7234,8 +7283,29 @@ server <- function(input, output, session) {
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+      scale_x_discrete()+
+      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+    #theme(axis.text.x = element_text(hjust = 3.5))
+    
+
+    
+    # ggplot(data, aes(x=CYCLETIME, fill=NEW_PT3, color=NEW_PT3)) +
+    #   geom_histogram(aes(y = (..count..)/sum(..count..)),
+    #                  # position = "identity",
+    #                  alpha = 0.8)+
+    #   scale_color_MountSinai()+
+    #   scale_fill_MountSinai()+
+    #   labs(title = "Check-in to Visit-end Time* Comparison by Visit Type",
+    #        y = "% of Patients",
+    #        x = "Minutes",
+    #        #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+    #        caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   graph_theme("top")+
+    #   scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+    #   scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
     
   })
   
@@ -7323,10 +7393,6 @@ server <- function(input, output, session) {
  
   
   output$establishedCycleTimeBoxPlot <- renderPlot({
-    
-    start_time <<- Sys.time()
-    
-    data_test <<- dataArrived()
   
     # data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
     #   select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
@@ -7659,40 +7725,112 @@ server <- function(input, output, session) {
   })
   
   output$roomInTimeTrend <- renderPlot({
-    data_new <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
-      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect()
-    # data_new <- arrived.data %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE)
+    # data_new <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
+    #   select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect()
+    # # data_new <- arrived.data %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE)
+    # 
+    # data_other <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0,  NEW_PT3 == "ESTABLISHED") %>%
+    #   select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect()
+    # # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    # 
+    # if(nrow(data_other) == 0){
+    #   data <- data_new
+    # } else{
+    #   data <- rbind(data_new, data_other)
+    # }
+    # 
+    # data <- data %>%
+    #   mutate(NEW_PT3 = ifelse(NEW_PT3 == "NEW", "NEW", APPT_TYPE)) %>%
+    #   filter(!is.na(NEW_PT3))
+    # 
+    # 
+    # ggplot(data, aes(x=CHECKINTOROOMIN, fill=NEW_PT3, color=NEW_PT3)) +
+    #   geom_histogram(aes(y = (..count..)/sum(..count..)),
+    #                  # position = "identity",
+    #                  alpha = 0.8)+
+    #   scale_color_MountSinai()+
+    #   scale_fill_MountSinai()+
+    #   labs(title = "Check-in to Room-in Time Comparison by Appointment Type",
+    #        y = "% of Patients",
+    #        x = "Minutes",
+    #        subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   graph_theme("top")+
+    #   scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+    #   scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
     
-    data_other <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0,  NEW_PT3 == "ESTABLISHED") %>%
-      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect()
-    # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
-    if(nrow(data_other) == 0){
-      data <- data_new
-    } else{
-      data <- rbind(data_new, data_other)
-    }
-    
-    data <- data %>%
-      mutate(NEW_PT3 = ifelse(NEW_PT3 == "NEW", "NEW", APPT_TYPE)) %>%
+    data <- dataArrived() %>% filter(CHECKINTOROOMIN > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect() %>%
+      mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
     
     
-    ggplot(data, aes(x=CHECKINTOROOMIN, fill=NEW_PT3, color=NEW_PT3)) +
-      geom_histogram(aes(y = (..count..)/sum(..count..)),
-                     # position = "identity",
-                     alpha = 0.8)+
+    data <- data %>% select(CHECKINTOROOMIN, NEW_PT3) %>%
+      mutate(bin = ifelse(between(CHECKINTOROOMIN, 0, 30), "0",
+                          ifelse(between(CHECKINTOROOMIN,30,60), "30",
+                                 ifelse(between(CHECKINTOROOMIN,60,90), "60",
+                                        ifelse(between(CHECKINTOROOMIN,90,120), "90",
+                                               ifelse(between(CHECKINTOROOMIN,120,150), "120",
+                                                      ifelse(between(CHECKINTOROOMIN,150,180), "150",
+                                                             ifelse(between(CHECKINTOROOMIN,180,210), "180",
+                                                                    ifelse(between(CHECKINTOROOMIN,210,240), "210",
+                                                                           ifelse(between(CHECKINTOROOMIN,240,270), "240",
+                                                                                  ifelse(between(CHECKINTOROOMIN,270,300), "270",
+                                                                                         ifelse(between(CHECKINTOROOMIN,300,330), "300",
+                                                                                                ifelse(between(CHECKINTOROOMIN,330,360), "330",
+                                                                                                       ifelse(between(CHECKINTOROOMIN,360,390), "360",
+                                                                                                              ifelse(between(CHECKINTOROOMIN,390,420), "390",
+                                                                                                                     ifelse(between(CHECKINTOROOMIN,420,450), "420",
+                                                                                                                            ifelse(between(CHECKINTOROOMIN,450,480), "450", "480")))))))))))))))))%>%
+      group_by(bin, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+      ungroup() %>%
+      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(bin, NEW_PT3) %>%
+      mutate(percent = total_bin / total) %>%
+      mutate(bin = as.numeric(bin))
+    
+    
+    
+    
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data$bin)
+    
+    
+    if (length(rows_to_be_included)>0){
+      for (i in rows_to_be_included){
+        data[nrow(data) + 1 , 1] <- main_rows[i]
+      }
+      
+    }
+    
+    data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    
+    data <- unique(data)
+    data <- data %>%  group_by(bin, NEW_PT3) %>%
+      mutate(bin = factor(bin, levels = sort(bin)))
+    
+    #data$bin <- factor(data$bin,levels = sort(data$bin))
+    
+    
+    ggplot(aes(x = bin , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+      geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
-      labs(title = "Check-in to Room-in Time Comparison by Appointment Type",
+      #geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Check-in to Room-in Time Comparison by Appointment Type"),
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+      scale_x_discrete()+
+      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+    #theme(axis.text.x = element_text(hjust = 3.5))
     
   })
   
@@ -7746,7 +7884,7 @@ server <- function(input, output, session) {
       labs(title = paste0("Distribution of NEW Appointment\nCheck-in to Room-in Time**"),
            y = "% of Patients",
            x = "Minutes",
-           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "-")+
       theme_new_line()+
       theme_bw()+
