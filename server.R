@@ -7775,33 +7775,89 @@ server <- function(input, output, session) {
   })
   
   output$establishedRoomInTimeBoxPlot <- renderPlot({
-    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
-      select(APPT_TYPE, CHECKINTOROOMIN) %>% collect()
-    # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    # data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
+    #   select(APPT_TYPE, CHECKINTOROOMIN) %>% collect()
+    # # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    # 
+    # #data <- data_other
+    # 
+    # if(length(unique(data$APPT_TYPE)) == 1){
+    #   appt.type <- unique(data$APPT_TYPE)
+    # } else{
+    #   appt.type <- "Established*"
+    # }
+    # 
+    # ggplot(data, aes(x=CHECKINTOROOMIN)) + 
+    #   geom_histogram(aes(y = (..count..)/sum(..count..)),
+    #                  bins = 22,
+    #                  color="#d80b8c", fill="#fcc9e9") +
+    #   labs(title = paste0("Distribution of ",appt.type,"Appointments\nCheck-in to Room-in Time"), 
+    #        y = "% of Patients",
+    #        x = "Minutes",
+    #        #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+    #        caption = paste0("*Includes ", length(unique(data$APPT_TYPE)), " established appointments"))+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   graph_theme("none")+
+    #   theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
+    #   scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
+    #   scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+    # 
     
-    #data <- data_other
+    data_cycle <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(CHECKINTOROOMIN) %>%
+      mutate(bin = ifelse(between(CHECKINTOROOMIN, 0, 30), "0",
+                          ifelse(between(CHECKINTOROOMIN,30,60), "30",
+                                 ifelse(between(CHECKINTOROOMIN,60,90), "60",
+                                        ifelse(between(CHECKINTOROOMIN,90,120), "90",
+                                               ifelse(between(CHECKINTOROOMIN,120,150), "120",
+                                                      ifelse(between(CHECKINTOROOMIN,150,180), "150",
+                                                             ifelse(between(CHECKINTOROOMIN,180,210), "180",
+                                                                    ifelse(between(CHECKINTOROOMIN,210,240), "210",
+                                                                           ifelse(between(CHECKINTOROOMIN,240,270), "240",
+                                                                                  ifelse(between(CHECKINTOROOMIN,270,300), "270",
+                                                                                         ifelse(between(CHECKINTOROOMIN,300,330), "300",
+                                                                                                ifelse(between(CHECKINTOROOMIN,330,360), "330",
+                                                                                                       ifelse(between(CHECKINTOROOMIN,360,390), "360",
+                                                                                                              ifelse(between(CHECKINTOROOMIN,390,420), "390",
+                                                                                                                     ifelse(between(CHECKINTOROOMIN,420,450), "420",
+                                                                                                                            ifelse(between(CHECKINTOROOMIN,450,480), "450", "480")))))))))))))))))%>%
+      group_by(bin) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
+    data_cycle$bin <- as.numeric(data_cycle$bin)
     
-    if(length(unique(data$APPT_TYPE)) == 1){
-      appt.type <- unique(data$APPT_TYPE)
-    } else{
-      appt.type <- "Established*"
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
+    
+    if (length(rows_to_be_included > 0)){
+      
+      for (i in rows_to_be_included){
+        data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+        
+      }
+      
+      data_cycle[is.na(data_cycle)] <- 0
     }
     
-    ggplot(data, aes(x=CHECKINTOROOMIN)) + 
-      geom_histogram(aes(y = (..count..)/sum(..count..)),
-                     bins = 22,
-                     color="#d80b8c", fill="#fcc9e9") +
-      labs(title = paste0("Distribution of ",appt.type,"Appointments\nCheck-in to Room-in Time"), 
+    data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
+    
+    ggplot(aes(x = bin , y = percent), data = data_cycle) +
+      geom_bar(stat = 'identity') +
+      geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Distribution of ESTABLISHED Appointment\nCheck-in to Room-in Time**"),
            y = "% of Patients",
            x = "Minutes",
-           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = paste0("*Includes ", length(unique(data$APPT_TYPE)), " established appointments"))+
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           caption = "*Includes established appointments")+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
-      scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+    #theme(axis.text.x = element_text(hjust = 3.5))
+    
+   
     
   })
   
