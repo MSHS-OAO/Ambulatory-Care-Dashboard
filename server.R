@@ -7599,9 +7599,11 @@ server <- function(input, output, session) {
   
   
   output$newCycleTimeByProv <- renderPlot({
+    data_test <- dataArrived()
+    
     cycle.df <- dataArrived() %>% filter(CYCLETIME > 0 , NEW_PT3 == "NEW") %>%
-      select(PROVIDER, NEW_PT3, CYCLETIME) %>% collect() %>%
-      group_by(PROVIDER, NEW_PT3)
+      select(PROVIDER, CYCLETIME) %>% collect() %>% ungroup()
+      
       
       
     # data <- arrived.data.rows %>% filter(CYCLETIME > 0 , NEW_PT3 == "NEW") %>% 
@@ -7617,15 +7619,47 @@ server <- function(input, output, session) {
     # avg.cycleTime <- data.frame(New.PT3 = c("Avg"),
     #                             target =  round(mean(cycle.df$CYCLETIME)))
     
-    ggplot(cycle.df, aes(x = PROVIDER, y = CYCLETIME)) +
-      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
-      stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-      scale_y_continuous(limits = c(0,quantile(cycle.df$CYCLETIME,0.75)*1.5))+
+    # ggplot(cycle.df, aes(x = PROVIDER, y = CYCLETIME)) +
+    #   geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+    #   stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+    #   scale_y_continuous(limits = c(0,quantile(cycle.df$CYCLETIME,0.75)*1.5))+
+    #   # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+    #   # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+    #   labs(title = "Distribution of NEW Appointment Check-in to Visit-end Time** by Provider", 
+    #        y = "Minutes",
+    #        subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+    #        caption = "**Visit-end Time is the minimum of Visit-end Time and Check-out")+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   graph_theme("none")
+    
+    
+    
+    data_base <- cycle.df %>% group_by(PROVIDER) %>% summarise(min_value = min(CYCLETIME),                                
+                                                               quartile_1st = quantile(CYCLETIME, 0.25),
+                                                               median = median(CYCLETIME), 
+                                                               mean = mean(CYCLETIME, na.rm= TRUE),
+                                                               quartile_3rd = quantile(CYCLETIME, 0.75),
+                                                               max_value = max(CYCLETIME))
+    
+    
+    
+    
+    ggplot(data_base,                              
+           aes(x = PROVIDER,
+               ymin = min_value,
+               lower = quartile_1st,
+               middle = median,
+               upper = quartile_3rd,
+               ymax = max_value)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA, stat = "identity")+
+      #stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
       # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
       # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
       labs(title = "Distribution of NEW Appointment Check-in to Visit-end Time** by Provider", 
            y = "Minutes",
-           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "**Visit-end Time is the minimum of Visit-end Time and Check-out")+
       theme_new_line()+
       theme_bw()+
@@ -7635,7 +7669,8 @@ server <- function(input, output, session) {
   
   output$establishedCycleTimeByProv <- renderPlot({
   
-    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(PROVIDER, NEW_PT3, CYCLETIME, APPT_TYPE) %>% collect()
+    data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(PROVIDER, NEW_PT3, CYCLETIME, APPT_TYPE) %>% collect()
     #data <- arrived.data.rows %>% filter(cycleTime > 0) %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(PROVIDER, NEW_PT3, CYCLETIME, APPT_TYPE)
     
     #data <- data_other
@@ -7646,28 +7681,61 @@ server <- function(input, output, session) {
       appt.type <- "Established"
     }
     
-    cycle.df <- data %>%
-      select(PROVIDER, NEW_PT3, CYCLETIME) %>%
-      group_by(PROVIDER, NEW_PT3) 
+    # cycle.df <- data %>%
+    #   select(PROVIDER, CYCLETIME) %>%
+      
+      data_base <- data %>% group_by(PROVIDER) %>% summarise(min_value = min(CYCLETIME),                                
+                                                        quartile_1st = quantile(CYCLETIME, 0.25),
+                                                        median = median(CYCLETIME), 
+                                                        mean = mean(CYCLETIME, na.rm= TRUE),
+                                                        quartile_3rd = quantile(CYCLETIME, 0.75),
+                                                        max_value = max(CYCLETIME))
+
+
+
+
+ggplot(data_base,                              
+       aes(x = PROVIDER,
+           ymin = min_value,
+           lower = quartile_1st,
+           middle = median,
+           upper = quartile_3rd,
+           ymax = max_value)) +
+  geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA, stat = "identity")+
+  #stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+  #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
+  # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+  # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+  labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Visit-end Time** by Provider"),
+       y = "Minutes",
+       subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+       # caption = paste0("*Includes ", length(unique(data$Appt.Type)), "established appointments")
+       caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out")
+  )+
+  theme_new_line()+
+  theme_bw()+
+  graph_theme("none")
+      
+      
     
     # avg.cycleTime <- data.frame(New.PT3 = c("Avg"),
     #                             target =  ceiling(mean(cycle.df$CYCLETIME)))
     
-    ggplot(cycle.df, aes(x = PROVIDER, y = CYCLETIME)) +
-      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
-      stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-      scale_y_continuous(limits = c(0,quantile(cycle.df$CYCLETIME, 0.75)*1.5))+
-      # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
-      # annotate("text",x=length(unique(cycle.df$Provider))/2,y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
-      labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Visit-end Time** by Provider"), 
-           y = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           # caption = paste0("*Includes ", length(unique(data$Appt.Type)), "established appointments")
-           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out")
-           )+
-      theme_new_line()+
-      theme_bw()+
-      graph_theme("none")
+    # ggplot(cycle.df, aes(x = PROVIDER, y = CYCLETIME)) +
+    #   geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+    #   stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+    #   scale_y_continuous(limits = c(0,quantile(cycle.df$CYCLETIME, 0.75)*1.5))+
+    #   # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+    #   # annotate("text",x=length(unique(cycle.df$Provider))/2,y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+    #   labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Visit-end Time** by Provider"),
+    #        y = "Minutes",
+    #        subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+    #        # caption = paste0("*Includes ", length(unique(data$Appt.Type)), "established appointments")
+    #        caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out")
+    #        )+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   graph_theme("none")
       #theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
     
   })
@@ -8103,33 +8171,65 @@ server <- function(input, output, session) {
   
   
   output$newRoomInTimeByProv <- renderPlot({
-    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0) %>% filter(NEW_PT3 == "NEW")
+    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
+      select(PROVIDER, CHECKINTOROOMIN) %>% collect()
+      
     # data <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
     
-    roomin.df <- data %>%
-      select(PROVIDER, NEW_PT3, CHECKINTOROOMIN) %>% collect() %>%
-      group_by(PROVIDER, NEW_PT3)
+    # roomin.df <- data %>%
+    #   select(PROVIDER, NEW_PT3, CHECKINTOROOMIN) %>% collect() %>%
+    #   group_by(PROVIDER, NEW_PT3)
+    # 
+    # avg.roomInTime <- data.frame(New.PT3 = c("Avg"),
+    #                              target =  ceiling(mean(roomin.df$CHECKINTOROOMIN)))
     
-    avg.roomInTime <- data.frame(New.PT3 = c("Avg"),
-                                 target =  ceiling(mean(roomin.df$CHECKINTOROOMIN)))
+    # ggplot(roomin.df, aes(x = PROVIDER, y = CHECKINTOROOMIN)) +
+    #   geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+    #   stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+    #   scale_y_continuous(limits = c(0,quantile(roomin.df$CHECKINTOROOMIN,0.75)*1.5))+
+    #   # geom_hline(yintercept= round(mean(roomin.df$checkinToRoomin)), linetype="dashed", color = "red")+
+    #   # annotate("text",x=length(unique(roomin.df$Provider))/2,y=round(mean(roomin.df$checkinToRoomin))+3,size=5,color="red",label=c('Average'))+
+    #   labs(title = "Distribution of NEW Appointment Check-in to Room-in Time by Provider", 
+    #        y = "Minutes",
+    #        subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   graph_theme("none")
     
-    ggplot(roomin.df, aes(x = PROVIDER, y = CHECKINTOROOMIN)) +
-      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
-      stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-      scale_y_continuous(limits = c(0,quantile(roomin.df$CHECKINTOROOMIN,0.75)*1.5))+
-      # geom_hline(yintercept= round(mean(roomin.df$checkinToRoomin)), linetype="dashed", color = "red")+
-      # annotate("text",x=length(unique(roomin.df$Provider))/2,y=round(mean(roomin.df$checkinToRoomin))+3,size=5,color="red",label=c('Average'))+
-      labs(title = "Distribution of NEW Appointment Check-in to Room-in Time by Provider", 
-           y = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
-      theme_new_line()+
-      theme_bw()+
-      graph_theme("none")
+    data_base <- data %>% group_by(PROVIDER) %>% summarise(min_value = min(CHECKINTOROOMIN),                                
+                                                               quartile_1st = quantile(CHECKINTOROOMIN, 0.25),
+                                                               median = median(CHECKINTOROOMIN), 
+                                                               mean = mean(CHECKINTOROOMIN, na.rm= TRUE),
+                                                               quartile_3rd = quantile(CHECKINTOROOMIN, 0.75),
+                                                               max_value = max(CHECKINTOROOMIN))
+    
+    
+    
+    
+    ggplot(data_base,                              
+           aes(x = PROVIDER,
+               ymin = min_value,
+               lower = quartile_1st,
+               middle = median,
+               upper = quartile_3rd,
+               ymax = max_value)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA, stat = "identity")+
+      #stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
+      # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+      # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+      labs(title = "Distribution of NEW Appointment Check-in to Room-in Time by Provider",
+             y = "Minutes",
+             subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+        theme_new_line()+
+        theme_bw()+
+        graph_theme("none")
     
   })
   
   output$establishedRoomInTimeByProv <- renderPlot({
-    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0) %>% select(PROVIDER, NEW_PT3, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
+    data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(PROVIDER, NEW_PT3, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
     # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
    #data <- data_other
@@ -8140,20 +8240,52 @@ server <- function(input, output, session) {
       appt.type <- "Established"
     }
     
-    roomIn.df <- data %>%
-      select(PROVIDER, NEW_PT3, CHECKINTOROOMIN) %>%
-      group_by(PROVIDER, NEW_PT3)
+    # roomIn.df <- data %>%
+    #   select(PROVIDER, NEW_PT3, CHECKINTOROOMIN) %>%
+    #   group_by(PROVIDER, NEW_PT3)
+    # 
+    # avg.roomInTime <- data.frame(New.PT3 = c("Avg"),
+    #                              target =  ceiling(mean(roomIn.df$CHECKINTOROOMIN)))
+    # 
+    # ggplot(roomIn.df, aes(x = PROVIDER, y = CHECKINTOROOMIN)) +
+    #   geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
+    #   stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+    #   scale_y_continuous(limits = c(0,quantile(roomIn.df$CHECKINTOROOMIN,0.75)*1.5))+
+    #   # geom_hline(yintercept= round(mean(roomIn.df$checkinToRoomin)), linetype="dashed", color = "red")+
+    #   # annotate("text",x=length(unique(roomIn.df$Provider))/2,y=round(mean(roomIn.df$checkinToRoomin))+3,size=5,color="red",label=c('Average'))+
+    #   labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Room-in Time by Provider"), 
+    #        y = "Minutes",
+    #        subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+    #        # caption = paste0("*Includes ", length(unique(data$Appt.Type)), "established appointments")
+    #        )+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   graph_theme("none")+
+    #   theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
     
-    avg.roomInTime <- data.frame(New.PT3 = c("Avg"),
-                                 target =  ceiling(mean(roomIn.df$CHECKINTOROOMIN)))
+    data_base <- data %>% group_by(PROVIDER) %>% summarise(min_value = min(CHECKINTOROOMIN),                                
+                                                               quartile_1st = quantile(CHECKINTOROOMIN, 0.25),
+                                                               median = median(CHECKINTOROOMIN), 
+                                                               mean = mean(CHECKINTOROOMIN, na.rm= TRUE),
+                                                               quartile_3rd = quantile(CHECKINTOROOMIN, 0.75),
+                                                               max_value = max(CHECKINTOROOMIN))
     
-    ggplot(roomIn.df, aes(x = PROVIDER, y = CHECKINTOROOMIN)) +
-      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA)+
-      stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
-      scale_y_continuous(limits = c(0,quantile(roomIn.df$CHECKINTOROOMIN,0.75)*1.5))+
-      # geom_hline(yintercept= round(mean(roomIn.df$checkinToRoomin)), linetype="dashed", color = "red")+
-      # annotate("text",x=length(unique(roomIn.df$Provider))/2,y=round(mean(roomIn.df$checkinToRoomin))+3,size=5,color="red",label=c('Average'))+
-      labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Room-in Time by Provider"), 
+    
+    
+    
+    ggplot(data_base,                              
+           aes(x = PROVIDER,
+               ymin = min_value,
+               lower = quartile_1st,
+               middle = median,
+               upper = quartile_3rd,
+               ymax = max_value)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA, stat = "identity")+
+      #stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
+      # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+      # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+      labs(title = paste0("Distribution of ",appt.type," Appointments Check-in to Room-in Time by Provider"),
            y = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
            # caption = paste0("*Includes ", length(unique(data$Appt.Type)), "established appointments")
