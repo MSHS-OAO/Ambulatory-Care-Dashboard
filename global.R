@@ -412,7 +412,9 @@ max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 #rm(historical.data)
 
 
+# Fill missing new_pt3 with stablished
 
+historical.data <- historical.data %>% mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3))
 
 # ## KPI Rows DataTable
 # kpi.arrivedNoShow.data.rows <- kpi.all.data[Appt.Status %in% c("Arrived","No Show"), which = TRUE]
@@ -541,6 +543,8 @@ colnames(byTime.df) <- c("Time") ## Empty data frame for time (hour)
 
 byTime30.df <- as.data.frame(timeOptions30m)
 colnames(byTime30.df) <- c("Time") ## Empty data frame for time (hour)
+
+
 
 
 # (7) Data Reactive functions ---------------------------------------------------------------------------------
@@ -708,10 +712,10 @@ groupByFilters_2 <- function(dt, campus, specialty, department, resource, provid
 }
 
 ## Filtered by Appt.Type Data
-groupByFilters_3 <- function(dt, apptType){
-  result <- dt %>% filter(NEW_PT2 == "ESTABLISHED", APPT_TYPE %in% apptType)
-  return(result)
-}
+# groupByFilters_3 <- function(dt, apptType){
+#   result <- dt %>% filter(NEW_PT3 == "ESTABLISHED", APPT_TYPE %in% apptType)
+#   return(result)
+# }
 
 
 ## Filtered Slot Data
