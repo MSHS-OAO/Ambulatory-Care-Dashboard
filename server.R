@@ -6650,7 +6650,7 @@ server <- function(input, output, session) {
     
     #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
     
-    waitTime <- data %>%
+    waitTime <- dataAll_access() %>%
       filter(WAIT_TIME >= 0) %>%
       group_by(APPT_SOURCE_NEW, NEW_PT2) %>%
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
@@ -7839,7 +7839,7 @@ ggplot(data_base,
     
     
     data <- dataArrived() %>% filter(CHECKINTOROOMIN > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
-      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect() %>%
+      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
     
@@ -7862,7 +7862,7 @@ ggplot(data_base,
                                                                                                                      ifelse(between(CHECKINTOROOMIN,420,450), "420",
                                                                                                                             ifelse(between(CHECKINTOROOMIN,450,480), "450", "480")))))))))))))))))%>%
       group_by(bin, NEW_PT3) %>% summarise(total_bin = n()) %>% 
-      ungroup() %>%
+      collect() %>%
       mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(bin, NEW_PT3) %>%
       mutate(percent = total_bin / total) %>%
       mutate(bin = as.numeric(bin))
