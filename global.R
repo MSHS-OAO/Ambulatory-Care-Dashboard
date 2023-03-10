@@ -545,6 +545,19 @@ byTime30.df <- as.data.frame(timeOptions30m)
 colnames(byTime30.df) <- c("Time") ## Empty data frame for time (hour)
 
 
+## function for cycle time tab
+add_value <- function(data, bin){
+  main_rows <- seq(0, max(data$bin), by= 30)
+  
+  rows_to_be_included <- which(!main_rows %in% data$bin)
+  
+  for (i in rows_to_be_included){
+    data[nrow(data) + 1 , 1] <- main_rows[i]
+    
+  }
+}
+
+
 # (7) Data Reactive functions ---------------------------------------------------------------------------------
 
 ## Filtered Scheduling Data

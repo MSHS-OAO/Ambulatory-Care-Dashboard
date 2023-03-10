@@ -7501,12 +7501,16 @@ server <- function(input, output, session) {
   
   output$cycleTimeByHour <- renderPlot({
     
+    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")  %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME) 
+    
     data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME) 
     #data <- arrived.data.rows %>% filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME)
     data_other <- dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED", CYCLETIME > 0) %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME) 
     # data_other <- arrived.data.rows  %>% filter(NEW_PT3 == "ESTABLISHED", CYCLETIME > 0) %>% select(APPT_DAY, APPT_TM_HR, CYCLETIME)
    
     #names <- paste(unique(data_other$Appt.Type),sep="", collapse=", ")
+    
+    appt.type.choices <- dataArrived()  %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(APPT_TYPE) %>% mutate(APPT_TYPE = unique(APPT_TYPE)) %>% collect()
     
     if(input$median2 == TRUE){
       
@@ -7538,8 +7542,8 @@ server <- function(input, output, session) {
       input <- "Average"
     }
     
-    if(length(unique(data_other$APPT_TYPE)) == 1){
-      appt.type <- unique(data_other$APPT_TYPE)
+    if(length(unique(appt.type.choices$APPT_TYPE)) == 1){
+      appt.type <- unique(appt.type.choices$APPT_TYPE)
     } else{
       appt.type <- "Established*"
     }
@@ -7574,7 +7578,7 @@ server <- function(input, output, session) {
       scale_fill_gradient(low="white", high="#00aeef")+
       labs(title = paste0(input," ",appt.type," Appointments Check-in to Visit-end Time** by Hour\n"), 
            y = NULL,
-           caption = paste0("*Includes ", length(unique(data_other$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out"),
+           caption = paste0("*Includes ", length(unique(appt.type.choices$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out"),
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
@@ -8077,8 +8081,13 @@ ggplot(data_base,
    
     # data_other <- arrived.data %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
     
-    names <- data_other %>% filter(APPT_TM_HR %in% timeOptionsHr_filter) %>% select(APPT_TYPE)
-    names <- sort(unique(names$APPT_TYPE), na.last = T)
+    # names <- data_other %>% filter(APPT_TM_HR %in% timeOptionsHr_filter) %>% select(APPT_TYPE)
+    # names <- sort(unique(names$APPT_TYPE), na.last = T)
+    
+    
+    appt.type.choices <- dataArrived() %>% filter( CHECKINTOROOMIN > 0, NEW_PT3 == "ESTABLISHED") %>% 
+      select(APPT_TYPE) %>% mutate(APPT_TYPE = unique(APPT_TYPE)) %>% collect()
+    
     
     if(input$median3 == TRUE){
       
@@ -8110,8 +8119,8 @@ ggplot(data_base,
       input <- "Average"
     }
     
-    if(length(names) == 1){
-      appt.type <- names
+    if(length(appt.type.choices$APPT_TYPE) == 1){
+      appt.type <- unique(appt.type.choices$APPT_TYPE)
     } else{
       appt.type <- "Established*"
     }
@@ -8121,7 +8130,7 @@ ggplot(data_base,
     new <- ggplot(data, aes(APPT_TM_HR, y = factor(APPT_DAY, level = level_order), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#d80b8c")+
-      labs(title = paste0(input," New Patients Check-in to Visit-end Time by Hour\n"),
+      labs(title = paste0(input," New Patients Check-in to Room-in Time by Hour\n"),
            y = NULL,
            fill = "Minutes")+
       #subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
@@ -8145,9 +8154,9 @@ ggplot(data_base,
     other <- ggplot(data_other, aes(APPT_TM_HR, y = factor(APPT_DAY, level = level_order), fill = avg))+ 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#00aeef")+
-      labs(title = paste0(input," ",appt.type," Patients Check-in to Visit-end Time by Hour\n"), 
+      labs(title = paste0(input," ",appt.type," Patients Check-in to Room-in Time by Hour\n"), 
            y = NULL,
-           caption = paste0("*Includes ", length(unique(data_other$APPT_TYPE)), " established visit types"),
+           caption = paste0("*Includes ", length(unique(appt.type.choices$APPT_TYPE)), " established visit types"),
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             legend.position = "right",
@@ -8269,9 +8278,6 @@ ggplot(data_base,
                                                                mean = mean(CHECKINTOROOMIN, na.rm= TRUE),
                                                                quartile_3rd = quantile(CHECKINTOROOMIN, 0.75),
                                                                max_value = max(CHECKINTOROOMIN))
-    
-    
-    
     
     ggplot(data_base,                              
            aes(x = PROVIDER,
