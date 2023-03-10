@@ -7606,7 +7606,7 @@ server <- function(input, output, session) {
     data_test <- dataArrived()
     
     cycle.df <- dataArrived() %>% filter(CYCLETIME > 0 , NEW_PT3 == "NEW") %>%
-      select(PROVIDER, CYCLETIME) %>% collect() %>% ungroup()
+      select(PROVIDER, CYCLETIME) 
       
       
       
@@ -7644,7 +7644,8 @@ server <- function(input, output, session) {
                                                                median = median(CYCLETIME), 
                                                                mean = mean(CYCLETIME, na.rm= TRUE),
                                                                quartile_3rd = quantile(CYCLETIME, 0.75),
-                                                               max_value = max(CYCLETIME))
+                                                               max_value = max(CYCLETIME)) %>% 
+                                                               collect()
     
     
     
@@ -7674,7 +7675,7 @@ server <- function(input, output, session) {
   output$establishedCycleTimeByProv <- renderPlot({
   
     data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
-      select(PROVIDER, NEW_PT3, CYCLETIME, APPT_TYPE) %>% collect()
+      select(PROVIDER, NEW_PT3, CYCLETIME, APPT_TYPE) 
     #data <- arrived.data.rows %>% filter(cycleTime > 0) %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(PROVIDER, NEW_PT3, CYCLETIME, APPT_TYPE)
     
     #data <- data_other
@@ -7693,7 +7694,8 @@ server <- function(input, output, session) {
                                                         median = median(CYCLETIME), 
                                                         mean = mean(CYCLETIME, na.rm= TRUE),
                                                         quartile_3rd = quantile(CYCLETIME, 0.75),
-                                                        max_value = max(CYCLETIME))
+                                                        max_value = max(CYCLETIME)) %>% 
+                                                        collect()
 
 
 
@@ -7747,6 +7749,7 @@ ggplot(data_base,
   # (2) Room-in Times ----------------------------------------------------------------------
   
   output$roomInTimeCompNew <- renderValueBox({
+    print("1")
     
     data_room <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW")
       
@@ -7769,6 +7772,7 @@ ggplot(data_base,
   })
   
   output$roomInTimeCompOther <- renderValueBox({
+    print("2")
     
    data_room <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED")
     
@@ -7797,6 +7801,7 @@ ggplot(data_base,
   })
   
   output$roomInTimeTrend <- renderPlot({
+    print("5")
     # data_new <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
     #   select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>% collect()
     # # data_new <- arrived.data %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE)
@@ -7907,6 +7912,7 @@ ggplot(data_base,
   })
   
   output$newRoomInTimeBoxPlot <- renderPlot({
+    print("3")
     # data <- data_test %>% filter(CHECKINTOROOMIN >= 0) %>%
     #   filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
     
@@ -7985,6 +7991,7 @@ ggplot(data_base,
   })
   
   output$establishedRoomInTimeBoxPlot <- renderPlot({
+    print("4")
     # data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
     #   select(APPT_TYPE, CHECKINTOROOMIN) %>% collect()
     # # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
@@ -8072,6 +8079,7 @@ ggplot(data_base,
   })
   
   output$roomInTimeByHour <- renderPlot({
+    print("6")
     data <- dataArrived() %>% filter(CHECKINTOROOMIN > 0) %>% filter(NEW_PT3 == "NEW") %>%
       select(APPT_DAY, APPT_TM_HR, CHECKINTOROOMIN) %>% collect()
     # data <- arrived.data %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
@@ -8180,8 +8188,9 @@ ggplot(data_base,
   
   
   output$newRoomInTimeByProv <- renderPlot({
+    print("7")
     data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
-      select(PROVIDER, CHECKINTOROOMIN) %>% collect()
+      select(PROVIDER, CHECKINTOROOMIN) 
       
     # data <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
     
@@ -8210,7 +8219,8 @@ ggplot(data_base,
                                                                median = median(CHECKINTOROOMIN), 
                                                                mean = mean(CHECKINTOROOMIN, na.rm= TRUE),
                                                                quartile_3rd = quantile(CHECKINTOROOMIN, 0.75),
-                                                               max_value = max(CHECKINTOROOMIN))
+                                                               max_value = max(CHECKINTOROOMIN)) %>% 
+                                                               collect()
     
     
     
@@ -8237,8 +8247,9 @@ ggplot(data_base,
   })
   
   output$establishedRoomInTimeByProv <- renderPlot({
+    print("8")
     data <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
-      select(PROVIDER, NEW_PT3, CHECKINTOROOMIN, APPT_TYPE) %>% collect()
+      select(PROVIDER, NEW_PT3, CHECKINTOROOMIN, APPT_TYPE) 
     # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
     
    #data <- data_other
@@ -8277,7 +8288,8 @@ ggplot(data_base,
                                                                median = median(CHECKINTOROOMIN), 
                                                                mean = mean(CHECKINTOROOMIN, na.rm= TRUE),
                                                                quartile_3rd = quantile(CHECKINTOROOMIN, 0.75),
-                                                               max_value = max(CHECKINTOROOMIN))
+                                                               max_value = max(CHECKINTOROOMIN)) %>% 
+                                                               collect()
     
     ggplot(data_base,                              
            aes(x = PROVIDER,
