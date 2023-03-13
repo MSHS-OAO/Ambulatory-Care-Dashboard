@@ -4190,7 +4190,8 @@ server <- function(input, output, session) {
   
   incompleteAppts_num <- reactive({
     data <- dataArrivedNoShow()
-    numerator <- data %>% filter(APPT_STATUS == "No Show") %>% summarize(n()) %>% collect()
+    
+    numerator <- data %>% filter(APPT_STATUS %in% c("Rescheduled", "Canceled", "Bumped", "No Show")) %>% summarize(n()) %>% collect()
     denominator <- data %>% summarize(n()) %>% collect()
     num <- prettyNum(round(numerator/denominator,2)*100, big.mark = ",")
   })
@@ -4209,6 +4210,9 @@ server <- function(input, output, session) {
   output$schedulingStatusSummary <- renderPlot({
     
     data <- dataArrivedNoShow()
+    
+    noshow_test <<- dataArrivedNoShow()
+    test_data <<- dataArrived()
     # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     
     # total_arrived <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>% 
@@ -4219,7 +4223,7 @@ server <- function(input, output, session) {
     #   summarise(value = round(n()/length(unique(kpi.all.data[arrived.data.rows,]$Appt.DateYear)))) %>%
     #   arrange(desc(value)) 
     data <- data %>% select(APPT_STATUS, APPT_DATE_YEAR) %>% collect()
-    total_arrived <- dataArrived() %>% select(APPT_DATE_YEAR) %>% collect()
+    total_arrived <- data %>% select(APPT_DATE_YEAR) %>% collect()
     
     sameDay <- data %>%
       group_by(APPT_STATUS) %>%
@@ -4371,30 +4375,30 @@ server <- function(input, output, session) {
   })
   
   # Reactive Filters for Scheduling Tab: Appointment Type & Insurance 
-  output$apptTypeControl <- renderUI({
-    
-    box(
-      title = NULL,
-      width = 12, 
-      solidHeader = FALSE,
-      pickerInput("selectedApptType", label=h4("Select Visit Type:"),
-                  choices = c("New", "Established"),#sort(unique(dataAll()$Appt.Type)),
-                  #choices = sort(unique(dataAll()$Appt.Type), na.last = TRUE),
-                  # choices=sort(unique(dataAll()$Appt.Type)),
-                  multiple=TRUE,
-                  options = pickerOptions(
-                    liveSearch = TRUE,
-                    actionsBox = TRUE,
-                    selectedTextFormat = "count > 1",
-                    countSelectedText = "{0}/{1} Visit Types",
-                    dropupAuto = FALSE),
-                  selected = c("New", "Established")
-                  #selected = unique(dataAll()$Appt.Type)
-                  #selected = sort(unique(dataAll()$Appt.Type), na.last = TRUE)
-      )
-    )
-  })
-  
+  # output$apptTypeControl <- renderUI({
+  #   
+  #   box(
+  #     title = NULL,
+  #     width = 12, 
+  #     solidHeader = FALSE,
+  #     pickerInput("selectedApptType", label=h4("Select Visit Type:"),
+  #                 choices = c("New", "Established"),#sort(unique(dataAll()$Appt.Type)),
+  #                 #choices = sort(unique(dataAll()$Appt.Type), na.last = TRUE),
+  #                 # choices=sort(unique(dataAll()$Appt.Type)),
+  #                 multiple=TRUE,
+  #                 options = pickerOptions(
+  #                   liveSearch = TRUE,
+  #                   actionsBox = TRUE,
+  #                   selectedTextFormat = "count > 1",
+  #                   countSelectedText = "{0}/{1} Visit Types",
+  #                   dropupAuto = FALSE),
+  #                 selected = c("New", "Established")
+  #                 #selected = unique(dataAll()$Appt.Type)
+  #                 #selected = sort(unique(dataAll()$Appt.Type), na.last = TRUE)
+  #     )
+  #   )
+  # })
+  # 
   output$insuranceControl <- renderUI({
     
     box(
@@ -4422,14 +4426,16 @@ server <- function(input, output, session) {
     data <- dataArrivedNoShow()
     #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
     groupByFilters_1(data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")),
-                     input$selectedApptType, input$selectedInsurance)
+                     #input$selectedApptType, 
+                     input$selectedInsurance)
   })
   
   dataNoShow_1 <- reactive({
     data <- dataNoShow()
     #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
     groupByFilters_1(data %>% filter(APPT_STATUS %in% c("No Show", "Canceled")),
-                     input$selectedApptType, input$selectedInsurance
+                     #input$selectedApptType,
+                     input$selectedInsurance
     )
   })
   
@@ -4669,7 +4675,6 @@ server <- function(input, output, session) {
   # Avg Daily Canceled/Bumped/Rescheduled Appointments 
   output$avgDailyBumpedBox <- renderValueBox({
     
-    start_date <<- Sys.time()
     
     data <- dataCanceledBumpedRescheduled()
     # data <- canceled.bumped.rescheduled.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
@@ -4924,7 +4929,6 @@ server <- function(input, output, session) {
     
     top10 <- as.vector(top10$CANCEL_REASON)
     
-    end_date <<- Sys.time()
     
     if(input$percent == FALSE){
       
@@ -7916,7 +7920,6 @@ ggplot(data_base,
     # data <- data_test %>% filter(CHECKINTOROOMIN >= 0) %>%
     #   filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
     
-    data_test <<- dataArrived()
     
     data_cycle <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
       select(CHECKINTOROOMIN) %>%
