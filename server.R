@@ -7811,40 +7811,24 @@ ggplot(data_base,
     
     
     data <- dataArrived() %>% filter(CHECKINTOROOMIN > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
-      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>%
+      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE, BIN_ROOMIN) %>% collect() %>% 
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
     
     
-    data <- data %>% select(CHECKINTOROOMIN, NEW_PT3) %>%
-      mutate(bin = ifelse(between(CHECKINTOROOMIN, 0, 30), "0",
-                          ifelse(between(CHECKINTOROOMIN,30,60), "30",
-                                 ifelse(between(CHECKINTOROOMIN,60,90), "60",
-                                        ifelse(between(CHECKINTOROOMIN,90,120), "90",
-                                               ifelse(between(CHECKINTOROOMIN,120,150), "120",
-                                                      ifelse(between(CHECKINTOROOMIN,150,180), "150",
-                                                             ifelse(between(CHECKINTOROOMIN,180,210), "180",
-                                                                    ifelse(between(CHECKINTOROOMIN,210,240), "210",
-                                                                           ifelse(between(CHECKINTOROOMIN,240,270), "240",
-                                                                                  ifelse(between(CHECKINTOROOMIN,270,300), "270",
-                                                                                         ifelse(between(CHECKINTOROOMIN,300,330), "300",
-                                                                                                ifelse(between(CHECKINTOROOMIN,330,360), "330",
-                                                                                                       ifelse(between(CHECKINTOROOMIN,360,390), "360",
-                                                                                                              ifelse(between(CHECKINTOROOMIN,390,420), "390",
-                                                                                                                     ifelse(between(CHECKINTOROOMIN,420,450), "420",
-                                                                                                                            ifelse(between(CHECKINTOROOMIN,450,480), "450", "480")))))))))))))))))%>%
-      group_by(bin, NEW_PT3) %>% summarise(total_bin = n()) %>% 
-      collect() %>%
-      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(bin, NEW_PT3) %>%
+    data <- data %>% select(CHECKINTOROOMIN, NEW_PT3, BIN_ROOMIN) %>%
+      group_by(BIN_ROOMIN, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+      ungroup() %>%
+      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_ROOMIN, NEW_PT3) %>%
       mutate(percent = total_bin / total) %>%
-      mutate(bin = as.numeric(bin))
+      mutate(BIN_ROOMIN = as.numeric(BIN_ROOMIN))
     
     
     
     
     main_rows <- seq(0, 480, by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data$bin)
+    rows_to_be_included <- which(!main_rows %in% data$BIN_ROOMIN)
     
     
     if (length(rows_to_be_included)>0){
@@ -7858,13 +7842,13 @@ ggplot(data_base,
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
-    data <- data %>%  group_by(bin, NEW_PT3) %>%
-      mutate(bin = factor(bin, levels = sort(bin)))
+    data <- data %>%  group_by(BIN_ROOMIN, NEW_PT3) %>%
+      mutate(BIN_ROOMIN = factor(BIN_ROOMIN, levels = sort(BIN_ROOMIN)))
     
     #data$bin <- factor(data$bin,levels = sort(data$bin))
     
     
-    ggplot(aes(x = bin , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+    ggplot(aes(x = BIN_ROOMIN , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
       geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
@@ -7888,33 +7872,16 @@ ggplot(data_base,
     # data <- data_test %>% filter(CHECKINTOROOMIN >= 0) %>%
     #   filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
     
-    data_test <<- dataArrived()
-    
+
     data_cycle <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
-      select(CHECKINTOROOMIN) %>%
-    mutate(bin = ifelse(between(CHECKINTOROOMIN, 0, 30), "0",
-                        ifelse(between(CHECKINTOROOMIN,30,60), "30",
-                               ifelse(between(CHECKINTOROOMIN,60,90), "60",
-                                      ifelse(between(CHECKINTOROOMIN,90,120), "90",
-                                             ifelse(between(CHECKINTOROOMIN,120,150), "120",
-                                                    ifelse(between(CHECKINTOROOMIN,150,180), "150",
-                                                           ifelse(between(CHECKINTOROOMIN,180,210), "180",
-                                                                  ifelse(between(CHECKINTOROOMIN,210,240), "210",
-                                                                         ifelse(between(CHECKINTOROOMIN,240,270), "240",
-                                                                                ifelse(between(CHECKINTOROOMIN,270,300), "270",
-                                                                                       ifelse(between(CHECKINTOROOMIN,300,330), "300",
-                                                                                              ifelse(between(CHECKINTOROOMIN,330,360), "330",
-                                                                                                     ifelse(between(CHECKINTOROOMIN,360,390), "360",
-                                                                                                            ifelse(between(CHECKINTOROOMIN,390,420), "390",
-                                                                                                                   ifelse(between(CHECKINTOROOMIN,420,450), "420",
-                                                                                                                          ifelse(between(CHECKINTOROOMIN,450,480), "450", "480")))))))))))))))))%>%
-      group_by(bin) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
-    data_cycle$bin <- as.numeric(data_cycle$bin)
+      select(CHECKINTOROOMIN, BIN_ROOMIN) %>%
+      group_by(BIN_ROOMIN) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
     
     main_rows <- seq(0, 480, by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN)
     
     if (length(rows_to_be_included > 0)){
     
@@ -7926,9 +7893,9 @@ ggplot(data_base,
     data_cycle[is.na(data_cycle)] <- 0
     }
     
-    data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
+    data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
-   ggplot(aes(x = bin , y = percent), data = data_cycle) +
+   ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointment\nCheck-in to Room-in Time**"),
@@ -7994,30 +7961,14 @@ ggplot(data_base,
     # 
     
     data_cycle <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
-      select(CHECKINTOROOMIN) %>%
-      mutate(bin = ifelse(between(CHECKINTOROOMIN, 0, 30), "0",
-                          ifelse(between(CHECKINTOROOMIN,30,60), "30",
-                                 ifelse(between(CHECKINTOROOMIN,60,90), "60",
-                                        ifelse(between(CHECKINTOROOMIN,90,120), "90",
-                                               ifelse(between(CHECKINTOROOMIN,120,150), "120",
-                                                      ifelse(between(CHECKINTOROOMIN,150,180), "150",
-                                                             ifelse(between(CHECKINTOROOMIN,180,210), "180",
-                                                                    ifelse(between(CHECKINTOROOMIN,210,240), "210",
-                                                                           ifelse(between(CHECKINTOROOMIN,240,270), "240",
-                                                                                  ifelse(between(CHECKINTOROOMIN,270,300), "270",
-                                                                                         ifelse(between(CHECKINTOROOMIN,300,330), "300",
-                                                                                                ifelse(between(CHECKINTOROOMIN,330,360), "330",
-                                                                                                       ifelse(between(CHECKINTOROOMIN,360,390), "360",
-                                                                                                              ifelse(between(CHECKINTOROOMIN,390,420), "390",
-                                                                                                                     ifelse(between(CHECKINTOROOMIN,420,450), "420",
-                                                                                                                            ifelse(between(CHECKINTOROOMIN,450,480), "450", "480")))))))))))))))))%>%
-      group_by(bin) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
-    data_cycle$bin <- as.numeric(data_cycle$bin)
+      select(CHECKINTOROOMIN, BIN_ROOMIN) %>%
+      group_by(BIN_ROOMIN) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
     
     main_rows <- seq(0, 480, by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN)
     
     if (length(rows_to_be_included > 0)){
       
@@ -8029,9 +7980,9 @@ ggplot(data_base,
       data_cycle[is.na(data_cycle)] <- 0
     }
     
-    data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
+    data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
-    ggplot(aes(x = bin , y = percent), data = data_cycle) +
+    ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of ESTABLISHED Appointment\nCheck-in to Room-in Time**"),
