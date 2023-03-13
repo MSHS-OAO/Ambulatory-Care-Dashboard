@@ -7237,40 +7237,24 @@ server <- function(input, output, session) {
     
     
     data <-  dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
-      select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect() %>%
+      select(CYCLETIME, NEW_PT3, APPT_TYPE, BIN_CYCLE) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
     
     
-    data <- data %>% select(CYCLETIME, NEW_PT3) %>%
-      mutate(bin = ifelse(between(CYCLETIME, 0, 30), "0",
-                          ifelse(between(CYCLETIME,30,60), "30",
-                                 ifelse(between(CYCLETIME,60,90), "60",
-                                        ifelse(between(CYCLETIME,90,120), "90",
-                                               ifelse(between(CYCLETIME,120,150), "120",
-                                                      ifelse(between(CYCLETIME,150,180), "150",
-                                                             ifelse(between(CYCLETIME,180,210), "180",
-                                                                    ifelse(between(CYCLETIME,210,240), "210",
-                                                                           ifelse(between(CYCLETIME,240,270), "240",
-                                                                                  ifelse(between(CYCLETIME,270,300), "270",
-                                                                                         ifelse(between(CYCLETIME,300,330), "300",
-                                                                                                ifelse(between(CYCLETIME,330,360), "330",
-                                                                                                       ifelse(between(CYCLETIME,360,390), "360",
-                                                                                                              ifelse(between(CYCLETIME,390,420), "390",
-                                                                                                                     ifelse(between(CYCLETIME,420,450), "420",
-                                                                                                                            ifelse(between(CYCLETIME,450,480), "450", "480")))))))))))))))))%>%
-      group_by(bin, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+    data <- data %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
+      group_by(BIN_CYCLE, NEW_PT3) %>% summarise(total_bin = n()) %>% 
       ungroup() %>%
-      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(bin, NEW_PT3) %>%
+      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_CYCLE, NEW_PT3) %>%
       mutate(percent = total_bin / total) %>%
-      mutate(bin = as.numeric(bin))
+      mutate(BIN_CYCLE = as.numeric(BIN_CYCLE))
     
     
     
     
     main_rows <- seq(0, 480, by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data$bin)
+    rows_to_be_included <- which(!main_rows %in% data$BIN_CYCLE)
     
     
     if (length(rows_to_be_included)>0){
@@ -7284,13 +7268,13 @@ server <- function(input, output, session) {
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
-    data <- data %>%  group_by(bin, NEW_PT3) %>%
-      mutate(bin = factor(bin, levels = sort(bin)))
+    data <- data %>%  group_by(BIN_CYCLE, NEW_PT3) %>%
+      mutate(BIN_CYCLE = factor(BIN_CYCLE, levels = sort(BIN_CYCLE)))
     
-    #data$bin <- factor(data$bin,levels = sort(data$bin))
+    #data$BIN_CYCLE <- factor(data$BIN_CYCLE,levels = sort(data$BIN_CYCLE))
     
     
-    ggplot(aes(x = bin , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+    ggplot(aes(x = BIN_CYCLE , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
       geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
@@ -7353,30 +7337,14 @@ server <- function(input, output, session) {
     
     
     data_cycle <- dataArrived() %>% 
-      filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME, NEW_PT3) %>%
-      mutate(bin = ifelse(between(CYCLETIME, 0, 30), "0",
-                          ifelse(between(CYCLETIME,30,60), "30",
-                                 ifelse(between(CYCLETIME,60,90), "60",
-                                        ifelse(between(CYCLETIME,90,120), "90",
-                                               ifelse(between(CYCLETIME,120,150), "120",
-                                                      ifelse(between(CYCLETIME,150,180), "150",
-                                                             ifelse(between(CYCLETIME,180,210), "180",
-                                                                    ifelse(between(CYCLETIME,210,240), "210",
-                                                                           ifelse(between(CYCLETIME,240,270), "240",
-                                                                                  ifelse(between(CYCLETIME,270,300), "270",
-                                                                                         ifelse(between(CYCLETIME,300,330), "300",
-                                                                                                ifelse(between(CYCLETIME,330,360), "330",
-                                                                                                       ifelse(between(CYCLETIME,360,390), "360",
-                                                                                                              ifelse(between(CYCLETIME,390,420), "390",
-                                                                                                                     ifelse(between(CYCLETIME,420,450), "420",
-                                                                                                                            ifelse(between(CYCLETIME,450,480), "450", "480")))))))))))))))))%>%
-      group_by(bin) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
-    data_cycle$bin <- as.numeric(data_cycle$bin)
+      filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
+      group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
     
-    main_rows <- seq(0, max(data_cycle$bin), by= 30)
+    main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
     
     
     if (length(rows_to_be_included)>0){
@@ -7386,10 +7354,10 @@ server <- function(input, output, session) {
     data_cycle[is.na(data_cycle)] <- 0
     }
   
-    data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
+    data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
     
     
-    graph <- ggplot(aes(x = bin , y = percent), data = data_cycle) +
+    graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointments\nCheck-in to Visit-end Time**"),
@@ -7452,30 +7420,14 @@ server <- function(input, output, session) {
     #   group_by(APPT_TYPE) %>% summarise(check = 1)  %>% collect()
 
     data_cycle <- dataArrived() %>% 
-      filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3) %>%
-      mutate(bin = ifelse(between(CYCLETIME, 0, 30), "0",
-                                ifelse(between(CYCLETIME,30,60), "30",
-                                       ifelse(between(CYCLETIME,60,90), "60",
-                                              ifelse(between(CYCLETIME,90,120), "90",
-                                                     ifelse(between(CYCLETIME,120,150), "120",
-                                                            ifelse(between(CYCLETIME,150,180), "150",
-                                                                   ifelse(between(CYCLETIME,180,210), "180",
-                                                                          ifelse(between(CYCLETIME,210,240), "210",
-                                                                                 ifelse(between(CYCLETIME,240,270), "240",
-                                                                                        ifelse(between(CYCLETIME,270,300), "270",
-                                                                                               ifelse(between(CYCLETIME,300,330), "300",
-                                                                                                      ifelse(between(CYCLETIME,330,360), "330",
-                                                                                                             ifelse(between(CYCLETIME,360,390), "360",
-                                                                                                                    ifelse(between(CYCLETIME,390,420), "390",
-                                                                                                                           ifelse(between(CYCLETIME,420,450), "420",
-                                                                                                                                  ifelse(between(CYCLETIME,450,480), "450", "480")))))))))))))))))%>%
-      group_by(bin) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
-    data_cycle$bin <- as.numeric(data_cycle$bin)
+      filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
+      group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
     
-    main_rows <- seq(0, max(data_cycle$bin), by= 30)
+    main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$bin)
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
     
     if (length(rows_to_be_included)>0){
       for (i in rows_to_be_included){
@@ -7486,7 +7438,7 @@ server <- function(input, output, session) {
     }
     
     
-    data_cycle$bin <- factor(data_cycle$bin,levels = sort(data_cycle$bin))
+    data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
 
 
     # if(length(unique(appt.type.data$APPT_TYPE)) == 1){
@@ -7496,7 +7448,7 @@ server <- function(input, output, session) {
     # }
 
 
-    graph <- ggplot(aes(x = bin , y = percent), data = data_cycle) +
+    graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of Established Appointments\nCheck-in to Visit-end Time**"),
