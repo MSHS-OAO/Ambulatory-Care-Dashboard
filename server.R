@@ -6456,22 +6456,29 @@ server <- function(input, output, session) {
   output$newPtRatioByDept <- renderPlot({
     data <- dataArrived_access()
     # data <- kpi.all.data[arrived.data.rows,]
-    
+
     newpatients.ratio <- data %>%
-      group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
-      spread(NEW_PT2, Total) %>%
+      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
+      spread(NEW_PT3, Total) %>%
       replace(is.na(.), 0)
+
+    
+    print("1.5")
    
     newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
     ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group=1)) +
-      geom_bar(stat = "identity", width = 0.8, fill = "#221f72") +
+      # geom_bar(stat = "identity", width = 0.8, fill = "#221f72") +
+      geom_line(size=1) +
+      geom_line(color = "#221f72", size=1) +
+      geom_point(color = "#221f72", size = 3.2) +
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
            title = "Monthly New Patient Ratio",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -6480,7 +6487,10 @@ server <- function(input, output, session) {
                          ) +
       stat_summary(fun = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..*100,"%")), group = APPT_MADE_MONTH_YEAR), geom="text", color="black", 
                    size=5, fontface="bold.italic")+
-      theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+      theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+    geom_point(size = 3.2)+
+      geom_point(color = "#221f72", size = 3.2) +
+      scale_color_manual(values = c("#221f72", "#d80b8c"))
     # scale_x_date(breaks = "day", date_labels = "%Y-%m", date_breaks = "1 week",
     #              date_minor_breaks = "1 day", expand = c(0, 0.6))
     
@@ -6493,9 +6503,12 @@ server <- function(input, output, session) {
     # data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
     
     newpatients.ratio <- data %>%
-      group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
-      spread(NEW_PT2, Total)
+      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
+      group_by(PROVIDER,APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
+      dplyr::summarise(Total = n()) %>%
+      spread(NEW_PT3, Total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
@@ -6544,29 +6557,30 @@ server <- function(input, output, session) {
     target <- 14
     
     
-    ggplot(waitTime, aes(x=APPT_MADE_MONTH_YEAR, y=value, fill = variable))+
-      #geom_line(aes(linetype=variable, color=variable, size=variable)) +
-      geom_bar(stat = "identity", position = 'dodge')+
+    ggplot(waitTime, aes(x=APPT_MADE_MONTH_YEAR, y=value, group = variable, color=variable))+
+      # geom_bar(stat = "identity", position = 'dodge')+
+      geom_line(size=1) +
       geom_abline(slope=0, intercept=14,  col = "red",lty=2, size = 1) +
       #geom_line(aes(linetype = variable))+
       #scale_linetype_manual(values=c("solid", "solid", "dashed"))+
-      scale_fill_manual(values=c('#212070','#d80b8c'))+
       #scale_size_manual(values=c(1, 1, 1.3))+
       # scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 week",
       #              date_minor_breaks = "1 day", expand = c(0, 0.6))+
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
-           title = "Monthly Median Wait Time to New* and Established Appointment",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "*New patients defined by CPT codes (level of service)."
+           title = "Monthly Median Wait Time to New and Established Appointment",
+           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
       geom_label(aes(x = 0.8, y = target, label = paste0("Target: ", target," days")), fill = "white", fontface = "bold", color = "red", size=4)+
-      geom_text(aes(label = value), position = position_dodge(1), vjust = ifelse(waitTime$value >= 10 & waitTime$value <= 15,-3,-1), color = "black", size = 5, fontface="bold.italic")+
+      #geom_text(aes(label = value), position = position_dodge(1), vjust = ifelse(waitTime$value >= 10 & waitTime$value <= 15,-3,-1), color = "black", size = 5, fontface="bold.italic")+
       scale_y_continuous(limits = c(0,max(waitTime$value))*1.5)+
-      theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+      theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+      scale_color_manual(values=c('#212070','#d80b8c')) +
+      geom_point(size = 3.2)
     # stat_summary(fun = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..)), group = value), geom="text", color="black", 
     #              size=5, fontface="bold.italic")
     
@@ -6615,10 +6629,10 @@ server <- function(input, output, session) {
     data <- dataArrived_access()
     # data <- kpi.all.data[arrivedNoShow.data.rows,]
     
-    
+    print("2")
     newpatients.ratio <- data %>%
-        group_by(APPT_SOURCE_NEW, NEW_PT2) %>%
-      filter(NEW_PT2 == "NEW") %>%
+      filter(NEW_PT3 == "NEW") %>%
+        group_by(APPT_SOURCE_NEW, NEW_PT3) %>%
       dplyr::summarise(Total = n()) %>% collect()
 
     newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
@@ -6632,10 +6646,10 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('purple')+
       labs(x=NULL, y=NULL,
-           title = "New Patient Source*",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+           title = "New* Patient Source",
+           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
                              "\nTotal New Patients = ",prettyNum(sum(newpatients.ratio$Total), big.mark = ',')),
-           caption = "*Based on arrived patients\n**New patients defined by CPT codes (level of service).")+
+           caption = "*New patients defined by CPT codes (level of service).")+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -6672,10 +6686,12 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('pink')+
       labs(x=NULL, y=NULL, 
-           title = "Wait Time* to New Appointment",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+           title = "Median Wait Time to New Appointment",
+           subtitle = paste0("Based scheduled on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
                              "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
-           caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service).")+
+           # caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service)."
+           #caption = "*New patients defined by CPT codes (level of service)."
+           )+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -6690,6 +6706,7 @@ server <- function(input, output, session) {
       geom_label(aes(x = 0.8, y = target, label = paste0("Target: ", target," days")), fill = "white", fontface = "bold", color = "red", size=4)+
       geom_text(aes(label=paste0(medWaitTime," days")), color="black", 
                 size=5, position = position_dodge(1), hjust=-.5)
+
     
     
     # No Show Rate
@@ -6697,6 +6714,7 @@ server <- function(input, output, session) {
     data.noShow <- dataArrivedNoShow_access() %>% filter(APPT_STATUS %in% c("Arrived", "No Show"))
     # data.noShow <- arrivedNoShow.data
     
+    print("3")
     noShows <- data.noShow %>%
       filter(NEW_PT2 == "NEW") %>%
       group_by(APPT_SOURCE_NEW, APPT_STATUS) %>%
@@ -6722,10 +6740,11 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
-           title = "New Patient No Show Rate*",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
-                             "\nNo Show Rate = Total No Shows / (Arrived + No Shows)"),
-           caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service).")+
+           title = "New Patient No Show Rate",
+           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+                             "\nNo Show Rate = Total No Shows / (Arrived + No Shows)")#,
+           #caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service)."
+           )+
       theme_new_line()+
       theme_bw()+
       theme(
@@ -6738,7 +6757,8 @@ server <- function(input, output, session) {
         axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
         axis.text.y = element_text(size = "14"))+
       geom_text(aes(label=paste0(`No Show Perc`*100,"%")), color="black", 
-                size=5, position = position_dodge(1), hjust=-.5)
+                size=5, position = position_dodge(1), hjust=-.5) +
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, max(newpatients.ratio$ratio)*1.3))
     
     
     grid.arrange(newRatio, newWaitTime, newNoShow, ncol=3)
@@ -7221,25 +7241,24 @@ server <- function(input, output, session) {
     
     
     data <-  dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
-      select(CYCLETIME, NEW_PT3, APPT_TYPE) %>%
+      select(CYCLETIME, NEW_PT3, APPT_TYPE, BIN_CYCLE) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
-    
-    
-    data <- data %>% select(CYCLETIME, NEW_PT3) %>%
-      group_by(bin_cycle, NEW_PT3) %>% summarise(total_bin = n()) %>% 
-      collect() %>%
-      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(bin, NEW_PT3) %>%
+ 
+    data <- data %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
+      group_by(BIN_CYCLE, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+      ungroup() %>%
+      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_CYCLE, NEW_PT3) %>%
       mutate(percent = total_bin / total) %>%
-      mutate(bin_cycle = as.numeric(bin_cycle))
+      mutate(BIN_CYCLE = as.numeric(BIN_CYCLE))
+
     
     
     
     
     main_rows <- seq(0, 480, by= 30)
-    
-    rows_to_be_included <- which(!main_rows %in% data$bin_cycle)
-    
+
+    rows_to_be_included <- which(!main_rows %in% data$BIN_CYCLE)    
     
     if (length(rows_to_be_included)>0){
       for (i in rows_to_be_included){
@@ -7252,13 +7271,14 @@ server <- function(input, output, session) {
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
-    data <- data %>%  group_by(bin_cycle, NEW_PT3) %>%
-      mutate(bin_cycle = factor(bin_cycle, levels = sort(bin)))
+
+    data <- data %>%  group_by(BIN_CYCLE, NEW_PT3) %>%
+      mutate(BIN_CYCLE = factor(BIN_CYCLE, levels = sort(BIN_CYCLE)))
     
-    #data$bin <- factor(data$bin,levels = sort(data$bin))
+    #data$BIN_CYCLE <- factor(data$BIN_CYCLE,levels = sort(data$BIN_CYCLE))
     
-    
-    ggplot(aes(x = bin_cycle , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+
+    ggplot(aes(x = BIN_CYCLE , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
       geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
@@ -7321,16 +7341,16 @@ server <- function(input, output, session) {
     
     
     data_cycle <- dataArrived() %>% 
-      filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME, NEW_PT3) %>%
-      group_by(bin_cycle) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(bin) %>% mutate(percent = total_bin / total)
-    data_cycle$bin_cycle <- as.numeric(data_cycle$bin_cycle)
+      filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
+      group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
     
-    main_rows <- seq(0, max(data_cycle$bin_cycle), by= 30)
+    main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$bin_cycle)
-    
-    
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
+
+       
     if (length(rows_to_be_included)>0){
        for (i in rows_to_be_included){
           data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
@@ -7338,10 +7358,10 @@ server <- function(input, output, session) {
     data_cycle[is.na(data_cycle)] <- 0
     }
   
-    data_cycle$bin_cycle <- factor(data_cycle$bin_cycle,levels = sort(data_cycle$bin_cycle))
-    
-    
-    graph <- ggplot(aes(x = bin_cycle , y = percent), data = data_cycle) +
+    data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
+
+    graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
+
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointments\nCheck-in to Visit-end Time**"),
@@ -7404,14 +7424,15 @@ server <- function(input, output, session) {
     #   group_by(APPT_TYPE) %>% summarise(check = 1)  %>% collect()
 
     data_cycle <- dataArrived() %>% 
-      filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3) %>%
-      group_by(bin_cycle) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(bin_cycle) %>% mutate(percent = total_bin / total)
-    data_cycle$bin_cycle <- as.numeric(data_cycle$bin_cycle)
+      filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
+      group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
     
-    main_rows <- seq(0, max(data_cycle$bin_cycle), by= 30)
+    main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$bin_cycle)
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
+
     
     if (length(rows_to_be_included)>0){
       for (i in rows_to_be_included){
@@ -7420,9 +7441,9 @@ server <- function(input, output, session) {
     
     data_cycle[is.na(data_cycle)] <- 0
     }
-    
-    
-    data_cycle$bin_cycle <- factor(data_cycle$bin_cycle,levels = sort(data_cycle$bin_cycle))
+
+    data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
+
 
 
     # if(length(unique(appt.type.data$APPT_TYPE)) == 1){
@@ -7431,8 +7452,7 @@ server <- function(input, output, session) {
     #   appt.type <- "Established*"
     # }
 
-
-    graph <- ggplot(aes(x = bin_cycle , y = percent), data = data_cycle) +
+    graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of Established Appointments\nCheck-in to Visit-end Time**"),
@@ -7795,26 +7815,25 @@ ggplot(data_base,
     
     
     data <- dataArrived() %>% filter(CHECKINTOROOMIN > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
-      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE) %>%
+      select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE, BIN_ROOMIN) %>% collect() %>% 
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
     
     
-    data <- data %>% select(CHECKINTOROOMIN, NEW_PT3) %>%
-      group_by(bin_roomin, NEW_PT3) %>% summarise(total_bin = n()) %>% 
-      collect() %>%
-      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(bin_roomin, NEW_PT3) %>%
+
+    data <- data %>% select(CHECKINTOROOMIN, NEW_PT3, BIN_ROOMIN) %>%
+      group_by(BIN_ROOMIN, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+      ungroup() %>%
+      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_ROOMIN, NEW_PT3) %>%
       mutate(percent = total_bin / total) %>%
-      mutate(bin_roomin = as.numeric(bin_roomin))
-    
-    
-    
+      mutate(BIN_ROOMIN = as.numeric(BIN_ROOMIN))
+
     
     main_rows <- seq(0, 480, by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data$bin_roomin)
-    
-    
+    rows_to_be_included <- which(!main_rows %in% data$BIN_ROOMIN)
+
+
     if (length(rows_to_be_included)>0){
       for (i in rows_to_be_included){
         data[nrow(data) + 1 , 1] <- main_rows[i]
@@ -7826,13 +7845,15 @@ ggplot(data_base,
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
-    data <- data %>%  group_by(bin_roomin, NEW_PT3) %>%
-      mutate(bin_roomin = factor(bin_roomin, levels = sort(bin_roomin)))
+
+    data <- data %>%  group_by(BIN_ROOMIN, NEW_PT3) %>%
+      mutate(BIN_ROOMIN = factor(BIN_ROOMIN, levels = sort(BIN_ROOMIN)))
     
     #data$bin <- factor(data$bin,levels = sort(data$bin))
     
     
-    ggplot(aes(x = bin_roomin , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+
+    ggplot(aes(x = BIN_ROOMIN , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
       geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
@@ -7856,16 +7877,17 @@ ggplot(data_base,
     # data <- data_test %>% filter(CHECKINTOROOMIN >= 0) %>%
     #   filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
     
-    
+
+
     data_cycle <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
-      select(CHECKINTOROOMIN) %>%
-      group_by(bin_roomin) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(bin_roomin) %>% mutate(percent = total_bin / total)
-    data_cycle$bin_roomin <- as.numeric(data_cycle$bin_roomin)
+      select(CHECKINTOROOMIN, BIN_ROOMIN) %>%
+      group_by(BIN_ROOMIN) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
     
     main_rows <- seq(0, 480, by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$bin_roomin)
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN)
     
     if (length(rows_to_be_included > 0)){
     
@@ -7877,9 +7899,9 @@ ggplot(data_base,
     data_cycle[is.na(data_cycle)] <- 0
     }
     
-    data_cycle$bin_roomin <- factor(data_cycle$bin_roomin,levels = sort(data_cycle$bin_roomin))
+    data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
-   ggplot(aes(x = bin_roomin , y = percent), data = data_cycle) +
+   ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointment\nCheck-in to Room-in Time**"),
@@ -7945,14 +7967,15 @@ ggplot(data_base,
     # 
     
     data_cycle <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED") %>%
-      select(CHECKINTOROOMIN) %>%
-      group_by(bin_roomin) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(bin_roomin) %>% mutate(percent = total_bin / total)
-    data_cycle$bin_roomin <- as.numeric(data_cycle$bin_roomin)
+      select(CHECKINTOROOMIN, BIN_ROOMIN) %>%
+      group_by(BIN_ROOMIN) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
     
     main_rows <- seq(0, 480, by= 30)
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$bin_roomin)
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN)
+
     
     if (length(rows_to_be_included > 0)){
       
@@ -7963,10 +7986,10 @@ ggplot(data_base,
       
       data_cycle[is.na(data_cycle)] <- 0
     }
+
+    data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
-    data_cycle$bin_roomin <- factor(data_cycle$bin_roomin,levels = sort(data_cycle$bin_roomin))
-    
-    ggplot(aes(x = bin_roomin , y = percent), data = data_cycle) +
+    ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of ESTABLISHED Appointment\nCheck-in to Room-in Time**"),

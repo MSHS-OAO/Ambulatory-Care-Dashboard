@@ -1,47 +1,48 @@
 default_campus <- "MSUS"
-default_campus_choices <- historical.data %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
+default_campus_choices <- filters %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
 default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
 
-default_specialty_choices <-  historical.data %>% filter(CAMPUS %in% default_campus) %>% select( CAMPUS_SPECIALTY)  %>%
-  mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+default_specialty_choices <-  filters %>% filter(CAMPUS %in% default_campus) %>% select( CAMPUS_SPECIALTY)  %>%
+  summarise(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
 default_specialty_choices <- sort(default_specialty_choices$CAMPUS_SPECIALTY, na.last = T)
 
 default_specialty <- "Allergy"
 
 
-default_departments <-  historical.data %>% filter(CAMPUS %in% default_campus & 
+default_departments <-  filters %>% filter(CAMPUS %in% default_campus & 
                                                       CAMPUS_SPECIALTY %in% default_specialty) %>% select( DEPARTMENT)  %>%
-  mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
+  summarise(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
 default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
 
 
 default_resource_type <- c("Provider","Resource")
 
-default_provider <-   historical.data %>% filter(CAMPUS %in% default_campus & 
-                                                     CAMPUS_SPECIALTY %in% default_specialty& 
-                                                     DEPARTMENT %in% default_departments ) %>% 
-  select(PROVIDER)  %>% 
-  mutate(PROVIDER= unique(PROVIDER)) %>% collect()
-default_provider <- sort(default_provider$PROVIDER, na.last = T)
+# default_provider <-   filters %>% filter(CAMPUS %in% default_campus & 
+#                                                      CAMPUS_SPECIALTY %in% default_specialty& 
+#                                                      DEPARTMENT %in% default_departments ) %>% 
+#   select(PROVIDER)  %>% 
+#   summarise(PROVIDER= unique(PROVIDER)) %>% collect()
+# default_provider <- sort(default_provider$PROVIDER, na.last = T)
 
+default_provider <- c("LEE-WONG, MARY F", "MA, SONGHUI", "MEDICAL TECHNICIANS ALLERGY", "TEITEL, MICHAEL G.", "YOST, SHARON LYNN")
 
-default_visit_method <- historical.data %>% filter(CAMPUS %in% default_campus & 
+default_visit_method <-    filters %>% filter(CAMPUS %in% default_campus & 
                                                   CAMPUS_SPECIALTY %in% default_specialty & 
                                                   DEPARTMENT %in% default_departments &
                                                   PROVIDER %in% default_provider) %>% 
   select( VISIT_METHOD)  %>% 
-  mutate(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
+  summarise(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
 default_visit_method <- sort(default_visit_method$VISIT_METHOD, na.last = T)
 
 
 
-default_PRC_name <-  historical.data %>% filter(CAMPUS %in% default_campus & 
+default_PRC_name <-  filters %>% filter(CAMPUS %in% default_campus & 
                                             CAMPUS_SPECIALTY %in% default_specialty & 
                                             DEPARTMENT %in% default_departments &
                                             PROVIDER %in% default_provider &
                                             VISIT_METHOD %in% default_visit_method) %>% 
   select(APPT_TYPE )  %>% 
-  mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+  summarise(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
 default_PRC_name <- sort(default_PRC_name$APPT_TYPE, na.last = T) 
 
 
@@ -1090,20 +1091,6 @@ ui <- dashboardPage(
                        tags$head(tags$style("#newpatients{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
                        fluidRow(
                          boxPlus(
-                           title = "New Patient Visit Ratio", width = 12, status = "primary",
-                           solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                           tabBox(
-                             title = NULL, type = "pills",
-                             id = "tabset4", width = "100%",
-                             tabPanel("Total", 
-                                      plotOutput("newPtRatioByDept", height = "550px") %>% 
-                                        withSpinner(type = 5, color = "#d80b8c")),
-                             tabPanel("By Provider",
-                                      "*Select fewer providers for better visibility",
-                                      plotOutput("newPtRatioByProv", height = "550px") %>% 
-                                        withSpinner(type = 5, color = "#d80b8c"))))),
-                       fluidRow(
-                         boxPlus(
                            title = "New Patient Wait Time", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            tabBox(
@@ -1115,6 +1102,20 @@ ui <- dashboardPage(
                              tabPanel("By Provider",
                                       "*Select Fewer Providers for Better Visibility",
                                       plotOutput("newPtWaitTimeByProv", height = "550px") %>% 
+                                        withSpinner(type = 5, color = "#d80b8c"))))),
+                       fluidRow(
+                         boxPlus(
+                           title = "New Patient Visit Ratio", width = 12, status = "primary",
+                           solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                           tabBox(
+                             title = NULL, type = "pills",
+                             id = "tabset4", width = "100%",
+                             tabPanel("Total", 
+                                      plotOutput("newPtRatioByDept", height = "550px") %>% 
+                                        withSpinner(type = 5, color = "#d80b8c")),
+                             tabPanel("By Provider",
+                                      "*Select fewer providers for better visibility",
+                                      plotOutput("newPtRatioByProv", height = "550px") %>% 
                                         withSpinner(type = 5, color = "#d80b8c"))))),
                        fluidRow(
                          boxPlus(
