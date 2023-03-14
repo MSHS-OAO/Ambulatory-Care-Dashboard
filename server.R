@@ -9152,7 +9152,7 @@ ggplot(data_base,
   
   patient_ratio_month <- reactive({
     data <- dataArrived_access_npr() #%>% filter(Resource == "Provider")
-   #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy"))
+   #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Internal Medicine", "Endocrinology"))
     # compare_filters <- "Department"
     # breakdown_filters <- "Visit.Method"
     
@@ -9217,7 +9217,7 @@ ggplot(data_base,
       
       #### Calulate new patient ratio for the whole month sum of all new patients within the month divide by sum of new and established patients
       newpatients.ratio.new <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
-        mutate(ratio = round(NEW/(sum(NEW, na.rm = TRUE) + sum(ESTABLISHED, na.rm = TRUE)),2))
+        mutate(ratio = round(`NEW`/(`NEW`+ `ESTABLISHED`),2))
       
       
       
@@ -9280,7 +9280,7 @@ ggplot(data_base,
       
       ### Calculate new patient ratio by breakdown
       newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
-        mutate(ratio = round(`NEW`/(sum(`NEW`, na.rm = TRUE) + sum(`ESTABLISHED`, na.rm = TRUE)),2))
+        mutate(ratio = round(`NEW`/(`NEW`+`ESTABLISHED`),2))
       
       
       drop <- c("ESTABLISHED","NEW", "<NA>")
