@@ -26,7 +26,6 @@ default_resource_type <- c("Provider","Resource")
 
 default_provider <- c("LEE-WONG, MARY F", "MA, SONGHUI", "MEDICAL TECHNICIANS ALLERGY", "TEITEL, MICHAEL G.", "YOST, SHARON LYNN")
 
-
 default_visit_method <-    filters %>% filter(CAMPUS %in% default_campus & 
                                                   CAMPUS_SPECIALTY %in% default_specialty & 
                                                   DEPARTMENT %in% default_departments &
@@ -913,11 +912,11 @@ ui <- dashboardPage(
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            br(),
                            fluidRow(
-                             column(3, uiOutput("apptTypeControl")),
-                             column(3, uiOutput("insuranceControl")),
-                             column(3, valueBoxOutput("avgDailyNoShow_Count", width = 12) %>%
+                             #column(3, uiOutput("apptTypeControl")),
+                             column(4, uiOutput("insuranceControl")),
+                             column(4, valueBoxOutput("avgDailyNoShow_Count", width = 12) %>%
                                       withSpinner(type = 5, color = "#d80b8c")),
-                             column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
+                             column(4, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
                            tags$em("*No Show Rate = (No Show + Same-day Canceled)  / (Arrived + No Show + Same-day Canceled)")
                            # h5("No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")
                          ),

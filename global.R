@@ -662,22 +662,23 @@ groupByFilters_access_npr <- function(dt, campus, specialty, department, resourc
 #   return(result)
 # }
 
-groupByFilters_1 <- function(dt, apptType, insurance){
+groupByFilters_1 <- function(dt, insurance){
+#groupByFilters_1 <- function(dt, apptType, insurance){
   result <- dt %>% filter(COVERAGE %in% insurance)
   
-  if("New" %in% apptType && "Established" %in% apptType){
-    result <- result %>% filter(NEW_PT2 %in% c("NEW", "ESTABLISHED"))
-  }
-  if("New" %in% apptType && !("Established" %in% apptType)){
-    result <- result %>% filter(NEW_PT2 == "NEW")
-  }
-  if(!("New" %in% apptType) && ("Established" %in% apptType)){
-    result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
-  }
-  
-  if(!("New" %in% apptType) && !("Established" %in% apptType)){
-    result <- result
-  }
+  # if("New" %in% apptType && "Established" %in% apptType){
+  #   result <- result %>% filter(NEW_PT2 %in% c("NEW", "ESTABLISHED"))
+  # }
+  # if("New" %in% apptType && !("Established" %in% apptType)){
+  #   result <- result %>% filter(NEW_PT2 == "NEW")
+  # }
+  # if(!("New" %in% apptType) && ("Established" %in% apptType)){
+  #   result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
+  # }
+  # 
+  # if(!("New" %in% apptType) && !("Established" %in% apptType)){
+  #   result <- result
+  #}
   # if("Established" %in% apptType){
   #   result <- result %>% filter(NEW_PT2 == "ESTABLISHED")
   #   print("est")

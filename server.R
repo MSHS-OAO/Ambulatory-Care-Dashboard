@@ -4190,7 +4190,8 @@ server <- function(input, output, session) {
   
   incompleteAppts_num <- reactive({
     data <- dataArrivedNoShow()
-    numerator <- data %>% filter(APPT_STATUS == "No Show") %>% summarize(n()) %>% collect()
+    
+    numerator <- data %>% filter(APPT_STATUS %in% c("Rescheduled", "Canceled", "Bumped", "No Show")) %>% summarize(n()) %>% collect()
     denominator <- data %>% summarize(n()) %>% collect()
     num <- prettyNum(round(numerator/denominator,2)*100, big.mark = ",")
   })
@@ -4209,6 +4210,9 @@ server <- function(input, output, session) {
   output$schedulingStatusSummary <- renderPlot({
     
     data <- dataArrivedNoShow()
+    
+    noshow_test <<- dataArrivedNoShow()
+    test_data <<- dataArrived()
     # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     
     # total_arrived <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>% 
@@ -4219,7 +4223,7 @@ server <- function(input, output, session) {
     #   summarise(value = round(n()/length(unique(kpi.all.data[arrived.data.rows,]$Appt.DateYear)))) %>%
     #   arrange(desc(value)) 
     data <- data %>% select(APPT_STATUS, APPT_DATE_YEAR) %>% collect()
-    total_arrived <- dataArrived() %>% select(APPT_DATE_YEAR) %>% collect()
+    total_arrived <- data %>% select(APPT_DATE_YEAR) %>% collect()
     
     sameDay <- data %>%
       group_by(APPT_STATUS) %>%
@@ -4371,30 +4375,30 @@ server <- function(input, output, session) {
   })
   
   # Reactive Filters for Scheduling Tab: Appointment Type & Insurance 
-  output$apptTypeControl <- renderUI({
-    
-    box(
-      title = NULL,
-      width = 12, 
-      solidHeader = FALSE,
-      pickerInput("selectedApptType", label=h4("Select Visit Type:"),
-                  choices = c("New", "Established"),#sort(unique(dataAll()$Appt.Type)),
-                  #choices = sort(unique(dataAll()$Appt.Type), na.last = TRUE),
-                  # choices=sort(unique(dataAll()$Appt.Type)),
-                  multiple=TRUE,
-                  options = pickerOptions(
-                    liveSearch = TRUE,
-                    actionsBox = TRUE,
-                    selectedTextFormat = "count > 1",
-                    countSelectedText = "{0}/{1} Visit Types",
-                    dropupAuto = FALSE),
-                  selected = c("New", "Established")
-                  #selected = unique(dataAll()$Appt.Type)
-                  #selected = sort(unique(dataAll()$Appt.Type), na.last = TRUE)
-      )
-    )
-  })
-  
+  # output$apptTypeControl <- renderUI({
+  #   
+  #   box(
+  #     title = NULL,
+  #     width = 12, 
+  #     solidHeader = FALSE,
+  #     pickerInput("selectedApptType", label=h4("Select Visit Type:"),
+  #                 choices = c("New", "Established"),#sort(unique(dataAll()$Appt.Type)),
+  #                 #choices = sort(unique(dataAll()$Appt.Type), na.last = TRUE),
+  #                 # choices=sort(unique(dataAll()$Appt.Type)),
+  #                 multiple=TRUE,
+  #                 options = pickerOptions(
+  #                   liveSearch = TRUE,
+  #                   actionsBox = TRUE,
+  #                   selectedTextFormat = "count > 1",
+  #                   countSelectedText = "{0}/{1} Visit Types",
+  #                   dropupAuto = FALSE),
+  #                 selected = c("New", "Established")
+  #                 #selected = unique(dataAll()$Appt.Type)
+  #                 #selected = sort(unique(dataAll()$Appt.Type), na.last = TRUE)
+  #     )
+  #   )
+  # })
+  # 
   output$insuranceControl <- renderUI({
     
     box(
@@ -4422,14 +4426,16 @@ server <- function(input, output, session) {
     data <- dataArrivedNoShow()
     #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
     groupByFilters_1(data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")),
-                     input$selectedApptType, input$selectedInsurance)
+                     #input$selectedApptType, 
+                     input$selectedInsurance)
   })
   
   dataNoShow_1 <- reactive({
     data <- dataNoShow()
     #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
     groupByFilters_1(data %>% filter(APPT_STATUS %in% c("No Show", "Canceled")),
-                     input$selectedApptType, input$selectedInsurance
+                     #input$selectedApptType,
+                     input$selectedInsurance
     )
   })
   
@@ -4669,7 +4675,6 @@ server <- function(input, output, session) {
   # Avg Daily Canceled/Bumped/Rescheduled Appointments 
   output$avgDailyBumpedBox <- renderValueBox({
     
-    start_date <<- Sys.time()
     
     data <- dataCanceledBumpedRescheduled()
     # data <- canceled.bumped.rescheduled.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "OB/GYN") 
@@ -4924,7 +4929,6 @@ server <- function(input, output, session) {
     
     top10 <- as.vector(top10$CANCEL_REASON)
     
-    end_date <<- Sys.time()
     
     if(input$percent == FALSE){
       
@@ -7240,22 +7244,21 @@ server <- function(input, output, session) {
       select(CYCLETIME, NEW_PT3, APPT_TYPE, BIN_CYCLE) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
-    
-    
+ 
     data <- data %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
       group_by(BIN_CYCLE, NEW_PT3) %>% summarise(total_bin = n()) %>% 
       ungroup() %>%
       mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_CYCLE, NEW_PT3) %>%
       mutate(percent = total_bin / total) %>%
       mutate(BIN_CYCLE = as.numeric(BIN_CYCLE))
+
     
     
     
     
     main_rows <- seq(0, 480, by= 30)
-    
-    rows_to_be_included <- which(!main_rows %in% data$BIN_CYCLE)
-    
+
+    rows_to_be_included <- which(!main_rows %in% data$BIN_CYCLE)    
     
     if (length(rows_to_be_included)>0){
       for (i in rows_to_be_included){
@@ -7268,12 +7271,13 @@ server <- function(input, output, session) {
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
+
     data <- data %>%  group_by(BIN_CYCLE, NEW_PT3) %>%
       mutate(BIN_CYCLE = factor(BIN_CYCLE, levels = sort(BIN_CYCLE)))
     
     #data$BIN_CYCLE <- factor(data$BIN_CYCLE,levels = sort(data$BIN_CYCLE))
     
-    
+
     ggplot(aes(x = BIN_CYCLE , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
       geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
@@ -7345,8 +7349,8 @@ server <- function(input, output, session) {
     main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
     
     rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
-    
-    
+
+       
     if (length(rows_to_be_included)>0){
        for (i in rows_to_be_included){
           data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
@@ -7355,9 +7359,9 @@ server <- function(input, output, session) {
     }
   
     data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
-    
-    
+
     graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
+
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointments\nCheck-in to Visit-end Time**"),
@@ -7428,6 +7432,7 @@ server <- function(input, output, session) {
     main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
     
     rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
+
     
     if (length(rows_to_be_included)>0){
       for (i in rows_to_be_included){
@@ -7436,9 +7441,9 @@ server <- function(input, output, session) {
     
     data_cycle[is.na(data_cycle)] <- 0
     }
-    
-    
+
     data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
+
 
 
     # if(length(unique(appt.type.data$APPT_TYPE)) == 1){
@@ -7446,7 +7451,6 @@ server <- function(input, output, session) {
     # } else{
     #   appt.type <- "Established*"
     # }
-
 
     graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
@@ -7816,21 +7820,20 @@ ggplot(data_base,
       filter(!is.na(NEW_PT3))
     
     
+
     data <- data %>% select(CHECKINTOROOMIN, NEW_PT3, BIN_ROOMIN) %>%
       group_by(BIN_ROOMIN, NEW_PT3) %>% summarise(total_bin = n()) %>% 
       ungroup() %>%
       mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_ROOMIN, NEW_PT3) %>%
       mutate(percent = total_bin / total) %>%
       mutate(BIN_ROOMIN = as.numeric(BIN_ROOMIN))
-    
-    
-    
+
     
     main_rows <- seq(0, 480, by= 30)
     
     rows_to_be_included <- which(!main_rows %in% data$BIN_ROOMIN)
-    
-    
+
+
     if (length(rows_to_be_included)>0){
       for (i in rows_to_be_included){
         data[nrow(data) + 1 , 1] <- main_rows[i]
@@ -7842,12 +7845,14 @@ ggplot(data_base,
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
+
     data <- data %>%  group_by(BIN_ROOMIN, NEW_PT3) %>%
       mutate(BIN_ROOMIN = factor(BIN_ROOMIN, levels = sort(BIN_ROOMIN)))
     
     #data$bin <- factor(data$bin,levels = sort(data$bin))
     
     
+
     ggplot(aes(x = BIN_ROOMIN , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
       geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
@@ -7872,6 +7877,7 @@ ggplot(data_base,
     # data <- data_test %>% filter(CHECKINTOROOMIN >= 0) %>%
     #   filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
     
+
 
     data_cycle <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
       select(CHECKINTOROOMIN, BIN_ROOMIN) %>%
@@ -7969,6 +7975,7 @@ ggplot(data_base,
     main_rows <- seq(0, 480, by= 30)
     
     rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN)
+
     
     if (length(rows_to_be_included > 0)){
       
@@ -7979,7 +7986,7 @@ ggplot(data_base,
       
       data_cycle[is.na(data_cycle)] <- 0
     }
-    
+
     data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
     ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
