@@ -4211,8 +4211,6 @@ server <- function(input, output, session) {
     
     data <- dataArrivedNoShow()
     
-    noshow_test <<- dataArrivedNoShow()
-    test_data <<- dataArrived()
     # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     
     # total_arrived <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>% 
@@ -10560,7 +10558,7 @@ ggplot(data_base,
     #waitTime <- dataAll %>% mutate(wait.time= as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2)))
     #waitTime <- waitTime  %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
-    data_access <-  dataArrived_access()
+    data_access <-  dataAll_access()
     #data_access <- arrived.data.rows.old %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     
    
