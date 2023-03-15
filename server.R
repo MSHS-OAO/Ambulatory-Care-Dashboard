@@ -9256,17 +9256,17 @@ ggplot(data_base,
       
       
       #### Get total by summarising all columns with months in them 
-      # tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
+      tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+
+      newpatients.ratio <- full_join(newpatients.ratio,tot)
       
-      #newpatients.ratio <- full_join(newpatients.ratio,tot)
-      
-      newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
     }else{
       
@@ -9292,17 +9292,17 @@ ggplot(data_base,
       
       
       ##### sum all the columns with months in them to get the Totoal for the month
-      # tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
-      # 
-      # newpatients.ratio <- full_join(newpatients.ratio,tot)
+      tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+
+      newpatients.ratio <- full_join(newpatients.ratio,tot)
       
-      newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       
     }
