@@ -8681,16 +8681,16 @@ ggplot(data_base,
        # summarise_at(vars(-!!breakdown_filters), sum) #%>%
         #relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
-      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
-      # volume <- full_join(volume,tot)
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+      volume <- full_join(volume,tot)
       
-      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       #### GEt rowSUms of all columns with months
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
@@ -8730,19 +8730,19 @@ ggplot(data_base,
       volume[is.na(volume)] <- 0
       
       
-      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum)  %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum)  %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
-      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-                  split( .[,tot_cols] ) %>%
-                  purrr::map_df(., janitor::adorn_totals)
+      # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #             split( .[,tot_cols] ) %>%
+      #             purrr::map_df(., janitor::adorn_totals)
       
       #test <- volume %>% group_by(CAMPUS_SPECIALTY, DEPARTMENT) %>% adorn_totals()
       
       
-      #volume <- full_join(volume, tot) 
+      volume <- full_join(volume, tot) 
       
       ### Get average total by adding all the numbers in the months columns grouped by the volume filters
       #### Also added a column named by the breakdown filter to store the number Avergae Total NUmber
@@ -9000,18 +9000,18 @@ ggplot(data_base,
       volume <- full_join(volume_new,volume_est)
       
       #### Get total for each moth by adding all columns with months 
-      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
-      # 
-      # volume <- full_join(volume,tot)
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+
+      volume <- full_join(volume,tot)
       
       
-      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       #### GEt rowSUms of all columns with months
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
@@ -9030,17 +9030,17 @@ ggplot(data_base,
       volume[is.na(volume)] <- 0
       
       #### Sum all cloumns with months to get the total for the month
-      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+
+      volume <- full_join(volume,tot)
       
-      
-      #volume <- full_join(volume,tot)
-      
-      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
@@ -9914,15 +9914,15 @@ ggplot(data_base,
                     values_fill = 0) 
       
       #### Get total by summing all columns that are months
-      # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) 
-        #relocate(all_of(breakdown_filters), .after = !!compare_filters)
+       tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+         summarise_at(vars(-!!breakdown_filters), sum) 
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
-      #waitTime <- full_join(waitTime,tot)
+      waitTime <- full_join(waitTime,tot)
       
-      waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       
     }else{
@@ -9951,16 +9951,16 @@ ggplot(data_base,
                     values_fill = 0)
       
       
-      # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
-      # waitTime <- full_join(waitTime,tot) 
+      tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+      waitTime <- full_join(waitTime,tot)
       
-      waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       
       
