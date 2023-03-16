@@ -8687,6 +8687,7 @@ ggplot(data_base,
         relocate(all_of(breakdown_filters), .after = !!compare_filters)
 
       volume <- full_join(volume,tot)
+      volume <- volume %>% arrange(across(all_of(tot_cols)))
       
       # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
@@ -8743,6 +8744,7 @@ ggplot(data_base,
       
       
       volume <- full_join(volume, tot) 
+      volume <- volume %>% arrange(across(all_of(tot_cols)))
       
       ### Get average total by adding all the numbers in the months columns grouped by the volume filters
       #### Also added a column named by the breakdown filter to store the number Avergae Total NUmber
@@ -9007,7 +9009,7 @@ ggplot(data_base,
 
 
       volume <- full_join(volume,tot)
-      
+      volume <- volume %>% arrange(across(all_of(tot_cols)))
       
       # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
@@ -9037,6 +9039,7 @@ ggplot(data_base,
 
 
       volume <- full_join(volume,tot)
+      volume <- volume %>% arrange(across(all_of(tot_cols)))
       
       # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
@@ -9263,6 +9266,7 @@ ggplot(data_base,
 
 
       newpatients.ratio <- full_join(newpatients.ratio,tot)
+      newpatients.ratio <- newpatients.ratio %>% arrange(across(all_of(tot_cols)))
       
       # newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
@@ -9300,10 +9304,12 @@ ggplot(data_base,
 
       newpatients.ratio <- full_join(newpatients.ratio,tot)
       
+      newpatients.ratio <- newpatients.ratio %>% arrange(across(all_of(tot_cols)))
+      
       # newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
       #   purrr::map_df(., janitor::adorn_totals)
-      
+      # 
       
     }
     
@@ -9920,6 +9926,8 @@ ggplot(data_base,
       
       waitTime <- full_join(waitTime,tot)
       
+      waitTime <- waitTime %>% arrange(across(all_of(tot_cols)))
+      
       # waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
       #   purrr::map_df(., janitor::adorn_totals)
@@ -9957,6 +9965,7 @@ ggplot(data_base,
         relocate(all_of(breakdown_filters), .after = !!compare_filters)
 
       waitTime <- full_join(waitTime,tot)
+      waitTime <- waitTime %>% arrange(across(all_of(tot_cols)))
       
       # waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
