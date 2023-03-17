@@ -6452,14 +6452,14 @@ server <- function(input, output, session) {
   
   # New Patient Ratio by Department
   output$newPtRatioByDept <- renderPlot({
-    data <- dataArrived_access()
-    # data <- kpi.all.data[arrived.data.rows,]
+    data <- dataArrived_access_npr()
+    # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
 
     newpatients.ratio <- data %>%
-      group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
-      dplyr::summarise(Total = n()) %>% collect() %>%
-      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
-      spread(NEW_PT3, Total) %>%
+      group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
+      mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
+      spread(NEW_PT2, Total) %>%
       replace(is.na(.), 0)
 
     
@@ -6497,20 +6497,20 @@ server <- function(input, output, session) {
   
   # New Patient Ratio by Provideer
   output$newPtRatioByProv <- renderPlot({
-    data <- dataArrived_access()
-    # data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
+    data <- dataArrived_access_npr()
+    #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
     newpatients.ratio <- data %>%
-      group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
-      dplyr::summarise(Total = n()) %>% collect() %>%
-      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
-      group_by(PROVIDER,APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
+      group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
+      mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
+      group_by(PROVIDER,APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = n()) %>%
-      spread(NEW_PT3, Total)
+      spread(NEW_PT2, Total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
-    newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
+    newpatients.ratio <-  newpatients.ratio %>% mutate(ratio = round(`NEW` / (`ESTABLISHED` + `NEW`), 2))
     #newpatients.ratio$Appt.MonthYear <- as.Date(paste0(newpatients.ratio$Appt.MonthYear, "-01"), format="%Y-%m-%d") ## Create date-year column
     
     ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group = PROVIDER)) +
@@ -10562,7 +10562,7 @@ ggplot(data_base,
     
     ### Calculate new patient ratio by breakdown
     newpatients.ratio <- newpatients.ratio %>% group_by(APPT_MADE_MONTH_YEAR) %>%
-      mutate(ratio = paste0(round(`NEW`/(sum(`NEW`, na.rm = TRUE) + sum(`ESTABLISHED`, na.rm = TRUE)), 2)*100, "%")) 
+      mutate(ratio = paste0(round(`NEW`/(`NEW`+`ESTABLISHED`), 2)*100, "%")) 
       
     
     #newpatients.ratio <- newpatients.ratio %>% group_by(Appt.MonthYear) %>%
