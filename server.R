@@ -4211,8 +4211,6 @@ server <- function(input, output, session) {
     
     data <- dataArrivedNoShow()
     
-    noshow_test <<- dataArrivedNoShow()
-    test_data <<- dataArrived()
     # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     
     # total_arrived <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>% 
@@ -8683,16 +8681,17 @@ ggplot(data_base,
        # summarise_at(vars(-!!breakdown_filters), sum) #%>%
         #relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
-      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
-      # volume <- full_join(volume,tot)
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+      volume <- full_join(volume,tot)
+      volume <- volume %>% arrange(across(all_of(tot_cols)))
       
-      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       #### GEt rowSUms of all columns with months
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
@@ -8732,19 +8731,20 @@ ggplot(data_base,
       volume[is.na(volume)] <- 0
       
       
-      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum)  %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum)  %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
-      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-                  split( .[,tot_cols] ) %>%
-                  purrr::map_df(., janitor::adorn_totals)
+      # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #             split( .[,tot_cols] ) %>%
+      #             purrr::map_df(., janitor::adorn_totals)
       
       #test <- volume %>% group_by(CAMPUS_SPECIALTY, DEPARTMENT) %>% adorn_totals()
       
       
-      #volume <- full_join(volume, tot) 
+      volume <- full_join(volume, tot) 
+      volume <- volume %>% arrange(across(all_of(tot_cols)))
       
       ### Get average total by adding all the numbers in the months columns grouped by the volume filters
       #### Also added a column named by the breakdown filter to store the number Avergae Total NUmber
@@ -9002,18 +9002,18 @@ ggplot(data_base,
       volume <- full_join(volume_new,volume_est)
       
       #### Get total for each moth by adding all columns with months 
-      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
-      # 
-      # volume <- full_join(volume,tot)
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+
+      volume <- full_join(volume,tot)
+      volume <- volume %>% arrange(across(all_of(tot_cols)))
       
-      
-      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       #### GEt rowSUms of all columns with months
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
@@ -9032,17 +9032,18 @@ ggplot(data_base,
       volume[is.na(volume)] <- 0
       
       #### Sum all cloumns with months to get the total for the month
-      # tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      tot <- volume %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+
+      volume <- full_join(volume,tot)
+      volume <- volume %>% arrange(across(all_of(tot_cols)))
       
-      
-      #volume <- full_join(volume,tot)
-      
-      volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # volume <-  volume %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       
       volume$Total <- rowSums(volume[setdiff(names(volume),cols)])
@@ -9219,7 +9220,7 @@ ggplot(data_base,
       
       #### Calulate new patient ratio for the whole month sum of all new patients within the month divide by sum of new and established patients
       newpatients.ratio.new <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
-        mutate(ratio = round(NEW/(sum(NEW, na.rm = TRUE) + sum(ESTABLISHED, na.rm = TRUE)),2))
+        mutate(ratio = round(`NEW`/(`NEW`+ `ESTABLISHED`),2))
       
       
       
@@ -9258,17 +9259,18 @@ ggplot(data_base,
       
       
       #### Get total by summarising all columns with months in them 
-      # tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
+      tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+
+      newpatients.ratio <- full_join(newpatients.ratio,tot)
+      newpatients.ratio <- newpatients.ratio %>% arrange(across(all_of(tot_cols)))
       
-      #newpatients.ratio <- full_join(newpatients.ratio,tot)
-      
-      newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
     }else{
       
@@ -9280,9 +9282,12 @@ ggplot(data_base,
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
+      
+      
+      
       ### Calculate new patient ratio by breakdown
       newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
-        mutate(ratio = round(`NEW`/(sum(`NEW`, na.rm = TRUE) + sum(`ESTABLISHED`, na.rm = TRUE)),2))
+        mutate(ratio = round(`NEW`/(`NEW`+`ESTABLISHED`),2))
       
       
       drop <- c("ESTABLISHED","NEW", "<NA>")
@@ -9294,18 +9299,20 @@ ggplot(data_base,
       
       
       ##### sum all the columns with months in them to get the Totoal for the month
-      # tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
-      # 
-      # newpatients.ratio <- full_join(newpatients.ratio,tot)
+      tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+
+      newpatients.ratio <- full_join(newpatients.ratio,tot)
       
-      newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      newpatients.ratio <- newpatients.ratio %>% arrange(across(all_of(tot_cols)))
       
+      # newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
+      # 
       
     }
     
@@ -9916,15 +9923,17 @@ ggplot(data_base,
                     values_fill = 0) 
       
       #### Get total by summing all columns that are months
-      # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) 
-        #relocate(all_of(breakdown_filters), .after = !!compare_filters)
+       tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+         summarise_at(vars(-!!breakdown_filters), sum) 
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
       
-      #waitTime <- full_join(waitTime,tot)
+      waitTime <- full_join(waitTime,tot)
       
-      waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      waitTime <- waitTime %>% arrange(across(all_of(tot_cols)))
+      
+      # waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       
     }else{
@@ -9953,16 +9962,17 @@ ggplot(data_base,
                     values_fill = 0)
       
       
-      # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
-      #   add_column(!!breakdown_filters := "Total") %>%
-      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
-      # 
-      # waitTime <- full_join(waitTime,tot) 
+      tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+        summarise_at(vars(-!!breakdown_filters), sum) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+
+      waitTime <- full_join(waitTime,tot)
+      waitTime <- waitTime %>% arrange(across(all_of(tot_cols)))
       
-      waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
-        split( .[,tot_cols] ) %>%
-        purrr::map_df(., janitor::adorn_totals)
+      # waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
+      #   split( .[,tot_cols] ) %>%
+      #   purrr::map_df(., janitor::adorn_totals)
       
       
       
@@ -10583,7 +10593,7 @@ ggplot(data_base,
     #waitTime <- dataAll %>% mutate(wait.time= as.numeric(round(difftime(Appt.DTTM, Appt.Made.DTTM,  units = "days"),2)))
     #waitTime <- waitTime  %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
-    data_access <-  dataArrived_access()
+    data_access <-  dataAll_access()
     #data_access <- arrived.data.rows.old %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     
    
