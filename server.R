@@ -9155,7 +9155,7 @@ ggplot(data_base,
   
   patient_ratio_month <- reactive({
     data <- dataArrived_access_npr() #%>% filter(Resource == "Provider")
-   #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Internal Medicine", "Endocrinology"))
+   #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy"))
     # compare_filters <- "Department"
     # breakdown_filters <- "Visit.Method"
     
@@ -9281,6 +9281,9 @@ ggplot(data_base,
         spread(NEW_PT2, total)
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
+      
+      
+      
       
       ### Calculate new patient ratio by breakdown
       newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
