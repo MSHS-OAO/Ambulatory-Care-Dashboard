@@ -6459,13 +6459,14 @@ server <- function(input, output, session) {
       group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
       mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
-      spread(NEW_PT2, Total) %>%
-      replace(is.na(.), 0)
+      spread(NEW_PT2, Total) 
+    
+    newpatients.ratio[is.na(newpatients.ratio)] <- 0
 
     
     print("1.5")
    
-    newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
+    newpatients.ratio <- newpatients.ratio %>% mutate(ratio = round(`NEW` / (`ESTABLISHED` + `NEW`),2))
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
     ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group=1)) +
@@ -10541,9 +10542,7 @@ ggplot(data_base,
       summarise(total = SUM(TOTAL_APPTS)) %>% collect()%>%  # it was n()
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
-      spread(NEW_PT2, total) %>%
-      drop_na()
-    
+      spread(NEW_PT2, total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
