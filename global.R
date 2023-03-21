@@ -382,6 +382,7 @@ utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_
 
 
 population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
+print("Population")
 
 ambulatory_access_tbl_summary <- tbl(poolcon_upt, "AMBULATORY_ACCESS_SUMMARY_TABLE")
 ambulatory_access_tbl_summary_npr <- tbl(poolcon_upt, "AMBULATORY_ACCESS_NPR_SUMMARY_TABLE")
