@@ -334,9 +334,13 @@ setwd(wdpath)
 #                       uid = "villea04",
 #                       pwd = "qKQvPoSilm21T*qVr")
 
-poolcon <- dbConnect(odbc(), "Oracle 21_8",
-                     uid = "villea04",
-                     pwd = "qKQvPoSilm21T*qVr")
+#poolcon <- dbConnect(odbc(), "Oracle 21_8",
+#                     uid = "villea04",
+#                     pwd = "qKQvPoSilm21T*qVr")
+
+poolcon <- dbConnect(drv = odbc()::odbc(),
+                    dsn = "OAO Cloud DB")
+
 
 poolcon_upt <- dbPool(drv = odbc::odbc(),
                       dsn= "OAO Cloud DB Staging")
