@@ -398,6 +398,7 @@ slot.data <- tbl(poolcon, "AMBULATORY_SLOT") #%>%
 #                  `Arrived Hours` = sum(ARRIVED_MINUTES, na.rm = T)/60,
 #                  `Canceled Hours` = sum(CANCELED_MINUTES, na.rm = T)/60,
 #                  `No Show Hours` = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60)
+print("slot")
 
 # holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
 # utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
@@ -842,6 +843,7 @@ daysOfWeek.options.utilization <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 ## Volume test
 
 volume_tbl <- tbl(poolcon, "VOLUME_TEST")
+print("volume")
 volume_arrived_rows <- volume_tbl %>% filter(APPT_STATUS == "Arrived")
 
 ## Filtered Scheduling Data
@@ -867,6 +869,7 @@ groupByFilters_volume <- function(dt, campus, specialty, department, resource, v
 ## Schedule Optimization Tests
 tbl_schedule <- tbl(poolcon, "SCHEDULE_OPTIMIZATION")
 arrived.data.rows.schedule <- tbl_schedule %>% filter(APPT_STATUS == "Arrived")
+print("opt")
 
 groupByFilters_schedule <- function(dt, campus, specialty, department, resource, provider, visitMethod, appt_type, mindateRange, maxdateRange, daysofweek, holidays){
   format <- "YYYY-MM-DD HH24:MI:SS"
