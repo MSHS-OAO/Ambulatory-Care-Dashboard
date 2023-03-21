@@ -359,13 +359,17 @@ poolcon_upt <- dbPool(drv = odbc::odbc(),
 
 
 historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
+print("hist")
 filters <- tbl(poolcon, "AMBULATORY_FILTERS")
+print("filters")
 library(pins) 
 board <- board_folder("/data/pin")
 filters_table <- board %>% pin_read("ambulatory_filters")
 holid <- tbl(poolcon, "HOLIDAYS")
+print("holidays")
 holid <- holid %>% distinct(HOLIDAY) %>% rename(holiday = HOLIDAY) %>% collect()
 utilization.data <- tbl(poolcon, "UTILIZATION_VIEW")
+print("util")
 
 utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_08_00",
                                                 `09:00`= "H_09_00", `10:00`= "H_10_00",
