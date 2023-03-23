@@ -5024,11 +5024,37 @@ server <- function(input, output, session) {
   
   utilization_data <- reactive({
     
-    dataUtilization <- dataUtilization() 
+    data <- dataUtilization() 
     #dataUtilization <- utilization.data  %>% filter(CAMPUS %in% default_campus, CAMPUS_SPECIALTY %in% default_specialty)
     
+    test_data <<- data
     
-    dataUtilization <- dataUtilization %>% select(SUM, APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>% collect()
+    dataUtilization <- data %>% select(SUM, APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>% collect()
+    
+    
+    
+    daysOfWeek.Table <- 
+      data %>%
+      group_by(APPT_DAY, APPT_DATE_YEAR) %>%
+      dplyr::summarise(total = n()) %>% #collect()
+      group_by(APPT_DAY) %>%
+      dplyr::summarise(count = n()) %>% 
+      collect()
+    
+    
+    space.hour.day <- data %>% group_by(APPT_DAY) %>% 
+      summarise(across(c("07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+                         "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"), ~ sum(.x, na.rm = TRUE))) %>% collect()
+    
+    
+    
+    space.hour.day <- reshape2::melt(space.hour.day, id=c("APPT_DAY"))
+    space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$APPT_DAY, space.hour.day$APPT_DAY)]
+    
+    space.hour.day$average <- round(space.hour.day$value/(space.hour.day$days*60), 1)
+    
+    space.hour.day[is.na(space.hour.day)] <- 0
+    
     
     data <- data.frame( 
       
@@ -5044,12 +5070,14 @@ server <- function(input, output, session) {
                summarise(avg = round((sum(SUM, na.rm = T)/ 
                                         (length(unique(dataUtilization$APPT_DATE_YEAR))*(60*input$setRooms)))*100)))$avg),"%"),
       
-    `Max # of rooms required during the day: `= paste0(
-        max((dataUtilization  %>%
-               select(APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>%
-               gather(Time, SUM, 2:15) %>%
-               group_by(Time) %>%
-               summarise(avg = ceiling((sum(SUM, na.rm = T)/length(unique(APPT_DATE_YEAR)))/60)))$avg))#,
+    # `Max # of rooms required during the day: `= paste0(
+    #     max((dataUtilization  %>%
+    #            select(APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>%
+    #            gather(Time, SUM, 2:15) %>%
+    #            group_by(Time) %>%
+    #            summarise(avg = ceiling((sum(SUM, na.rm = T)/length(unique(APPT_DATE_YEAR)))/60)))$avg))#,
+    
+    `Max # of rooms required during the day: `= paste0(max(ceiling(space.hour.day$average)))
     
     
     #`% Utilization (Visits per Room): `= NA, 
@@ -7238,8 +7266,10 @@ server <- function(input, output, session) {
     #   data <- rbind(data_new, data_other)
     # }
     
+    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS"& CAMPUS_SPECIALTY %in% "Allergy")
     
-    data <-  dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+    data <-  dataArrived()
+    data <-  data %>% filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
       select(CYCLETIME, NEW_PT3, APPT_TYPE, BIN_CYCLE) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
@@ -7247,7 +7277,9 @@ server <- function(input, output, session) {
     data <- data %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
       group_by(BIN_CYCLE, NEW_PT3) %>% summarise(total_bin = n()) %>% 
       ungroup() %>%
-      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_CYCLE, NEW_PT3) %>%
+      mutate(total = sum (total_bin, na.rm = TRUE)) %>%
+      group_by(BIN_CYCLE, NEW_PT3) %>%
+      #group_by(BIN_CYCLE) %>%
       mutate(percent = total_bin / total) %>%
       mutate(BIN_CYCLE = as.numeric(BIN_CYCLE))
 
@@ -7267,7 +7299,7 @@ server <- function(input, output, session) {
     }
   
     data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
-    data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    #data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
 
