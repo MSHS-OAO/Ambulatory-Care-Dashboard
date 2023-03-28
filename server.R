@@ -9867,7 +9867,7 @@ ggplot(data_base,
   
   patient_lead <- reactive({
     data <- dataAll()
-    #data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
+    #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Department"
     # breakdown_filters <- "New.PT3"
     
@@ -9956,9 +9956,20 @@ ggplot(data_base,
                     values_fill = 0) 
       
       #### Get total by summing all columns that are months
-       tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-         summarise_at(vars(-!!breakdown_filters), sum) 
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+       # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+       #   summarise_at(vars(-!!breakdown_filters), sum) 
+       #  relocate(all_of(breakdown_filters), .after = !!compare_filters)
+       #  
+        tot <- data %>%
+          filter(WAIT_TIME >= 0) %>%
+          group_by(!!!syms(tot_cols), APPT_MONTH_YEAR) %>%
+          dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
+          collect() %>%
+          add_column(!!breakdown_filters := "Total") %>%
+          relocate(all_of(breakdown_filters), .after = !!compare_filters) %>%
+          pivot_wider(names_from = APPT_MONTH_YEAR,
+                      values_from = medWaitTime,
+                      values_fill = 0)
       
       waitTime <- full_join(waitTime,tot)
       
@@ -9976,17 +9987,17 @@ ggplot(data_base,
       
       #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
       waitTime <- data %>%
-        filter(WAIT_TIME >= 0) %>%
-        group_by(!!!syms(cols),APPT_MONTH_YEAR, NEW_PT2) %>%
-        dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
-        filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
+        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
+        dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>% collect()
+        #filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
       
       
       #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
-      waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
-      waitTime <- waitTime %>% filter(NEW_PT2 == "New")
-      drop <- c("NEW_PT2")
-      waitTime = waitTime[,!(names(waitTime) %in% drop)]
+      #waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
+      #waitTime <- waitTime %>% filter(NEW_PT2 == "New")
+      #drop <- c("NEW_PT2")
+      #waitTime = waitTime[,!(names(waitTime) %in% drop)]
       
       #### Pivot the data so the months are in the columns and shows only new patient median time   
       waitTime <- waitTime %>%
@@ -9995,11 +10006,24 @@ ggplot(data_base,
                     values_fill = 0)
       
       
-      tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) %>%
-        add_column(!!breakdown_filters := "Total") %>%
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
 
+      
+      tot <- data %>%
+        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols), APPT_MONTH_YEAR) %>%
+        dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
+        collect() %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters) %>%
+        pivot_wider(names_from = APPT_MONTH_YEAR,
+                    values_from = medWaitTime,
+                    values_fill = 0)
+      
+      
       waitTime <- full_join(waitTime,tot)
       waitTime <- waitTime %>% arrange(across(all_of(tot_cols)))
       

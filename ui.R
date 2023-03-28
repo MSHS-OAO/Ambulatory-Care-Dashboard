@@ -1053,6 +1053,7 @@ ui <- dashboardPage(
                                        #                 valueBoxOutput("avgUtilization", width=12))))
                                        
                                 )),
+                              
                               boxPlus(
                                 title = "Space Utilization", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
