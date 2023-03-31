@@ -335,6 +335,7 @@ setwd(wdpath)
 #                       pwd = "qKQvPoSilm21T*qVr")
 
 
+
 #poolcon <- dbConnect(odbc(), "Oracle 21_8",
 #                     uid = "villea04",
 #                     pwd = "qKQvPoSilm21T*qVr")
@@ -342,15 +343,10 @@ setwd(wdpath)
 poolcon <- dbConnect(odbc(), "OAO Cloud DB")
 
 
+
 poolcon_upt <- dbPool(drv = odbc::odbc(),
                       dsn= "OAO Cloud DB Staging")
 
-end_time <<- Sys.time()
-
-
-dif_time <- end_time - start_time
-
-print(dif_time)
 
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
