@@ -336,9 +336,13 @@ setwd(wdpath)
 
 
 
-poolcon <- dbConnect(odbc(), "Oracle 21_8",
-                     uid = "villea04",
-                     pwd = "qKQvPoSilm21T*qVr")
+#poolcon <- dbConnect(odbc(), "Oracle 21_8",
+#                     uid = "villea04",
+#                     pwd = "qKQvPoSilm21T*qVr")
+
+poolcon <- dbConnect(odbc(), "OAO Cloud DB")
+
+
 
 poolcon_upt <- dbPool(drv = odbc::odbc(),
                       dsn= "OAO Cloud DB Staging")
@@ -359,13 +363,17 @@ poolcon_upt <- dbPool(drv = odbc::odbc(),
 
 
 historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
+print("hist")
 filters <- tbl(poolcon, "AMBULATORY_FILTERS")
+print("filters")
 library(pins) 
 board <- board_folder("/data/pin")
 filters_table <- board %>% pin_read("ambulatory_filters")
 holid <- tbl(poolcon, "HOLIDAYS")
+print("holidays")
 holid <- holid %>% distinct(HOLIDAY) %>% rename(holiday = HOLIDAY) %>% collect()
 utilization.data <- tbl(poolcon, "UTILIZATION_VIEW")
+print("util")
 
 utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_08_00",
                                                 `09:00`= "H_09_00", `10:00`= "H_10_00",
@@ -378,9 +386,12 @@ utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_
 
 
 population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
+print("Population")
 
 ambulatory_access_tbl_summary <- tbl(poolcon_upt, "AMBULATORY_ACCESS_SUMMARY_TABLE")
+print("summary")
 ambulatory_access_tbl_summary_npr <- tbl(poolcon_upt, "AMBULATORY_ACCESS_NPR_SUMMARY_TABLE")
+print("npr")
 
 
 
@@ -394,6 +405,7 @@ slot.data <- tbl(poolcon, "AMBULATORY_SLOT") #%>%
 #                  `Arrived Hours` = sum(ARRIVED_MINUTES, na.rm = T)/60,
 #                  `Canceled Hours` = sum(CANCELED_MINUTES, na.rm = T)/60,
 #                  `No Show Hours` = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60)
+print("slot")
 
 # holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
 # utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
@@ -838,6 +850,7 @@ daysOfWeek.options.utilization <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 ## Volume test
 
 volume_tbl <- tbl(poolcon, "VOLUME_TEST")
+print("volume")
 volume_arrived_rows <- volume_tbl %>% filter(APPT_STATUS == "Arrived")
 
 ## Filtered Scheduling Data
@@ -863,6 +876,7 @@ groupByFilters_volume <- function(dt, campus, specialty, department, resource, v
 ## Schedule Optimization Tests
 tbl_schedule <- tbl(poolcon, "SCHEDULE_OPTIMIZATION")
 arrived.data.rows.schedule <- tbl_schedule %>% filter(APPT_STATUS == "Arrived")
+print("opt")
 
 groupByFilters_schedule <- function(dt, campus, specialty, department, resource, provider, visitMethod, appt_type, mindateRange, maxdateRange, daysofweek, holidays){
   format <- "YYYY-MM-DD HH24:MI:SS"
