@@ -5626,7 +5626,7 @@ server <- function(input, output, session) {
       filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
       group_by(NEW_ZIP_CODE_LAYER_A) %>% summarise(total = n()) %>%
       arrange(-total) %>%
-      mutate(perc = round(total/sum(total, na.rm = T),2)*100) %>% collect()%>%
+      mutate(perc = round(total/sum(total, na.rm = T), 2)*100) %>% collect()%>%
       adorn_totals("row") %>%
       mutate(perc = paste0(perc,"%")) %>%
       `colnames<-` (c("Zip Code Layer", "total", "perc")) %>%
