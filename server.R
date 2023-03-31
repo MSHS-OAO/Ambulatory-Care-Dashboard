@@ -5024,11 +5024,37 @@ server <- function(input, output, session) {
   
   utilization_data <- reactive({
     
-    dataUtilization <- dataUtilization() 
+    data <- dataUtilization() 
     #dataUtilization <- utilization.data  %>% filter(CAMPUS %in% default_campus, CAMPUS_SPECIALTY %in% default_specialty)
     
+    test_data <<- data
     
-    dataUtilization <- dataUtilization %>% select(SUM, APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>% collect()
+    dataUtilization <- data %>% select(SUM, APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>% collect()
+    
+    
+    
+    daysOfWeek.Table <- 
+      data %>%
+      group_by(APPT_DAY, APPT_DATE_YEAR) %>%
+      dplyr::summarise(total = n()) %>% #collect()
+      group_by(APPT_DAY) %>%
+      dplyr::summarise(count = n()) %>% 
+      collect()
+    
+    
+    space.hour.day <- data %>% group_by(APPT_DAY) %>% 
+      summarise(across(c("07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+                         "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"), ~ sum(.x, na.rm = TRUE))) %>% collect()
+    
+    
+    
+    space.hour.day <- reshape2::melt(space.hour.day, id=c("APPT_DAY"))
+    space.hour.day$days <- daysOfWeek.Table$count[match(daysOfWeek.Table$APPT_DAY, space.hour.day$APPT_DAY)]
+    
+    space.hour.day$average <- round(space.hour.day$value/(space.hour.day$days*60), 1)
+    
+    space.hour.day[is.na(space.hour.day)] <- 0
+    
     
     data <- data.frame( 
       
@@ -5044,12 +5070,14 @@ server <- function(input, output, session) {
                summarise(avg = round((sum(SUM, na.rm = T)/ 
                                         (length(unique(dataUtilization$APPT_DATE_YEAR))*(60*input$setRooms)))*100)))$avg),"%"),
       
-    `Max # of rooms required during the day: `= paste0(
-        max((dataUtilization  %>%
-               select(APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>%
-               gather(Time, SUM, 2:15) %>%
-               group_by(Time) %>%
-               summarise(avg = ceiling((sum(SUM, na.rm = T)/length(unique(APPT_DATE_YEAR)))/60)))$avg))#,
+    # `Max # of rooms required during the day: `= paste0(
+    #     max((dataUtilization  %>%
+    #            select(APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>%
+    #            gather(Time, SUM, 2:15) %>%
+    #            group_by(Time) %>%
+    #            summarise(avg = ceiling((sum(SUM, na.rm = T)/length(unique(APPT_DATE_YEAR)))/60)))$avg))#,
+    
+    `Max # of rooms required during the day: `= paste0(max(ceiling(space.hour.day$average)))
     
     
     #`% Utilization (Visits per Room): `= NA, 
@@ -5598,7 +5626,7 @@ server <- function(input, output, session) {
       filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
       group_by(NEW_ZIP_CODE_LAYER_A) %>% summarise(total = n()) %>%
       arrange(-total) %>%
-      mutate(perc = round(total/sum(total, na.rm = T),2)*100) %>% collect()%>%
+      mutate(perc = round(total/sum(total, na.rm = T), 2)*100) %>% collect()%>%
       adorn_totals("row") %>%
       mutate(perc = paste0(perc,"%")) %>%
       `colnames<-` (c("Zip Code Layer", "total", "perc")) %>%
@@ -6452,20 +6480,21 @@ server <- function(input, output, session) {
   
   # New Patient Ratio by Department
   output$newPtRatioByDept <- renderPlot({
-    data <- dataArrived_access()
-    # data <- kpi.all.data[arrived.data.rows,]
+    data <- dataArrived_access_npr()
+    # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
 
     newpatients.ratio <- data %>%
-      group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
-      dplyr::summarise(Total = n()) %>% collect() %>%
-      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
-      spread(NEW_PT3, Total) %>%
-      replace(is.na(.), 0)
+      group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
+      mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
+      spread(NEW_PT2, Total) 
+    
+    newpatients.ratio[is.na(newpatients.ratio)] <- 0
 
     
     print("1.5")
    
-    newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
+    newpatients.ratio <- newpatients.ratio %>% mutate(ratio = round(`NEW` / (`ESTABLISHED` + `NEW`),2))
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
     ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group=1)) +
@@ -6497,20 +6526,20 @@ server <- function(input, output, session) {
   
   # New Patient Ratio by Provideer
   output$newPtRatioByProv <- renderPlot({
-    data <- dataArrived_access()
-    # data <- kpi.all.data[arrived.data.rows,] %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
+    data <- dataArrived_access_npr()
+    #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
     newpatients.ratio <- data %>%
-      group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
-      dplyr::summarise(Total = n()) %>% collect() %>%
-      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
-      group_by(PROVIDER,APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
+      group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
+      mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
+      group_by(PROVIDER,APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = n()) %>%
-      spread(NEW_PT3, Total)
+      spread(NEW_PT2, Total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
-    newpatients.ratio$ratio <- round(newpatients.ratio$`NEW` / (newpatients.ratio$`ESTABLISHED` + newpatients.ratio$`NEW`),2)
+    newpatients.ratio <-  newpatients.ratio %>% mutate(ratio = round(`NEW` / (`ESTABLISHED` + `NEW`), 2))
     #newpatients.ratio$Appt.MonthYear <- as.Date(paste0(newpatients.ratio$Appt.MonthYear, "-01"), format="%Y-%m-%d") ## Create date-year column
     
     ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group = PROVIDER)) +
@@ -7237,8 +7266,10 @@ server <- function(input, output, session) {
     #   data <- rbind(data_new, data_other)
     # }
     
+    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS"& CAMPUS_SPECIALTY %in% "Allergy")
     
-    data <-  dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+    data <-  dataArrived()
+    data <-  data %>% filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
       select(CYCLETIME, NEW_PT3, APPT_TYPE, BIN_CYCLE) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
@@ -7246,7 +7277,9 @@ server <- function(input, output, session) {
     data <- data %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
       group_by(BIN_CYCLE, NEW_PT3) %>% summarise(total_bin = n()) %>% 
       ungroup() %>%
-      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_CYCLE, NEW_PT3) %>%
+      mutate(total = sum (total_bin, na.rm = TRUE)) %>%
+      group_by(BIN_CYCLE, NEW_PT3) %>%
+      #group_by(BIN_CYCLE) %>%
       mutate(percent = total_bin / total) %>%
       mutate(BIN_CYCLE = as.numeric(BIN_CYCLE))
 
@@ -7266,7 +7299,7 @@ server <- function(input, output, session) {
     }
   
     data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
-    data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    #data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
 
@@ -9834,7 +9867,7 @@ ggplot(data_base,
   
   patient_lead <- reactive({
     data <- dataAll()
-    #data <- kpi.all.data[arrived.data.rows,] %>% filter(Campus.Specialty %in% c("Allergy", "Cardiology"))
+    #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Department"
     # breakdown_filters <- "New.PT3"
     
@@ -9923,9 +9956,20 @@ ggplot(data_base,
                     values_fill = 0) 
       
       #### Get total by summing all columns that are months
-       tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-         summarise_at(vars(-!!breakdown_filters), sum) 
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+       # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+       #   summarise_at(vars(-!!breakdown_filters), sum) 
+       #  relocate(all_of(breakdown_filters), .after = !!compare_filters)
+       #  
+        tot <- data %>%
+          filter(WAIT_TIME >= 0) %>%
+          group_by(!!!syms(tot_cols), APPT_MONTH_YEAR) %>%
+          dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
+          collect() %>%
+          add_column(!!breakdown_filters := "Total") %>%
+          relocate(all_of(breakdown_filters), .after = !!compare_filters) %>%
+          pivot_wider(names_from = APPT_MONTH_YEAR,
+                      values_from = medWaitTime,
+                      values_fill = 0)
       
       waitTime <- full_join(waitTime,tot)
       
@@ -9943,17 +9987,17 @@ ggplot(data_base,
       
       #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
       waitTime <- data %>%
-        filter(WAIT_TIME >= 0) %>%
-        group_by(!!!syms(cols),APPT_MONTH_YEAR, NEW_PT2) %>%
-        dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
-        filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
+        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
+        dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>% collect()
+        #filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
       
       
       #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
-      waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
-      waitTime <- waitTime %>% filter(NEW_PT2 == "New")
-      drop <- c("NEW_PT2")
-      waitTime = waitTime[,!(names(waitTime) %in% drop)]
+      #waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
+      #waitTime <- waitTime %>% filter(NEW_PT2 == "New")
+      #drop <- c("NEW_PT2")
+      #waitTime = waitTime[,!(names(waitTime) %in% drop)]
       
       #### Pivot the data so the months are in the columns and shows only new patient median time   
       waitTime <- waitTime %>%
@@ -9962,11 +10006,24 @@ ggplot(data_base,
                     values_fill = 0)
       
       
-      tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) %>%
-        add_column(!!breakdown_filters := "Total") %>%
-        relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      # tot <- waitTime %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
 
+      
+      tot <- data %>%
+        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols), APPT_MONTH_YEAR) %>%
+        dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
+        collect() %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        relocate(all_of(breakdown_filters), .after = !!compare_filters) %>%
+        pivot_wider(names_from = APPT_MONTH_YEAR,
+                    values_from = medWaitTime,
+                    values_fill = 0)
+      
+      
       waitTime <- full_join(waitTime,tot)
       waitTime <- waitTime %>% arrange(across(all_of(tot_cols)))
       
@@ -10541,9 +10598,7 @@ ggplot(data_base,
       summarise(total = SUM(TOTAL_APPTS)) %>% collect()%>%  # it was n()
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
-      spread(NEW_PT2, total) %>%
-      drop_na()
-    
+      spread(NEW_PT2, total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
@@ -10562,7 +10617,7 @@ ggplot(data_base,
     
     ### Calculate new patient ratio by breakdown
     newpatients.ratio <- newpatients.ratio %>% group_by(APPT_MADE_MONTH_YEAR) %>%
-      mutate(ratio = paste0(round(`NEW`/(sum(`NEW`, na.rm = TRUE) + sum(`ESTABLISHED`, na.rm = TRUE)), 2)*100, "%")) 
+      mutate(ratio = paste0(round(`NEW`/(`NEW`+`ESTABLISHED`), 2)*100, "%")) 
       
     
     #newpatients.ratio <- newpatients.ratio %>% group_by(Appt.MonthYear) %>%
