@@ -4287,12 +4287,13 @@ server <- function(input, output, session) {
       summarize(value = sum(value, na.rm = T))
     
     
-    ggplot(data, aes(x=Time, y=value, fill=factor(variable, levels=c("Same-day Bumped", 
+    ggplot(data, aes(x=Time, y=value, fill=factor(variable, levels=c("Arrived", "No Show",
+                                                                     "Same-day Bumped",
                                                                      "Same-day Canceled (No Show)", 
-                                                                     "Same-day Rescheduled", 
-                                                                     "No Show","Arrived"))))+
+                                                                     "Same-day Rescheduled"))))+
       geom_bar(position="stack",stat="identity", width=0.7)+
-      scale_fill_MountSinai(reverse = TRUE)+
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      #scale_fill_MountSinai(reverse = TRUE)+
       labs(x = NULL, y = "Pateints",
            title = "Average Patients by Status",
            subtitle = paste0("Based on scheduled appointment time from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
