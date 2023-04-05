@@ -5026,12 +5026,10 @@ server <- function(input, output, session) {
     
     data <- dataUtilization() 
     #dataUtilization <- utilization.data  %>% filter(CAMPUS %in% default_campus, CAMPUS_SPECIALTY %in% default_specialty)
-    
-    test_data <<- data
-    
+
     dataUtilization <- data %>% select(SUM, APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>% collect()
     
-    
+    denominator <- length(unique(dataUtilization$APPT_DATE_YEAR))
     
     daysOfWeek.Table <- 
       data %>%
@@ -5059,7 +5057,7 @@ server <- function(input, output, session) {
     data <- data.frame( 
       
     `Avg utilization per day: `= paste0(round((sum(dataUtilization$SUM))/
-                                                (length(unique(dataUtilization$APPT_DATE_YEAR))*(60*input$setHours*input$setRooms))*100),"%"),
+                                                (denominator *(60*input$setHours*input$setRooms))*100),"%"),
     
       
     `Peak utilization during the day: `= paste0(
@@ -5068,7 +5066,7 @@ server <- function(input, output, session) {
                gather(Time, SUM, 2:15) %>%
                group_by(Time) %>%
                summarise(avg = round((sum(SUM, na.rm = T)/ 
-                                        (length(unique(dataUtilization$APPT_DATE_YEAR))*(60*input$setRooms)))*100)))$avg),"%"),
+                                        (denominator *(60*input$setRooms)))*100)))$avg),"%"),
       
     # `Max # of rooms required during the day: `= paste0(
     #     max((dataUtilization  %>%
@@ -5094,9 +5092,6 @@ server <- function(input, output, session) {
                        )
     data <- rownames_to_column(data)
     #data$rowname <- NULL
-    
-    
-    
     
   })
    
