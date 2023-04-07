@@ -5719,8 +5719,8 @@ server <- function(input, output, session) {
     newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
     
     # Create a color palette with handmade bins.
-    mybins <- round(seq(min(newdata$total), max(newdata$total), length.out=5),0)
-    mypalette <- colorBin(palette=MountSinai_palettes$pinkBlue, domain=quakes$mag, na.color="transparent", bins=mybins)
+    mybins <- ceiling(seq(min(newdata$total), max(newdata$total), length.out=5))
+    mypalette <- colorBin(palette= MountSinai_palettes$pinkBlue, domain=quakes$mag, na.color="transparent", bins=mybins)
     
     # Prepare the text for the tooltip:
     mytext <- paste(
