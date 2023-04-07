@@ -4287,12 +4287,13 @@ server <- function(input, output, session) {
       summarize(value = sum(value, na.rm = T))
     
     
-    ggplot(data, aes(x=Time, y=value, fill=factor(variable, levels=c("Same-day Bumped", 
+    ggplot(data, aes(x=Time, y=value, fill=factor(variable, levels=c("Arrived", "No Show",
+                                                                     "Same-day Bumped",
                                                                      "Same-day Canceled (No Show)", 
-                                                                     "Same-day Rescheduled", 
-                                                                     "No Show","Arrived"))))+
+                                                                     "Same-day Rescheduled"))))+
       geom_bar(position="stack",stat="identity", width=0.7)+
-      scale_fill_MountSinai(reverse = TRUE)+
+      scale_fill_manual(values=MountSinai_pal("all")(10))+
+      #scale_fill_MountSinai(reverse = TRUE)+
       labs(x = NULL, y = "Pateints",
            title = "Average Patients by Status",
            subtitle = paste0("Based on scheduled appointment time from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
@@ -5025,12 +5026,26 @@ server <- function(input, output, session) {
   utilization_data <- reactive({
     
     data <- dataUtilization() 
-    #dataUtilization <- utilization.data  %>% filter(CAMPUS %in% default_campus, CAMPUS_SPECIALTY %in% default_specialty)
-    
     test_data <<- data
-    
+    #dataUtilization <- utilization.data  %>% filter(CAMPUS %in% default_campus, CAMPUS_SPECIALTY %in% default_specialty)
+
     dataUtilization <- data %>% select(SUM, APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>% collect()
     
+    # denominator <- data %>% select(APPT_DATE_YEAR) %>% 
+    #   mutate(APPT_DATE_YEAR= unique(APPT_DATE_YEAR)) %>% summarise(total= n()) %>% collect()
+    
+    denominator <- length(unique(dataUtilization$APPT_DATE_YEAR))
+    
+    
+    set_rooms <- input$setRoom
+    set_hours <- input$setHours
+    
+    utilization_day <- dataUtilization  %>%
+         select(APPT_DATE_YEAR, SUM, all_of(timeOptionsHr_filter)) %>%
+      gather(Time, SUM, all_of(timeOptionsHr_filter)) %>%
+      group_by(Time) %>%
+      summarise(avg = round((sum(SUM, na.rm = T)/
+                               (denominator *(60*set_rooms)))*100))
     
     
     daysOfWeek.Table <- 
@@ -5042,10 +5057,13 @@ server <- function(input, output, session) {
       collect()
     
     
-    space.hour.day <- data %>% group_by(APPT_DAY) %>% 
-      summarise(across(c("07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
-                         "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"), ~ sum(.x, na.rm = TRUE))) %>% collect()
+    # space.hour.day <- data %>% group_by(APPT_DAY) %>% 
+    #   summarise(across(c("07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+    #                      "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"), ~ sum(.x, na.rm = TRUE))) %>% collect()
     
+    
+    space.hour.day <- data %>% group_by(APPT_DAY) %>% 
+      summarise(across(all_of(timeOptionsHr_filter), ~ sum(.x, na.rm = TRUE))) %>% collect()
     
     
     space.hour.day <- reshape2::melt(space.hour.day, id=c("APPT_DAY"))
@@ -5059,17 +5077,16 @@ server <- function(input, output, session) {
     data <- data.frame( 
       
     `Avg utilization per day: `= paste0(round((sum(dataUtilization$SUM))/
-                                                (length(unique(dataUtilization$APPT_DATE_YEAR))*(60*input$setHours*input$setRooms))*100),"%"),
+                                                (denominator *(60*input$setHours*input$setRooms))*100),"%"),
     
       
     `Peak utilization during the day: `= paste0(
-        max((dataUtilization  %>%
-               select(APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>%
-               gather(Time, SUM, 2:15) %>%
-               group_by(Time) %>%
-               summarise(avg = round((sum(SUM, na.rm = T)/ 
-                                        (length(unique(dataUtilization$APPT_DATE_YEAR))*(60*input$setRooms)))*100)))$avg),"%"),
-      
+      max((dataUtilization  %>%
+             select(APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>%
+             gather(Time, SUM, all_of(timeOptionsHr_filter)) %>%
+             group_by(Time) %>%
+             summarise(avg = round((sum(SUM, na.rm = T)/ 
+                                      (denominator*(60*input$setRooms)))*100)))$avg),"%"),
     # `Max # of rooms required during the day: `= paste0(
     #     max((dataUtilization  %>%
     #            select(APPT_DATE_YEAR, all_of(timeOptionsHr_filter)) %>%
@@ -5094,9 +5111,6 @@ server <- function(input, output, session) {
                        )
     data <- rownames_to_column(data)
     #data$rowname <- NULL
-    
-    
-    
     
   })
    
@@ -5705,8 +5719,8 @@ server <- function(input, output, session) {
     newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
     
     # Create a color palette with handmade bins.
-    mybins <- round(seq(min(newdata$total), max(newdata$total), length.out=5),0)
-    mypalette <- colorBin(palette=MountSinai_palettes$pinkBlue, domain=quakes$mag, na.color="transparent", bins=mybins)
+    mybins <- ceiling(seq(min(newdata$total), max(newdata$total), length.out=5))
+    mypalette <- colorBin(palette= MountSinai_palettes$pinkBlue, domain=quakes$mag, na.color="transparent", bins=mybins)
     
     # Prepare the text for the tooltip:
     mytext <- paste(
