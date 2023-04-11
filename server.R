@@ -5714,14 +5714,28 @@ server <- function(input, output, session) {
     # population.data <- dataArrivedPop()
     population.data <- dataArrivedPop()
     
-    #population.data <- population_tbl %>% filter(CAMPUS_SPECIALTY== "Allergy")
+    #population.data <- population_tbl %>% filter(CAMPUS == "MSUS", CAMPUS_SPECIALTY== "Cardiology")
     
     newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
     
-    # Create a color palette with handmade bins.
-    mybins <- ceiling(seq(min(newdata$total), max(newdata$total), length.out=5))
-    mypalette <- colorBin(palette= MountSinai_palettes$pinkBlue, domain=quakes$mag, na.color="transparent", bins=mybins)
     
+    newdata <- newdata %>% 
+      mutate(bins = ifelse(total <= 10, "0- 10",
+                     ifelse(total > 10 & total <=20, "10- 20",
+                      ifelse(total > 20 & total <=30, "20- 30", 
+                       ifelse(total > 30 & total <= 40, "30- 40",
+                        ifelse(total > 40 & total <= 50, "40- 50",
+                         ifelse(total > 50 & total <= 60, "50- 60",
+                          ifelse(total > 60 & total <= 70, "60- 70",
+                           ifelse(total > 70 & total <= 80, "70- 80",
+                            ifelse(total > 80 & total <= 90, "80- 90", "> 90"))))))))))
+    
+    newdata <- newdata %>%
+      mutate(bins = factor(bins, levels= c("0- 10", "10- 20", "20- 30", "30- 40","40- 50", "50- 60", "60- 70", "70- 80", "80- 90", "> 90")))
+    # Create a color palette with handmade bins.
+    #mybins <- ceiling(seq(min(newdata$total), max(newdata$total), length.out=10))
+    #mypalette <- colorBin(palette= MountSinai_palettes$dark, domain=quakes$mag, na.color="transparent", bins=mybins)
+    mypalette <- colorFactor(palette= MountSinai_palettes$dark , levels = newdata$bins)
     # Prepare the text for the tooltip:
     mytext <- paste(
       "Total Visits: ", newdata$total, "<br/>", 
@@ -5742,11 +5756,11 @@ server <- function(input, output, session) {
       setView(lng = -73.98928, lat = 40.75042, zoom = 10) %>%
       addProviderTiles("CartoDB.Positron", options = providerTileOptions(noWrap = TRUE)) %>%
       addCircleMarkers(~LONGITUDE, ~LATITUDE, 
-                       fillColor = ~mypalette(total), fillOpacity = 0.7, color="white", radius=8, stroke=FALSE,
+                       fillColor = ~ mypalette(bins), fillOpacity = 0.7, color="white", radius=8, stroke=FALSE,
                        label = mytext,
                        labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"), textsize = "13px", direction = "auto")
       ) %>%
-      addLegend( pal=mypalette, values=~total, opacity=0.9, title = "Appointment Demand", position = "bottomright") %>%
+      addLegend( pal=mypalette, values=~bins, opacity=0.9, title = "Appointment Demand", position = "bottomright") %>%
       addAwesomeMarkers(
         lng=-73.943324, lat=40.79171,
         label='Mount Sinai Hospital',

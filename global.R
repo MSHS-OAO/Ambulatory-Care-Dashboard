@@ -156,7 +156,8 @@ MountSinai_colors <- c(
   `light purple` = "#c7c6ef",
   `light pink`   = "#fcc9e9",
   `light blue`   = "#c9f0ff",
-  `light grey`   = "#dddedd"
+  `light grey`   = "#dddedd",
+  `Cetacean Blue`= "#00002D"
 )
 
 # Function to extract Mount Sinai colors as hex codes
@@ -183,11 +184,12 @@ MountSinai_palettes <- list(
                             "med purple","med pink","med blue","med grey", 
                             "light purple","light pink","light blue","light grey"),
   
-  `dark`  = MountSinai_cols("dark purple","dark grey",
-                            "yellow","med pink","dark pink","dark blue",
-                            "med purple","med grey","med blue"),
+  `dark`  = MountSinai_cols("dark grey", "Cetacean Blue",
+                            "med pink","dark purple","dark blue",
+                            "med purple","med grey","med blue", "yellow", "dark pink" ),
   
-  `main`  = MountSinai_cols("dark purple","dark grey","dark pink","dark blue","med purple","med pink","med blue","med grey"),
+  `main`  = MountSinai_cols("dark purple","dark grey","dark pink","dark blue",
+                            "med purple","med pink","med blue","med grey"),
   
   `purple`  = MountSinai_cols("dark purple","med purple","light purple"),
   
