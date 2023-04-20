@@ -4776,7 +4776,7 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            title = "% of Bumped/Canceled/Rescheduled \nby Lead days to Appointment*",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "*Time from appointment scheduled to status changed.")+
+           caption = "*Time from scheduled appointment date to status changed.")+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
       guides(colour = guide_legend(nrow = 1))+
       geom_text(aes(label=paste0(round(perc*100),"%")), color="white", 
@@ -5714,24 +5714,24 @@ server <- function(input, output, session) {
     # population.data <- dataArrivedPop()
     population.data <- dataArrivedPop()
     
-    #population.data <- population_tbl %>% filter(CAMPUS == "MSUS", CAMPUS_SPECIALTY== "Cardiology")
+    #population.data <- population_tbl %>% filter(CAMPUS == "MSUS", CAMPUS_SPECIALTY== "Internal Medicine")
     
     newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
     
     
     newdata <- newdata %>% 
-      mutate(bins = ifelse(total <= 10, "0- 10",
-                     ifelse(total > 10 & total <=20, "10- 20",
-                      ifelse(total > 20 & total <=30, "20- 30", 
-                       ifelse(total > 30 & total <= 40, "30- 40",
-                        ifelse(total > 40 & total <= 50, "40- 50",
-                         ifelse(total > 50 & total <= 60, "50- 60",
-                          ifelse(total > 60 & total <= 70, "60- 70",
-                           ifelse(total > 70 & total <= 80, "70- 80",
-                            ifelse(total > 80 & total <= 90, "80- 90", "> 90"))))))))))
+      mutate(bins = ifelse(total <= 10, "0 - 10",
+                     ifelse(total > 10 & total <=20, "10 - 20",
+                      ifelse(total > 20 & total <=30, "20 - 30", 
+                       ifelse(total > 30 & total <= 40, "30 - 40",
+                        ifelse(total > 40 & total <= 50, "40 - 50",
+                         ifelse(total > 50 & total <= 60, "50 - 60",
+                          ifelse(total > 60 & total <= 70, "60 - 70",
+                           ifelse(total > 70 & total <= 80, "70 - 80",
+                            ifelse(total > 80 & total <= 90, "80 - 90", "> 90"))))))))))
     
     newdata <- newdata %>%
-      mutate(bins = factor(bins, levels= c("0- 10", "10- 20", "20- 30", "30- 40","40- 50", "50- 60", "60- 70", "70- 80", "80- 90", "> 90")))
+      mutate(bins = factor(bins, levels= c("0 - 10", "10 - 20", "20 - 30", "30 - 40","40 - 50", "50 - 60", "60 - 70", "70 - 80", "80 - 90", "> 90")))
     # Create a color palette with handmade bins.
     #mybins <- ceiling(seq(min(newdata$total), max(newdata$total), length.out=10))
     #mypalette <- colorBin(palette= MountSinai_palettes$dark, domain=quakes$mag, na.color="transparent", bins=mybins)
