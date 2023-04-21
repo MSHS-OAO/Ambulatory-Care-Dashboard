@@ -1,3 +1,6 @@
+saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
+saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
+
 default_campus <- "MSUS"
 default_campus_choices <- filters %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
 default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
@@ -129,7 +132,7 @@ header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),
                                                                      width = 12,
                                                                      height = "100px",
                                                                      solidHeader = FALSE,
-                                                                     pickerInput("filter_list", choices = NULL, multiple = TRUE,
+                                                                     pickerInput("filter_list", choices = saved_filter_choices, multiple = TRUE,
                                                                                  selected = NULL, options = pickerOptions(maxOptions = 1)
                                                                      ),
                                                                      actionButton("update_filters1", "CLICK TO UPDATE", width = "80%")
