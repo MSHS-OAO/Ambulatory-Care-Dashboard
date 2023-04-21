@@ -80,14 +80,20 @@ server <- function(input, output, session) {
       filter_df <- mapply(c, input$filter_name, input$selectedCampus, input$selectedSpecialty,
                           input$selectedDepartment, input$selectedResource,
                           input$selectedProvider, input$selectedVisitMethod,
-                          input$selectedPRCName, input$daysOfWeek,
+                          input$selectedPRCName, input$daysOfWeek, input$excludeHolidays,
                           SIMPLIFY = TRUE)
       filter_df <- as.data.frame(t(filter_df), row.names = FALSE)
       colnames(filter_df) <- c("Name", "Campus", "Specialty", "Department", "Resource",
-                               "Provider", "Visit Method", "Visit Type", "Days")
-      write.csv(filter_df, here::here(paste0(filter_path_full, "/" , input$filter_name, ".csv")), row.names = FALSE)
+                               "Provider", "Visit Method", "Visit Type", "Days", "Holiday")
+      # write.csv(filter_df, here::here(paste0(filter_path_full, "/" , input$filter_name, ".csv")), row.names = FALSE)
+      # 
+      # filter_list_choices <- file_path_sans_ext(list.files(path = filter_path_full, pattern = "*.csv"))
+      write_filters_db(filter_df)
       
-      filter_list_choices <- file_path_sans_ext(list.files(path = filter_path_full, pattern = "*.csv"))
+      filter_list_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
+      filter_list_choices <- sort(filter_list_choices$choices, na.last = T)
+      
+      print("after collect")
       
       updatePickerInput(session,
                         inputId = "filter_list",
