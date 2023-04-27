@@ -127,7 +127,7 @@ suppressMessages({
   library(pool)
 })
 
-#options(connectionObserver = NULL)
+options(connectionObserver = NULL)
 
 #devtools::install_github("haozhu233/kableExtra", upgrade = "never")
 
@@ -341,9 +341,14 @@ setwd(wdpath)
 #                     uid = "villea04",
 #                     pwd = "qKQvPoSilm21T*qVr")
 
+#profvis({
 print("conn start pool1")
-poolcon <- dbConnect(odbc(), "OAO Cloud DB")
+# poolcon <- dbConnect(odbc(), "OAO Cloud DB", timeout = 15)
 
+poolcon <- dbPool(drv = odbc::odbc(),
+                  dsn= "OAO Cloud DB")
+
+#})
 print("conn start pool2")
 
 poolcon_upt <- dbPool(drv = odbc::odbc(),
@@ -987,3 +992,8 @@ write_filters_db <- function(df) {
 }
 
 ambulatory_filters_tbl <- tbl(poolcon_upt, "AMBULATORY_FILTERS_SAVED")
+
+return_saved_choices <- function(df_choices, column) {
+  choices <- df_choices %>% summarise(choices_unique = unique(!!!syms(column)))
+  choices <- sort(choices$choices_unique, na.last = T)
+}

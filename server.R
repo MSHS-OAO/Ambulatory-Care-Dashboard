@@ -1,4 +1,101 @@
 server <- function(input, output, session) {
+  # observeEvent(input$dropdownbutton3, {
+  #   print("clcick button")
+  #   saved_filter_choices <- return_saved_choices(df_choices, "FILTER_NAME")
+  #   print("filter observe")
+  #   updatePickerInput(session,
+  #                     inputId = "filter_list",
+  #                     selected = NULL,
+  #                     choices = saved_filter_choices
+  #   )
+  # }, once = TRUE)
+  observeEvent(input$update_filters1,{
+    filter_name <- input$filter_list
+    #filter_name <- "MSUS_CARDIO_ALLERGY"
+    df_choices <- ambulatory_filters_tbl %>% filter(FILTER_NAME == filter_name) %>% collect()
+    
+    campus_choices <- return_saved_choices(df_choices, "CAMPUS")
+    
+    updatePickerInput(session,
+                      inputId = "selectedCampus",
+                      choices = campus_choices,
+                      selected = campus_choices
+    )
+    
+    specialty_choices <- return_saved_choices(df_choices, "SPECIALTY")
+    
+    updatePickerInput(session,
+                      inputId = "selectedSpecialty",
+                      choices = specialty_choices,
+                      selected = specialty_choices
+    )
+    
+    dept_choices <- return_saved_choices(df_choices, "DEPARTMENT")
+    
+    updatePickerInput(session,
+                      inputId = "selectedDepartment",
+                      choices = dept_choices,
+                      selected = dept_choices
+    )
+    
+    resource_choices <- return_saved_choices(df_choices, "RESOURCES")
+    
+    updatePickerInput(session,
+                      inputId = "selectedResource",
+                      choices = resource_choices,
+                      selected = resource_choices
+    )
+    
+    provider_choices <- return_saved_choices(df_choices, "PROVIDER")
+    
+    updatePickerInput(session,
+                      inputId = "selectedProvider",
+                      choices = provider_choices,
+                      selected = provider_choices
+    )
+    
+    visit_method_choices <- return_saved_choices(df_choices, "VISIT_METHOD")
+    
+    updatePickerInput(session,
+                      inputId = "selectedVisitMethod",
+                      choices = visit_method_choices,
+                      selected = visit_method_choices
+    )
+    
+    visit_type_choices <- return_saved_choices(df_choices, "VISIT_TYPE")
+    
+    updatePickerInput(session,
+                      inputId = "selectedPRCName",
+                      choices = visit_type_choices,
+                      selected = visit_type_choices
+    )
+    
+    days_choices <- return_saved_choices(df_choices, "DAYS")
+    
+    updatePickerInput(session,
+                      inputId = "daysOfWeek",
+                      choices = days_choices,
+                      selected = days_choices
+    )
+    
+    holiday_choices <- return_saved_choices(df_choices, "HOLIDAY")
+    
+    updatePickerInput(session,
+                      inputId = "excludeHolidays",
+                      choices = holiday_choices,
+                      selected = holiday_choices
+    )
+    saved_filter_choices <- return_saved_choices(df_choices, "FILTER_NAME")
+    print("filter observe")
+    updatePickerInput(session,
+                      inputId = "filter_list",
+                      selected = NULL,
+                      choices = saved_filter_choices
+    )
+    
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
   ##Test for volume
   dataArrived_volume <- eventReactive(list(input$update_filters,input$update_filters1),{
@@ -58,26 +155,34 @@ server <- function(input, output, session) {
   #   
   # })
   
-  observeEvent(input$sbm,{
-    user <- user()
-    filter_path_full <- paste0(filter_path, "/", user)
-    dir.create(file.path(filter_path, user), showWarnings = FALSE)
-    filter_choices <- file_path_sans_ext(list.files(path = filter_path_full, pattern = "*.csv"))
-    updatePickerInput(session, "filter_list", choices = filter_choices)
-  }, once = TRUE)
+  # observeEvent(input$sbm,{
+  #   user <- user()
+  #   filter_path_full <- paste0(filter_path, "/", user)
+  #   dir.create(file.path(filter_path, user), showWarnings = FALSE)
+  #   filter_choices <- file_path_sans_ext(list.files(path = filter_path_full, pattern = "*.csv"))
+  #   updatePickerInput(session, "filter_list", choices = filter_choices)
+  # }, once = TRUE)
   
   observeEvent(input$save_filters,{
     user <- user()
     
-    if(input$filter_name == ""){
+    print("collect")
+    choices <- ambulatory_filters_tbl %>% summarise(choices_unique = unique(FILTER_NAME)) %>% collect()
+    choices <- sort(choices$choices_unique, na.last = T)
+    print("after collect")
+   
+    filter_name <- input$filter_name
+    if(filter_name == ""){
       shinyalert("Please provide a name.", type = "error")
       #showNotification("Please provider a name", duration = 5, type = "error")
-    }else{
+    } else if (filter_name %in% choices){
+      shinyalert("The current name already exists, please provide a new one.", type = "error")
+    } else{
       updateTextInput(session, "filter_name", value = "")
-      print(input$filter_name)
+      print(filter_name)
       filter_path_full <- paste0(filter_path, "/", user)
       
-      filter_df <- mapply(c, input$filter_name, input$selectedCampus, input$selectedSpecialty,
+      filter_df <- mapply(c, filter_name, input$selectedCampus, input$selectedSpecialty,
                           input$selectedDepartment, input$selectedResource,
                           input$selectedProvider, input$selectedVisitMethod,
                           input$selectedPRCName, input$daysOfWeek, input$excludeHolidays,
@@ -103,7 +208,9 @@ server <- function(input, output, session) {
       filter_df
     }
     
-  })
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
  
   
