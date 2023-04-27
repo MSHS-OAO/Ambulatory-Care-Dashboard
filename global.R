@@ -127,6 +127,7 @@ suppressMessages({
   library(pool)
 })
 
+options(connectionObserver = NULL)
 
 devtools::install_github("haozhu233/kableExtra", upgrade = "never")
 
@@ -340,12 +341,14 @@ setwd(wdpath)
 #                     uid = "villea04",
 #                     pwd = "qKQvPoSilm21T*qVr")
 
+print("conn start pool1")
 poolcon <- dbConnect(odbc(), "OAO Cloud DB")
 
-
+print("conn start pool2")
 
 poolcon_upt <- dbPool(drv = odbc::odbc(),
                       dsn= "OAO Cloud DB Staging")
+print("conn end")
 
 
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
