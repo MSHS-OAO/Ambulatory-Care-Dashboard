@@ -127,7 +127,7 @@ suppressMessages({
   library(pool)
 })
 
-options(connectionObserver = NULL)
+#options(connectionObserver = NULL)
 
 devtools::install_github("haozhu233/kableExtra", upgrade = "never")
 
