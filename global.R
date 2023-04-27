@@ -129,7 +129,7 @@ suppressMessages({
 
 #options(connectionObserver = NULL)
 
-devtools::install_github("haozhu233/kableExtra", upgrade = "never")
+#devtools::install_github("haozhu233/kableExtra", upgrade = "never")
 
 #detach("package:kableExtra", unload = TRUE)
 #library(kableExtra)
