@@ -1,3 +1,4 @@
+print("ui Start")
 saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
 saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
 
@@ -157,6 +158,7 @@ header$children[[2]]$children[[1]] <-  tags$a(href='https://peak.mountsinai.org/
                                               tags$img(src='Sinai_logo_white.png',height='100%',width='30%'))
 
 
+print("ui end")
 
 ui <- dashboardPage(
   
