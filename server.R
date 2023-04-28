@@ -6255,8 +6255,9 @@ server <- function(input, output, session) {
     #(data = percent, aes(x=Month, y= Visit.Method, label=percent), size = 3, vjust = 0.5, hjust = 0.5, fontface = 'bold', position = pd)
     
     library(patchwork)
-    g3 + g4 + plot_layout(ncol = 1, heights = c(10, 1 * length(unique(pts.by.month$Visit.Method))))
+    plot <- g3 + g4 + plot_layout(ncol = 1, heights = c(10, 1 * length(unique(pts.by.month$Visit.Method))))
     
+    plot
   })
   # Average Daily Patient Volume by Day of Week
   output$volume3 <- renderPlot({

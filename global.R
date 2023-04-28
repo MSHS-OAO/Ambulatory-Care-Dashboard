@@ -343,10 +343,10 @@ setwd(wdpath)
 
 #profvis({
 print("conn start pool1")
-# poolcon <- dbConnect(odbc(), "OAO Cloud DB", timeout = 15)
+poolcon <- dbConnect(odbc(), "OAO Cloud DB", timeout = 15)
 
-poolcon <- dbPool(drv = odbc::odbc(),
-                  dsn= "OAO Cloud DB")
+# poolcon <- dbPool(drv = odbc::odbc(),
+#                   dsn= "OAO Cloud DB")
 
 #})
 print("conn start pool2")
@@ -1096,8 +1096,8 @@ dateRangeSlot_start <- dateRange_min
 # dateRangeSlot_end <- as.Date(dateRangeSlot_end$MAXDATE, format="%Y-%m-%d")
 dateRangeSlot_end <- dateRange_max
 
-dateRangepop_max <- glue("Select max(APPT_DTTM) AS maxDate FROM AMBULATORY_POPULATION")
-dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
+dateRangepop_max <- glue("Select max(APPT_DATE_YEAR) AS maxDate FROM AMBULATORY_POPULATION")
+dateRangepop_max <- dbGetQuery(poolcon_upt, dateRangepop_max)
 dateRangepop_max <- as.Date(dateRangepop_max$MAXDATE, format="%Y-%m-%d")
 
 # dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_POPULATION")
