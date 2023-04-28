@@ -4889,7 +4889,7 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            title = "% of Bumped/Canceled/Rescheduled \nby Lead days to Appointment*",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "*Time from appointment scheduled to status changed.")+
+           caption = "*Time from scheduled appointment date to status changed.")+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
       guides(colour = guide_legend(nrow = 1))+
       geom_text(aes(label=paste0(round(perc*100),"%")), color="white", 
