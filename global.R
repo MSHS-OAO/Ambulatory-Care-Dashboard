@@ -997,3 +997,168 @@ return_saved_choices <- function(df_choices, column) {
   choices <- df_choices %>% summarise(choices_unique = unique(!!!syms(column)))
   choices <- sort(choices$choices_unique, na.last = T)
 }
+
+
+
+##### UI Global Variables
+print("ui Start")
+saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
+saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
+
+default_campus <- "MSUS"
+default_campus_choices <- filters %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
+default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
+
+default_specialty_choices <-  filters %>% filter(CAMPUS %in% default_campus) %>% select( CAMPUS_SPECIALTY)  %>%
+  summarise(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+default_specialty_choices <- sort(default_specialty_choices$CAMPUS_SPECIALTY, na.last = T)
+
+default_specialty <- "Allergy"
+
+
+default_departments <-  filters %>% filter(CAMPUS %in% default_campus & 
+                                             CAMPUS_SPECIALTY %in% default_specialty) %>% select( DEPARTMENT)  %>%
+  summarise(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
+default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
+
+
+default_resource_type <- c("Provider","Resource")
+
+# default_provider <-   filters %>% filter(CAMPUS %in% default_campus & 
+#                                                      CAMPUS_SPECIALTY %in% default_specialty& 
+#                                                      DEPARTMENT %in% default_departments ) %>% 
+#   select(PROVIDER)  %>% 
+#   summarise(PROVIDER= unique(PROVIDER)) %>% collect()
+# default_provider <- sort(default_provider$PROVIDER, na.last = T)
+
+default_provider <- c("LEE-WONG, MARY F", "MA, SONGHUI", "MEDICAL TECHNICIANS ALLERGY", "TEITEL, MICHAEL G.", "YOST, SHARON LYNN")
+
+default_visit_method <-    filters %>% filter(CAMPUS %in% default_campus & 
+                                                CAMPUS_SPECIALTY %in% default_specialty & 
+                                                DEPARTMENT %in% default_departments &
+                                                PROVIDER %in% default_provider) %>% 
+  select( VISIT_METHOD)  %>% 
+  summarise(VISIT_METHOD= unique(VISIT_METHOD)) %>% collect()
+default_visit_method <- sort(default_visit_method$VISIT_METHOD, na.last = T)
+
+
+
+default_PRC_name <-  filters %>% filter(CAMPUS %in% default_campus & 
+                                          CAMPUS_SPECIALTY %in% default_specialty & 
+                                          DEPARTMENT %in% default_departments &
+                                          PROVIDER %in% default_provider &
+                                          VISIT_METHOD %in% default_visit_method) %>% 
+  select(APPT_TYPE )  %>% 
+  summarise(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+default_PRC_name <- sort(default_PRC_name$APPT_TYPE, na.last = T) 
+
+
+# util_date_start = min(utilization.data$Appt.DateYear)
+# util_date_end = max(utilization.data$Appt.DateYear)
+
+# util_date_start <- utilization.data %>% select(APPT_DATE_YEAR) %>% summarise(start = min(APPT_DATE_YEAR, na.rm = T)) %>% collect()
+# util_date_start <- format(util_date_start$start, "%Y-%m-%d")
+# 
+# util_date_end <- utilization.data %>% select(APPT_DATE_YEAR) %>% summarise(start = max(APPT_DATE_YEAR, na.rm = T)) %>% collect()
+# util_date_end <- format(util_date_end$start, "%Y-%m-%d")
+
+
+
+dateRange_max <- max_date_arrived
+
+
+
+# dateRange_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_ACCESS WHERE APPT_STATUS = 'Arrived'")
+# dateRange_min <- dbGetQuery(poolcon, dateRange_min)
+# dateRange_min <- as.Date(dateRange_min$MINDATE, format="%Y-%m-%d")
+dateRange_min <- "2021-01-01"
+dateRange_min <- as.Date(dateRange_min, format="%Y-%m-%d")
+
+util_date_start <- dateRange_min
+util_date_end <- dateRange_max
+
+# dateRange_start <-  dateRange_min
+today <- Sys.Date() %m-% months(6)
+dateRange_start <- as.Date(paste0(format(today, "%Y-%m"), "-01"), "%Y-%m-%d")
+
+dateRangeKpi_start = dateRange_min 
+dateRangeKpi_end = dateRange_max
+dateRangeKpi_min = dateRange_min
+dateRangeKpi_max = dateRange_max
+
+# dateRangeSlot_start <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_SLOT")
+# dateRangeSlot_start <- dbGetQuery(poolcon, dateRangeSlot_start)
+# dateRangeSlot_start <- as.Date(dateRangeSlot_start$MINDATE, format="%Y-%m-%d")
+dateRangeSlot_start <- dateRange_min
+
+# dateRangeSlot_end <- glue("Select max(APPT_DTTM) AS maxDate FROM AMBULATORY_SLOT")
+# dateRangeSlot_end <- dbGetQuery(poolcon, dateRangeSlot_end)
+# dateRangeSlot_end <- as.Date(dateRangeSlot_end$MAXDATE, format="%Y-%m-%d")
+dateRangeSlot_end <- dateRange_max
+
+dateRangepop_max <- glue("Select max(APPT_DTTM) AS maxDate FROM AMBULATORY_POPULATION")
+dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
+dateRangepop_max <- as.Date(dateRangepop_max$MAXDATE, format="%Y-%m-%d")
+
+# dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_POPULATION")
+# dateRangepop_min <- dbGetQuery(poolcon, dateRangepop_min)
+# dateRangepop_min <- as.Date(dateRangepop_min$MINDATE, format="%Y-%m-%d")
+dateRangepop_min <- dateRange_min
+
+
+header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),
+                            disable = FALSE,
+                            titleWidth = 400,
+                            tags$li(class = "dropdown", actionButton("download1",
+                                                                     label = icon("download")
+                            )
+                            ),
+                            
+                            tags$li(class = "dropdown",
+                                    dropdown(
+                                      box(
+                                        title = "Bookmark Current Page:",
+                                        width = 12,
+                                        height = "200px",
+                                        solidHeader = FALSE,
+                                        h5("For naming your bookmarks please follow: 'SITE_FIRSTNAME_LASTNAME_DESC'"),#, style = "font-size:12px;"), br(),
+                                        textInput("filter_name", label = NULL),
+                                        actionButton("save_filters", "CLICK TO SAVE", width = "80%")
+                                      ), br(), br(), br(), br(), br(), br(), br(), br(),
+                                      br(), br(),
+                                      style = "material-circle", size = "lg", right = TRUE, status = "default",
+                                      icon = icon("save"), width = "300px",
+                                      inputId = "dropdownbutton4"
+                                    )
+                            ),
+                            
+                            tags$li(class = "dropdown", dropdown(box(title = "Retrieve Previously Saved Bookmark:",
+                                                                     width = 12,
+                                                                     height = "100px",
+                                                                     solidHeader = FALSE,
+                                                                     pickerInput("filter_list", choices = saved_filter_choices, multiple = TRUE,
+                                                                                 selected = NULL, options = pickerOptions(maxOptions = 1)
+                                                                     ),
+                                                                     actionButton("update_filters1", "CLICK TO UPDATE", width = "80%")
+                            ), br(), br(), br(), br(), br(), br(),
+                            br(), br(),
+                            # actionButton("remove_filters", "CLICK TO REMOVE", width = "80%"), br(), br(),
+                            style = "material-circle", size = "lg", right = TRUE, status = "default",
+                            icon = icon("star"), width = "300px",
+                            tooltip = tooltipOptions(title = "Set additional filters for graphs/tables."),
+                            inputId = "dropdownbutton3"
+                            ),
+                            )
+                            
+)
+
+#)
+
+
+
+header$children[[2]]$children[[2]] <- header$children[[2]]$children[[1]]
+header$children[[2]]$children[[1]] <-  tags$a(href='https://peak.mountsinai.org/',
+                                              tags$img(src='Sinai_logo_white.png',height='100%',width='30%'))
+
+
+print("ui end")
