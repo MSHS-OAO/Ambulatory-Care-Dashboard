@@ -6787,16 +6787,18 @@ server <- function(input, output, session) {
     print("2")
     newpatients.ratio <- data %>%
       filter(NEW_PT3 == "NEW") %>%
-        group_by(APPT_SOURCE_NEW, NEW_PT3) %>%
+        group_by(SCHEDULE_GROUPING_MAPPED, NEW_PT3) %>%
       dplyr::summarise(Total = n()) %>% collect()
 
-    newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
+    #newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
     
     newpatients.ratio$ratio <- round(newpatients.ratio$Total / sum(newpatients.ratio$Total), 2)
     
     newRatio <-
-      ggplot(newpatients.ratio, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
-                                    y=ratio, group=APPT_SOURCE_NEW, fill=APPT_SOURCE_NEW)) +
+      ggplot(newpatients.ratio, aes(x=factor(SCHEDULE_GROUPING_MAPPED
+                                             #, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
+                                             ), 
+                                    y=ratio, group=SCHEDULE_GROUPING_MAPPED, fill=SCHEDULE_GROUPING_MAPPED)) +
       geom_bar(stat="identity", width = 0.8) +
       coord_flip() +
       scale_fill_MountSinai('purple')+
