@@ -1117,7 +1117,7 @@ header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),
                             tags$li(class = "dropdown",
                                     dropdown(
                                       box(
-                                        title = "Bookmark Current Page:",
+                                        title = "Bookmark Current Filter:",
                                         width = 12,
                                         height = "200px",
                                         solidHeader = FALSE,
@@ -1132,7 +1132,7 @@ header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),
                                     )
                             ),
                             
-                            tags$li(class = "dropdown", dropdown(box(title = "Retrieve Previously Saved Bookmark:",
+                            tags$li(class = "dropdown", dropdown(box(title = "Retrieve Previously Saved Filter:",
                                                                      width = 12,
                                                                      height = "100px",
                                                                      solidHeader = FALSE,
