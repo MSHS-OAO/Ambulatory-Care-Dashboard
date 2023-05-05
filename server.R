@@ -9996,7 +9996,7 @@ ggplot(data_base,
   
   
   patient_lead <- reactive({
-    data <- dataAll()
+    data <- dataAll_access()
     #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% c("Allergy", "Cardiology"))
     # compare_filters <- "Department"
     # breakdown_filters <- "New.PT3"
@@ -10070,7 +10070,7 @@ ggplot(data_base,
       #### Filter out for wait times grater than 0 and calculate the monthly median wait time 
       waitTime <- data %>%
         filter(WAIT_TIME >= 0) %>%
-        group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+        group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
         dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
         filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
       
@@ -10081,7 +10081,7 @@ ggplot(data_base,
       
       #### Get the average daily for new patients and arrived patients 
       waitTime <- waitTime %>% 
-        pivot_wider(names_from = APPT_MONTH_YEAR,
+        pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                     values_from = medWaitTime,
                     values_fill = 0) 
       
@@ -10092,12 +10092,12 @@ ggplot(data_base,
        #  
         tot <- data %>%
           filter(WAIT_TIME >= 0) %>%
-          group_by(!!!syms(tot_cols), APPT_MONTH_YEAR) %>%
+          group_by(!!!syms(tot_cols), APPT_MADE_MONTH_YEAR) %>%
           dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
           collect() %>%
           add_column(!!breakdown_filters := "Total") %>%
           relocate(all_of(breakdown_filters), .after = !!compare_filters) %>%
-          pivot_wider(names_from = APPT_MONTH_YEAR,
+          pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                       values_from = medWaitTime,
                       values_fill = 0)
       
@@ -10118,7 +10118,7 @@ ggplot(data_base,
       #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
       waitTime <- data %>%
         filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
-        group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
+        group_by(!!!syms(cols),APPT_MADE_MONTH_YEAR) %>%
         dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>% collect()
         #filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
       
@@ -10131,7 +10131,7 @@ ggplot(data_base,
       
       #### Pivot the data so the months are in the columns and shows only new patient median time   
       waitTime <- waitTime %>%
-        pivot_wider(names_from = APPT_MONTH_YEAR,
+        pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                     values_from = medWaitTime,
                     values_fill = 0)
       
@@ -10144,12 +10144,12 @@ ggplot(data_base,
       
       tot <- data %>%
         filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
-        group_by(!!!syms(tot_cols), APPT_MONTH_YEAR) %>%
+        group_by(!!!syms(tot_cols), APPT_MADE_MONTH_YEAR) %>%
         dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
         collect() %>%
         add_column(!!breakdown_filters := "Total") %>%
         relocate(all_of(breakdown_filters), .after = !!compare_filters) %>%
-        pivot_wider(names_from = APPT_MONTH_YEAR,
+        pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                     values_from = medWaitTime,
                     values_fill = 0)
       
@@ -10202,7 +10202,9 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('Median New Patient Wait Time = median wait time of all arrived new patients within the month')
+                            # htmltools::em('Median New Patient Wait Time = median wait time of all arrived new patients within the month')
+                            htmltools::em('Median New Patient Wait Time = median wait time of scheduled new patients within the month')
+                            
                           ),
                           options = list(
                             scrollX = TRUE,
