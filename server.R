@@ -11,30 +11,53 @@ server <- function(input, output, session) {
   # }, once = TRUE)
   observeEvent(input$update_filters1,{
     filter_name <- input$filter_list
+    format <- "YYYY-MM-DD HH24:MI:SS"
+    date_start <- input$dateRange[1]
+    date_end <- input$dateRange[2]
     #filter_name <- "MSUS_CARDIO_ALLERGY"
     df_choices <- ambulatory_filters_tbl %>% filter(FILTER_NAME == filter_name) %>% collect()
     
     campus_choices <- return_saved_choices(df_choices, "CAMPUS")
     
+    default_campus_choices <- filters %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
+    default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
+    
+    
     updatePickerInput(session,
                       inputId = "selectedCampus",
-                      choices = campus_choices,
+                      choices = updated_campus_choices,
                       selected = campus_choices
     )
     
+    
     specialty_choices <- return_saved_choices(df_choices, "SPECIALTY")
+    updated_specialty_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+                                                            TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                            TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+                                select(CAMPUS_SPECIALTY) %>% 
+                                mutate(CAMPUS_SPECIALTY = unique(CAMPUS_SPECIALTY)) %>% 
+                                collect()
+    updated_specialty_choices <- sort(updated_specialty_choices$CAMPUS_SPECIALTY, na.last = T)
     
     updatePickerInput(session,
                       inputId = "selectedSpecialty",
-                      choices = specialty_choices,
+                      choices = updated_specialty_choices,
                       selected = specialty_choices
     )
     
     dept_choices <- return_saved_choices(df_choices, "DEPARTMENT")
+    updated_dept_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+                                                       CAMPUS_SPECIALTY %in% specialty_choices,
+                                                            TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                            TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+      select(DEPARTMENT) %>% 
+      mutate(DEPARTMENT = unique(DEPARTMENT)) %>% 
+      collect()
+    updated_dept_choices <- sort(updated_dept_choices$DEPARTMENT, na.last = T)
     
     updatePickerInput(session,
                       inputId = "selectedDepartment",
-                      choices = dept_choices,
+                      choices = updated_dept_choices,
                       selected = dept_choices
     )
     
@@ -42,31 +65,91 @@ server <- function(input, output, session) {
     
     updatePickerInput(session,
                       inputId = "selectedResource",
-                      choices = resource_choices,
+                      choices = c("Provider","Resource"),
                       selected = resource_choices
     )
     
     provider_choices <- return_saved_choices(df_choices, "PROVIDER")
+    updated_provider_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+                                                       CAMPUS_SPECIALTY %in% specialty_choices,
+                                                       DEPARTMENT %in% dept_choices,
+                                                       RESOURCES %in% resource_choices,
+                                                       TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                       TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+      select(PROVIDER) %>% 
+      mutate(PROVIDER = unique(PROVIDER)) %>% 
+      collect()
+    updated_provider_choices <- sort(updated_provider_choices$PROVIDER, na.last = T)
     
     updatePickerInput(session,
                       inputId = "selectedProvider",
-                      choices = provider_choices,
+                      choices = updated_provider_choices,
                       selected = provider_choices
     )
     
     visit_method_choices <- return_saved_choices(df_choices, "VISIT_METHOD")
     
+    if(length(provider_choices) >= 1000) {
+      updated_visit_method_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+                                                             CAMPUS_SPECIALTY %in% specialty_choices,
+                                                             DEPARTMENT %in% dept_choices,
+                                                             RESOURCES %in% resource_choices,
+                                                             TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                             TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+        select(VISIT_METHOD) %>% 
+        mutate(VISIT_METHOD = unique(VISIT_METHOD)) %>% 
+        collect()
+    } else {
+      updated_visit_method_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+                                                                 CAMPUS_SPECIALTY %in% specialty_choices,
+                                                                 DEPARTMENT %in% dept_choices,
+                                                                 RESOURCES %in% resource_choices,
+                                                                 PROVIDER %in% provider_choices,
+                                                                 TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                                 TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+        select(VISIT_METHOD) %>% 
+        mutate(VISIT_METHOD = unique(VISIT_METHOD)) %>% 
+        collect()
+    }
+    updated_visit_method_choices <- sort(updated_visit_method_choices$VISIT_METHOD, na.last = T)
+    
     updatePickerInput(session,
                       inputId = "selectedVisitMethod",
-                      choices = visit_method_choices,
+                      choices = updated_visit_method_choices,
                       selected = visit_method_choices
     )
     
     visit_type_choices <- return_saved_choices(df_choices, "VISIT_TYPE")
     
+    if(length(provider_choices) >= 1000) {
+      updated_visit_type_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+                                                                 CAMPUS_SPECIALTY %in% specialty_choices,
+                                                                 DEPARTMENT %in% dept_choices,
+                                                                 RESOURCES %in% resource_choices,
+                                                                 VISIT_METHOD %in% visit_method_choices,
+                                                                 TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                                 TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+        select(APPT_TYPE) %>% 
+        mutate(APPT_TYPE = unique(APPT_TYPE)) %>% 
+        collect()
+    } else {
+      updated_visit_type_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+                                                                 CAMPUS_SPECIALTY %in% specialty_choices,
+                                                                 DEPARTMENT %in% dept_choices,
+                                                                 RESOURCES %in% resource_choices,
+                                                                 PROVIDER %in% provider_choices,
+                                                                 VISIT_METHOD %in% visit_method_choices,
+                                                                 TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                                 TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+        select(APPT_TYPE) %>% 
+        mutate(APPT_TYPE = unique(APPT_TYPE)) %>% 
+        collect()
+    }
+    updated_visit_type_choices <- sort(updated_visit_type_choices$APPT_TYPE, na.last = T)
+    
     updatePickerInput(session,
                       inputId = "selectedPRCName",
-                      choices = visit_type_choices,
+                      choices = updated_visit_type_choices,
                       selected = visit_type_choices
     )
     
@@ -74,7 +157,7 @@ server <- function(input, output, session) {
     
     updatePickerInput(session,
                       inputId = "daysOfWeek",
-                      choices = days_choices,
+                      choices = daysOfWeek.options,
                       selected = days_choices
     )
     
@@ -82,7 +165,7 @@ server <- function(input, output, session) {
     
     updatePickerInput(session,
                       inputId = "excludeHolidays",
-                      choices = holiday_choices,
+                      choices = unique(holid$holiday),
                       selected = holiday_choices
     )
     saved_filter_choices <- return_saved_choices(df_choices, "FILTER_NAME")
