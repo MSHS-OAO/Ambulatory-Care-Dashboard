@@ -19,8 +19,8 @@ server <- function(input, output, session) {
     
     campus_choices <- return_saved_choices(df_choices, "CAMPUS")
     
-    default_campus_choices <- filters %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
-    default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
+    updated_campus_choices <- filters %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
+    updated_campus_choices <- sort(updated_campus_choices$CAMPUS, na.last = T)
     
     
     updatePickerInput(session,
