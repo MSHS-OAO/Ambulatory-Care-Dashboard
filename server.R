@@ -6951,7 +6951,7 @@ server <- function(input, output, session) {
     
     # No Show Rate
     
-    data.noShow <- dataArrivedNoShow_access() %>% filter(APPT_STATUS %in% c("Arrived", "No Show"))
+    data.noShow <- dataArrivedNoShow_access() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
     # data.noShow <- arrivedNoShow.data
     
     print("3")
@@ -6963,7 +6963,7 @@ server <- function(input, output, session) {
   
     noShows[is.na(noShows)] <- 0
     
-    noShows$`No Show Perc` <- round(noShows$`No Show`/(noShows$Arrived + noShows$`No Show`),2)
+    noShows$`No Show Perc` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
     noShows$APPT_SOURCE_NEW[which(noShows$APPT_SOURCE_NEW == "Other")] <- "Practice"
     
     
@@ -6980,17 +6980,16 @@ server <- function(input, output, session) {
       coord_flip() +
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
-           title = "New Patient No Show Rate",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
-                             "\nNo Show Rate = Total No Shows / (Arrived + No Shows)")#,
-           #caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service)."
+           title = "New Patient No Show Rate*",
+           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           caption = "*No Show Rate = (No Show + Same-day Canceled) / (Arrived + No Show + Same-day Canceled)"
            )+
       theme_new_line()+
       theme_bw()+
       theme(
         plot.title = element_text(hjust=0.5, face = "bold", size = 20),
         plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
-        plot.caption = element_text(hjust = 0, size = 12, face = "italic"),
+        plot.caption = element_text(hjust = 0.95, size = 10, face = "italic"),
         legend.position = "none",
         axis.title.y = element_blank(),
         axis.title.x = element_blank(),
