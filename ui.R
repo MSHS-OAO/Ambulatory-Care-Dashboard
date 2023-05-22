@@ -1293,7 +1293,7 @@ ui <- dashboardPage(
                                                 DTOutput("new_patient_lead_time_month") %>% 
                                                   withSpinner(type = 5, color = "#d80b8c")
                                               )
-                                     ),
+                                     )#,
                                      # tabPanel("No Show %",
                                      #          boxPlus(
                                      #            title = "No Show %", width = 12, status = "primary", 
@@ -1307,19 +1307,19 @@ ui <- dashboardPage(
                                      #              withSpinner(type = 5, color = "#d80b8c")
                                      #          )
                                      #),
-                                     tabPanel("Booked/Filled Rate",
-                                              boxPlus(
-                                                title = "Filled Rate", width = 12, status = "primary", 
-                                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE, 
-                                                h3(uiOutput(("new_patient_fill_rate_day_title"))),
-                                                DTOutput("new_patient_fill_rate_day") %>% 
-                                                  withSpinner(type = 5, color = "#d80b8c"),
-                                                hr(),
-                                                h3(uiOutput(("new_patient_fill_rate_month_title"))),
-                                                DTOutput("new_patient_fill_rate_month") %>% 
-                                                  withSpinner(type = 5, color = "#d80b8c")
-                                              )
-                                     )
+                                     # tabPanel("Booked/Filled Rate",
+                                     #          boxPlus(
+                                     #            title = "Filled Rate", width = 12, status = "primary", 
+                                     #            solidHeader = TRUE, collapsible = TRUE, closable = TRUE, 
+                                     #            h3(uiOutput(("new_patient_fill_rate_day_title"))),
+                                     #            DTOutput("new_patient_fill_rate_day") %>% 
+                                     #              withSpinner(type = 5, color = "#d80b8c"),
+                                     #            hr(),
+                                     #            h3(uiOutput(("new_patient_fill_rate_month_title"))),
+                                     #            DTOutput("new_patient_fill_rate_month") %>% 
+                                     #              withSpinner(type = 5, color = "#d80b8c")
+                                     #          )
+                                     # )
                               )
                               
                        )
