@@ -6910,16 +6910,17 @@ server <- function(input, output, session) {
     
     waitTime <- dataAll_access() %>%
       filter(WAIT_TIME >= 0) %>%
-      group_by(APPT_SOURCE_NEW, NEW_PT2) %>%
+      group_by(SCHEDULE_GROUPING_MAPPED, NEW_PT2) %>%
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
       filter(NEW_PT2 == "NEW") %>% collect()
     waitTime$target <- 14
     
-    waitTime$APPT_SOURCE_NEW[which(waitTime$APPT_SOURCE_NEW == "Other")] <- "Practice"
+    waitTime$SCHEDULE_GROUPING_MAPPED[which(waitTime$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
     
     newWaitTime <-
-      ggplot(waitTime, aes(x=factor(APPT_SOURCE_NEW, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
-                           y=medWaitTime, group=APPT_SOURCE_NEW, fill=APPT_SOURCE_NEW)) +
+      ggplot(waitTime, aes(x=factor(SCHEDULE_GROUPING_MAPPED#, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
+                                    ), 
+                           y=medWaitTime, group=SCHEDULE_GROUPING_MAPPED, fill=SCHEDULE_GROUPING_MAPPED)) +
       geom_bar(stat="identity", width = 0.8) +
       geom_hline(aes(yintercept=target), linetype="dashed", color = "red", size=1)+
       scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.3))+
@@ -6957,24 +6958,25 @@ server <- function(input, output, session) {
     print("3")
     noShows <- data.noShow %>%
       filter(NEW_PT2 == "NEW") %>%
-      group_by(APPT_SOURCE_NEW, APPT_STATUS) %>%
+      group_by(SCHEDULE_GROUPING_MAPPED, APPT_STATUS) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
   
     noShows[is.na(noShows)] <- 0
     
     noShows$`No Show Perc` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
-    noShows$APPT_SOURCE_NEW[which(noShows$APPT_SOURCE_NEW == "Other")] <- "Practice"
+    noShows$SCHEDULE_GROUPING_MAPPED[which(noShows$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
     
     
-    noShows$APPT_SOURCE_NEW <- ifelse(noShows$APPT_SOURCE_NEW == "Other", "Practice", noShows$APPT_SOURCE_NEW)
+    noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)
     
     
     
     newNoShow <-
       
-      ggplot(noShows, aes(x=factor(APPT_SOURCE_NEW, levels =  c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")), 
-                          y=`No Show Perc`, group=APPT_SOURCE_NEW, fill=APPT_SOURCE_NEW)) +
+      ggplot(noShows, aes(x=factor(SCHEDULE_GROUPING_MAPPED#, levels =  c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
+                                   ), 
+                          y=`No Show Perc`, group=SCHEDULE_GROUPING_MAPPED, fill=SCHEDULE_GROUPING_MAPPED)) +
       geom_bar(stat="identity", width = 0.8) +
       scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.3)+
       coord_flip() +
