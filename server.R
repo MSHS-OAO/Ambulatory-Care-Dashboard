@@ -10901,58 +10901,58 @@ ggplot(data_base,
    
     # Process slot data
     #data_slot <- slot.data.subset %>% filter(Campus.Specialty== "Cardiology") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
-    slot <- dataAllSlot_comp() %>% rename(DEPARTMENT= DEPARTMENT_NAME)
-    
-    #slot <- data_slot_test
-    #data_slot <- dataAllSlot_comp() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
-    #data_slot <-  slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
-    compare_filters <- input$compare_filters_opt
-    
-    
-    
-    #data_slot <- slot.data.subset[all.slot.rows,] %>% filter(Campus.Specialty=="Allergy") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
-    #data_slot <- slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology") %>% rename(DEPARTMENT= DEPARTMENT_NAME)
-    
-    
-    #slot <- data_slot %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
-    slot <- slot %>% group_by(!!!syms(cols), APPT_MONTH_YEAR, APPT_DATE_YEAR)%>%
-      dplyr::summarise(AVAILABLE_HOURS = round(sum(AVAILABLE_HOURS, na.rm=TRUE),1),
-                       BOOKED_HOURS = round(sum(BOOKED_HOURS, na.rm=TRUE), 1),
-                       FILLED_HOURS = round(sum(ARRIVED_HOURS, na.rm=TRUE), 1)) #%>% collect()
-                        
-    print("9")
-    suppressWarnings({
-      ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
-      ### then gather all created columns make them categories for the STatus column
-      ### Spread data to make monhts in Appt.Month into columns
-      slot <- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
-        filter(AVAILABLE_HOURS > 0) %>%
-        filter(!is.na(AVAILABLE_HOURS)) %>%
-        summarise(
-          `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
-          `Filled Rate` = round(sum(FILLED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
-        ) %>% collect() %>%
-        mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
-    })
-    slot[is.na(slot)] <- 0
-    slot_metrics <- c( "Booked Rate", "Filled Rate")
-    
-    print("9.1")
-      
-    slot <- slot %>%
-      mutate_if(is.numeric,function(x) ifelse(is.nan(x) | is.infinite(x), NA, x)) %>%
-      mutate(`Booked Rate` = formattable::percent(`Booked Rate`, digits = 0),
-             `Filled Rate` = formattable::percent(`Filled Rate`, digits = 0)) %>%
-    mutate(`Booked Rate` = case_when(
-      `Booked Rate` >= 0.95 ~ cell_spec(`Booked Rate`, color = "green"),
-      `Booked Rate` < 0.95 ~ cell_spec(`Booked Rate`, color = "red")
-    )) %>%
-    mutate(`Filled Rate` = case_when(
-           `Filled Rate` >= 0.85 ~ cell_spec(`Filled Rate`, color = "green"),
-           `Filled Rate` < 0.85 ~ cell_spec(`Filled Rate`, color = "red"))) %>%
-      gather(variable, value, !!slot_metrics) %>%
-      spread(APPT_MONTH_YEAR, value) %>%
-      rename(Metrics = variable)
+    # slot <- dataAllSlot_comp() %>% rename(DEPARTMENT= DEPARTMENT_NAME)
+    # 
+    # #slot <- data_slot_test
+    # #data_slot <- dataAllSlot_comp() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+    # #data_slot <-  slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
+    # compare_filters <- input$compare_filters_opt
+    # 
+    # 
+    # 
+    # #data_slot <- slot.data.subset[all.slot.rows,] %>% filter(Campus.Specialty=="Allergy") %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+    # #data_slot <- slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology") %>% rename(DEPARTMENT= DEPARTMENT_NAME)
+    # 
+    # 
+    # #slot <- data_slot %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
+    # slot <- slot %>% group_by(!!!syms(cols), APPT_MONTH_YEAR, APPT_DATE_YEAR)%>%
+    #   dplyr::summarise(AVAILABLE_HOURS = round(sum(AVAILABLE_HOURS, na.rm=TRUE),1),
+    #                    BOOKED_HOURS = round(sum(BOOKED_HOURS, na.rm=TRUE), 1),
+    #                    FILLED_HOURS = round(sum(ARRIVED_HOURS, na.rm=TRUE), 1)) #%>% collect()
+    #                     
+    # print("9")
+    # suppressWarnings({
+    #   ### Group by the month and get the monthl avaerage for each month by summing the column and dividing by number of rows within the month
+    #   ### then gather all created columns make them categories for the STatus column
+    #   ### Spread data to make monhts in Appt.Month into columns
+    #   slot <- slot %>%  group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+    #     filter(AVAILABLE_HOURS > 0) %>%
+    #     filter(!is.na(AVAILABLE_HOURS)) %>%
+    #     summarise(
+    #       `Booked Rate` = round(sum(BOOKED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
+    #       `Filled Rate` = round(sum(FILLED_HOURS, na.rm = T)/sum(AVAILABLE_HOURS, na.rm = T),2 ),
+    #     ) %>% collect() %>%
+    #     mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
+    # })
+    # slot[is.na(slot)] <- 0
+    # slot_metrics <- c( "Booked Rate", "Filled Rate")
+    # 
+    # print("9.1")
+    #   
+    # slot <- slot %>%
+    #   mutate_if(is.numeric,function(x) ifelse(is.nan(x) | is.infinite(x), NA, x)) %>%
+    #   mutate(`Booked Rate` = formattable::percent(`Booked Rate`, digits = 0),
+    #          `Filled Rate` = formattable::percent(`Filled Rate`, digits = 0)) %>%
+    # mutate(`Booked Rate` = case_when(
+    #   `Booked Rate` >= 0.95 ~ cell_spec(`Booked Rate`, color = "green"),
+    #   `Booked Rate` < 0.95 ~ cell_spec(`Booked Rate`, color = "red")
+    # )) %>%
+    # mutate(`Filled Rate` = case_when(
+    #        `Filled Rate` >= 0.85 ~ cell_spec(`Filled Rate`, color = "green"),
+    #        `Filled Rate` < 0.85 ~ cell_spec(`Filled Rate`, color = "red"))) %>%
+    #   gather(variable, value, !!slot_metrics) %>%
+    #   spread(APPT_MONTH_YEAR, value) %>%
+    #   rename(Metrics = variable)
    
     
     
@@ -10969,7 +10969,9 @@ print("10")
     
     
     ### Bind datas by row to create the final table
-    opt_table <- plyr:: rbind.fill(volume, slot, newpatients.ratio, waitTime )  
+    # opt_table <- plyr:: rbind.fill(volume, slot, newpatients.ratio, waitTime )  
+    opt_table <- plyr:: rbind.fill(volume, newpatients.ratio, waitTime )  
+
     opt_table[is.na(opt_table)] <- 0
 
     i1 <- as.yearmon(names(opt_table))
