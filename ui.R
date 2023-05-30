@@ -950,7 +950,11 @@ ui <- dashboardPage(
                              tabPanel("By Provider",
                                       "*Select Fewer Providers for Better Visibility",
                                       plotOutput("newPtWaitTimeByProv", height = "550px") %>% 
-                                        withSpinner(type = 5, color = "#d80b8c"))))),
+                                        withSpinner(type = 5, color = "#d80b8c"),
+                                      plotOutput("newPtWaitTimeByProvPercent", height = "550px") %>% 
+                                        withSpinner(type = 5, color = "#d80b8c")
+                                      )
+                             ))),
                        fluidRow(
                          boxPlus(
                            title = "New Patient Visit Ratio", width = 12, status = "primary",
