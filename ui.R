@@ -942,7 +942,11 @@ ui <- dashboardPage(
                              id = "tabset5", width = "100%",
                              tabPanel("Total", 
                                       plotOutput("newPtWaitTimeByDept", height = "550px") %>% 
-                                        withSpinner(type = 5, color = "#d80b8c")),
+                                        withSpinner(type = 5, color = "#d80b8c"),
+                                      br(),
+                                      plotOutput("newPtWaitTimeByDeptPercent", height = "550px") %>% 
+                                        withSpinner(type = 5, color = "#d80b8c")
+                                      ),
                              tabPanel("By Provider",
                                       "*Select Fewer Providers for Better Visibility",
                                       plotOutput("newPtWaitTimeByProv", height = "550px") %>% 

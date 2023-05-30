@@ -6824,6 +6824,61 @@ server <- function(input, output, session) {
     
   })
   
+  output$newPtWaitTimeByDeptPercent <- renderPlot({
+    data <- dataAll_access()
+    # data_test <<- data
+    # data <- kpi.all.data[all.data.rows,] %>% filter(Campus == "MSUS")
+    
+    #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
+    
+    waitTime_total <- data %>%
+      filter(WAIT_TIME >= 0) %>%
+      filter(NEW_PT2 == "NEW") %>%
+      group_by(APPT_MADE_MONTH_YEAR) %>%
+      dplyr::summarise(total_all = n()) %>%
+      collect()
+    
+    waitTime_within_14_days <- data %>%
+                                filter(WAIT_TIME >= 0, 
+                                       WAIT_TIME < 14.0001, 
+                                       NEW_PT2 == "NEW") %>%
+                                group_by(APPT_MADE_MONTH_YEAR) %>%
+                                dplyr::summarise(total = n()) %>%
+                                collect()
+    
+    join_data <- inner_join(waitTime_total, waitTime_within_14_days)
+    
+    percent_within_14_days <- join_data %>% group_by(APPT_MADE_MONTH_YEAR) %>%
+                              summarise(percent = (total/total_all))
+    
+    
+    ggplot(percent_within_14_days, aes(x=APPT_MADE_MONTH_YEAR, y=percent, group = 1))+
+      # geom_bar(stat = "identity", position = 'dodge')+
+      #geom_line(aes(linetype = variable))+
+      scale_linetype_manual(values=c("solid"))+
+      scale_size_manual(values=c(1))+
+      # scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 week",
+      #              date_minor_breaks = "1 day", expand = c(0, 0.6))+
+      labs(x=NULL, y=NULL,
+           #title = "Median Wait Time to New and Established Appointment Over Time",
+           title = "Percent of New Patients Seen Within 14 Days",
+           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           #caption = "*New patients defined by CPT codes (level of service)."
+      )+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      #geom_text(aes(label = value), position = position_dodge(1), vjust = ifelse(waitTime$value >= 10 & waitTime$value <= 15,-3,-1), color = "black", size = 5, fontface="bold.italic")+
+      #scale_y_continuous(limits = c(0,max(waitTime$value))*1.5)+
+      theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+      scale_color_manual(values=c('#212070')) +
+      geom_point(size = 3.2, color = '#d80b8c') +
+      geom_line(size=1, color = '#d80b8c') +
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1))
+    
+    
+  })
+  
   
   # New Patient Wait Time
   output$newPtWaitTimeByProv <- renderPlot({
