@@ -237,8 +237,8 @@ ui <- dashboardPage(
                                            title = p("Reference Files", style = "font-size:34px; font-weight:bold"), width = 12, height = "400px", status = "warning", solidHeader = TRUE,
                                            p("- Ambulatory Analytics Tool Playbook:", style = "font-size:22px; font-weight: bold"),
                                            a(href = "https://mtsinai.sharepoint.com/:w:/s/PracticeTest/Ed_jEdvMiaNCjbdeLXm97z8BDJlwRX6J9VPoheoYmakypA?e=pdSCbC",target='blank', 'Click to View', download = 'Ambulatory Analysis Tool - Metric Overview.pdf', style = "font-size:22px"),
-                                           p("- Metric Definitions and Analysis Methodology:", style = "font-size:20px; font-weight: bold"),
-                                           a(href = "Mappings/Analysis Methodology.xlsx",target='blank', 'Click to Download', download = 'Ambulatory Analysis Tool - Metric definitions.xlsx', style = "font-size:22px")
+                                           p("- Grouper 17 Mapping File:", style = "font-size:20px; font-weight: bold"),
+                                           a(href = "",target='blank', 'Click to Download', download = 'Ambulatory Analysis Tool - Metric definitions.xlsx', style = "font-size:22px")
                                          )))
                        ),
                        
