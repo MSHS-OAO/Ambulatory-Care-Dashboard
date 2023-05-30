@@ -208,7 +208,7 @@ ui <- dashboardPage(
                        # ),
                        div("Ambulatory Analytics Tool", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        tags$div(id = "home_text",
-                                HTML("<p>Version: 1.0 <br> Last Updated: 2/10/2022</p>")
+                                HTML("<p>Version: 1.0 <br> Last Updated: 5/30/2023</p>")
                        ),
                        tags$head(tags$style("#home_text{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 15px; margin-top: -0.2em; margin-bottom: -4em; margin-left: 20px}")), 
                        br(), br(),
@@ -235,10 +235,10 @@ ui <- dashboardPage(
                                 tags$div(id = "home_mapping",
                                          box(
                                            title = p("Reference Files", style = "font-size:34px; font-weight:bold"), width = 12, height = "400px", status = "warning", solidHeader = TRUE,
-                                           p("- Metrics Overview:", style = "font-size:22px; font-weight: bold"),
-                                           a(href = "Mappings/Metrics_Overview.pdf",target='blank', 'Click to View', download = 'Ambulatory Analysis Tool - Metric Overview.pdf', style = "font-size:22px"),
-                                           p("- Metric Definitions and Analysis Methodology:", style = "font-size:20px; font-weight: bold"),
-                                           a(href = "Mappings/Analysis Methodology.xlsx",target='blank', 'Click to Download', download = 'Ambulatory Analysis Tool - Metric definitions.xlsx', style = "font-size:22px")
+                                           p("- Ambulatory Analytics Tool Playbook:", style = "font-size:22px; font-weight: bold"),
+                                           a(href = "https://mtsinai.sharepoint.com/:w:/s/PracticeTest/Ed_jEdvMiaNCjbdeLXm97z8BDJlwRX6J9VPoheoYmakypA?e=pdSCbC",target='blank', 'Click to View', download = 'Ambulatory Analysis Tool - Metric Overview.pdf', style = "font-size:22px"),
+                                           p("- Grouper 17 Mapping File:", style = "font-size:20px; font-weight: bold"),
+                                           a(href = "",target='blank', 'Click to Download', download = 'Ambulatory Analysis Tool - Metric definitions.xlsx', style = "font-size:22px")
                                          )))
                        ),
                        
@@ -258,7 +258,7 @@ ui <- dashboardPage(
                                            title = p("Targeted Use", style = "font-size:34px; font-weight:bold"), width = 12, status = "warning", solidHeader = TRUE,
                                            p("Data-driven insights and findings obtained from this tool should be used in conjunction with the learnings from the Ambulatory Academy to achieve operational improvements.", 
                                              style = "font-size:20px; font-weight: bold; font-style: italic"),
-                                           img(src = "Use_Case.png", width = "700px", style="display: block; margin-left: auto; margin-right: auto"))))
+                                           img(src = "Ambulatory_Analytics_Pyramid.png", width = "700px", style="display: block; margin-left: auto; margin-right: auto"))))
                        )
                        
                        
@@ -942,11 +942,19 @@ ui <- dashboardPage(
                              id = "tabset5", width = "100%",
                              tabPanel("Total", 
                                       plotOutput("newPtWaitTimeByDept", height = "550px") %>% 
-                                        withSpinner(type = 5, color = "#d80b8c")),
+                                        withSpinner(type = 5, color = "#d80b8c"),
+                                      br(),
+                                      plotOutput("newPtWaitTimeByDeptPercent", height = "550px") %>% 
+                                        withSpinner(type = 5, color = "#d80b8c")
+                                      ),
                              tabPanel("By Provider",
                                       "*Select Fewer Providers for Better Visibility",
                                       plotOutput("newPtWaitTimeByProv", height = "550px") %>% 
-                                        withSpinner(type = 5, color = "#d80b8c"))))),
+                                        withSpinner(type = 5, color = "#d80b8c"),
+                                      plotOutput("newPtWaitTimeByProvPercent", height = "550px") %>% 
+                                        withSpinner(type = 5, color = "#d80b8c")
+                                      )
+                             ))),
                        fluidRow(
                          boxPlus(
                            title = "New Patient Visit Ratio", width = 12, status = "primary",
