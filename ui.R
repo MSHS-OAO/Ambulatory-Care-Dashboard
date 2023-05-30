@@ -258,7 +258,7 @@ ui <- dashboardPage(
                                            title = p("Targeted Use", style = "font-size:34px; font-weight:bold"), width = 12, status = "warning", solidHeader = TRUE,
                                            p("Data-driven insights and findings obtained from this tool should be used in conjunction with the learnings from the Ambulatory Academy to achieve operational improvements.", 
                                              style = "font-size:20px; font-weight: bold; font-style: italic"),
-                                           img(src = "Use_Case.png", width = "700px", style="display: block; margin-left: auto; margin-right: auto"))))
+                                           img(src = "Ambulatory_Analytics_Pyramid.png", width = "700px", style="display: block; margin-left: auto; margin-right: auto"))))
                        )
                        
                        
