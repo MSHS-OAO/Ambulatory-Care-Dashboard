@@ -1455,7 +1455,7 @@ ui <- dashboardPage(
                      solidHeader = FALSE,
                      pickerInput("selectedCampus",label=NULL,
                                  choices=default_campus_choices,
-                                 multiple=FALSE,
+                                 multiple=TRUE,
                                  options = pickerOptions(
                                    liveSearch = TRUE,
                                    actionsBox = TRUE,
