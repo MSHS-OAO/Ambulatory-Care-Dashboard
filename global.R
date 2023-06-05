@@ -584,7 +584,7 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
     
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
-                            #DEPARTMENT %in% department, 
+                            DEPARTMENT %in% department, 
                             RESOURCES %in% resource, 
                             #PROVIDER %in% provider,
                             VISIT_METHOD %in% visitMethod, 
@@ -597,7 +597,7 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
   } else{
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
-                            #DEPARTMENT %in% department, 
+                            DEPARTMENT %in% department, 
                             RESOURCES %in% resource, 
                             PROVIDER %in% provider,
                             VISIT_METHOD %in% visitMethod, 
@@ -614,10 +614,10 @@ groupByFilters <- function(dt, campus, specialty, department, resource, provider
     result <- result %>% filter(APPT_TYPE %in% visitType)
   }
   
-  if(length(department) < 1000){
-    
-    result <- result %>% filter(DEPARTMENT %in% department)
-  }
+  # if(length(department) < 1000){
+  #   
+  #   result <- result %>% filter(DEPARTMENT %in% department)
+  # }
   
   return(result)
 }
@@ -630,7 +630,7 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
     
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
-                            #DEPARTMENT %in% department, 
+                            DEPARTMENT %in% department, 
                             RESOURCES %in% resource, 
                             #PROVIDER %in% provider,
                             VISIT_METHOD %in% visitMethod, 
@@ -643,7 +643,7 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
   } else {
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
-                            #DEPARTMENT %in% department, 
+                            DEPARTMENT %in% department, 
                             RESOURCES %in% resource, 
                             PROVIDER %in% provider,
                             VISIT_METHOD %in% visitMethod, 
@@ -658,10 +658,10 @@ groupByFilters_access <- function(dt, campus, specialty, department, resource, p
     
     result <- result %>% filter(APPT_TYPE %in% visitType)
   }
-  if(length(department) < 1000){
-    
-    result <- result %>% filter(DEPARTMENT %in% department)
-  }
+  # if(length(department) < 1000){
+  #   
+  #   result <- result %>% filter(DEPARTMENT %in% department)
+  # }
   
   return(result)
 }
@@ -674,7 +674,7 @@ groupByFilters_access_npr <- function(dt, campus, specialty, department, resourc
     
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
-                            #DEPARTMENT %in% department, 
+                            DEPARTMENT %in% department, 
                             RESOURCES %in% resource, 
                             #PROVIDER %in% provider,
                             VISIT_METHOD %in% visitMethod, 
@@ -687,7 +687,7 @@ groupByFilters_access_npr <- function(dt, campus, specialty, department, resourc
   } else {
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
-                            #DEPARTMENT %in% department, 
+                            DEPARTMENT %in% department, 
                             RESOURCES %in% resource, 
                             PROVIDER %in% provider,
                             VISIT_METHOD %in% visitMethod, 
@@ -704,10 +704,10 @@ groupByFilters_access_npr <- function(dt, campus, specialty, department, resourc
     result <- result %>% filter(APPT_TYPE %in% visitType)
   }
   
-  if(length(department) < 1000){
-    
-    result <- result %>% filter(DEPARTMENT %in% department)
-  }
+  # if(length(department) < 1000){
+  #   
+  #   result <- result %>% filter(DEPARTMENT %in% department)
+  # }
   
   return(result)
 }
@@ -759,13 +759,13 @@ groupByFilters_2 <- function(dt, campus, specialty, department, resource, provid
   format <- "YYYY-MM-DD HH24:MI:SS"
   
   if(length(provider) >= 1000) {
-    result <- dt %>% filter(CAMPUS %in% campus, CAMPUS_SPECIALTY %in% specialty, #DEPARTMENT %in% department, 
+    result <- dt %>% filter(CAMPUS %in% campus, CAMPUS_SPECIALTY %in% specialty, DEPARTMENT %in% department, 
                             RESOURCES %in% resource, #PROVIDER %in% provider, 
                             VISIT_METHOD %in% visitMethod, #APPT_TYPE %in% visitType, 
                             #!HOLIDAY %in% holidays,
                             TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, TO_DATE(maxdateRange, format) >= APPT_DATE_YEAR, APPT_DAY %in% daysofweek, UTIL_TYPE %in% type)
   } else {
-    result <- dt %>% filter(CAMPUS %in% campus, CAMPUS_SPECIALTY %in% specialty, #DEPARTMENT %in% department, 
+    result <- dt %>% filter(CAMPUS %in% campus, CAMPUS_SPECIALTY %in% specialty, DEPARTMENT %in% department, 
                             RESOURCES %in% resource, PROVIDER %in% provider, 
                             VISIT_METHOD %in% visitMethod, #APPT_TYPE %in% visitType, 
                             #!HOLIDAY %in% holidays,
@@ -777,10 +777,10 @@ groupByFilters_2 <- function(dt, campus, specialty, department, resource, provid
     result <- result %>% filter(APPT_TYPE %in% visitType)
   }
   
-  if(length(department) < 1000){
-    
-    result <- result %>% filter(DEPARTMENT %in% department)
-  }
+  # if(length(department) < 1000){
+  #   
+  #   result <- result %>% filter(DEPARTMENT %in% department)
+  # }
   return(result)
 }
 
@@ -805,7 +805,7 @@ groupByFilters_4 <- function(dt, campus, specialty, department, resource, provid
   if(length(provider) >= 1000) {
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
-                            #DEPARTMENT_NAME %in% department, 
+                            DEPARTMENT_NAME %in% department, 
                             #RESOURCES %in% resource, 
                             #PROVIDER %in% provider,
                             TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
@@ -816,7 +816,7 @@ groupByFilters_4 <- function(dt, campus, specialty, department, resource, provid
   } else{
     result <- dt %>% filter(CAMPUS %in% campus, 
                             CAMPUS_SPECIALTY %in% specialty, 
-                            #DEPARTMENT_NAME %in% department, 
+                            DEPARTMENT_NAME %in% department, 
                             #RESOURCES %in% resource, 
                             PROVIDER %in% provider,
                             TO_DATE(mindateRange, format) <= APPT_DATE_YEAR, 
@@ -826,12 +826,12 @@ groupByFilters_4 <- function(dt, campus, specialty, department, resource, provid
     )
   }
   
-  if(length(department) < 1000){
-    
-    result <- result %>% filter(DEPARTMENT_NAME %in% department)
-  }
+  # if(length(department) < 1000){
+  #   
+  #   result <- result %>% filter(DEPARTMENT_NAME %in% department)
+  # }
   
-  
+  return(result)
 }
 
 
