@@ -6886,7 +6886,7 @@ server <- function(input, output, session) {
       #              date_minor_breaks = "1 day", expand = c(0, 0.6))+
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
-           title = "Percent of New Patients Seen Within 14 Days",
+           title = "Percent of New Patients Scheduled Within 14 Days",
            subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
@@ -6979,7 +6979,7 @@ server <- function(input, output, session) {
       #              date_minor_breaks = "1 day", expand = c(0, 0.6))+
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
-           title = "Percent of New Patients Seen Within 14 Days",
+           title = "Percent of New Patients Scheduled Within 14 Days",
            #subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
