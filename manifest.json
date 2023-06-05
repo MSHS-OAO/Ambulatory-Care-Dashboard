@@ -5448,6 +5448,29 @@
         "Built": "R 3.6.0; x86_64-w64-mingw32; 2019-05-28 20:48:05 UTC; windows"
       }
     },
+        "histogram": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com/",
+      "description": {
+        "Package": "histogram",
+        "Type": "Package",
+        "Title": "Construction of Regular and Irregular Histograms with Different\nOptions for Automatic Choice of Bins",
+        "Version": "0.0-25",
+        "Authors@R": "c(person(\"Thoralf\", \"Mildenberger\", role = c(\"aut\", \"cre\"),\n\t\t     email = \"mild@zhaw.ch\"),\n\t      person(\"Yves\", \"Rozenholc\", role = \"aut\"),\n\t      person(\"David\", \"Zasada\", role = \"aut\"))",
+        "Author": "Thoralf Mildenberger [aut, cre],\n  Yves Rozenholc [aut],\n  David Zasada [aut]",
+        "Maintainer": "Thoralf Mildenberger <mild@zhaw.ch>",
+        "Description": "Automatic construction of regular and irregular histograms as described in Rozenholc/Mildenberger/Gather (2010).",
+        "License": "GPL (>= 2)",
+        "LazyLoad": "yes",
+        "ByteCompile": "yes",
+        "NeedsCompilation": "no",
+        "Packaged": "2019-04-26 19:32:00 UTC; thoralf",
+        "Repository": "CRAN",
+        "Date/Publication": "2019-04-26 20:00:16 UTC",
+        "Encoding": "UTF-8",
+        "Built": "R 3.6.3; ; 2021-02-11 21:19:32 UTC; unix"
+      }
+    },
     "rlang": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com/",

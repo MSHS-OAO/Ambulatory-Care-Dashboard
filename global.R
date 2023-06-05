@@ -52,6 +52,7 @@
 
 #install.packages("eeptools", repos = "http://cran.us.r-project.org")
 suppressMessages({
+  library(histogram)
   library(readxl)
   library(writexl)
   library(plyr)
