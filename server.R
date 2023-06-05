@@ -6874,7 +6874,7 @@ server <- function(input, output, session) {
     join_data <- inner_join(waitTime_total, waitTime_within_14_days)
     
     percent_within_14_days <- join_data %>% group_by(APPT_MADE_MONTH_YEAR) %>%
-                              summarise(percent = (total/total_all))
+                              summarise(percent = round((total/total_all),2))
     
     
     ggplot(percent_within_14_days, aes(x=APPT_MADE_MONTH_YEAR, y=percent, group = 1))+
@@ -6899,7 +6899,11 @@ server <- function(input, output, session) {
       scale_color_manual(values=c('#212070')) +
       geom_point(size = 3.2, color = '#d80b8c') +
       geom_line(size=1, color = '#d80b8c') +
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1))
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1),expand = c(0, 0), limits = c(0,max(percent_within_14_days$percent)*1.5)
+      ) +
+      stat_summary(fun = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..*100,"%")), group = APPT_MADE_MONTH_YEAR), geom="text", color="black", 
+                   size=5, fontface="bold.italic")
     
     
   })
@@ -6928,9 +6932,10 @@ server <- function(input, output, session) {
       # geom_hline(yintercept=14, linetype="dashed", color = "red", size=1)+
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       labs(x=NULL, y=NULL, 
-           title = "Median Wait Time to New* and Established Appointment Over Time by Provider",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "*New patients defined by CPT codes (level of service).")+
+           title = "Median Wait Time to New and Established Appointment Over Time by Provider",
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           #caption = "*New patients defined by CPT codes (level of service)."
+           )+
       theme_new_line()+
       theme_bw()+
       graph_theme("bottom")+
@@ -6944,7 +6949,7 @@ server <- function(input, output, session) {
   
   output$newPtWaitTimeByProvPercent <- renderPlot({
     data <- dataAll_access()
-     data_test <<- data
+    # data_test <<- data
     # data <- kpi.all.data[all.data.rows,] %>% filter(Campus == "MSUS")
     
     #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
@@ -6967,7 +6972,7 @@ server <- function(input, output, session) {
     join_data <- inner_join(waitTime_total, waitTime_within_14_days)
     
     percent_within_14_days <- join_data %>% group_by(APPT_MADE_MONTH_YEAR, PROVIDER) %>%
-      summarise(percent = (total/total_all))
+      summarise(percent = round((total/total_all),2))
     
     
     ggplot(percent_within_14_days, aes(x=APPT_MADE_MONTH_YEAR, y=percent, group = PROVIDER))+
@@ -6980,7 +6985,7 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Percent of New Patients Scheduled Within 14 Days",
-           #subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -6991,7 +6996,12 @@ server <- function(input, output, session) {
       theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
       geom_point(aes(color=PROVIDER), size = 3.2) +
       geom_line(aes(color=PROVIDER), size=1) +
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1))
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1),expand = c(0, 0), limits = c(0,max(percent_within_14_days$percent)*1.5)
+      ) +
+      stat_summary(fun = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..*100,"%")), group = APPT_MADE_MONTH_YEAR), geom="text", color="black", 
+                   size=5, fontface="bold.italic")
+    
+      
     
     
   })
