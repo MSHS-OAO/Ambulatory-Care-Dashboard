@@ -1460,7 +1460,7 @@ ui <- dashboardPage(
                                  multiple=TRUE,
                                  options = pickerOptions(
                                    liveSearch = TRUE,
-                                   actionsBox = TRUE,
+                                   actionsBox = FALSE,
                                    selectedTextFormat = "count > 1", 
                                    countSelectedText = "{0}/{1} Campuses", 
                                    dropupAuto = FALSE),
