@@ -5721,9 +5721,10 @@ server <- function(input, output, session) {
     data <- data %>%
       group_by(COVERAGE) %>%
       dplyr::summarise(`Total Arrived Patients` = n()) %>%
-      mutate(Percent = paste0(round((`Total Arrived Patients`/sum(`Total Arrived Patients`, na.rm = T))*100, 1),"%")) %>%
-      arrange(desc(`Total Arrived Patients`)) %>%
-      rename(Payer = COVERAGE) %>% collect()
+      mutate(Percent = round((`Total Arrived Patients`/sum(`Total Arrived Patients`, na.rm = T))*100, 1)) %>%
+      rename(Payer = COVERAGE) %>% collect() %>%
+      mutate(Percent = paste0(sprintf("%.1f", Percent), "%")) %>%
+      arrange(desc(`Total Arrived Patients`))
     
     data$Payer[is.na(data$Payer)] <- "Unknown"
     data$`Total Arrived Patients` <- prettyNum(data$`Total Arrived Patients`, big.mark = ',')
@@ -5762,6 +5763,7 @@ server <- function(input, output, session) {
   
   output$pop_breakdown <- renderPlot({
     arrived.data <- dataArrived()
+    
     
     arrived.data$age <- round(age_calc(as.Date(arrived.data$Birth.Date, format="%Y-%m-%d"), units='years'),0)
     arrived.data$age_group <- cut(arrived.data$age, breaks = c(10,20,30,40,50,60,70,80), na.rm=TRUE)
@@ -5840,7 +5842,7 @@ server <- function(input, output, session) {
       arrange(-total) %>%
       mutate(perc = round(total/sum(total, na.rm = T), 2)*100) %>% collect()%>%
       adorn_totals("row") %>%
-      mutate(perc = paste0(perc,"%")) %>%
+      mutate(perc = paste0(sprintf("%.1f", perc), "%")) %>%
       `colnames<-` (c("Zip Code Layer", "total", "perc")) %>%
       mutate(Layer = `Zip Code Layer`)
     
@@ -5852,7 +5854,7 @@ server <- function(input, output, session) {
     
     b_table <- b_table %>%
       mutate(perc = round(total/sum(b_table$total, na.rm = T),2)*100) %>% 
-      mutate(perc = paste0(perc,"%")) %>% 
+      mutate(perc = paste0(sprintf("%.1f", perc), "%")) %>% 
       `colnames<-` (c("Layer", "Zip Code Layer", "total", "perc")) %>%
       filter(`Layer` %in% c("Manhattan", "Out of NYS", "Long Island", "Northern New York"))
     
