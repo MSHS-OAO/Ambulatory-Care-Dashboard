@@ -851,7 +851,9 @@ ui <- dashboardPage(
                                                     inputId = "utilType",
                                                     label = h4("Analysis based on:"),
                                                     size = "lg",
-                                                    choices = list("SCHEDULED time and duration" = "scheduled", "ACTUAL time and duration" = "actual"),
+                                                    choices = list("SCHEDULED time and duration" = "scheduled"
+                                                                   #, "ACTUAL time and duration" = "actual"
+                                                                   ),
                                                     # choices = util_choices,
                                                     # selected = util_choices[1],
                                                     checkIcon = list(
