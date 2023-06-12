@@ -396,7 +396,7 @@ utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_
 
 
 
-population_tbl <- tbl(poolcon_upt, "AMBULATORY_POPULATION")
+population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION")
 print("Population")
 
 ambulatory_access_tbl_summary <- tbl(poolcon_upt, "AMBULATORY_ACCESS_SUMMARY_TABLE")
@@ -1151,7 +1151,7 @@ dateRangeSlot_start <- dateRange_min
 dateRangeSlot_end <- dateRange_max
 
 dateRangepop_max <- glue("Select max(APPT_DATE_YEAR) AS maxDate FROM AMBULATORY_POPULATION")
-dateRangepop_max <- dbGetQuery(poolcon_upt, dateRangepop_max)
+dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
 dateRangepop_max <- as.Date(dateRangepop_max$MAXDATE, format="%Y-%m-%d")
 
 # dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_POPULATION")
