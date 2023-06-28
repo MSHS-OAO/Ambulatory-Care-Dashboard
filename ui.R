@@ -852,7 +852,7 @@ ui <- dashboardPage(
                                                     label = h4("Analysis based on:"),
                                                     size = "lg",
                                                     choices = list("SCHEDULED time and duration" = "scheduled"
-                                                                   #, "ACTUAL time and duration" = "actual"
+                                                                   , "ACTUAL time and duration" = "actual"
                                                                    ),
                                                     # choices = util_choices,
                                                     # selected = util_choices[1],
@@ -861,7 +861,7 @@ ui <- dashboardPage(
                                                       no = tags$i(class = "fa fa-square-o", style = "color: steelblue"))),
                                                   hr(),
                                                   h5("SCHEDULED: Utilization of all arrived appointments based on scheduled appointment start and end time."),
-                                                  #h5("ACTUAL: Utilization of all arrived appointments based on actual appointment start and end time."),
+                                                  h5("ACTUAL: Utilization of all arrived appointments based on actual appointment start and end time."),
                                                   h5("Scheduled time includes an adjustment factor of 20% (every visit duration increased by 20%) to account for room turnover times and any non-physician contact time spent in rooms."))),
                                        column(3,
                                               box(title = NULL, width = 12, solidHeader = FALSE,
