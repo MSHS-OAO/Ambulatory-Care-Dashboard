@@ -6834,7 +6834,7 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Monthly Median Wait Time to New and Established Appointment",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           #subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -10891,7 +10891,7 @@ ggplot(data_base,
     
     data <- dataArrived_summary()
     
-    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
+    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
     
     #data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT2, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
     
@@ -11012,7 +11012,7 @@ ggplot(data_base,
     #waitTime <- waitTime  %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
     data_access <-  dataAll_access()
-    #data_access <- arrived.data.rows.old %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
+    #data_access <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     
    
     waitTime <- data_access %>%
@@ -11101,8 +11101,7 @@ ggplot(data_base,
     #   spread(APPT_MONTH_YEAR, value) %>%
     #   rename(Metrics = variable)
    
-    
-    
+   
 print("10")
     #slot <- slot %>%  group_by(across(!!cols), Appt.MonthYear) %>%
      # summarise(
@@ -11113,11 +11112,92 @@ print("10")
       #spread(Appt.MonthYear, value) %>%
       #rename(Metrics = variable)
     
-    
+
+
+     noShow_perc <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+
+# noShow_perc <- arrivedNoShow.data.rows %>%
+#   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
+#   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+
+
+     noShow_perc <- noShow_perc %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+
+
+
+
+    noShow_perc <- noShow_perc %>%
+  group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+  dplyr::summarise(Total = n()) %>% collect()
+
+  noShow_perc <- noShow_perc %>% pivot_wider(names_from = APPT_STATUS, values_from = Total)
+
+noShow_perc[is.na(noShow_perc)] <- 0
+
+noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+  mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))
+
+
+
+noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
+
+noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
+  pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+  ungroup()
+
+
+noShow_perc$Metrics <- "No Show Rate"
+noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, everything())
+
+print("11")
+
+    ## Percent of New Patients Scheduled Within 14 Days
+data <- dataAll_access()
+
+#data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+
+waitTime_total <- data %>%
+  filter(WAIT_TIME >= 0) %>%
+  filter(NEW_PT2 == "NEW") %>%
+  group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+  dplyr::summarise(total_all = n()) %>%
+  collect()
+
+waitTime_within_14_days <- data %>%
+  filter(WAIT_TIME >= 0, 
+         WAIT_TIME < 14.0001, 
+         NEW_PT2 == "NEW") %>%
+  group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+  dplyr::summarise(total = n()) %>%
+  collect()
+
+join_data <- inner_join(waitTime_total, waitTime_within_14_days)
+
+join_data[is.na(join_data)] <- 0
+
+percent_within_14_days <- join_data %>% 
+  group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+  summarise(percent = paste0(round((total/total_all),2)*100, "%"))
+
+
+percent_within_14_days$APPT_MONTH_YEAR <- as.yearmon(percent_within_14_days$APPT_MADE_MONTH_YEAR, "%Y-%m")
+
+percent_within_14_days <- percent_within_14_days %>% 
+  select(-APPT_MADE_MONTH_YEAR) %>% 
+  pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percent) %>%
+  ungroup()
+
+
+percent_within_14_days$Metrics <- "Percent of New Patients Scheduled Within 14 Days"
+percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metrics, everything())
+
+
+
+
     
     ### Bind datas by row to create the final table
     # opt_table <- plyr:: rbind.fill(volume, slot, newpatients.ratio, waitTime )  
-    opt_table <- plyr:: rbind.fill(volume, newpatients.ratio, waitTime )  
+    opt_table <- plyr:: rbind.fill(volume, newpatients.ratio, waitTime, noShow_perc, percent_within_14_days )  
 
     opt_table[is.na(opt_table)] <- 0
 
@@ -11126,16 +11206,16 @@ print("10")
     
    print("11")
     
-    months_df <-  opt_table[,!(names( opt_table) %in% c(cols_name, "Metrics"))]
+    months_df <-  opt_table[,!(names( opt_table) %in% c(cols, "Metrics"))]
     months <- order(as.yearmon(colnames(months_df), "%b %Y"))
     order_months <- months_df[months]
 
 
 
 
-    index <- months+length(cols_name)
+    index <- months+length(cols)+1
     #index <- c(1:length(cols_name),index,length(opt_table))
-    index <- c(1:length(cols_name),index)
+    index <- c(1:length(cols)+1, index)
     index <- sort(index, decreasing = F)
 
     opt_table <- opt_table[index]
@@ -11152,7 +11232,8 @@ print("10")
     time_2 <- Sys.time()
     
     print(time_2 - time_1)
-    metric_order <- c("Average Daily Volume",c( "Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time") , as.vector(unique(opt_table$Metrics)))
+    metric_order <- c("Average Daily Volume",
+                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time", "No Show Rate", "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
   
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
