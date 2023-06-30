@@ -11180,11 +11180,10 @@ percent_within_14_days <- join_data %>%
   summarise(percent = paste0(round((total/total_all),2)*100, "%"))
 
 
-percent_within_14_days$APPT_MONTH_YEAR <- as.yearmon(percent_within_14_days$APPT_MADE_MONTH_YEAR, "%Y-%m")
+percent_within_14_days$APPT_MADE_MONTH_YEAR <- as.yearmon(percent_within_14_days$APPT_MADE_MONTH_YEAR, "%Y-%m")
 
 percent_within_14_days <- percent_within_14_days %>% 
-  select(-APPT_MADE_MONTH_YEAR) %>% 
-  pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percent) %>%
+  pivot_wider(names_from = APPT_MADE_MONTH_YEAR, values_from = percent) %>%
   ungroup()
 
 
@@ -11327,7 +11326,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
       row_spec(0,  background = "#212070", color = "white")
       
     
-    
+ 
     # data %>%
     #   kable("html", booktabs = T,escape = F) %>%
     #   collapse_rows(columns = "Department", valign = "top")
