@@ -863,7 +863,7 @@ ui <- dashboardPage(
                                                   h5("Scheduled time includes an adjustment factor of 20% (every visit duration increased by 20%) to account for room turnover times and any non-physician contact time spent in rooms."))),
                                        column(3,
                                               box(title = NULL, width = 12, solidHeader = FALSE,
-                                                  sliderInput("setRooms", label = h4("Set Rooms Available:"), min = 1, max = 24, value = 8)),
+                                                  sliderInput("setRooms", label = h4("Set Rooms Available:"), min = 1, max = 50, value = 8)),
                                               box(title = NULL, width = 12, solidHeader = FALSE,
                                                   sliderInput("setHours", label = h4("Set Daily Open Hours:"), min = 1, max = 24, value = 8))),
                                        column(6,
