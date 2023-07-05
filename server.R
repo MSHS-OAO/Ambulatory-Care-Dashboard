@@ -8777,7 +8777,7 @@ ggplot(data_base,
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -8801,7 +8801,7 @@ ggplot(data_base,
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -8826,7 +8826,7 @@ ggplot(data_base,
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -8851,7 +8851,7 @@ ggplot(data_base,
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -8989,7 +8989,7 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
 
@@ -9012,7 +9012,7 @@ ggplot(data_base,
       tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       ### Group data by inputs and Month and Date.  Spread data to make columns FALSE and TRUE that determine number of new or established patients
       volume <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
@@ -9326,7 +9326,7 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -9350,7 +9350,7 @@ ggplot(data_base,
       tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       
       #### Group data by inputs and Month.  Spread data to make TRUE and FALSe columns for new patietns
       volume <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
@@ -9576,7 +9576,7 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -9602,7 +9602,7 @@ ggplot(data_base,
     
     
     
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
       newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
@@ -9669,10 +9669,10 @@ ggplot(data_base,
     }else{
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
+      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
-        spread(NEW_PT2, total)
+        spread(NEW_PT3, total)
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
@@ -10260,7 +10260,7 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -10292,7 +10292,7 @@ ggplot(data_base,
     
     
     
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       
       
       #### Calculate wait time which is the difference between the the patients made the appt to the data of the appt
@@ -10303,11 +10303,11 @@ ggplot(data_base,
         filter(WAIT_TIME >= 0) %>%
         group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
         dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
-        filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
+        filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% collect()
       
       
       #### convert to new and established and filter out established and drop the NEW.PT3 columns
-      waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
+      waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == "NEW", "New","Established")
       
       
       #### Get the average daily for new patients and arrived patients 
@@ -10348,16 +10348,16 @@ ggplot(data_base,
       
       #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
       waitTime <- data %>%
-        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>%
         group_by(!!!syms(cols),APPT_MADE_MONTH_YEAR) %>%
         dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>% collect()
-        #filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
+        #filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% collect()
       
       
       #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
-      #waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
-      #waitTime <- waitTime %>% filter(NEW_PT2 == "New")
-      #drop <- c("NEW_PT2")
+      #waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == "NEW", "New","Established")
+      #waitTime <- waitTime %>% filter(NEW_PT3 == "New")
+      #drop <- c("NEW_PT3")
       #waitTime = waitTime[,!(names(waitTime) %in% drop)]
       
       #### Pivot the data so the months are in the columns and shows only new patient median time   
@@ -10374,7 +10374,7 @@ ggplot(data_base,
 
       
       tot <- data %>%
-        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>%
         group_by(!!!syms(tot_cols), APPT_MADE_MONTH_YEAR) %>%
         dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
         collect() %>%
@@ -10503,7 +10503,7 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
