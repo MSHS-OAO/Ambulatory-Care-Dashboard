@@ -1306,7 +1306,7 @@ ui <- dashboardPage(
                                      ),
                                      tabPanel("No Show Rate",
                                               boxPlus(
-                                                title = "No Show Ratee", width = 12, status = "primary", 
+                                                title = "No Show Rate", width = 12, status = "primary", 
                                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                                 h3(uiOutput(("noshow_rate_month_title"))),
                                                 DTOutput("new_no_show_rate_monthly") %>% 
