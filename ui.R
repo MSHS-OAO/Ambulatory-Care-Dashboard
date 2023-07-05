@@ -1303,7 +1303,28 @@ ui <- dashboardPage(
                                                 DTOutput("new_patient_lead_time_month") %>% 
                                                   withSpinner(type = 5, color = "#d80b8c")
                                               )
-                                     )#,
+                                     ),
+                                     tabPanel("No Show Rate",
+                                              boxPlus(
+                                                title = "No Show Ratee", width = 12, status = "primary", 
+                                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                                h3(uiOutput(("noshow_rate_month_title"))),
+                                                DTOutput("new_no_show_rate_monthly") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c")
+                                              )
+                                     ),
+                                     
+                                     
+                                     tabPanel("Percent of New Patients Scheduled Within 14 Days",
+                                              boxPlus(
+                                                title = "Percent of New Patients Scheduled Within 14 Days", width = 12, status = "primary", 
+                                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                                h3(uiOutput(("new_patient_within_14days_title"))),
+                                                DTOutput("new_patient_within_14days") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c")
+                                              )
+                                     )
+                                     
                                      # tabPanel("No Show %",
                                      #          boxPlus(
                                      #            title = "No Show %", width = 12, status = "primary", 
