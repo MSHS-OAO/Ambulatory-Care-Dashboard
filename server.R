@@ -6722,10 +6722,10 @@ server <- function(input, output, session) {
     # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
 
     newpatients.ratio <- data %>%
-      group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
       dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
-      mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
-      spread(NEW_PT2, Total) 
+      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
+      spread(NEW_PT3, Total) 
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
 
@@ -6834,7 +6834,7 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Monthly Median Wait Time to New and Established Appointment",
-           #subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
