@@ -10661,8 +10661,9 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
+      breakdown_filters <- "NEW_PT2"
     }
     
     
