@@ -11304,11 +11304,11 @@ ggplot(data_base,
     
     # data_access <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-    newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
+    newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
       summarise(total = SUM(TOTAL_APPTS)) %>% collect()%>%  # it was n()
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
-      spread(NEW_PT2, total)
+      spread(NEW_PT3, total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
@@ -11364,16 +11364,16 @@ ggplot(data_base,
    
     waitTime <- data_access %>%
       filter(WAIT_TIME >= 0) %>% 
-      group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>% 
+      group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>% 
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
-      filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect() %>%
+      filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% collect() %>%
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))
     
     
     #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
-    waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
-    waitTime <- waitTime %>% filter(NEW_PT2 == "New") 
-    drop <- c("NEW_PT2")
+    waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == "NEW", "New","Established")
+    waitTime <- waitTime %>% filter(NEW_PT3 == "New") 
+    drop <- c("NEW_PT3")
     waitTime = waitTime[,!(names(waitTime) %in% drop)]
     
     #### Pivot the data so the months are in the columns and shows only new patient median time   
