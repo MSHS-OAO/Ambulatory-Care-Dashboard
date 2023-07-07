@@ -5449,7 +5449,36 @@ server <- function(input, output, session) {
   output$spaceUtil <- renderPlot({
     data <- dataUtilization() 
     # data <- utilization.data[arrived.utilization.data.rows,]
-    #data <- utilization.data %>% filter(CAMPUS %in% default_campus, CAMPUS_SPECIALTY)
+    #data <- utilization.data %>% filter(CAMPUS %in% default_campus, CAMPUS_SPECIALTY %in% "Allergy")
+    
+    test_util <<- data
+    
+    if (input$utilType == "actual"){
+
+      check <- data %>% 
+        group_by(SCHEDULE_TO_ACTUAL_CONVERSION) %>%
+        summarise(total = n()) %>% 
+        collect() %>%
+        spread(key = SCHEDULE_TO_ACTUAL_CONVERSION, value = total)
+      
+      
+        #index <- which(!(colnames(check) %in% c("TRUE", "FALSE")))
+
+
+      if (!(colnames(check) %in% c("TRUE"))){
+        check <- check %>% mutate(`TRUE` = 0)
+      }
+      
+      check <- check %>%
+        mutate(ratio = (`TRUE`/(`TRUE`+ `FALSE` )))
+      
+      variable_to_check <- check$ratio
+        
+      check_test <<- check
+      validate(need(variable_to_check < 0.05, "Not enough EPIC timestamp data to generate graphs. Please refer to the handbook and reach out to the team." ))
+     
+      
+    }
     
     # Days of Week Table
     daysOfWeek.Table <- 
