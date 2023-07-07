@@ -9234,8 +9234,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('Average Daily Volume = Total arrived visits by month and breakdown / Total number of days within the month.')
-                          ),
+                            htmltools::em('Average Daily Volume = Total arrived visits by month and breakdown / Total number of days within the month.')),
                           
                           options = list(
                             scrollX = TRUE,

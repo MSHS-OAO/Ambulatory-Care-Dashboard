@@ -1259,7 +1259,8 @@ ui <- dashboardPage(
                                 radioButtons("breakdown_filters", label = h4("Breakdown by:"),
                                              choices = list("Visit Method" = "VISIT_METHOD", "Visit Type" = "APPT_TYPE",  "New vs. Established Patients*" = "NEW_PT3"),
                                              selected = "VISIT_METHOD"),
-                                h6("*New Patients defined by CPT codes"))
+                                h6("*New Patients defined by CPT codes for the first four tabs and by the scheduled data for the last tab.")
+                                )
                               
                        ),
                        
