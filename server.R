@@ -6722,10 +6722,10 @@ server <- function(input, output, session) {
     # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
 
     newpatients.ratio <- data %>%
-      group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
       dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
-      mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
-      spread(NEW_PT2, Total) 
+      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
+      spread(NEW_PT3, Total) 
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
 
@@ -8777,7 +8777,7 @@ ggplot(data_base,
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -8801,7 +8801,7 @@ ggplot(data_base,
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -8826,7 +8826,7 @@ ggplot(data_base,
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -8851,7 +8851,7 @@ ggplot(data_base,
     if(input$breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -8989,7 +8989,7 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
 
@@ -9012,7 +9012,7 @@ ggplot(data_base,
       tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
-    if(input$breakdown_filters == "NEW_PT2"){
+    if(input$breakdown_filters == "NEW_PT3"){
       ### Group data by inputs and Month and Date.  Spread data to make columns FALSE and TRUE that determine number of new or established patients
       volume <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
@@ -9234,8 +9234,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('Average Daily Volume = Total arrived visits by month and breakdown / Total number of days within the month.')
-                          ),
+                            htmltools::em('Average Daily Volume = Total arrived visits by month and breakdown / Total number of days within the month.')),
                           
                           options = list(
                             scrollX = TRUE,
@@ -9326,7 +9325,7 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -9350,7 +9349,7 @@ ggplot(data_base,
       tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       
       #### Group data by inputs and Month.  Spread data to make TRUE and FALSe columns for new patietns
       volume <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
@@ -9576,7 +9575,7 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -9602,7 +9601,7 @@ ggplot(data_base,
     
     
     
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
       newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
@@ -9669,10 +9668,10 @@ ggplot(data_base,
     }else{
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
+      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
-        spread(NEW_PT2, total)
+        spread(NEW_PT3, total)
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
@@ -10260,7 +10259,7 @@ ggplot(data_base,
     if(breakdown_filters == "APPT_TYPE"){
       name_2 <- "Vist Type"
     }
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
     }
     
@@ -10292,7 +10291,7 @@ ggplot(data_base,
     
     
     
-    if(breakdown_filters == "NEW_PT2"){
+    if(breakdown_filters == "NEW_PT3"){
       
       
       #### Calculate wait time which is the difference between the the patients made the appt to the data of the appt
@@ -10303,11 +10302,11 @@ ggplot(data_base,
         filter(WAIT_TIME >= 0) %>%
         group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
         dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
-        filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
+        filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% collect()
       
       
       #### convert to new and established and filter out established and drop the NEW.PT3 columns
-      waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
+      waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == "NEW", "New","Established")
       
       
       #### Get the average daily for new patients and arrived patients 
@@ -10348,16 +10347,16 @@ ggplot(data_base,
       
       #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
       waitTime <- data %>%
-        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>%
         group_by(!!!syms(cols),APPT_MADE_MONTH_YEAR) %>%
         dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>% collect()
-        #filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect()
+        #filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% collect()
       
       
       #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
-      #waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
-      #waitTime <- waitTime %>% filter(NEW_PT2 == "New")
-      #drop <- c("NEW_PT2")
+      #waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == "NEW", "New","Established")
+      #waitTime <- waitTime %>% filter(NEW_PT3 == "New")
+      #drop <- c("NEW_PT3")
       #waitTime = waitTime[,!(names(waitTime) %in% drop)]
       
       #### Pivot the data so the months are in the columns and shows only new patient median time   
@@ -10374,7 +10373,7 @@ ggplot(data_base,
 
       
       tot <- data %>%
-        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>%
         group_by(!!!syms(tot_cols), APPT_MADE_MONTH_YEAR) %>%
         dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
         collect() %>%
@@ -10480,6 +10479,354 @@ ggplot(data_base,
     dtable
   },server = FALSE)
   
+  
+  
+  no_Show_percentage <- reactive({
+    
+    
+    data <- dataArrivedNoShow() %>%
+      filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    
+    # data <- arrivedNoShow.data.rows %>%
+    #   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
+    #   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    
+    
+    compare_filters <- input$compare_filters
+    breakdown_filters <- input$breakdown_filters
+    
+    
+    if(breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(breakdown_filters == "NEW_PT3"){
+      name_2 <- "Patient Status"
+    }
+    
+    
+    if(compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+      cols <- c(compare_filters,breakdown_filters)
+      cols_name <- c(name_1,name_2)
+      tot_cols <- c(compare_filters)
+    }
+    if(compare_filters == "DEPARTMENT"){
+      name_1 <- compare_filters
+      cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
+      cols_name <- c("Specialty",name_1,name_2)
+      tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
+    }
+    if(compare_filters == "PROVIDER"){
+      name_1 <- compare_filters
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
+      cols_name <- c("Specialty","Department",name_1,name_2)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
+    }
+    
+    
+    data <- data %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+    
+    
+    # if(breakdown_filters == "NEW_PT2"){
+    #   validate(
+    #     need(input$breakdown_filters != "NEW_PT2", ("No show Rate cannot be viewed by New vs Established Patients"))
+    #   )
+    #   
+    # } else{
+      
+      
+      noShow_perc <- data %>%
+        group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+        dplyr::summarise(Total = n()) %>% collect() %>% 
+        pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+        replace(is.na(.), 0) %>% 
+        group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+        mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+        mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+        select(-`No Show`,-Arrived) %>% 
+        pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+        ungroup()
+      
+      
+      
+      tot <- data %>%
+        group_by(!!!syms(tot_cols), APPT_STATUS, APPT_MONTH_YEAR) %>%
+        dplyr::summarise(Total = n()) %>% 
+        collect() %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+        replace(is.na(.), 0) %>% 
+        group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+        mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+        select(-`No Show`,-Arrived) %>% 
+        mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+        pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+        ungroup() %>%
+        select(all_of(cols),  everything())
+      
+      noShow_perc <- full_join(noShow_perc, tot)
+      
+      noShow_perc <- noShow_perc %>% arrange(across(all_of(tot_cols)))
+      
+      
+      
+      i1 <- as.yearmon(names(noShow_perc))
+      noShow_perc <- noShow_perc[order(i1)]
+      
+      noShow_perc <- noShow_perc %>% select(cols, everything())
+      
+      noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
+      
+      noShow_perc
+      
+    #}
+    
+  })
+  
+  output[["new_no_show_rate_monthly"]] <- renderDT({
+    num_of_cols <- length(no_Show_percentage())
+    col_dissappear <- which(names(no_Show_percentage()) %in% c("Total_YN"))
+    
+    test_data <<- no_Show_percentage()
+    
+    dtable <-   datatable(no_Show_percentage(), 
+                          class = 'cell-border stripe',
+                          rownames = FALSE,
+                          extensions = c('Buttons','Scroller'),
+                          caption = htmltools::tags$caption(
+                            style = 'caption-side: bottom; text-align: left;',
+                            #htmltools::em('Median New Patient Wait Time = median wait time of scheduled new patients within the month')
+                            
+                          ),
+                          options = list(
+                            scrollX = TRUE,
+                            columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
+                            list(pageLength = 20, scrollY = "400px"),
+                            dom = 'Bfrtip',
+                            #buttons = c('csv','excel'),
+                            buttons = list(
+                              list(extend = 'csv', filename = 'Monthly No Show Rate Comaprsion'),
+                              list(extend = 'excel', filename = 'Monthly No Show Rate Comaprsion')
+                            ),
+                            sDom  = '<"top">lrt<"bottom">ip',
+                            initComplete = JS(
+                              "function(settings, json) {",
+                              "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                              "}"),
+                            fixedColumns = list(leftColumns =
+                                                  ifelse(colnames(no_Show_percentage())[3] == "Provider", 4, 3)
+                            ),
+                            rowsGroup = rows_group(),
+                            headerCallback = DT::JS(
+                              "function(thead) {",
+                              "  $(thead).css('font-size', '115%');",
+                              "}"
+                            )
+                            
+                          )
+    )
+    dtable <- dtable %>%
+      formatStyle(
+        'Total_YN',
+        target = "row",
+        fontWeight = styleEqual(1, "bold")
+      )%>%
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+    path <- here::here("www")
+    
+    dep <- htmltools::htmlDependency(
+      "RowsGroup", "2.0.0", 
+      path, script = "dataTables.rowsGroup.js")
+    dtable$dependencies <- c(dtable$dependencies, list(dep))
+    dtable
+  },server = FALSE)
+  
+  
+  wite_time_14days <- reactive({
+    ## Percent of New Patients Scheduled Within 14 Days
+    data <- dataAll_access()
+    
+    
+    compare_filters <- input$compare_filters
+    breakdown_filters <- input$breakdown_filters
+    
+    
+    if(breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(breakdown_filters == "NEW_PT3"){
+      name_2 <- "Patient Status"
+      breakdown_filters <- "NEW_PT2"
+    }
+    
+    
+    if(compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+      cols <- c(compare_filters,breakdown_filters)
+      cols_name <- c(name_1,name_2)
+      tot_cols <- c(compare_filters)
+    }
+    if(compare_filters == "DEPARTMENT"){
+      name_1 <- compare_filters
+      cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
+      cols_name <- c("Specialty",name_1,name_2)
+      tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
+    }
+    if(compare_filters == "PROVIDER"){
+      name_1 <- compare_filters
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
+      cols_name <- c("Specialty","Department",name_1,name_2)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
+    }
+    
+    
+    
+    if(breakdown_filters == "NEW_PT2"){
+      validate(
+        need(input$breakdown_filters != "NEW_PT2", ("Percent of New Patients Scheduled Within 14 Days cannot be viewed by New vs Established Patients"))
+      )
+      
+    } else{
+      
+      #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+      
+      
+      waitTime_total <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        filter(NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+        dplyr::summarise(total_all = n()) %>%
+        collect()
+      
+      waitTime_within_14_days <- data %>%
+        filter(WAIT_TIME >= 0, 
+               WAIT_TIME < 14.0001, 
+               NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+        dplyr::summarise(total = n()) %>%
+        collect()
+      
+      join_data <- inner_join(waitTime_total, waitTime_within_14_days)
+      
+      join_data[is.na(join_data)] <- 0
+      
+      percent_within_14_days <- join_data %>% 
+        group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+        summarise(percent = paste0(round((total/total_all),2)*100, "%"))
+      
+      
+      percent_within_14_days$APPT_MADE_MONTH_YEAR <- as.yearmon(percent_within_14_days$APPT_MADE_MONTH_YEAR, "%Y-%m")
+      
+      percent_within_14_days <- percent_within_14_days %>% 
+        pivot_wider(names_from = APPT_MADE_MONTH_YEAR, values_from = percent) %>%
+        ungroup()
+      
+      
+      
+      percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), everything())
+      
+      waitTime_tot <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        filter(NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols), APPT_MADE_MONTH_YEAR) %>%
+        dplyr::summarise(total_all = n()) %>%
+        collect()
+      
+      waitTime_within_14_days_tot <- data %>%
+        filter(WAIT_TIME >= 0, 
+               WAIT_TIME < 14.0001, 
+               NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols), APPT_MADE_MONTH_YEAR) %>%
+        dplyr::summarise(total = n()) %>%
+        collect()
+      
+      tot_join_data <- inner_join(waitTime_tot, waitTime_within_14_days_tot)
+      
+      tot_join_data[is.na(tot_join_data)] <- 0
+      
+      tot <- tot_join_data %>% 
+        group_by(!!!syms(tot_cols), APPT_MADE_MONTH_YEAR) %>%
+        summarise(percent = paste0(round((total/total_all),2)*100, "%"))%>%
+        add_column(!!breakdown_filters := "Total") 
+      
+      
+      tot$APPT_MADE_MONTH_YEAR <- as.yearmon(tot$APPT_MADE_MONTH_YEAR, "%Y-%m")
+      
+      tot <- tot %>% 
+        pivot_wider(names_from = APPT_MADE_MONTH_YEAR, values_from = percent) %>%
+        ungroup()
+      
+      
+      percent_within_14_days <- full_join(percent_within_14_days, tot)
+      
+      percent_within_14_days$Total_YN <- ifelse(percent_within_14_days[[all_of(breakdown_filters)]] == "Total", 1,0)
+      
+      percent_within_14_days
+    }
+    
+  })
+  
+  
+  output[["new_patient_within_14days"]] <- renderDT({
+    num_of_cols <- length(wite_time_14days())
+    col_dissappear <- which(names(wite_time_14days()) %in% c("Total_YN"))
+    
+    dtable <-   datatable(patient_lead(), 
+                          class = 'cell-border stripe',
+                          rownames = FALSE,
+                          extensions = c('Buttons','Scroller'),
+                          caption = htmltools::tags$caption(
+                            style = 'caption-side: bottom; text-align: left;',
+                            
+                          ),
+                          options = list(
+                            scrollX = TRUE,
+                            columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
+                            list(pageLength = 20, scrollY = "400px"),
+                            dom = 'Bfrtip',
+                            #buttons = c('csv','excel'),
+                            buttons = list(
+                              list(extend = 'csv', filename = 'Monthly Percent of New Patients Scheduled Within 14 Days Comaprsion'),
+                              list(extend = 'excel', filename = 'Monthly Percent of New Patients Scheduled Within 14 Days Comaprsion')
+                            ),
+                            sDom  = '<"top">lrt<"bottom">ip',
+                            initComplete = JS(
+                              "function(settings, json) {",
+                              "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                              "}"),
+                            fixedColumns = list(leftColumns =
+                                                  ifelse(colnames(wite_time_14days())[3] == "Provider", 4, 3)
+                            ),
+                            rowsGroup = rows_group(),
+                            headerCallback = DT::JS(
+                              "function(thead) {",
+                              "  $(thead).css('font-size', '115%');",
+                              "}"
+                            )
+                            
+                          )
+    )
+    dtable <- dtable %>%
+      formatStyle(
+        'Total_YN',
+        target = "row",
+        fontWeight = styleEqual(1, "bold")
+      )%>%
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+    path <- here::here("www")
+    
+    dep <- htmltools::htmlDependency(
+      "RowsGroup", "2.0.0", 
+      path, script = "dataTables.rowsGroup.js")
+    dtable$dependencies <- c(dtable$dependencies, list(dep))
+    dtable
+  },server = FALSE)
   
   booked_and_filled_month <- reactive({
     data <- dataAllSlot_comp() #%>% select(APPT_MONTH_YEAR, VISIT_METHOD, CAMPUS_SPECIALTY, DEPARTMENT_NAME, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, AVAILABLE_HOURS, BOOKED_HOURS, ARRIVED_HOURS) %>% collect()
@@ -10891,7 +11238,7 @@ ggplot(data_base,
     
     data <- dataArrived_summary()
     
-    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology"  )
+    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
     
     #data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT2, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
     
@@ -10957,11 +11304,11 @@ ggplot(data_base,
     
     # data_access <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-    newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
+    newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
       summarise(total = SUM(TOTAL_APPTS)) %>% collect()%>%  # it was n()
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
-      spread(NEW_PT2, total)
+      spread(NEW_PT3, total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
@@ -11012,21 +11359,21 @@ ggplot(data_base,
     #waitTime <- waitTime  %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
     #### Filter out wait time that equals 0 and calculate the median wait time for NEw and est patients by month
     data_access <-  dataAll_access()
-    #data_access <- arrived.data.rows.old %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
+    #data_access <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     
    
     waitTime <- data_access %>%
       filter(WAIT_TIME >= 0) %>% 
-      group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>% 
+      group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>% 
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
-      filter(NEW_PT2 %in% c("NEW","ESTABLISHED")) %>% collect() %>%
+      filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% collect() %>%
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))
     
     
     #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
-    waitTime$NEW_PT2 <- ifelse(waitTime$NEW_PT2 == "NEW", "New","Established")
-    waitTime <- waitTime %>% filter(NEW_PT2 == "New") 
-    drop <- c("NEW_PT2")
+    waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == "NEW", "New","Established")
+    waitTime <- waitTime %>% filter(NEW_PT3 == "New") 
+    drop <- c("NEW_PT3")
     waitTime = waitTime[,!(names(waitTime) %in% drop)]
     
     #### Pivot the data so the months are in the columns and shows only new patient median time   
@@ -11101,8 +11448,7 @@ ggplot(data_base,
     #   spread(APPT_MONTH_YEAR, value) %>%
     #   rename(Metrics = variable)
    
-    
-    
+   
 print("10")
     #slot <- slot %>%  group_by(across(!!cols), Appt.MonthYear) %>%
      # summarise(
@@ -11113,11 +11459,91 @@ print("10")
       #spread(Appt.MonthYear, value) %>%
       #rename(Metrics = variable)
     
-    
+
+
+     noShow_perc <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+
+# noShow_perc <- arrivedNoShow.data.rows %>%
+#   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
+#   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+
+
+     noShow_perc <- noShow_perc %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+
+
+
+
+    noShow_perc <- noShow_perc %>%
+  group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+  dplyr::summarise(Total = n()) %>% collect()
+
+  noShow_perc <- noShow_perc %>% pivot_wider(names_from = APPT_STATUS, values_from = Total)
+
+noShow_perc[is.na(noShow_perc)] <- 0
+
+noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+  mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))
+
+
+
+noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
+
+noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
+  pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+  ungroup()
+
+
+noShow_perc$Metrics <- "No Show Rate"
+noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, everything())
+
+print("11")
+
+    ## Percent of New Patients Scheduled Within 14 Days
+data <- dataAll_access()
+
+#data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+
+waitTime_total <- data %>%
+  filter(WAIT_TIME >= 0) %>%
+  filter(NEW_PT2 == "NEW") %>%
+  group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+  dplyr::summarise(total_all = n()) %>%
+  collect()
+
+waitTime_within_14_days <- data %>%
+  filter(WAIT_TIME >= 0, 
+         WAIT_TIME < 14.0001, 
+         NEW_PT2 == "NEW") %>%
+  group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+  dplyr::summarise(total = n()) %>%
+  collect()
+
+join_data <- inner_join(waitTime_total, waitTime_within_14_days)
+
+join_data[is.na(join_data)] <- 0
+
+percent_within_14_days <- join_data %>% 
+  group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
+  summarise(percent = paste0(round((total/total_all),2)*100, "%"))
+
+
+percent_within_14_days$APPT_MADE_MONTH_YEAR <- as.yearmon(percent_within_14_days$APPT_MADE_MONTH_YEAR, "%Y-%m")
+
+percent_within_14_days <- percent_within_14_days %>% 
+  pivot_wider(names_from = APPT_MADE_MONTH_YEAR, values_from = percent) %>%
+  ungroup()
+
+
+percent_within_14_days$Metrics <- "Percent of New Patients Scheduled Within 14 Days"
+percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metrics, everything())
+
+
+
+
     
     ### Bind datas by row to create the final table
     # opt_table <- plyr:: rbind.fill(volume, slot, newpatients.ratio, waitTime )  
-    opt_table <- plyr:: rbind.fill(volume, newpatients.ratio, waitTime )  
+    opt_table <- plyr:: rbind.fill(volume, newpatients.ratio, waitTime, noShow_perc, percent_within_14_days )  
 
     opt_table[is.na(opt_table)] <- 0
 
@@ -11126,16 +11552,16 @@ print("10")
     
    print("11")
     
-    months_df <-  opt_table[,!(names( opt_table) %in% c(cols_name, "Metrics"))]
+    months_df <-  opt_table[,!(names( opt_table) %in% c(cols, "Metrics"))]
     months <- order(as.yearmon(colnames(months_df), "%b %Y"))
     order_months <- months_df[months]
 
 
 
 
-    index <- months+length(cols_name)
+    index <- months+length(cols)+1
     #index <- c(1:length(cols_name),index,length(opt_table))
-    index <- c(1:length(cols_name),index)
+    index <- c(1:length(cols)+1, index)
     index <- sort(index, decreasing = F)
 
     opt_table <- opt_table[index]
@@ -11152,7 +11578,8 @@ print("10")
     time_2 <- Sys.time()
     
     print(time_2 - time_1)
-    metric_order <- c("Average Daily Volume",c( "Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time") , as.vector(unique(opt_table$Metrics)))
+    metric_order <- c("Average Daily Volume",
+                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time", "No Show Rate", "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
   
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
@@ -11246,7 +11673,7 @@ print("10")
       row_spec(0,  background = "#212070", color = "white")
       
     
-    
+ 
     # data %>%
     #   kable("html", booktabs = T,escape = F) %>%
     #   collapse_rows(columns = "Department", valign = "top")
