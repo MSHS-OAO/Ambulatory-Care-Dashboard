@@ -1190,7 +1190,7 @@ header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),
                                                                      width = 12,
                                                                      height = "100px",
                                                                      solidHeader = FALSE,
-                                                                     pickerInput("filter_list", choices = saved_filter_choices, multiple = TRUE,
+                                                                     pickerInput("filter_list", choices = saved_filter_choices, multiple = FALSE,
                                                                                  selected = NULL, options = pickerOptions(maxOptions = 1)
                                                                      ),
                                                                      actionButton("update_filters1", "CLICK TO UPDATE", width = "80%")

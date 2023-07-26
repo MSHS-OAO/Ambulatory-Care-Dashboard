@@ -168,12 +168,14 @@ server <- function(input, output, session) {
                       choices = unique(holid$holiday),
                       selected = holiday_choices
     )
-    saved_filter_choices <- return_saved_choices(df_choices, "FILTER_NAME")
+    saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
+    saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
+    saved_filter_choices_testing <<- saved_filter_choices
     print("filter observe")
     updatePickerInput(session,
                       inputId = "filter_list",
-                      selected = NULL,
-                      choices = saved_filter_choices
+                      choices = saved_filter_choices,
+                      selected = NULL
     )
     
   },
@@ -393,15 +395,6 @@ server <- function(input, output, session) {
   #   
   #   
   # })
-  
-  observeEvent(input$update_filters1,{
-    user <- user()
-    filter_path_full <- paste0(filter_path, "/", user)
-    dir.create(file.path(filter_path, user), showWarnings = FALSE)
-    filter_choices <- file_path_sans_ext(list.files(path = filter_path_full, pattern = "*.csv"))
-    updatePickerInput(session, "filter_list", choices = filter_choices)
-    
-  })
   
   
   observeEvent(input$selectedCampus,{
