@@ -183,7 +183,7 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
   
   ##Test for volume
-  dataArrived_volume <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_volume <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -818,7 +818,7 @@ server <- function(input, output, session) {
   
   ### (2) Prepare datasets for analysis ===============================================================================================
   # [2.1] All pre-processed data for non-kpi tabs --------------------------------------------------------------------------------------
-  dataAll <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAll <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -834,7 +834,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataAll_access <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAll_access <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -850,7 +850,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataArrivedNoShow <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedNoShow <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -867,7 +867,7 @@ server <- function(input, output, session) {
 
   })
   
-  dataArrivedNoShow_access <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedNoShow_access <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -884,7 +884,7 @@ server <- function(input, output, session) {
     
   })
   
-  dataArrived <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -903,7 +903,7 @@ server <- function(input, output, session) {
   })
   
   
-  dataArrived_summary <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_summary <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -921,7 +921,7 @@ server <- function(input, output, session) {
   })
   
   
-  dataArrived_access_npr <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_access_npr <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -939,7 +939,7 @@ server <- function(input, output, session) {
     
   })
   
-  dataArrived_access <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_access <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -957,7 +957,7 @@ server <- function(input, output, session) {
     
   })
   
-  dataNoShow <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataNoShow <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -973,7 +973,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataCanceledBumpedRescheduled<- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceledBumpedRescheduled<- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -989,7 +989,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataCanceledBumpedRescheduledAll <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceledBumpedRescheduledAll <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1006,7 +1006,7 @@ server <- function(input, output, session) {
   })
   
   
-  dataCanceled<- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceled<- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1022,7 +1022,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataBumped<- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataBumped<- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1038,7 +1038,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataRescheduled<- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataRescheduled<- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1055,7 +1055,7 @@ server <- function(input, output, session) {
   })
   
   # [2.2] All pre-processed data for kpi tabs --------------------------------------------------------------------------------------
-  dataAllKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAllKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1071,7 +1071,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataArrivedNoShowKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedNoShowKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1087,7 +1087,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataArrivedKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedKpi <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -1104,7 +1104,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataCanceledBumpedKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceledBumpedKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1120,7 +1120,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataCanceledKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceledKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1136,7 +1136,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataBumpedKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataBumpedKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1154,7 +1154,7 @@ server <- function(input, output, session) {
   
   # [2.2] All pre-processed data for utilization tabs --------------------------------------------------------------------------------------
   
-  dataUtilization <- eventReactive(list(input$update_filters,input$utilType,input$update_filters1),{
+  dataUtilization <- eventReactive(list(input$update_filters,input$utilType),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1172,7 +1172,7 @@ server <- function(input, output, session) {
   }) 
   
   # [2.3] All pre-processed data for access tabs --------------------------------------------------------------------------------------
-  dataFutureSlot <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataFutureSlot <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1188,7 +1188,7 @@ server <- function(input, output, session) {
                      input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   }) 
   
-  dataPastSlot <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataPastSlot <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1205,7 +1205,7 @@ server <- function(input, output, session) {
   }) 
   
   
-  dataAllSlot <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAllSlot <- eventReactive(list(input$update_filters),{
     print(paste0("Beginning of slot processing ", Sys.time()))
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -1222,7 +1222,7 @@ server <- function(input, output, session) {
                      input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
   }) 
   
-  dataAllSlot_comp <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAllSlot_comp <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1242,7 +1242,7 @@ server <- function(input, output, session) {
   
   # [2.4] Arrived Population Data --------------------------------------------------------------------------------------
   
-  dataArrivedPop <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedPop <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -11215,7 +11215,7 @@ ggplot(data_base,
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
-  dataArrived_test_schedule <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_test_schedule <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -11232,7 +11232,7 @@ ggplot(data_base,
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
     
   })
-  dataArrived_access_schedule <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_access_schedule <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
