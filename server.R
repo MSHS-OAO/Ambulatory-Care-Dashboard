@@ -170,12 +170,12 @@ server <- function(input, output, session) {
     )
     saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
     saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
-    saved_filter_choices_testing <<- saved_filter_choices
+
     print("filter observe")
     updatePickerInput(session,
                       inputId = "filter_list",
-                      choices = saved_filter_choices,
-                      selected = NULL
+                      selected = NULL,
+                      choices = saved_filter_choices
     )
     
   },
