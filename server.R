@@ -5399,11 +5399,17 @@ server <- function(input, output, session) {
     
     space.hour.day <- space.hour.day %>% filter(Time %in% timeOptionsHr_filter)
     
+    if (input$utilType == "actual"){
+      subtitle <- "actual"
+    } else {
+      subtitle <- "scheduled"
+    }
+    
     graph <- ggplot(space.hour.day, aes(x=Time, y=ceiling(Average_Req), col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
       labs(x=NULL, y="Number of Rooms\n",
            title = "Average Space Required by Time of Day and Day of Week",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           subtitle = paste0("Based on ", subtitle, " appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
            )+
       scale_color_MountSinai("main")+
       geom_point(size = 3.2) +
@@ -5514,12 +5520,17 @@ server <- function(input, output, session) {
     #space.hour.day$target <- 80
     space.hour.day$target <- 0.8
     
+    if (input$utilType == "actual"){
+      subtitle <- "actual"
+    } else {
+      subtitle <- "scheduled"
+    }
     
     graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Util, col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
       labs(x=NULL, y="Utilization (%)", 
            title = "Average Space Utilization (%) by Time of Day and Day of Week",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           subtitle = paste0("Based on ", subtitle, " appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
            )+
       scale_color_MountSinai("main")+
       #geom_hline(yintercept = .8, color = "red", linetype="dashed")+
@@ -5600,12 +5611,18 @@ server <- function(input, output, session) {
     
     space.hour <- space.hour %>% filter(Time %in% timeOptionsHr_filter)
     
+    if (input$utilType == "actual"){
+      subtitle <- "actual"
+    } else {
+      subtitle <- "scheduled"
+    }
+    
     graph <- ggplot(space.hour, aes(x=Time, y=value, col=variable, group=variable))+
       geom_line(size=1.2)+
       scale_y_continuous(limits=c(0, max(space.hour$value)*1.2))+
       labs(x=NULL, y="Number of Rooms\n",
            title = "Space Required by Percentile by Time of Day",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           subtitle = paste0("Based on ", subtitle, " appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
            )+
       scale_color_MountSinai("main")+
       geom_point(size = 3.2) +
@@ -5685,12 +5702,18 @@ server <- function(input, output, session) {
     
     space.hour <- space.hour %>% filter(Time %in% timeOptionsHr_filter)
     
+    if (input$utilType == "actual"){
+      subtitle <- "actual"
+    } else {
+      subtitle <- "scheduled"
+    }
+    
     graph <- ggplot(space.hour, aes(x=Time, y=value, col=variable, group=variable))+
       geom_line(size=1.2)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0,max(space.hour$value)*1.2))+
       labs(x=NULL, y="Utilization (%)", 
            title = "Space Utilization (%) by Percentile by Time of Day",
-           #subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           subtitle = paste0("Based on ", subtitle, " scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
            )+
       scale_color_MountSinai("main")+
       geom_point(size = 3.2) +
