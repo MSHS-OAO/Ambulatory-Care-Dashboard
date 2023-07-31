@@ -5476,8 +5476,7 @@ server <- function(input, output, session) {
         
       check_test <<- check
       validate(need(variable_to_check < 0.05, "Not enough EPIC timestamp data to generate graphs. Please refer to the handbook and reach out to the team." ))
-     
-      
+
     }
     
     # Days of Week Table
@@ -11326,6 +11325,7 @@ ggplot(data_base,
     
     volume$Metrics <- "Average Daily Volume"
     volume <- volume %>% select(all_of(cols), Metrics, everything())
+    volume <- volume %>% mutate(`Dynamic Target` = "TBD")
     
     
 
@@ -11374,6 +11374,7 @@ ggplot(data_base,
     
     newpatients.ratio$Metrics <- "New Patient Ratio"
     newpatients.ratio <- newpatients.ratio %>% select(cols, Metrics, everything())
+    newpatients.ratio <- newpatients.ratio %>% mutate(`Dynamic Target` = "TBD")
     
     #dataAll <- dataAll()
     #dataAll <- dataAll() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
@@ -11419,6 +11420,7 @@ ggplot(data_base,
     
     waitTime$Metrics <- "New Patient Wait Time"
     waitTime <- waitTime %>% select(cols, Metrics, everything())
+    waitTime <- waitTime  %>% mutate(`Dynamic Target` = "TBD")
     
     
    
@@ -11497,7 +11499,7 @@ print("10")
 #   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
 
 
-     noShow_perc <- noShow_perc %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+    noShow_perc <- noShow_perc %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
 
 
 
@@ -11508,16 +11510,71 @@ print("10")
 
   noShow_perc <- noShow_perc %>% pivot_wider(names_from = APPT_STATUS, values_from = Total)
 
-noShow_perc[is.na(noShow_perc)] <- 0
+  noShow_perc[is.na(noShow_perc)] <- 0
 
-noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+  noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
   mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))
 
 
 
-noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
+ noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
+ 
+ year <- max(year(noShow_perc$APPT_MONTH_YEAR))-1
+ 
+ campus <- input$selectedCampus 
+ specialty <- input$selectedSpecialty
+ department <- input$selectedDepartment
+ resources <- input$selectedResource 
+   provider <- input$selectedProvider
+ 
+ 
+ if(compare_filters == "CAMPUS_SPECIALTY"){
+   
+   dynamic_noshow <- arrivedNoShow.data.rows %>%
+     filter(CAMPUS %in% campus  & 
+              CAMPUS_SPECIALTY %in% specialty ) 
+   
+ }
+ if(compare_filters == "DEPARTMENT"){
+   dynamic_noshow <- arrivedNoShow.data.rows %>%
+     filter(CAMPUS %in% campus  & 
+              CAMPUS_SPECIALTY %in% specialty &
+              DEPARTMENT %in% department )
+ }
+ if(compare_filters == "PROVIDER"){
+   dynamic_noshow <- arrivedNoShow.data.rows %>%
+     filter(CAMPUS %in% campus  & 
+              CAMPUS_SPECIALTY %in% specialty &
+              DEPARTMENT %in% department &
+              RESOURCES %in% resources &
+              PROVIDER %in% provider)
+ }
+ 
+ 
+ dynamic_noshow  <- dynamic_noshow %>%
+   #filter(CAMPUS %in% "MSUS"  & CAMPUS_SPECIALTY %in% "Allergy")%>%
+   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+   mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show")) %>%
+   group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+   dplyr::summarise(Total = n()) %>% 
+   collect() %>% 
+   pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
+   replace(is.na(.), 0) %>%
+   mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m")) %>%
+   filter(year(APPT_MONTH_YEAR) == year)%>%
+   group_by(!!!syms(cols)) %>%
+   summarise(Arrived =sum(Arrived, na.rm = T), 
+             `No Show` = sum(`No Show`, na.rm = T))%>%
+   mutate(`Dynamic Target` = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+   select(-`No Show`,-Arrived)
+ 
+ 
+ 
+   
+   noShow_perc <- left_join(noShow_perc, dynamic_noshow, by = cols )
+ 
 
-noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
+ noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
   pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
   ungroup()
 
@@ -11565,6 +11622,7 @@ percent_within_14_days <- percent_within_14_days %>%
 
 percent_within_14_days$Metrics <- "Percent of New Patients Scheduled Within 14 Days"
 percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metrics, everything())
+percent_within_14_days <- percent_within_14_days %>% mutate(`Dynamic Target` = "TBD")
 
 
 
@@ -11581,29 +11639,35 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
    print("11")
     
-    months_df <-  opt_table[,!(names( opt_table) %in% c(cols, "Metrics"))]
+    months_df <-  opt_table[,!(names( opt_table) %in% c(cols, "Metrics", "Dynamic Target"))]
     months <- order(as.yearmon(colnames(months_df), "%b %Y"))
     order_months <- months_df[months]
 
 
 
 
-    index <- months+length(cols)+1
+    index <- months+length(cols)+2
     #index <- c(1:length(cols_name),index,length(opt_table))
-    index <- c(1:length(cols)+1, index)
+    index <- c(1:length(cols)+2, index)
     index <- sort(index, decreasing = F)
 
     opt_table <- opt_table[index]
-    opt_table <- opt_table %>% select(cols, "Metrics", everything())
+    opt_table <- opt_table %>% select(cols, "Metrics", "Dynamic Target", everything())
     
-    opt_table <- opt_table %>% add_column(Target = "TBD", .after = "Metrics") 
-    opt_table <- opt_table %>% mutate(Target= case_when(Metrics=="Booked Rate"~ ">= 95%", 
+    opt_table <- opt_table %>% add_column(`System Target` = "TBD", .after = "Metrics") 
+    opt_table <- opt_table %>% mutate(`System Target`= case_when(Metrics=="Booked Rate"~ ">= 95%", 
                                                         Metrics=="Filled Rate"~ ">= 85%",
                                                         Metrics=="New Patient Wait Time"~ "14 Days",
                                                         Metrics=="Average Daily Volume"~ "Variable",
+                                                        Metrics == "New Patient Ratio" ~ "15%",
+                                                        Metrics == "No Show Rate" ~ "10%",
+                                                        Metrics == "Percent of New Patients Scheduled Within 14 Days" ~ "60%",
                                                         TRUE ~ "TBD"))
     
-   print("12") 
+                                                             
+    
+   
+    print("12") 
     time_2 <- Sys.time()
     
     print(time_2 - time_1)
@@ -11681,13 +11745,13 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
   
     
-    col_names <- c(cols, "Metrics", "Target",                   
-                   colnames(data)[(length(cols)+3):length(data)])
+    col_names <- c(cols, "Metrics", "System Target", "Dynamic Target",                  
+                   colnames(data)[(length(cols)+4):length(data)])
 
     header_above <- c("title" = length(data))
     names(header_above) <- paste0("Schedule Optimization by ", name_1)
     
-    month_columns <- colnames(data)[(length(cols)+3):length(data)]
+    month_columns <- colnames(data)[(length(cols)+4):length(data)]
     
     options(knitr.kable.NA = '-')
     
