@@ -11532,18 +11532,21 @@ print("10")
    
    dynamic_noshow <- arrivedNoShow.data.rows %>%
      filter(CAMPUS %in% campus  & 
+              APPT_YEAR %in% year &
               CAMPUS_SPECIALTY %in% specialty ) 
    
  }
  if(compare_filters == "DEPARTMENT"){
    dynamic_noshow <- arrivedNoShow.data.rows %>%
      filter(CAMPUS %in% campus  & 
+              APPT_YEAR %in% year &
               CAMPUS_SPECIALTY %in% specialty &
               DEPARTMENT %in% department )
  }
  if(compare_filters == "PROVIDER"){
    dynamic_noshow <- arrivedNoShow.data.rows %>%
-     filter(CAMPUS %in% campus  & 
+     filter(CAMPUS %in% campus  &
+              APPT_YEAR %in% year &
               CAMPUS_SPECIALTY %in% specialty &
               DEPARTMENT %in% department &
               RESOURCES %in% resources &
@@ -11551,6 +11554,7 @@ print("10")
  }
  
  
+   
  dynamic_noshow  <- dynamic_noshow %>%
    #filter(CAMPUS %in% "MSUS"  & CAMPUS_SPECIALTY %in% "Allergy")%>%
    filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
@@ -11561,7 +11565,7 @@ print("10")
    pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
    replace(is.na(.), 0) %>%
    mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m")) %>%
-   filter(year(APPT_MONTH_YEAR) == year)%>%
+   #filter(year(APPT_MONTH_YEAR) == year)%>%
    group_by(!!!syms(cols)) %>%
    summarise(Arrived =sum(Arrived, na.rm = T), 
              `No Show` = sum(`No Show`, na.rm = T))%>%
