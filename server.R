@@ -8682,6 +8682,60 @@ ggplot(data_base,
     
   })
   
+  
+  
+  output$roomInTimeCompNew2 <- renderValueBox({
+    print("1")
+    
+    data_room <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW")
+    
+    data <-  data_room %>% select(CHECKINTOROOMIN) %>%
+      summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T))  %>% collect()
+    
+    perc <-  data_room %>% summarise(n()) %>% collect() /
+      dataArrived() %>% filter(NEW_PT3 == "NEW") %>% summarise(n()) %>% collect()
+    
+    valueBoxSpark(
+      # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
+      value =  paste0(ceiling(data)," min"),
+      title = toupper("Avg. New Appointments Check-in to Room-in Time"),
+      # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
+      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
+  output$roomInTimeCompOther2 <- renderValueBox({
+    print("2")
+    
+    data_room <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "ESTABLISHED")
+    
+    data <- data_room %>% select(CHECKINTOROOMIN) %>%
+      summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T)) %>% collect()
+    
+    perc <- data_room %>%
+      summarise(n()) %>% collect() / dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED") %>%
+      summarise(n()) %>% collect()
+    
+    valueBoxSpark(
+      # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
+      value =  paste0(ceiling(data)," min"),
+      title = toupper( 
+        #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
+        #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
+        # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
+        "Avg. Established Appointments Check-in to Room-in Time"),
+      
+      # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
+      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
   # # Example Event Log Dataset 
   # 
   # ex_pts_throughput <- as.data.frame(ex_patients %>% throughput_time("case"))
