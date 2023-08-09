@@ -1188,7 +1188,7 @@ ui <- dashboardPage(
                 column(11,
                        div("Check-in to Room-in Time", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
-                       textOutput("room_time"),
+                       textOutput("room_time2"),
                        tags$head(tags$style("#room_time2{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
                        column(12,
                               boxPlus(
@@ -1521,7 +1521,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-        input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime'|  input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'",
+        input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'",
                    br(),
                    actionButton("update_filters", "CLICK TO UPDATE", width = "80%"),
                    br(),
@@ -1657,7 +1657,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime'| input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'",
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'",
                    box(
                      title = "Select Date Range:",
                      width = 12, 
@@ -1917,7 +1917,7 @@ ui <- dashboardPage(
       ),
       
       conditionalPanel(
-        condition = "input.sbm == 'cycleTime' | input.sbm == 'roomInTime'",
+        condition = "input.sbm == 'cycleTime' | input.sbm == 'roomInTime' | input.sbm == 'roomInTime2'",
           br(),
         br(),
         br(),
