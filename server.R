@@ -11597,19 +11597,19 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
    print("11")
     
-    months_df <-  opt_table[,!(names( opt_table) %in% c(cols, "Metrics"))]
-    months <- order(as.yearmon(colnames(months_df), "%b %Y"))
-    order_months <- months_df[months]
-
-
-
-
-    index <- months+length(cols)+1
-    #index <- c(1:length(cols_name),index,length(opt_table))
-    index <- c(1:length(cols)+1, index)
-    index <- sort(index, decreasing = F)
-
-    opt_table <- opt_table[index]
+    # months_df <-  opt_table[,!(names( opt_table) %in% c(cols, "Metrics"))]
+    # months <- order(as.yearmon(colnames(months_df), "%b %Y"))
+    # order_months <- months_df[months]
+    # 
+    # 
+    # 
+    # 
+    # index <- months+length(cols)+1
+    # #index <- c(1:length(cols_name),index,length(opt_table))
+    # index <- c(1:length(cols)+1, index)
+    # index <- sort(index, decreasing = F)
+    # 
+    # opt_table <- opt_table[index]
     opt_table <- opt_table %>% select(cols, "Metrics", everything())
     
     opt_table <- opt_table %>% add_column(Target = "TBD", .after = "Metrics") 
