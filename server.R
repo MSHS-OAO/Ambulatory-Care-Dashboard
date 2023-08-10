@@ -11315,25 +11315,65 @@ ggplot(data_base,
       group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       summarise(avg = ceiling(sum(total)/n())) %>%
       collect() %>%
-      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
+    
+   
+     year <- max(year(volume$APPT_MONTH_YEAR))-1
+    
+     volume <- volume %>%
       pivot_wider(names_from = APPT_MONTH_YEAR,
                   values_from = avg,
                   values_fill = 0) 
     
-    volume[is.na(volume)] <- 0
-    
-    
-    columns_to_sum <- as.yearmon(names(volume))
-    columns_to_sum <- columns_to_sum[!is.na(columns_to_sum)]
-    
+    # estimate the total 
     volume <- volume %>% mutate(Total = rowSums(across(where(is.numeric)), na.rm=TRUE))
     
     
+    
+    campus <- input$selectedCampus 
+    specialty <- input$selectedSpecialty
+    department <- input$selectedDepartment
+    resources <- input$selectedResource 
+    provider <- input$selectedProvider
+    
+    
+    if(compare_filters == "CAMPUS_SPECIALTY"){
+      volume_dynamics <- arrived.data.rows.summary %>%
+        filter(CAMPUS %in% campus  & 
+                 CAMPUS_SPECIALTY %in% specialty ) 
+      
+    }
+    if(compare_filters == "DEPARTMENT"){
+      volume_dynamics <- arrived.data.rows.summary %>%
+        filter(CAMPUS %in% campus  & 
+                 CAMPUS_SPECIALTY %in% specialty &
+                 DEPARTMENT %in% department )
+    }
+    if(compare_filters == "PROVIDER"){
+      volume_dynamics <- arrived.data.rows.summary %>%
+        filter(CAMPUS %in% campus  &
+                 CAMPUS_SPECIALTY %in% specialty &
+                 DEPARTMENT %in% department &
+                 RESOURCES %in% resources &
+                 PROVIDER %in% provider)
+    }
+    
+
+    volume_dynamics <- volume_dynamics %>% 
+      group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
+      summarise(total = SUM(TOTAL_APPTS)) %>% 
+      collect()%>%
+      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+      filter(year(APPT_MONTH_YEAR) %in% year)  %>%
+      group_by(!!!syms(cols)) %>%
+      summarise(`Dynamic Target` = ceiling(sum(total)/n()))
+    
+    volume <- left_join(volume, volume_dynamics, by= cols )
+    
+    volume[is.na(volume)] <- 0
+    
     volume$Metrics <- "Average Daily Volume"
-    volume <- volume %>% mutate(`Dynamic Target` = "TBD")
     volume <- volume %>% select(all_of(cols), Metrics, `Dynamic Target`, everything(), Total)
-    
-    
     
 
     data_access <- dataArrived_access_npr()
@@ -11401,15 +11441,7 @@ ggplot(data_base,
  
     newpatients.ratio <- left_join(newpatients.ratio, total, by = cols)
     
-    
-    
-    campus <- input$selectedCampus 
-    specialty <- input$selectedSpecialty
-    department <- input$selectedDepartment
-    resources <- input$selectedResource 
-    provider <- input$selectedProvider
-    
-    
+
     if(compare_filters == "CAMPUS_SPECIALTY"){
       
       newpatients.ratio.dynamcis <- arrived.data.rows.npr %>%
@@ -11995,6 +12027,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
       
     
  
+    
     # data %>%
     #   kable("html", booktabs = T,escape = F) %>%
     #   collapse_rows(columns = "Department", valign = "top")
