@@ -1186,7 +1186,7 @@ ui <- dashboardPage(
         
         tabItem(tabName = "roomInTime2",
                 column(11,
-                       div("Check-in to Room-in Time", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Room-in to Visit-end Time", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                        textOutput("room_time2"),
                        tags$head(tags$style("#room_time2{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
@@ -1218,7 +1218,7 @@ ui <- dashboardPage(
                                 title = "Room-in Time by Time of Day", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 materialSwitch(
-                                  inputId = "median3",
+                                  inputId = "median4",
                                   label = "Median", 
                                   right = TRUE,
                                   status = "primary"),
