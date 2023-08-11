@@ -55,7 +55,7 @@ ui <- dashboardPage(
                 menuItem("Cycle Time", tabName = "cycleTime", icon = icon("stopwatch"),
                          menuSubItem("Cycle Time", tabName = "cycleTime"),
                          menuSubItem("Room-in Time", tabName = "roomInTime"),
-                         menuSubItem("Room-in Time-2", tabName = "roomInTime2")
+                         menuSubItem("Visit-end Time", tabName = "roomInTime2")
                 ),
                 menuItem("Population", tabName = "population", icon = icon("users")),
                 menuItem("Scheduling", tabName = "scheduling", icon = icon("calendar-day"),
