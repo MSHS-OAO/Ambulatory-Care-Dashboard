@@ -8703,7 +8703,7 @@ ggplot(data_base,
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
       value =  paste0(ceiling(data)," min"),
-      title = toupper("Avg. New Appointments Room-in to Visit-end Time"),
+      title = toupper("Avg. New Appointments Room-in to Visit-end* Time"),
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
       width = 6,
@@ -8731,7 +8731,7 @@ ggplot(data_base,
         #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
         #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
         # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
-        "Avg. Established Appointments Room-in to Visit-end Time"),
+        "Avg. Established Appointments Room-in to Visit-end* Time"),
       
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
@@ -8777,7 +8777,7 @@ ggplot(data_base,
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "-")+
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -8820,7 +8820,7 @@ ggplot(data_base,
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "*Includes established appointments")+
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -8879,9 +8879,10 @@ ggplot(data_base,
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
       #geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
-      labs(title = paste0("Room-in to Visit-end Time Comparison by Appointment Type"),
+      labs(title = paste0("Room-in to Visit-end* Time Comparison by Appointment Type"),
            y = "% of Patients",
            x = "Minutes",
+           caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"), 
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
@@ -8954,7 +8955,7 @@ ggplot(data_base,
     new <- ggplot(data, aes(APPT_TM_HR, y = factor(APPT_DAY, level = level_order), fill = avg)) + 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#d80b8c")+
-      labs(title = paste0(input," New Patients Room-in to Visit-end Time by Hour\n"),
+      labs(title = paste0(input," New Patients Room-in to Visit-end** Time by Hour\n"),
            y = NULL,
            fill = "Minutes")+
       #subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
@@ -8978,9 +8979,9 @@ ggplot(data_base,
     other <- ggplot(data_other, aes(APPT_TM_HR, y = factor(APPT_DAY, level = level_order), fill = avg))+ 
       geom_tile(colour = "white") + 
       scale_fill_gradient(low="white", high="#00aeef")+
-      labs(title = paste0(input," ",appt.type," Patients Room-in to Visit-end Time by Hour\n"), 
+      labs(title = paste0(input," ",appt.type," Patients Room-in to Visit-end** Time by Hour\n"), 
            y = NULL,
-           caption = paste0("*Includes ", length(unique(appt.type.choices$APPT_TYPE)), " established visit types"),
+           caption = paste0("*Includes ", length(unique(appt.type.choices$APPT_TYPE)), " established visit types\n **Visit-end Time is the minimum of Visit-end Time and Check-out"),
            fill = "Minutes")+
       theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
             legend.position = "right",
@@ -9034,8 +9035,9 @@ ggplot(data_base,
       #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
       # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
       # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
-      labs(title = "Distribution of NEW Appointment Room-in to Visit-end Time by Provider",
+      labs(title = "Distribution of NEW Appointment Room-in to Visit-end** Time by Provider",
            y = "Minutes",
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"),
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
@@ -9078,15 +9080,16 @@ ggplot(data_base,
       #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
       # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
       # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
-      labs(title = paste0("Distribution of ",appt.type," Appointments Room-in to Visit-end Time by Provider"),
+      labs(title = paste0("Distribution of ",appt.type," Appointments Room-in to Visit-end** Time by Provider"),
            y = "Minutes",
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"),
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
            # caption = paste0("*Includes ", length(unique(data$Appt.Type)), "established appointments")
       )+
       theme_new_line()+
       theme_bw()+
-      graph_theme("none")+
-      theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
+      graph_theme("none")#+
+      #theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
     
   })
   # # Example Event Log Dataset 
