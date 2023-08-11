@@ -1192,7 +1192,7 @@ ui <- dashboardPage(
                        tags$head(tags$style("#room_time2{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
                        column(12,
                               boxPlus(
-                                title = "Room-in Time Summary", width = 12, status = "primary",
+                                title = "Visit-end Time Summary", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 br(),
                                 fluidRow(
@@ -1201,7 +1201,7 @@ ui <- dashboardPage(
                                            withSpinner(type = 5, color = "#d80b8c")),
                                   column(6, valueBoxOutput("roomInTimeCompOther2", width = 12)))),
                               boxPlus(
-                                title = "Room-in Time by Visit Type", width = 12, status = "primary",
+                                title = "Visit-end Time by Visit Type", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 "*Select fewer visit types for better visibility",
                                 br(),
@@ -1215,7 +1215,7 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")))
                               ),
                               boxPlus(
-                                title = "Room-in Time by Time of Day", width = 12, status = "primary",
+                                title = "Visit-end Time by Time of Day", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 materialSwitch(
                                   inputId = "median4",
@@ -1225,7 +1225,7 @@ ui <- dashboardPage(
                                 plotOutput("roomInTimeByHour2", height = "700px") %>%
                                   withSpinner(type = 5, color = "#d80b8c")),
                               boxPlus(
-                                title = "Room-in Time by Provider and Visit Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
+                                title = "Visit-end Time by Provider and Visit Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 "*Select fewer providers for better visibility",
                                 plotOutput("newRoomInTimeByProv2", height = "800px") %>% 
