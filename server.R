@@ -11326,7 +11326,9 @@ ggplot(data_base,
                   values_fill = 0) 
     
     # estimate the total 
-    volume <- volume %>% mutate(Total = rowSums(across(where(is.numeric)), na.rm=TRUE))
+    volume <- volume %>% 
+      group_by(!!!syms(cols))%>%
+      mutate(Total = ceiling(rowMeans(across(where(is.numeric)), na.rm=TRUE)))
     
     
     
@@ -11589,12 +11591,12 @@ ggplot(data_base,
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       filter(year(APPT_MADE_MONTH_YEAR) %in% year) %>%
       group_by(!!!syms(cols)) %>% 
-      dplyr::summarise(`Dynamic Target` = ceiling(median(WAIT_TIME))) 
+      dplyr::summarise(`Dynamic Target` = 90* ceiling(median(WAIT_TIME))) 
     
     
     waitTime <- left_join(waitTime, waitTime.dynamic, by= cols)
  
-    waitTime$Metrics <- "New Patient Wait Time"
+    waitTime$Metrics <- "New Patient Wait Time (Days)"
     waitTime <- waitTime %>% select(cols, Metrics, `Dynamic Target`, everything(), Total)
    
     
@@ -11916,7 +11918,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     opt_table <- opt_table %>% add_column(`System Target` = "TBD", .after = "Metrics") 
     opt_table <- opt_table %>% mutate(`System Target`= case_when(Metrics=="Booked Rate"~ ">= 95%", 
                                                         Metrics=="Filled Rate"~ ">= 85%",
-                                                        Metrics=="New Patient Wait Time"~ "14 Days",
+                                                        Metrics=="New Patient Wait Time (Days)"~ "14",
                                                         Metrics=="Average Daily Volume"~ "Variable",
                                                         Metrics == "New Patient Ratio" ~ "15%",
                                                         Metrics == "No Show Rate" ~ "10%",
@@ -11931,7 +11933,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
     print(time_2 - time_1)
     metric_order <- c("Average Daily Volume",
-                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time", "No Show Rate", "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
+                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time (Days)", "No Show Rate", "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
   
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
