@@ -2588,6 +2588,11 @@ server <- function(input, output, session) {
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
+  output$room_time2 <- renderText({
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
+  
   output$practiceName_opt_comp <- renderText({
     paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
@@ -8682,6 +8687,411 @@ ggplot(data_base,
     
   })
   
+  
+  
+  output$roomInTimeCompNew2 <- renderValueBox({
+    print("1")
+    
+    data_room <- dataArrived() %>% filter(ROOMINTOVISITEND  >= 0, NEW_PT3 == "NEW")
+    
+    data <-  data_room %>% select(ROOMINTOVISITEND ) %>%
+      summarise(ROOMINTOVISITEND  = mean(ROOMINTOVISITEND , na.rm = T))  %>% collect()
+    
+    perc <-  data_room %>% summarise(n()) %>% collect() /
+      dataArrived() %>% filter(NEW_PT3 == "NEW") %>% summarise(n()) %>% collect()
+    
+    valueBoxSpark(
+      # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
+      value =  paste0(ceiling(data)," min"),
+      title = toupper("Avg. New Appointments Room-in to Visit-end* Time"),
+      # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
+      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
+  output$roomInTimeCompOther2 <- renderValueBox({
+    print("2")
+    
+    data_room <- dataArrived() %>% filter(ROOMINTOVISITEND  >= 0, NEW_PT3 == "ESTABLISHED")
+    
+    data <- data_room %>% select(ROOMINTOVISITEND ) %>%
+      summarise(ROOMINTOVISITEND  = mean(ROOMINTOVISITEND , na.rm = T)) %>% collect()
+    
+    perc <- data_room %>%
+      summarise(n()) %>% collect() / dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED") %>%
+      summarise(n()) %>% collect()
+    
+    valueBoxSpark(
+      # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
+      value =  paste0(ceiling(data)," min"),
+      title = toupper( 
+        #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
+        #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
+        # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
+        "Avg. Established Appointments Room-in to Visit-end* Time"),
+      
+      # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
+      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
+  output$newRoomInTimeBoxPlot2 <- renderPlot({
+    print("3")
+    # data <- data_test %>% filter(CHECKINTOROOMIN >= 0) %>%
+    #   filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
+    
+    
+    
+    data_cycle <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "NEW") %>%
+      select(ROOMINTOVISITEND, BIN_ROOMIN_VISIT_END) %>%
+      group_by(BIN_ROOMIN_VISIT_END) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN_VISIT_END) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
+    
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN_VISIT_END)
+    
+    if (length(rows_to_be_included > 0)){
+      
+      for (i in rows_to_be_included){
+        data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+        
+      }
+      
+      data_cycle[is.na(data_cycle)] <- 0
+    }
+    
+    data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
+    
+    ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent), data = data_cycle) +
+      geom_bar(stat = 'identity') +
+      geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Distribution of NEW Appointment\nRoom-in to Visit-end Time**"),
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+    
+  })
+  
+  
+  output$establishedRoomInTimeBoxPlot2 <- renderPlot({
+    print("4")
+    
+    data_cycle <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(ROOMINTOVISITEND, BIN_ROOMIN_VISIT_END) %>%
+      group_by(BIN_ROOMIN_VISIT_END) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN_VISIT_END) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
+    
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN_VISIT_END)
+    
+    
+    if (length(rows_to_be_included > 0)){
+      
+      for (i in rows_to_be_included){
+        data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+        
+      }
+      
+      data_cycle[is.na(data_cycle)] <- 0
+    }
+    
+    data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
+    
+    ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent), data = data_cycle) +
+      geom_bar(stat = 'identity') +
+      geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Distribution of ESTABLISHED Appointment\nRoom-in to Visit-end Time**"),
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+    #theme(axis.text.x = element_text(hjust = 3.5))
+    
+    
+    
+  })
+  
+  output$roomInTimeTrend2 <- renderPlot({
+    print("5")    
+    
+    data <- dataArrived() %>% filter(ROOMINTOVISITEND > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+      select(ROOMINTOVISITEND, NEW_PT3, APPT_TYPE, BIN_ROOMIN_VISIT_END) %>% collect() %>% 
+      mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
+      filter(!is.na(NEW_PT3))
+    
+    
+    
+    data <- data %>% select(ROOMINTOVISITEND, NEW_PT3, BIN_ROOMIN_VISIT_END) %>%
+      group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+      ungroup() %>%
+      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>%
+      mutate(percent = total_bin / total) %>%
+      mutate(BIN_ROOMIN_VISIT_END = as.numeric(BIN_ROOMIN_VISIT_END))
+    
+    
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data$BIN_ROOMIN_VISIT_END)
+    
+    
+    if (length(rows_to_be_included)>0){
+      for (i in rows_to_be_included){
+        data[nrow(data) + 1 , 1] <- main_rows[i]
+      }
+      
+    }
+    
+    data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    
+    data <- unique(data)
+    
+    data <- data %>%  group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>%
+      mutate(BIN_ROOMIN_VISIT_END = factor(BIN_ROOMIN_VISIT_END, levels = sort(BIN_ROOMIN_VISIT_END)))
+    
+    #data$bin <- factor(data$bin,levels = sort(data$bin))
+    
+    
+    
+    ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+      geom_bar(stat = 'identity') +
+      scale_color_MountSinai()+
+      scale_fill_MountSinai()+
+      #geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Room-in to Visit-end* Time Comparison by Appointment Type"),
+           y = "% of Patients",
+           x = "Minutes",
+           caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"), 
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("top")+
+      scale_x_discrete()+
+      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+    #theme(axis.text.x = element_text(hjust = 3.5))
+    
+  })
+  
+  
+  output$roomInTimeByHour2 <- renderPlot({
+    print("6")
+    data <- dataArrived() %>% filter(ROOMINTOVISITEND > 0) %>% filter(NEW_PT3 == "NEW") %>%
+      select(APPT_DAY, APPT_TM_HR, ROOMINTOVISITEND) %>% collect()
+    # data <- arrived.data %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
+    
+    data_other <- dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED", ROOMINTOVISITEND > 0) %>%
+      select(APPT_DAY, APPT_TM_HR, ROOMINTOVISITEND, APPT_TYPE) %>% collect()
+    
+    # data_other <- arrived.data %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
+    
+    # names <- data_other %>% filter(APPT_TM_HR %in% timeOptionsHr_filter) %>% select(APPT_TYPE)
+    # names <- sort(unique(names$APPT_TYPE), na.last = T)
+    
+    
+    appt.type.choices <- dataArrived() %>% filter( ROOMINTOVISITEND > 0, NEW_PT3 == "ESTABLISHED") %>% 
+      select(APPT_TYPE) %>% mutate(APPT_TYPE = unique(APPT_TYPE)) %>% collect()
+    
+    
+    if(input$median4 == TRUE){
+      
+      data <- data %>%
+        group_by(APPT_DAY, APPT_TM_HR) %>%
+        summarise(avg = median(ROOMINTOVISITEND)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+      
+      
+      data_other <- data_other %>%
+        group_by(APPT_DAY, APPT_TM_HR) %>%
+        summarise(avg = median(ROOMINTOVISITEND)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+      
+      input <- "Median"
+    } else{
+      
+      data <- data %>%
+        group_by(APPT_DAY, APPT_TM_HR) %>%
+        summarise(avg = mean(ROOMINTOVISITEND)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+      
+      
+      data_other <- data_other %>%
+        group_by(APPT_DAY, APPT_TM_HR) %>%
+        summarise(avg = mean(ROOMINTOVISITEND)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+      
+      input <- "Average"
+    }
+    
+    if(length(appt.type.choices$APPT_TYPE) == 1){
+      appt.type <- unique(appt.type.choices$APPT_TYPE)
+    } else{
+      appt.type <- "Established*"
+    }
+    
+    level_order <- rev(toupper(c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")))
+    
+    new <- ggplot(data, aes(APPT_TM_HR, y = factor(APPT_DAY, level = level_order), fill = avg)) + 
+      geom_tile(colour = "white") + 
+      scale_fill_gradient(low="white", high="#d80b8c")+
+      labs(title = paste0(input," New Patients Room-in to Visit-end** Time by Hour\n"),
+           y = NULL,
+           fill = "Minutes")+
+      #subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "right",
+            legend.direction = "vertical",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_text(color="black"),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(avg),"", ceiling(avg))), color="black", size=5, fontface="bold")
+    
+    
+    other <- ggplot(data_other, aes(APPT_TM_HR, y = factor(APPT_DAY, level = level_order), fill = avg))+ 
+      geom_tile(colour = "white") + 
+      scale_fill_gradient(low="white", high="#00aeef")+
+      labs(title = paste0(input," ",appt.type," Patients Room-in to Visit-end** Time by Hour\n"), 
+           y = NULL,
+           caption = paste0("*Includes ", length(unique(appt.type.choices$APPT_TYPE)), " established visit types\n **Visit-end Time is the minimum of Visit-end Time and Check-out"),
+           fill = "Minutes")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "right",
+            legend.direction = "vertical",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_text(color="black"),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(avg),"", ceiling(avg))), color="black", size=5, fontface="bold")
+    
+    grid.arrange(new, other, ncol = 1)
+    
+  })
+  
+  
+  output$newRoomInTimeByProv2 <- renderPlot({
+    print("7")
+    data <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "NEW") %>%
+      select(PROVIDER, ROOMINTOVISITEND) 
+    
+    # data <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
+    
+   
+    data_base <- data %>% group_by(PROVIDER) %>% summarise(min_value = min(ROOMINTOVISITEND),                                
+                                                           quartile_1st = quantile(ROOMINTOVISITEND, 0.25),
+                                                           median = median(ROOMINTOVISITEND), 
+                                                           mean = mean(ROOMINTOVISITEND, na.rm= TRUE),
+                                                           quartile_3rd = quantile(ROOMINTOVISITEND, 0.75),
+                                                           max_value = max(ROOMINTOVISITEND)) %>% 
+      collect()
+    
+    
+    
+    
+    ggplot(data_base,                              
+           aes(x = PROVIDER,
+               ymin = min_value,
+               lower = quartile_1st,
+               middle = median,
+               upper = quartile_3rd,
+               ymax = max_value)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA, stat = "identity")+
+      #stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
+      # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+      # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+      labs(title = "Distribution of NEW Appointment Room-in to Visit-end** Time by Provider",
+           y = "Minutes",
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")
+    
+  })
+  
+  output$establishedRoomInTimeByProv2 <- renderPlot({
+    print("8")
+    data <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(PROVIDER, NEW_PT3, ROOMINTOVISITEND, APPT_TYPE) 
+    # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    
+    #data <- data_other
+    
+    if(length(unique(data$APPT_TYPE)) == 1){
+      appt.type <- unique(data$APPT_TYPE)
+    } else{
+      appt.type <- "Established"
+    }
+    
+
+    data_base <- data %>% group_by(PROVIDER) %>% summarise(min_value = min(ROOMINTOVISITEND),                                
+                                                           quartile_1st = quantile(ROOMINTOVISITEND, 0.25),
+                                                           median = median(ROOMINTOVISITEND), 
+                                                           mean = mean(ROOMINTOVISITEND, na.rm= TRUE),
+                                                           quartile_3rd = quantile(ROOMINTOVISITEND, 0.75),
+                                                           max_value = max(ROOMINTOVISITEND)) %>% 
+      collect()
+    
+    ggplot(data_base,                              
+           aes(x = PROVIDER,
+               ymin = min_value,
+               lower = quartile_1st,
+               middle = median,
+               upper = quartile_3rd,
+               ymax = max_value)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA, stat = "identity")+
+      #stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
+      # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+      # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+      labs(title = paste0("Distribution of ",appt.type," Appointments Room-in to Visit-end** Time by Provider"),
+           y = "Minutes",
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           # caption = paste0("*Includes ", length(unique(data$Appt.Type)), "established appointments")
+      )+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")#+
+      #theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
+    
+  })
   # # Example Event Log Dataset 
   # 
   # ex_pts_throughput <- as.data.frame(ex_patients %>% throughput_time("case"))
