@@ -54,8 +54,8 @@ ui <- dashboardPage(
                 menuItem("Access", tabName = "newPatients", icon = icon("plus-circle")),
                 menuItem("Cycle Time", tabName = "cycleTime", icon = icon("stopwatch"),
                          menuSubItem("Cycle Time", tabName = "cycleTime"),
-                         menuSubItem("Room-in Time", tabName = "roomInTime"),
-                         menuSubItem("Visit-end Time", tabName = "roomInTime2")
+                         menuSubItem("Check-in to Room-in", tabName = "roomInTime"),
+                         menuSubItem("Room-in Visit-end", tabName = "roomInTime2")
                 ),
                 menuItem("Population", tabName = "population", icon = icon("users")),
                 menuItem("Scheduling", tabName = "scheduling", icon = icon("calendar-day"),
@@ -1141,7 +1141,7 @@ ui <- dashboardPage(
                        tags$head(tags$style("#room_time{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
                        column(12,
                               boxPlus(
-                                title = "Room-in Time Summary", width = 12, status = "primary",
+                                title = "Check-in to Room-in Time Summary", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 br(),
                                 fluidRow(
@@ -1150,7 +1150,7 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")),
                                          column(6, valueBoxOutput("roomInTimeCompOther", width = 12)))),
                               boxPlus(
-                                title = "Room-in Time by Visit Type", width = 12, status = "primary",
+                                title = "Check-in to Room-in Time by Visit Type", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 "*Select fewer visit types for better visibility",
                                 br(),
@@ -1164,7 +1164,7 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")))
                                 ),
                               boxPlus(
-                                title = "Room-in Time by Time of Day", width = 12, status = "primary",
+                                title = "Check-in to Room-in Time by Time of Day", width = 12, status = "primary",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 materialSwitch(
                                   inputId = "median3",
@@ -1174,7 +1174,7 @@ ui <- dashboardPage(
                                 plotOutput("roomInTimeByHour", height = "700px") %>%
                                   withSpinner(type = 5, color = "#d80b8c")),
                               boxPlus(
-                                title = "Room-in Time by Provider and Visit Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
+                                title = "Check-in to Room-in Time by Provider and Visit Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 "*Select fewer providers for better visibility",
                                 plotOutput("newRoomInTimeByProv", height = "800px") %>% 
