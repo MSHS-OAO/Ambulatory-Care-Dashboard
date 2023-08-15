@@ -11591,7 +11591,7 @@ ggplot(data_base,
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       filter(year(APPT_MADE_MONTH_YEAR) %in% year) %>%
       group_by(!!!syms(cols)) %>% 
-      dplyr::summarise(`Dynamic Target` = 90* ceiling(median(WAIT_TIME))) 
+      dplyr::summarise(`Dynamic Target` = ceiling(0.90* median(WAIT_TIME))) 
     
     
     waitTime <- left_join(waitTime, waitTime.dynamic, by= cols)
