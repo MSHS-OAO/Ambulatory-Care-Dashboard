@@ -11938,6 +11938,8 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
     
+     
+    
    
 
  # opt_table <- as.datatable(formattable(opt_table, list(
@@ -12013,19 +12015,22 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     header_above <- c("title" = length(data))
     names(header_above) <- paste0("Schedule Optimization by ", name_1)
     
-    month_columns <- colnames(data)[(length(cols)+4):length(data)-1]
+    month_columns <- colnames(data)[(length(cols)+5):length(data)-1]
     
     options(knitr.kable.NA = '-')
     
     pack_rows_name <- table(pack_rows_name)
+    
+    color_column <- length(cols)+3 
     
     data %>%
       kable(booktabs = T,escape = F, #align = c(rep("r",3),rep("c",length(metrics_dept_output)-4)),
             col.names = col_names) %>%
       kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
       add_header_above(header_above, background = "white", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
-      collapse_rows(columns = 1:3, valign = "top") %>%
-      row_spec(0,  background = "#212070", color = "white")
+      row_spec(0,  background = "#212070", color = "white")%>%
+      column_spec(1:color_column, background = "#dddedd" )%>%
+      collapse_rows(columns = 1:3, valign = "top")
       
     
  
