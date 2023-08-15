@@ -12029,7 +12029,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
       kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
       add_header_above(header_above, background = "white", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
       row_spec(0,  background = "#212070", color = "white")%>%
-      column_spec(1:color_column, background = "#dddedd" )%>%
+      column_spec(1:color_column, background = "#F3F3F3" )%>%
       collapse_rows(columns = 1:3, valign = "top")
       
     
