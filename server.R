@@ -4071,7 +4071,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Year",
+               title = "Average Cycle Time by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4087,7 +4087,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Quarter",
+               title = "Average Cycle Time by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4102,7 +4102,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Month",
+               title = "Average Cycle Time by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4118,7 +4118,7 @@ server <- function(input, output, session) {
           #ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Time (min)",  
-               title = "Average Check-in to Visit-End Time (Min.) by Day",
+               title = "Average Cycle Time by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4138,7 +4138,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)",  
-               title = "Average Check-in to Visit-End Time (Min.) by Year",
+               title = "Average Cycle Time by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4157,7 +4157,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Quarter",
+               title = "Average Cycle Time by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4175,7 +4175,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)",
-               title = "Average Check-in to Visit-End Time (Min.) by Month",
+               title = "Average Cycle Time by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4192,7 +4192,7 @@ server <- function(input, output, session) {
         ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Day",
+               title = "Average Cycle Time by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4224,7 +4224,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Year",
+               title = "Average Check-in to Room-in Time by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4240,7 +4240,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Quarter",
+               title = "Average Check-in to Room-in Time by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4255,7 +4255,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Month",
+               title = "Average Check-in to Room-in Time by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4271,7 +4271,7 @@ server <- function(input, output, session) {
         ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Day",
+               title = "Average Check-in to Room-in Time by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4291,7 +4291,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Year",
+               title = "Average Check-in to Room-in Time by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4309,7 +4309,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Quarter",
+               title = "Average Check-in to Room-in Time by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4327,7 +4327,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Month",
+               title = "Average Check-in to Room-in Time by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4344,7 +4344,7 @@ server <- function(input, output, session) {
         ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Day",
+               title = "Average Check-in to Room-in Time by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4360,6 +4360,157 @@ server <- function(input, output, session) {
     
   })
   
+  
+  
+  output$kpiRoomTimeGraph <- renderPlot({
+    data <- dataArrivedKpi() %>% filter(ROOMINTOVISITEND > 0)
+    # data <- kpi.arrived.data %>% filter(checkinToRoomin > 0)
+    
+    if(input$kpiTrend ==1){ # Historical Trend
+      if(input$kpiFreq == 1){ #Year
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>%
+          collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
+        ggplot(data_filter, aes(x=APPT_YEAR, y=mean, group=1)) +
+          #stat_summary(fun="mean", geom="line")+
+          geom_line(color="midnightblue") +
+          geom_point(color="midnightblue") +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Year",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 2) { # Quarter
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
+        ggplot(data_filter, aes(x=interaction(APPT_YEAR,APPT_QUARTER,lex.order = TRUE), y=mean,group=1)) +
+          geom_line(color="midnightblue") +
+          geom_point(color="midnightblue") +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Quarter",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("none")+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 3){ # Month
+        data_filter <- data %>% group_by(APPT_MONTH_YEAR) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=interaction(APPT_MONTH_YEAR,lex.order = TRUE), y=mean,group=1)) +
+          geom_line(color="midnightblue") +
+          geom_point(color="midnightblue") +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Month",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("none")+
+          geom_point(size = 3.2)
+        
+      } else { # Day
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% collect()
+        data_filter$DateYear <- as.Date(with(data_filter, paste(APPT_YEAR, APPT_DATE,sep="-")), "%Y-%m-%d")
+        ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
+          geom_line(color="midnightblue") +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Day",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("none")+ 
+          scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+                       date_minor_breaks = "1 day", expand = c(0, 0.6))+
+          geom_point(size = 3.2)
+      }
+    } else { 
+      if(input$kpiFreq == 1){ # Year
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% 
+          mutate(Label = "Year") %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
+        ggplot(data_filter, aes(x=Label, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+          geom_line() +
+          geom_point(size=4, alpha=0.5) +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Year",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          scale_color_MountSinai("main")+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 2){ # Quarter 
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% 
+          mutate(Label = "Quarter") %>% collect()
+        ggplot(data_filter, aes(x=APPT_QUARTER, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+          geom_line() +
+          geom_point(size=4, alpha=0.5) +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Quarter",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("top")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          scale_color_MountSinai("main")+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 3){ # Month
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_MONTH) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% 
+          mutate(Label = "Month") %>% collect()
+        ggplot(data_filter, aes(x = factor(APPT_MONTH, level = monthOptions), y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+          geom_line() +
+          geom_point(size=4, alpha=0.5) +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end by Month",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          scale_color_MountSinai("main")+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 4){ # Day
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE_YEAR) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% 
+          mutate(Label = "Date") %>% collect() %>% mutate(APPT_DATE_YEAR = as.Date(format(APPT_DATE_YEAR, "%Y-%m-%d"), "%Y-%m-%d"))
+        ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+          geom_line() +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Day",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("top")+ 
+          scale_color_MountSinai("main") + 
+          scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
+                       date_minor_breaks = "1 day", expand = c(0, 0.6))+
+          geom_point(size = 3.2)
+      }
+    }
+    
+  })
   ### Scheduling Tab -------------------------------------------------------------------------------------------------------------------
   # Scheduling Summary
   # Average Daily Appts Scheduled

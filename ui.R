@@ -616,7 +616,10 @@ ui <- dashboardPage(
                                        plotOutput("kpiCycleTimeGraph", height="450px") %>% 
                                          withSpinner(type = 5, color = "#d80b8c"),hr(),
                                        plotOutput("kpiWaitTimeGraph", height="450px") %>% 
-                                         withSpinner(type = 5, color = "#d80b8c"))
+                                         withSpinner(type = 5, color = "#d80b8c"), hr(),
+                                       plotOutput("kpiRoomTimeGraph", height="450px") %>% 
+                                         withSpinner(type = 5, color = "#d80b8c")
+                                       )
                               )
                        )
                        
