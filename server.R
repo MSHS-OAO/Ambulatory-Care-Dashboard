@@ -7768,13 +7768,17 @@ server <- function(input, output, session) {
       summarise(CYCLETIME = ceiling(mean(CYCLETIME, na.rm = T))) %>%
       collect()
     
+    data_median <- data_cycle %>% select(CYCLETIME) %>%
+      summarise(CYCLETIME = ceiling(median(CYCLETIME, na.rm = T))) %>%
+      collect()
+    
     perc <- data_cycle %>% summarize(n()) %>% collect() /
             dataArrived() %>% filter(NEW_PT3 == "NEW")%>% summarize(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
-      value =  paste0(data$CYCLETIME," min"),
-      #title = toupper("Average New Patients Check-in to Visit-end Time**"),
+      value =  paste0(data$CYCLETIME," min", " | ", data_median$CYCLETIME, " min"),
+      #title = toupper("Average | MEDIAN New Patients Check-in to Visit-end Time**"),
       title = toupper("Average New Patients Check-in to Visit-end Time*"),
       subtitle = paste0("*Based on ",round(perc,2)*100,
                            "% of total arrived new patients based on visit timestamps" 
@@ -7794,16 +7798,19 @@ server <- function(input, output, session) {
     data <- data_cycle %>% select(CYCLETIME) %>%
       summarise(CYCLETIME = mean(CYCLETIME, na.rm = T)) %>% collect()
     
+    data_meadian <- data_cycle %>% select(CYCLETIME) %>%
+      summarise(CYCLETIME = median(CYCLETIME, na.rm = T)) %>% collect()
+    
     perc <- data_cycle %>% summarise(n()) %>% collect() / 
             dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED")%>% summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
-      value =  paste0(ceiling(data$CYCLETIME)," min"),
+      value =  paste0(ceiling(data$CYCLETIME)," min", " | ", data_meadian$CYCLETIME, " min"),
       title = toupper(
                      #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
                              #paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
-                             "Average Established Patients Check-in to Visit-end Time*"),
+                             "Average | Median Established Patients Check-in to Visit-end Time*"),
       # subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ", round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
@@ -8325,13 +8332,16 @@ ggplot(data_base,
     data <-  data_room %>% select(CHECKINTOROOMIN) %>%
       summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T))  %>% collect()
     
+    data_meadian <-  data_room %>% select(CHECKINTOROOMIN) %>%
+      summarise(CHECKINTOROOMIN = median(CHECKINTOROOMIN, na.rm = T))  %>% collect()
+    
     perc <-  data_room %>% summarise(n()) %>% collect() /
             dataArrived() %>% filter(NEW_PT3 == "NEW") %>% summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min"),
-      title = toupper("Avg. New Appointments Check-in to Room-in Time"),
+      value =  paste0(ceiling(data)," min", " | ", ceiling(data_meadian), " min"),
+      title = toupper("Average | Median New Appointments Check-in to Room-in Time"),
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
       width = 6,
@@ -8348,18 +8358,21 @@ ggplot(data_base,
     data <- data_room %>% select(CHECKINTOROOMIN) %>%
       summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T)) %>% collect()
     
+    data_median <- data_room %>% select(CHECKINTOROOMIN) %>%
+      summarise(CHECKINTOROOMIN = median(CHECKINTOROOMIN, na.rm = T)) %>% collect()
+    
     perc <- data_room %>%
             summarise(n()) %>% collect() / dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED") %>%
             summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min"),
+      value =  paste0(ceiling(data)," min", " | ", ceiling(data_median), " min"),
       title = toupper( 
               #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
                              #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
                             # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
-                             "Avg. Established Appointments Check-in to Room-in Time"),
+                             "Average | Median Established Appointments Check-in to Room-in Time"),
  
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
@@ -8848,13 +8861,16 @@ ggplot(data_base,
     data <-  data_room %>% select(ROOMINTOVISITEND ) %>%
       summarise(ROOMINTOVISITEND  = mean(ROOMINTOVISITEND , na.rm = T))  %>% collect()
     
+    data_median <-  data_room %>% select(ROOMINTOVISITEND ) %>%
+      summarise(ROOMINTOVISITEND  = median(ROOMINTOVISITEND , na.rm = T))  %>% collect()
+    
     perc <-  data_room %>% summarise(n()) %>% collect() /
       dataArrived() %>% filter(NEW_PT3 == "NEW") %>% summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min"),
-      title = toupper("Avg. New Appointments Room-in to Visit-end* Time"),
+      value =  paste0(ceiling(data)," min", " | ", ceiling(data_median), " min"),
+      title = toupper("Average | Median New Appointments Room-in to Visit-end* Time"),
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
       width = 6,
@@ -8871,18 +8887,21 @@ ggplot(data_base,
     data <- data_room %>% select(ROOMINTOVISITEND ) %>%
       summarise(ROOMINTOVISITEND  = mean(ROOMINTOVISITEND , na.rm = T)) %>% collect()
     
+    data_median <- data_room %>% select(ROOMINTOVISITEND ) %>%
+      summarise(ROOMINTOVISITEND  = median(ROOMINTOVISITEND , na.rm = T)) %>% collect()
+    
     perc <- data_room %>%
       summarise(n()) %>% collect() / dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED") %>%
       summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min"),
+      value =  paste0(ceiling(data)," min", " | ", ceiling(data_median), " min"),
       title = toupper( 
         #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
         #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
         # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
-        "Avg. Established Appointments Room-in to Visit-end* Time"),
+        "Average | Median Established Appointments Room-in to Visit-end* Time"),
       
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
