@@ -6921,6 +6921,8 @@ server <- function(input, output, session) {
   output$newPtRatioByDept <- renderPlot({
     data <- dataArrived_access_npr()
     # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
+print("1")
+
 
     newpatients.ratio <- data %>%
       group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
@@ -6929,7 +6931,7 @@ server <- function(input, output, session) {
       spread(NEW_PT3, Total) 
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
-
+    
     
     print("1.5")
    
@@ -6968,6 +6970,7 @@ server <- function(input, output, session) {
     data <- dataArrived_access_npr()
     #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
+    print("prov_running")
     newpatients.ratio <- data %>%
       group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
@@ -7946,6 +7949,8 @@ server <- function(input, output, session) {
       mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
     data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
     
+    data_test <<- data_cycle
+    
     main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
     
     rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
@@ -7957,22 +7962,27 @@ server <- function(input, output, session) {
        }
     data_cycle[is.na(data_cycle)] <- 0
     }
+    bin_mapping <- read_excel("bin_mapping.xlsx")
+    bin_mapping$BIN_CYCLE <- as.numeric(bin_mapping$BIN_CYCLE)
+
+    data_cycle <- left_join(data_cycle, bin_mapping)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
   
     data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
 
     graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
-
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointments\nCheck-in to Visit-end Time**"),
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_discrete()+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
       #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
