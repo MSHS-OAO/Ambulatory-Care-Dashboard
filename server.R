@@ -6670,6 +6670,8 @@ server <- function(input, output, session) {
     # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology") %>%
     #                                                         select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE)
     
+    
+    pts.dist.testing <<- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = sum(TOTAL_APPTS)) %>% show_query()
     pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
     
     # pts.dist <- aggregate(data$UNIQUEID,
@@ -7781,8 +7783,8 @@ print("1")
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
       value =  paste0(data$CYCLETIME," min", " | ", data_median$CYCLETIME, " min"),
-      #title = toupper("Average | MEDIAN New Patients Check-in to Visit-end Time**"),
-      title = toupper("Average New Patients Check-in to Visit-end Time*"),
+      title = toupper(paste0("Average | MEDIAN "," New Patients Check-in to Visit-end Time*")),
+      # title = toupper("Average New Patients Check-in to Visit-end Time*"),
       subtitle = paste0("*Based on ",round(perc,2)*100,
                            "% of total arrived new patients based on visit timestamps" 
                     ),
@@ -7874,11 +7876,16 @@ print("1")
     #data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
-
+    data <- left_join(data, bin_mapping)
+    
+    data <- data[order(data$BIN_CYCLE),]
+    
     data <- data %>%  group_by(BIN_CYCLE, NEW_PT3) %>%
       mutate(BIN_CYCLE = factor(BIN_CYCLE, levels = sort(BIN_CYCLE)))
     
     #data$BIN_CYCLE <- factor(data$BIN_CYCLE,levels = sort(data$BIN_CYCLE))
+    x_label <- data %>% ungroup() %>% select(BIN_CYCLE, X_LABEL) %>% distinct()
+    x_label <- x_label[order(x_label$BIN_CYCLE),]
     
 
     ggplot(aes(x = BIN_CYCLE , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
@@ -7894,8 +7901,8 @@ print("1")
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      scale_x_discrete()+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      # scale_x_discrete()+
+      scale_x_discrete(labels = x_label$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -7949,8 +7956,7 @@ print("1")
       mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
     data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
     
-    data_test <<- data_cycle
-    
+
     main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
     
     rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
@@ -7962,8 +7968,6 @@ print("1")
        }
     data_cycle[is.na(data_cycle)] <- 0
     }
-    bin_mapping <- read_excel("bin_mapping.xlsx")
-    bin_mapping$BIN_CYCLE <- as.numeric(bin_mapping$BIN_CYCLE)
 
     data_cycle <- left_join(data_cycle, bin_mapping)
     
@@ -8052,6 +8056,11 @@ print("1")
     data_cycle[is.na(data_cycle)] <- 0
     }
 
+    
+    data_cycle <- left_join(data_cycle, bin_mapping)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
+    
     data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
 
 
@@ -8074,7 +8083,7 @@ print("1")
            theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
        #theme(axis.text.x = element_text(hjust = 3.5))
 
@@ -8461,9 +8470,17 @@ ggplot(data_base,
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
+    
+    bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
+    data <- left_join(data, bin_mapping_roomin)
+    
+    data <- data[order(data$BIN_ROOMIN),]
 
     data <- data %>%  group_by(BIN_ROOMIN, NEW_PT3) %>%
       mutate(BIN_ROOMIN = factor(BIN_ROOMIN, levels = sort(BIN_ROOMIN)))
+    
+    x_label <- data %>% ungroup() %>% select(BIN_ROOMIN, X_LABEL) %>% distinct()
+    x_label <- x_label[order(x_label$BIN_ROOMIN),]
     
     #data$bin <- factor(data$bin,levels = sort(data$bin))
     
@@ -8481,7 +8498,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      scale_x_discrete()+
+      scale_x_discrete(labels = x_label$X_LABEL)+
       #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
@@ -8515,6 +8532,11 @@ ggplot(data_base,
     data_cycle[is.na(data_cycle)] <- 0
     }
     
+    bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
+    data_cycle <- left_join(data_cycle, bin_mapping_roomin)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN),]
+    
     data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
    ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
@@ -8528,8 +8550,8 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+     scale_x_discrete(labels = data_cycle$X_LABEL)+
+     scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
     
@@ -8602,9 +8624,15 @@ ggplot(data_base,
       
       data_cycle[is.na(data_cycle)] <- 0
     }
+    
+    bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
+    data_cycle <- left_join(data_cycle, bin_mapping_roomin)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN),]
 
     data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
+
     ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
@@ -8616,7 +8644,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -8948,6 +8976,12 @@ ggplot(data_base,
       data_cycle[is.na(data_cycle)] <- 0
     }
     
+    bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    
+    data_cycle <- left_join(data_cycle, bin_mapping_visit_end)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN_VISIT_END),]
+    
     data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
     
     ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent), data = data_cycle) +
@@ -8961,7 +8995,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
     
   })
@@ -8991,6 +9025,12 @@ ggplot(data_base,
       data_cycle[is.na(data_cycle)] <- 0
     }
     
+    bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    data_cycle <- left_join(data_cycle, bin_mapping_visit_end)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN_VISIT_END),]
+    
+    
     data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
     
     ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent), data = data_cycle) +
@@ -9004,7 +9044,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -9047,8 +9087,16 @@ ggplot(data_base,
     
     data <- unique(data)
     
+    bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    data <- left_join(data, bin_mapping_visit_end)
+    
+    data <- data[order(data$BIN_ROOMIN_VISIT_END),]
+    
     data <- data %>%  group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>%
       mutate(BIN_ROOMIN_VISIT_END = factor(BIN_ROOMIN_VISIT_END, levels = sort(BIN_ROOMIN_VISIT_END)))
+    
+    x_label <- data %>% ungroup() %>% select(BIN_ROOMIN_VISIT_END, X_LABEL) %>% distinct()
+    x_label <- x_label[order(x_label$BIN_ROOMIN_VISIT_END),]
     
     #data$bin <- factor(data$bin,levels = sort(data$bin))
     
@@ -9067,8 +9115,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      scale_x_discrete()+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_x_discrete(labels = x_label$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
