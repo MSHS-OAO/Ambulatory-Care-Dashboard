@@ -12345,26 +12345,28 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     options(knitr.kable.NA = '-')
     
     pack_rows_name <- table(pack_rows_name)
+    border_column <- length(cols)+2 
     
+    # data %>%
+    #   kable(booktabs = T,escape = F, #align = c(rep("r",3),rep("c",length(metrics_dept_output)-4)),
+    #         col.names = col_names) %>%
+    #   kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
+    #   add_header_above(header_above, background = "white", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
+    #   collapse_rows(columns = 1:3, valign = "top") %>%
+    #   row_spec(0,  background = "#212070", color = "white")
+      
     data %>%
       kable(booktabs = T,escape = F, #align = c(rep("r",3),rep("c",length(metrics_dept_output)-4)),
             col.names = col_names) %>%
       kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
       add_header_above(header_above, background = "white", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
-      collapse_rows(columns = 1:3, valign = "top") %>%
-      row_spec(0,  background = "#212070", color = "white")
-      
-    
+      row_spec(0,  background = "#212070", color = "white")%>%
+      column_spec(1, border_left = "2px solid #DDDEDD", border_right = FALSE)%>%
+      column_spec(border_column, border_left = FALSE, border_right = "2px solid #DDDEDD" )%>%
+      column_spec(length(data), border_left = "2px solid #DDDEDD", border_right = "2px solid #DDDEDD" )%>%
+      #row_spec(nrow(data), hline_after = TRUE, extra_css = "border-bottom: 1px solid;")%>%
+      collapse_rows(columns = 1:3, valign = "top")
  
-    # data %>%
-    #   kable("html", booktabs = T,escape = F) %>%
-    #   collapse_rows(columns = "Department", valign = "top")
-    
-    
-    
-    # data_test %>%
-    #     kable(booktabs = T,escape = F) %>%
-    #   kableExtra::collapse_rows(columns = 4:5, valign = "top")
   }
   
   output[["opt_comparison_tb"]] <- renderDT({
