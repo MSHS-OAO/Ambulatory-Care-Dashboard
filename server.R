@@ -168,7 +168,9 @@ server <- function(input, output, session) {
                       choices = unique(holid$holiday),
                       selected = holiday_choices
     )
-    saved_filter_choices <- return_saved_choices(df_choices, "FILTER_NAME")
+    saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
+    saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
+
     print("filter observe")
     updatePickerInput(session,
                       inputId = "filter_list",
@@ -181,7 +183,7 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
   
   ##Test for volume
-  dataArrived_volume <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_volume <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -393,15 +395,6 @@ server <- function(input, output, session) {
   #   
   #   
   # })
-  
-  observeEvent(input$update_filters1,{
-    user <- user()
-    filter_path_full <- paste0(filter_path, "/", user)
-    dir.create(file.path(filter_path, user), showWarnings = FALSE)
-    filter_choices <- file_path_sans_ext(list.files(path = filter_path_full, pattern = "*.csv"))
-    updatePickerInput(session, "filter_list", choices = filter_choices)
-    
-  })
   
   
   observeEvent(input$selectedCampus,{
@@ -825,7 +818,7 @@ server <- function(input, output, session) {
   
   ### (2) Prepare datasets for analysis ===============================================================================================
   # [2.1] All pre-processed data for non-kpi tabs --------------------------------------------------------------------------------------
-  dataAll <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAll <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -841,7 +834,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataAll_access <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAll_access <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -857,7 +850,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataArrivedNoShow <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedNoShow <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -874,7 +867,7 @@ server <- function(input, output, session) {
 
   })
   
-  dataArrivedNoShow_access <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedNoShow_access <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -891,7 +884,7 @@ server <- function(input, output, session) {
     
   })
   
-  dataArrived <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -910,7 +903,7 @@ server <- function(input, output, session) {
   })
   
   
-  dataArrived_summary <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_summary <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -928,7 +921,7 @@ server <- function(input, output, session) {
   })
   
   
-  dataArrived_access_npr <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_access_npr <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -946,7 +939,7 @@ server <- function(input, output, session) {
     
   })
   
-  dataArrived_access <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_access <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -964,7 +957,7 @@ server <- function(input, output, session) {
     
   })
   
-  dataNoShow <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataNoShow <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -980,7 +973,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataCanceledBumpedRescheduled<- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceledBumpedRescheduled<- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -996,7 +989,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataCanceledBumpedRescheduledAll <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceledBumpedRescheduledAll <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1013,7 +1006,7 @@ server <- function(input, output, session) {
   })
   
   
-  dataCanceled<- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceled<- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1029,7 +1022,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataBumped<- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataBumped<- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1045,7 +1038,7 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataRescheduled<- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataRescheduled<- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1062,7 +1055,7 @@ server <- function(input, output, session) {
   })
   
   # [2.2] All pre-processed data for kpi tabs --------------------------------------------------------------------------------------
-  dataAllKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAllKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1078,7 +1071,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataArrivedNoShowKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedNoShowKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1094,7 +1087,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataArrivedKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedKpi <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -1111,7 +1104,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataCanceledBumpedKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceledBumpedKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1127,7 +1120,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataCanceledKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataCanceledKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1143,7 +1136,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
-  dataBumpedKpi <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataBumpedKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1161,7 +1154,7 @@ server <- function(input, output, session) {
   
   # [2.2] All pre-processed data for utilization tabs --------------------------------------------------------------------------------------
   
-  dataUtilization <- eventReactive(list(input$update_filters,input$utilType,input$update_filters1),{
+  dataUtilization <- eventReactive(list(input$update_filters,input$utilType),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1179,7 +1172,7 @@ server <- function(input, output, session) {
   }) 
   
   # [2.3] All pre-processed data for access tabs --------------------------------------------------------------------------------------
-  dataFutureSlot <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataFutureSlot <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1195,7 +1188,7 @@ server <- function(input, output, session) {
                      input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
   }) 
   
-  dataPastSlot <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataPastSlot <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1212,7 +1205,7 @@ server <- function(input, output, session) {
   }) 
   
   
-  dataAllSlot <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAllSlot <- eventReactive(list(input$update_filters),{
     print(paste0("Beginning of slot processing ", Sys.time()))
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -1229,7 +1222,7 @@ server <- function(input, output, session) {
                      input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
   }) 
   
-  dataAllSlot_comp <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataAllSlot_comp <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -1249,7 +1242,7 @@ server <- function(input, output, session) {
   
   # [2.4] Arrived Population Data --------------------------------------------------------------------------------------
   
-  dataArrivedPop <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrivedPop <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
       need(input$selectedSpecialty != "", "Please select a Specialty"),
@@ -2591,6 +2584,11 @@ server <- function(input, output, session) {
   })
   
   output$room_time <- renderText({
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
+  
+  output$room_time2 <- renderText({
     paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
@@ -4073,7 +4071,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Year",
+               title = "Average Cycle Time by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4089,7 +4087,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Quarter",
+               title = "Average Cycle Time by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4104,7 +4102,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Month",
+               title = "Average Cycle Time by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4120,7 +4118,7 @@ server <- function(input, output, session) {
           #ggplot(data_filter, aes(x=interaction(Appt.Year,as.Date(Appt.Date, format="%Y-%m-%d"),lex.order = TRUE), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Time (min)",  
-               title = "Average Check-in to Visit-End Time (Min.) by Day",
+               title = "Average Cycle Time by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4140,7 +4138,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)",  
-               title = "Average Check-in to Visit-End Time (Min.) by Year",
+               title = "Average Cycle Time by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4159,7 +4157,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Quarter",
+               title = "Average Cycle Time by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4177,7 +4175,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)",
-               title = "Average Check-in to Visit-End Time (Min.) by Month",
+               title = "Average Cycle Time by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4194,7 +4192,7 @@ server <- function(input, output, session) {
         ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Visit-End Time (Min.) by Day",
+               title = "Average Cycle Time by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4226,7 +4224,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Year",
+               title = "Average Check-in to Room-in Time by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4242,7 +4240,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Quarter",
+               title = "Average Check-in to Room-in Time by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
@@ -4257,7 +4255,7 @@ server <- function(input, output, session) {
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Month",
+               title = "Average Check-in to Room-in Time by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4273,7 +4271,7 @@ server <- function(input, output, session) {
         ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Day",
+               title = "Average Check-in to Room-in Time by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4293,7 +4291,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Year",
+               title = "Average Check-in to Room-in Time by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4311,7 +4309,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Quarter",
+               title = "Average Check-in to Room-in Time by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4329,7 +4327,7 @@ server <- function(input, output, session) {
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Month",
+               title = "Average Check-in to Room-in Time by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4346,7 +4344,7 @@ server <- function(input, output, session) {
         ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
           geom_line() +
           labs(x = NULL, y = "Time (min)", 
-               title = "Average Check-in to Room-in Time (Min.) by Day",
+               title = "Average Check-in to Room-in Time by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
@@ -4362,6 +4360,157 @@ server <- function(input, output, session) {
     
   })
   
+  
+  
+  output$kpiRoomTimeGraph <- renderPlot({
+    data <- dataArrivedKpi() %>% filter(ROOMINTOVISITEND > 0)
+    # data <- kpi.arrived.data %>% filter(checkinToRoomin > 0)
+    
+    if(input$kpiTrend ==1){ # Historical Trend
+      if(input$kpiFreq == 1){ #Year
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>%
+          collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
+        ggplot(data_filter, aes(x=APPT_YEAR, y=mean, group=1)) +
+          #stat_summary(fun="mean", geom="line")+
+          geom_line(color="midnightblue") +
+          geom_point(color="midnightblue") +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Year",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 2) { # Quarter
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
+        ggplot(data_filter, aes(x=interaction(APPT_YEAR,APPT_QUARTER,lex.order = TRUE), y=mean,group=1)) +
+          geom_line(color="midnightblue") +
+          geom_point(color="midnightblue") +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Quarter",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("none")+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 3){ # Month
+        data_filter <- data %>% group_by(APPT_MONTH_YEAR) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=interaction(APPT_MONTH_YEAR,lex.order = TRUE), y=mean,group=1)) +
+          geom_line(color="midnightblue") +
+          geom_point(color="midnightblue") +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Month",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("none")+
+          geom_point(size = 3.2)
+        
+      } else { # Day
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% collect()
+        data_filter$DateYear <- as.Date(with(data_filter, paste(APPT_YEAR, APPT_DATE,sep="-")), "%Y-%m-%d")
+        ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean,group=1)) +
+          geom_line(color="midnightblue") +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Day",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("none")+ 
+          scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
+                       date_minor_breaks = "1 day", expand = c(0, 0.6))+
+          geom_point(size = 3.2)
+      }
+    } else { 
+      if(input$kpiFreq == 1){ # Year
+        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% 
+          mutate(Label = "Year") %>% collect()
+        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
+        ggplot(data_filter, aes(x=Label, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+          geom_line() +
+          geom_point(size=4, alpha=0.5) +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Year",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          scale_color_MountSinai("main")+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 2){ # Quarter 
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% 
+          mutate(Label = "Quarter") %>% collect()
+        ggplot(data_filter, aes(x=APPT_QUARTER, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+          geom_line() +
+          geom_point(size=4, alpha=0.5) +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Quarter",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("top")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          scale_color_MountSinai("main")+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 3){ # Month
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_MONTH) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% 
+          mutate(Label = "Month") %>% collect()
+        ggplot(data_filter, aes(x = factor(APPT_MONTH, level = monthOptions), y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+          geom_line() +
+          geom_point(size=4, alpha=0.5) +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end by Month",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          scale_color_MountSinai("main")+
+          geom_point(size = 3.2)
+        
+      } else if(input$kpiFreq == 4){ # Day
+        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE_YEAR) %>% 
+          dplyr::summarise(mean = round(mean(ROOMINTOVISITEND, na.rm=TRUE))) %>% 
+          mutate(Label = "Date") %>% collect() %>% mutate(APPT_DATE_YEAR = as.Date(format(APPT_DATE_YEAR, "%Y-%m-%d"), "%Y-%m-%d"))
+        ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+          geom_line() +
+          labs(x = NULL, y = "Time (min)", 
+               title = "Average Room-in to Visit-end Time by Day",
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+          )+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          theme_new_line()+
+          theme_bw()+
+          graph_theme("top")+ 
+          scale_color_MountSinai("main") + 
+          scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
+                       date_minor_breaks = "1 day", expand = c(0, 0.6))+
+          geom_point(size = 3.2)
+      }
+    }
+    
+  })
   ### Scheduling Tab -------------------------------------------------------------------------------------------------------------------
   # Scheduling Summary
   # Average Daily Appts Scheduled
@@ -5406,11 +5555,17 @@ server <- function(input, output, session) {
     
     space.hour.day <- space.hour.day %>% filter(Time %in% timeOptionsHr_filter)
     
+    if (input$utilType == "actual"){
+      subtitle <- "actual"
+    } else {
+      subtitle <- "scheduled"
+    }
+    
     graph <- ggplot(space.hour.day, aes(x=Time, y=ceiling(Average_Req), col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
       labs(x=NULL, y="Number of Rooms\n",
            title = "Average Space Required by Time of Day and Day of Week",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           subtitle = paste0("Based on ", subtitle, " appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
            )+
       scale_color_MountSinai("main")+
       geom_point(size = 3.2) +
@@ -5520,12 +5675,17 @@ server <- function(input, output, session) {
     #space.hour.day$target <- 80
     space.hour.day$target <- 0.8
     
+    if (input$utilType == "actual"){
+      subtitle <- "actual"
+    } else {
+      subtitle <- "scheduled"
+    }
     
     graph <- ggplot(space.hour.day, aes(x=Time, y=Average_Util, col=factor(Day,level = daysOfWeek.options), group=Day))+
       geom_line(size=1.2)+
       labs(x=NULL, y="Utilization (%)", 
            title = "Average Space Utilization (%) by Time of Day and Day of Week",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           subtitle = paste0("Based on ", subtitle, " appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
            )+
       scale_color_MountSinai("main")+
       #geom_hline(yintercept = .8, color = "red", linetype="dashed")+
@@ -5606,12 +5766,18 @@ server <- function(input, output, session) {
     
     space.hour <- space.hour %>% filter(Time %in% timeOptionsHr_filter)
     
+    if (input$utilType == "actual"){
+      subtitle <- "actual"
+    } else {
+      subtitle <- "scheduled"
+    }
+    
     graph <- ggplot(space.hour, aes(x=Time, y=value, col=variable, group=variable))+
       geom_line(size=1.2)+
       scale_y_continuous(limits=c(0, max(space.hour$value)*1.2))+
       labs(x=NULL, y="Number of Rooms\n",
            title = "Space Required by Percentile by Time of Day",
-           subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           subtitle = paste0("Based on ", subtitle, " appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
            )+
       scale_color_MountSinai("main")+
       geom_point(size = 3.2) +
@@ -5691,12 +5857,18 @@ server <- function(input, output, session) {
     
     space.hour <- space.hour %>% filter(Time %in% timeOptionsHr_filter)
     
+    if (input$utilType == "actual"){
+      subtitle <- "actual"
+    } else {
+      subtitle <- "scheduled"
+    }
+    
     graph <- ggplot(space.hour, aes(x=Time, y=value, col=variable, group=variable))+
       geom_line(size=1.2)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0,max(space.hour$value)*1.2))+
       labs(x=NULL, y="Utilization (%)", 
            title = "Space Utilization (%) by Percentile by Time of Day",
-           #subtitle = paste0("Based on scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
+           subtitle = paste0("Based on ", subtitle, " scheduled appointment time and duration from ",isolate(input$dateRangeUtil[1])," to ",isolate(input$dateRangeUtil[2]))
            )+
       scale_color_MountSinai("main")+
       geom_point(size = 3.2) +
@@ -6497,6 +6669,8 @@ server <- function(input, output, session) {
     # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology") %>%
     #                                                         select(UNIQUEID, APPT_MONTH_YEAR, APPT_DATE)
     
+    
+    pts.dist.testing <<- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = sum(TOTAL_APPTS)) %>% show_query()
     pts.dist <- data %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
     
     # pts.dist <- aggregate(data$UNIQUEID,
@@ -6748,6 +6922,8 @@ server <- function(input, output, session) {
   output$newPtRatioByDept <- renderPlot({
     data <- dataArrived_access_npr()
     # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
+print("1")
+
 
     newpatients.ratio <- data %>%
       group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
@@ -6756,7 +6932,7 @@ server <- function(input, output, session) {
       spread(NEW_PT3, Total) 
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
-
+    
     
     print("1.5")
    
@@ -6795,6 +6971,7 @@ server <- function(input, output, session) {
     data <- dataArrived_access_npr()
     #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
+    print("prov_running")
     newpatients.ratio <- data %>%
       group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
@@ -7090,7 +7267,7 @@ server <- function(input, output, session) {
       filter(NEW_PT2 == "NEW") %>% collect()
     waitTime$target <- 14
     
-    waitTime$SCHEDULE_GROUPING_MAPPED[which(waitTime$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
+    #waitTime$SCHEDULE_GROUPING_MAPPED[which(waitTime$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
     
     newWaitTime <-
       ggplot(waitTime, aes(x=factor(SCHEDULE_GROUPING_MAPPED#, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
@@ -7143,7 +7320,7 @@ server <- function(input, output, session) {
     noShows$SCHEDULE_GROUPING_MAPPED[which(noShows$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
     
     
-    noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)
+    #noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)
     
     
     
@@ -7595,14 +7772,18 @@ server <- function(input, output, session) {
       summarise(CYCLETIME = ceiling(mean(CYCLETIME, na.rm = T))) %>%
       collect()
     
+    data_median <- data_cycle %>% select(CYCLETIME) %>%
+      summarise(CYCLETIME = ceiling(median(CYCLETIME, na.rm = T))) %>%
+      collect()
+    
     perc <- data_cycle %>% summarize(n()) %>% collect() /
             dataArrived() %>% filter(NEW_PT3 == "NEW")%>% summarize(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
-      value =  paste0(data$CYCLETIME," min"),
-      #title = toupper("Average New Patients Check-in to Visit-end Time**"),
-      title = toupper("Average New Patients Check-in to Visit-end Time*"),
+      value =  paste0(data$CYCLETIME," min", " | ", data_median$CYCLETIME, " min"),
+      title = toupper(paste0("Average | MEDIAN "," New Patients Check-in to Visit-end Time*")),
+      # title = toupper("Average New Patients Check-in to Visit-end Time*"),
       subtitle = paste0("*Based on ",round(perc,2)*100,
                            "% of total arrived new patients based on visit timestamps" 
                     ),
@@ -7621,16 +7802,19 @@ server <- function(input, output, session) {
     data <- data_cycle %>% select(CYCLETIME) %>%
       summarise(CYCLETIME = mean(CYCLETIME, na.rm = T)) %>% collect()
     
+    data_meadian <- data_cycle %>% select(CYCLETIME) %>%
+      summarise(CYCLETIME = median(CYCLETIME, na.rm = T)) %>% collect()
+    
     perc <- data_cycle %>% summarise(n()) %>% collect() / 
             dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED")%>% summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
-      value =  paste0(ceiling(data$CYCLETIME)," min"),
+      value =  paste0(ceiling(data$CYCLETIME)," min", " | ", data_meadian$CYCLETIME, " min"),
       title = toupper(
                      #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
                              #paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
-                             "Average Established Patients Check-in to Visit-end Time*"),
+                             "Average | Median Established Patients Check-in to Visit-end Time*"),
       # subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ", round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
@@ -7691,11 +7875,16 @@ server <- function(input, output, session) {
     #data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
-
+    data <- left_join(data, bin_mapping)
+    
+    data <- data[order(data$BIN_CYCLE),]
+    
     data <- data %>%  group_by(BIN_CYCLE, NEW_PT3) %>%
       mutate(BIN_CYCLE = factor(BIN_CYCLE, levels = sort(BIN_CYCLE)))
     
     #data$BIN_CYCLE <- factor(data$BIN_CYCLE,levels = sort(data$BIN_CYCLE))
+    x_label <- data %>% ungroup() %>% select(BIN_CYCLE, X_LABEL) %>% distinct()
+    x_label <- x_label[order(x_label$BIN_CYCLE),]
     
 
     ggplot(aes(x = BIN_CYCLE , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
@@ -7711,8 +7900,8 @@ server <- function(input, output, session) {
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      scale_x_discrete()+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      # scale_x_discrete()+
+      scale_x_discrete(labels = x_label$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -7766,6 +7955,7 @@ server <- function(input, output, session) {
       mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
     data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
     
+
     main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
     
     rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
@@ -7777,22 +7967,25 @@ server <- function(input, output, session) {
        }
     data_cycle[is.na(data_cycle)] <- 0
     }
+
+    data_cycle <- left_join(data_cycle, bin_mapping)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
   
     data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
 
     graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
-
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointments\nCheck-in to Visit-end Time**"),
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_discrete()+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
       #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
@@ -7862,6 +8055,11 @@ server <- function(input, output, session) {
     data_cycle[is.na(data_cycle)] <- 0
     }
 
+    
+    data_cycle <- left_join(data_cycle, bin_mapping)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
+    
     data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
 
 
@@ -7884,7 +8082,7 @@ server <- function(input, output, session) {
            theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
        #theme(axis.text.x = element_text(hjust = 3.5))
 
@@ -8152,13 +8350,16 @@ ggplot(data_base,
     data <-  data_room %>% select(CHECKINTOROOMIN) %>%
       summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T))  %>% collect()
     
+    data_meadian <-  data_room %>% select(CHECKINTOROOMIN) %>%
+      summarise(CHECKINTOROOMIN = median(CHECKINTOROOMIN, na.rm = T))  %>% collect()
+    
     perc <-  data_room %>% summarise(n()) %>% collect() /
             dataArrived() %>% filter(NEW_PT3 == "NEW") %>% summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min"),
-      title = toupper("Avg. New Appointments Check-in to Room-in Time"),
+      value =  paste0(ceiling(data)," min", " | ", ceiling(data_meadian), " min"),
+      title = toupper("Average | Median New Appointments Check-in to Room-in Time"),
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
       width = 6,
@@ -8175,18 +8376,21 @@ ggplot(data_base,
     data <- data_room %>% select(CHECKINTOROOMIN) %>%
       summarise(CHECKINTOROOMIN = mean(CHECKINTOROOMIN, na.rm = T)) %>% collect()
     
+    data_median <- data_room %>% select(CHECKINTOROOMIN) %>%
+      summarise(CHECKINTOROOMIN = median(CHECKINTOROOMIN, na.rm = T)) %>% collect()
+    
     perc <- data_room %>%
             summarise(n()) %>% collect() / dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED") %>%
             summarise(n()) %>% collect()
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min"),
+      value =  paste0(ceiling(data)," min", " | ", ceiling(data_median), " min"),
       title = toupper( 
               #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
                              #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
                             # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
-                             "Avg. Established Appointments Check-in to Room-in Time"),
+                             "Average | Median Established Appointments Check-in to Room-in Time"),
  
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
@@ -8265,9 +8469,17 @@ ggplot(data_base,
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- unique(data)
+    
+    bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
+    data <- left_join(data, bin_mapping_roomin)
+    
+    data <- data[order(data$BIN_ROOMIN),]
 
     data <- data %>%  group_by(BIN_ROOMIN, NEW_PT3) %>%
       mutate(BIN_ROOMIN = factor(BIN_ROOMIN, levels = sort(BIN_ROOMIN)))
+    
+    x_label <- data %>% ungroup() %>% select(BIN_ROOMIN, X_LABEL) %>% distinct()
+    x_label <- x_label[order(x_label$BIN_ROOMIN),]
     
     #data$bin <- factor(data$bin,levels = sort(data$bin))
     
@@ -8285,7 +8497,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      scale_x_discrete()+
+      scale_x_discrete(labels = x_label$X_LABEL)+
       #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
@@ -8319,6 +8531,11 @@ ggplot(data_base,
     data_cycle[is.na(data_cycle)] <- 0
     }
     
+    bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
+    data_cycle <- left_join(data_cycle, bin_mapping_roomin)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN),]
+    
     data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
    ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
@@ -8332,8 +8549,8 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
-      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+     scale_x_discrete(labels = data_cycle$X_LABEL)+
+     scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
     
@@ -8406,9 +8623,15 @@ ggplot(data_base,
       
       data_cycle[is.na(data_cycle)] <- 0
     }
+    
+    bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
+    data_cycle <- left_join(data_cycle, bin_mapping_roomin)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN),]
 
     data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
+
     ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
@@ -8420,7 +8643,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -8665,6 +8888,436 @@ ggplot(data_base,
     
   })
   
+  
+  
+  output$roomInTimeCompNew2 <- renderValueBox({
+    print("1")
+    
+    data_room <- dataArrived() %>% filter(ROOMINTOVISITEND  >= 0, NEW_PT3 == "NEW")
+    
+    data <-  data_room %>% select(ROOMINTOVISITEND ) %>%
+      summarise(ROOMINTOVISITEND  = mean(ROOMINTOVISITEND , na.rm = T))  %>% collect()
+    
+    data_median <-  data_room %>% select(ROOMINTOVISITEND ) %>%
+      summarise(ROOMINTOVISITEND  = median(ROOMINTOVISITEND , na.rm = T))  %>% collect()
+    
+    perc <-  data_room %>% summarise(n()) %>% collect() /
+      dataArrived() %>% filter(NEW_PT3 == "NEW") %>% summarise(n()) %>% collect()
+    
+    valueBoxSpark(
+      # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
+      value =  paste0(ceiling(data)," min", " | ", ceiling(data_median), " min"),
+      title = toupper("Average | Median New Appointments Room-in to Visit-end* Time"),
+      # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
+      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
+  output$roomInTimeCompOther2 <- renderValueBox({
+    print("2")
+    
+    data_room <- dataArrived() %>% filter(ROOMINTOVISITEND  >= 0, NEW_PT3 == "ESTABLISHED")
+    
+    data <- data_room %>% select(ROOMINTOVISITEND ) %>%
+      summarise(ROOMINTOVISITEND  = mean(ROOMINTOVISITEND , na.rm = T)) %>% collect()
+    
+    data_median <- data_room %>% select(ROOMINTOVISITEND ) %>%
+      summarise(ROOMINTOVISITEND  = median(ROOMINTOVISITEND , na.rm = T)) %>% collect()
+    
+    perc <- data_room %>%
+      summarise(n()) %>% collect() / dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED") %>%
+      summarise(n()) %>% collect()
+    
+    valueBoxSpark(
+      # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
+      value =  paste0(ceiling(data)," min", " | ", ceiling(data_median), " min"),
+      title = toupper( 
+        #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
+        #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
+        # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
+        "Average | Median Established Appointments Room-in to Visit-end* Time"),
+      
+      # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
+      subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
+      width = 6,
+      color = "fuchsia"
+    )
+    
+  })
+  
+  output$newRoomInTimeBoxPlot2 <- renderPlot({
+    print("3")
+    # data <- data_test %>% filter(CHECKINTOROOMIN >= 0) %>%
+    #   filter(NEW_PT3 == "NEW") %>% select(CHECKINTOROOMIN) %>% collect()
+    
+    
+    
+    data_cycle <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "NEW") %>%
+      select(ROOMINTOVISITEND, BIN_ROOMIN_VISIT_END) %>%
+      group_by(BIN_ROOMIN_VISIT_END) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN_VISIT_END) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
+    
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN_VISIT_END)
+    
+    if (length(rows_to_be_included > 0)){
+      
+      for (i in rows_to_be_included){
+        data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+        
+      }
+      
+      data_cycle[is.na(data_cycle)] <- 0
+    }
+    
+    bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    
+    data_cycle <- left_join(data_cycle, bin_mapping_visit_end)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN_VISIT_END),]
+    
+    data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
+    
+    ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent), data = data_cycle) +
+      geom_bar(stat = 'identity') +
+      geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Distribution of NEW Appointment\nRoom-in to Visit-end Time**"),
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+    
+  })
+  
+  
+  output$establishedRoomInTimeBoxPlot2 <- renderPlot({
+    print("4")
+    
+    data_cycle <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(ROOMINTOVISITEND, BIN_ROOMIN_VISIT_END) %>%
+      group_by(BIN_ROOMIN_VISIT_END) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN_VISIT_END) %>% mutate(percent = total_bin / total)
+    data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
+    
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN_VISIT_END)
+    
+    
+    if (length(rows_to_be_included > 0)){
+      
+      for (i in rows_to_be_included){
+        data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+        
+      }
+      
+      data_cycle[is.na(data_cycle)] <- 0
+    }
+    
+    bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    data_cycle <- left_join(data_cycle, bin_mapping_visit_end)
+    
+    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN_VISIT_END),]
+    
+    
+    data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
+    
+    ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent), data = data_cycle) +
+      geom_bar(stat = 'identity') +
+      geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Distribution of ESTABLISHED Appointment\nRoom-in to Visit-end Time**"),
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")+
+      scale_x_discrete(labels = data_cycle$X_LABEL)+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+    #theme(axis.text.x = element_text(hjust = 3.5))
+    
+    
+    
+  })
+  
+  output$roomInTimeTrend2 <- renderPlot({
+    print("5")    
+    
+    data <- dataArrived() %>% filter(ROOMINTOVISITEND > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+      select(ROOMINTOVISITEND, NEW_PT3, APPT_TYPE, BIN_ROOMIN_VISIT_END) %>% collect() %>% 
+      mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
+      filter(!is.na(NEW_PT3))
+    
+    
+    
+    data <- data %>% select(ROOMINTOVISITEND, NEW_PT3, BIN_ROOMIN_VISIT_END) %>%
+      group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+      ungroup() %>%
+      mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>%
+      mutate(percent = total_bin / total) %>%
+      mutate(BIN_ROOMIN_VISIT_END = as.numeric(BIN_ROOMIN_VISIT_END))
+    
+    
+    main_rows <- seq(0, 480, by= 30)
+    
+    rows_to_be_included <- which(!main_rows %in% data$BIN_ROOMIN_VISIT_END)
+    
+    
+    if (length(rows_to_be_included)>0){
+      for (i in rows_to_be_included){
+        data[nrow(data) + 1 , 1] <- main_rows[i]
+      }
+      
+    }
+    
+    data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    
+    data <- unique(data)
+    
+    bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    data <- left_join(data, bin_mapping_visit_end)
+    
+    data <- data[order(data$BIN_ROOMIN_VISIT_END),]
+    
+    data <- data %>%  group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>%
+      mutate(BIN_ROOMIN_VISIT_END = factor(BIN_ROOMIN_VISIT_END, levels = sort(BIN_ROOMIN_VISIT_END)))
+    
+    x_label <- data %>% ungroup() %>% select(BIN_ROOMIN_VISIT_END, X_LABEL) %>% distinct()
+    x_label <- x_label[order(x_label$BIN_ROOMIN_VISIT_END),]
+    
+    #data$bin <- factor(data$bin,levels = sort(data$bin))
+    
+    
+    
+    ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+      geom_bar(stat = 'identity') +
+      scale_color_MountSinai()+
+      scale_fill_MountSinai()+
+      #geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Room-in to Visit-end* Time Comparison by Appointment Type"),
+           y = "% of Patients",
+           x = "Minutes",
+           caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"), 
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("top")+
+      scale_x_discrete(labels = x_label$X_LABEL)+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
+    #theme(axis.text.x = element_text(hjust = 3.5))
+    
+  })
+  
+  
+  output$roomInTimeByHour2 <- renderPlot({
+    print("6")
+    data <- dataArrived() %>% filter(ROOMINTOVISITEND > 0) %>% filter(NEW_PT3 == "NEW") %>%
+      select(APPT_DAY, APPT_TM_HR, ROOMINTOVISITEND) %>% collect()
+    # data <- arrived.data %>% filter(checkinToRoomin > 0) %>% filter(New.PT3 == TRUE)
+    
+    data_other <- dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED", ROOMINTOVISITEND > 0) %>%
+      select(APPT_DAY, APPT_TM_HR, ROOMINTOVISITEND, APPT_TYPE) %>% collect()
+    
+    # data_other <- arrived.data %>% filter(New.PT3 == FALSE, checkinToRoomin > 0)
+    
+    # names <- data_other %>% filter(APPT_TM_HR %in% timeOptionsHr_filter) %>% select(APPT_TYPE)
+    # names <- sort(unique(names$APPT_TYPE), na.last = T)
+    
+    
+    appt.type.choices <- dataArrived() %>% filter( ROOMINTOVISITEND > 0, NEW_PT3 == "ESTABLISHED") %>% 
+      select(APPT_TYPE) %>% mutate(APPT_TYPE = unique(APPT_TYPE)) %>% collect()
+    
+    
+    if(input$median4 == TRUE){
+      
+      data <- data %>%
+        group_by(APPT_DAY, APPT_TM_HR) %>%
+        summarise(avg = median(ROOMINTOVISITEND)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+      
+      
+      data_other <- data_other %>%
+        group_by(APPT_DAY, APPT_TM_HR) %>%
+        summarise(avg = median(ROOMINTOVISITEND)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+      
+      input <- "Median"
+    } else{
+      
+      data <- data %>%
+        group_by(APPT_DAY, APPT_TM_HR) %>%
+        summarise(avg = mean(ROOMINTOVISITEND)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+      
+      
+      data_other <- data_other %>%
+        group_by(APPT_DAY, APPT_TM_HR) %>%
+        summarise(avg = mean(ROOMINTOVISITEND)) %>%
+        filter(APPT_TM_HR %in% timeOptionsHr_filter)
+      
+      input <- "Average"
+    }
+    
+    if(length(appt.type.choices$APPT_TYPE) == 1){
+      appt.type <- unique(appt.type.choices$APPT_TYPE)
+    } else{
+      appt.type <- "Established*"
+    }
+    
+    level_order <- rev(toupper(c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")))
+    
+    new <- ggplot(data, aes(APPT_TM_HR, y = factor(APPT_DAY, level = level_order), fill = avg)) + 
+      geom_tile(colour = "white") + 
+      scale_fill_gradient(low="white", high="#d80b8c")+
+      labs(title = paste0(input," New Patients Room-in to Visit-end** Time by Hour\n"),
+           y = NULL,
+           fill = "Minutes")+
+      #subtitle = paste0("Based on data from ",input$dateRangeKpi[1]," to ",input$dateRangeKpi[2]))+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "right",
+            legend.direction = "vertical",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_text(color="black"),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(avg),"", ceiling(avg))), color="black", size=5, fontface="bold")
+    
+    
+    other <- ggplot(data_other, aes(APPT_TM_HR, y = factor(APPT_DAY, level = level_order), fill = avg))+ 
+      geom_tile(colour = "white") + 
+      scale_fill_gradient(low="white", high="#00aeef")+
+      labs(title = paste0(input," ",appt.type," Patients Room-in to Visit-end** Time by Hour\n"), 
+           y = NULL,
+           caption = paste0("*Includes ", length(unique(appt.type.choices$APPT_TYPE)), " established visit types\n **Visit-end Time is the minimum of Visit-end Time and Check-out"),
+           fill = "Minutes")+
+      theme(plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+            legend.position = "right",
+            legend.direction = "vertical",
+            legend.key.size = unit(.8,"cm"),
+            legend.text = element_text(size="10"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size="14", margin = unit(c(8, 8, 8, 8), "mm")),
+            axis.text.x = element_text(color="black"),
+            axis.text.y = element_text(color= "black", margin = margin(r=15)),
+            axis.text = element_text(size="14"),
+            panel.background = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(),
+            plot.margin = margin(10,30,30,30))+
+      geom_text(aes(label= ifelse(is.na(avg),"", ceiling(avg))), color="black", size=5, fontface="bold")
+    
+    grid.arrange(new, other, ncol = 1)
+    
+  })
+  
+  
+  output$newRoomInTimeByProv2 <- renderPlot({
+    print("7")
+    data <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "NEW") %>%
+      select(PROVIDER, ROOMINTOVISITEND) 
+    
+    # data <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(New.PT3 == TRUE) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology")
+    
+   
+    data_base <- data %>% group_by(PROVIDER) %>% summarise(min_value = min(ROOMINTOVISITEND),                                
+                                                           quartile_1st = quantile(ROOMINTOVISITEND, 0.25),
+                                                           median = median(ROOMINTOVISITEND), 
+                                                           mean = mean(ROOMINTOVISITEND, na.rm= TRUE),
+                                                           quartile_3rd = quantile(ROOMINTOVISITEND, 0.75),
+                                                           max_value = max(ROOMINTOVISITEND)) %>% 
+      collect()
+    
+    
+    
+    
+    ggplot(data_base,                              
+           aes(x = PROVIDER,
+               ymin = min_value,
+               lower = quartile_1st,
+               middle = median,
+               upper = quartile_3rd,
+               ymax = max_value)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA, stat = "identity")+
+      #stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
+      # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+      # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+      labs(title = "Distribution of NEW Appointment Room-in to Visit-end** Time by Provider",
+           y = "Minutes",
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")
+    
+  })
+  
+  output$establishedRoomInTimeByProv2 <- renderPlot({
+    print("8")
+    data <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "ESTABLISHED") %>%
+      select(PROVIDER, NEW_PT3, ROOMINTOVISITEND, APPT_TYPE) 
+    # data_other <- arrived.data %>% filter(checkinToRoomin >= 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type == "FOLLOW UP")
+    
+    #data <- data_other
+    
+    if(length(unique(data$APPT_TYPE)) == 1){
+      appt.type <- unique(data$APPT_TYPE)
+    } else{
+      appt.type <- "Established"
+    }
+    
+
+    data_base <- data %>% group_by(PROVIDER) %>% summarise(min_value = min(ROOMINTOVISITEND),                                
+                                                           quartile_1st = quantile(ROOMINTOVISITEND, 0.25),
+                                                           median = median(ROOMINTOVISITEND), 
+                                                           mean = mean(ROOMINTOVISITEND, na.rm= TRUE),
+                                                           quartile_3rd = quantile(ROOMINTOVISITEND, 0.75),
+                                                           max_value = max(ROOMINTOVISITEND)) %>% 
+      collect()
+    
+    ggplot(data_base,                              
+           aes(x = PROVIDER,
+               ymin = min_value,
+               lower = quartile_1st,
+               middle = median,
+               upper = quartile_3rd,
+               ymax = max_value)) +
+      geom_boxplot(colour="black", fill="slategray1", outlier.shape=NA, stat = "identity")+
+      #stat_summary(fun=mean, geom="point", shape=18, size=3, color="maroon1", fill="maroon1")+
+      #scale_y_continuous(limits = c(0,  (data_base$quartile_3rd) *2))+
+      # geom_hline(yintercept= round(mean(cycle.df$cycleTime)), linetype="dashed", color = "red")+
+      # annotate("text",x=length(unique(cycle.df$Provider))/2, y=round(mean(cycle.df$cycleTime))+3,size=5,color="red",label=c('Average'))+
+      labs(title = paste0("Distribution of ",appt.type," Appointments Room-in to Visit-end** Time by Provider"),
+           y = "Minutes",
+           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out"),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           # caption = paste0("*Includes ", length(unique(data$Appt.Type)), "established appointments")
+      )+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("none")#+
+      #theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))
+    
+  })
   # # Example Event Log Dataset 
   # 
   # ex_pts_throughput <- as.data.frame(ex_patients %>% throughput_time("case"))
@@ -11221,7 +11874,7 @@ ggplot(data_base,
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
-  dataArrived_test_schedule <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_test_schedule <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -11238,7 +11891,7 @@ ggplot(data_base,
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
     
   })
-  dataArrived_access_schedule <- eventReactive(list(input$update_filters,input$update_filters1),{
+  dataArrived_access_schedule <- eventReactive(list(input$update_filters),{
     
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -11901,6 +12554,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     print("11")
     
     # months_df <-  opt_table[,!(names( opt_table) %in% c(cols, "Metrics", "Dynamic Target"))]
+
     # months <- order(as.yearmon(colnames(months_df), "%b %Y"))
     # order_months <- months_df[months]
     # 
@@ -12020,6 +12674,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     options(knitr.kable.NA = '-')
     
     pack_rows_name <- table(pack_rows_name)
+    border_column <- length(cols)+2 
     
     border_column <- length(cols)+3 
     
@@ -12049,6 +12704,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     # data_test %>%
     #     kable(booktabs = T,escape = F) %>%
     #   kableExtra::collapse_rows(columns = 4:5, valign = "top")
+
   }
   
   output[["opt_comparison_tb"]] <- renderDT({
