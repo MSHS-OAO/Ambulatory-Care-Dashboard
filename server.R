@@ -5631,8 +5631,7 @@ server <- function(input, output, session) {
         
       check_test <<- check
       validate(need(variable_to_check < 0.05, "Not enough EPIC timestamp data to generate graphs. Please refer to the handbook and reach out to the team." ))
-     
-      
+
     }
     
     # Days of Week Table
@@ -11920,7 +11919,7 @@ ggplot(data_base,
     
     data <- dataArrived_summary()
     
-    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
+    #data <- arrived.data.rows.summary %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     
     #data <- data %>% select(APPT_MONTH_YEAR, VISIT_METHOD, APPT_TYPE, NEW_PT2, CAMPUS_SPECIALTY, DEPARTMENT, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, APPT_MADE_DTTM) %>% collect()
     
@@ -11969,22 +11968,73 @@ ggplot(data_base,
       group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       summarise(avg = ceiling(sum(total)/n())) %>%
       collect() %>%
-      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+      mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))
+    
+   
+     year <- max(year(volume$APPT_MONTH_YEAR))-1
+    
+     volume <- volume %>%
       pivot_wider(names_from = APPT_MONTH_YEAR,
                   values_from = avg,
                   values_fill = 0) 
     
+    # estimate the total 
+    volume <- volume %>% 
+      group_by(!!!syms(cols))%>%
+      mutate(Total = ceiling(rowMeans(across(where(is.numeric)), na.rm=TRUE)))
+    
+    
+    
+    # campus <- input$selectedCampus 
+    # specialty <- input$selectedSpecialty
+    # department <- input$selectedDepartment
+    # resources <- input$selectedResource 
+    # provider <- input$selectedProvider
+    # 
+    # 
+    # if(compare_filters == "CAMPUS_SPECIALTY"){
+    #   volume_dynamics <- arrived.data.rows.summary %>%
+    #     filter(CAMPUS %in% campus  & 
+    #              CAMPUS_SPECIALTY %in% specialty ) 
+    #   
+    # }
+    # if(compare_filters == "DEPARTMENT"){
+    #   volume_dynamics <- arrived.data.rows.summary %>%
+    #     filter(CAMPUS %in% campus  & 
+    #              CAMPUS_SPECIALTY %in% specialty &
+    #              DEPARTMENT %in% department )
+    # }
+    # if(compare_filters == "PROVIDER"){
+    #   volume_dynamics <- arrived.data.rows.summary %>%
+    #     filter(CAMPUS %in% campus  &
+    #              CAMPUS_SPECIALTY %in% specialty &
+    #              DEPARTMENT %in% department &
+    #              RESOURCES %in% resources &
+    #              PROVIDER %in% provider)
+    # }
+    # 
+    # 
+    # volume_dynamics <- volume_dynamics %>% 
+    #   group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR) %>%
+    #   summarise(total = SUM(TOTAL_APPTS)) %>% 
+    #   collect()%>%
+    #   mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    #   filter(year(APPT_MONTH_YEAR) %in% year)  %>%
+    #   group_by(!!!syms(cols)) %>%
+    #   summarise(`Dynamic Target` = ceiling(sum(total)/n()))
+    # 
+    # volume <- left_join(volume, volume_dynamics, by= cols )
+    
     volume[is.na(volume)] <- 0
     
-    
     volume$Metrics <- "Average Daily Volume"
-    volume <- volume %>% select(all_of(cols), Metrics, everything())
-    
+    #volume <- volume %>% select(all_of(cols), Metrics, `Dynamic Target`, everything(), Total)
+    volume <- volume %>% select(all_of(cols), Metrics, everything(), Total)
     
 
     data_access <- dataArrived_access_npr()
     
-    # data_access <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
+    # data_access <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
     newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
       summarise(total = SUM(TOTAL_APPTS)) %>% collect()%>%  # it was n()
@@ -11993,6 +12043,8 @@ ggplot(data_base,
       spread(NEW_PT3, total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
+    
+   
     
     col_names <- c(cols, "APPT_MADE_MONTH_YEAR",  "NEW", "ESTABLISHED")
     
@@ -12006,27 +12058,111 @@ ggplot(data_base,
     }
     
     
-    
     ### Calculate new patient ratio by breakdown
     newpatients.ratio <- newpatients.ratio %>% group_by(APPT_MADE_MONTH_YEAR) %>%
       mutate(ratio = paste0(round(`NEW`/(`NEW`+`ESTABLISHED`), 2)*100, "%")) 
-      
+    
+   
     
     #newpatients.ratio <- newpatients.ratio %>% group_by(Appt.MonthYear) %>%
      # mutate(ratio = paste0(round(`TRUE`/(sum(`TRUE`, na.rm = TRUE) + sum(`FALSE`, na.rm = TRUE)),2)*100, "%"))  
     
    # `Booked Rate (%)` = paste0(round(sum(`Booked Hours`)/sum(`Available Hours`)*100),"%"),
     
+    year <- max(year(newpatients.ratio$APPT_MADE_MONTH_YEAR))-1
     
     drop <- c("ESTABLISHED","NEW", "<NA>")
     newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
     newpatients.ratio <- newpatients.ratio %>% spread(APPT_MADE_MONTH_YEAR, ratio)
+    
+    
+    total <- data_access %>% group_by(!!!syms(cols), NEW_PT3) %>%
+      summarise(total = SUM(TOTAL_APPTS)) %>%
+      collect()%>% 
+      drop_na() %>%
+      spread(NEW_PT3, total) %>%
+      replace(is.na(.), 0) 
+
+    col_index <- which(!(c(cols, "NEW", "ESTABLISHED") %in% colnames(total)))
+    col_to_add <- col_names[col_index]
+    
+    if (length(col_to_add)>0){
+      total[[col_to_add]] <- 0
+    }
+    
+    
+    total <- total %>%
+      mutate(Total = paste0(round(`NEW`/(`NEW`+`ESTABLISHED`), 2)*100, "%"))%>%
+      select(-c("NEW", "ESTABLISHED"))
+ 
+    newpatients.ratio <- left_join(newpatients.ratio, total, by = cols)
+    
+
+    # if(compare_filters == "CAMPUS_SPECIALTY"){
+    #   
+    #   newpatients.ratio.dynamcis <- arrived.data.rows.npr %>%
+    #     filter(CAMPUS %in% campus  & 
+    #              CAMPUS_SPECIALTY %in% specialty ) 
+    #   
+    # }
+    # if(compare_filters == "DEPARTMENT"){
+    #   newpatients.ratio.dynamcis <- arrived.data.rows.npr %>%
+    #     filter(CAMPUS %in% campus  & 
+    #              CAMPUS_SPECIALTY %in% specialty &
+    #              DEPARTMENT %in% department )
+    # }
+    # if(compare_filters == "PROVIDER"){
+    #   newpatients.ratio.dynamcis <- arrived.data.rows.npr %>%
+    #     filter(CAMPUS %in% campus  &
+    #              CAMPUS_SPECIALTY %in% specialty &
+    #              DEPARTMENT %in% department &
+    #              RESOURCES %in% resources &
+    #              PROVIDER %in% provider)
+    # }
+    # 
+    # 
+    # 
+    # # data_access <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
+    # ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
+    # newpatients.ratio.dynamcis <- newpatients.ratio.dynamcis %>% 
+    #   group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
+    #   summarise(total = SUM(TOTAL_APPTS)) %>% 
+    #   collect()%>%
+    #   mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
+    #   filter(year(APPT_MADE_MONTH_YEAR) %in% year) %>%
+    #   drop_na() %>%
+    #   spread(NEW_PT3, total)%>%
+    #   replace(is.na(.), 0)
+    #   
+    # 
+    # col_index <- which(!(col_names %in% colnames(newpatients.ratio.dynamcis)))
+    # col_to_add <- col_names[col_index]
+    # 
+    # if (length(col_to_add)>0){
+    #   
+    #   newpatients.ratio.dynamcis[[col_to_add]] <- NA
+    # }
+    
+    
+    
+    ### Calculate new patient ratio by breakdown
+    # newpatients.ratio.dynamcis <- newpatients.ratio.dynamcis %>%
+    #   group_by(!!!syms(cols)) %>%
+    #   summarise(`ESTABLISHED` =sum(`ESTABLISHED`, na.rm = T), 
+    #             `NEW` = sum(`NEW`, na.rm = T))%>%
+    #   mutate(`Dynamic Target` = paste0(round(`NEW`/(`NEW`+`ESTABLISHED`), 2)*100, "%")) %>%
+    #   select(c(cols, "Dynamic Target" )) 
+    # 
+    # newpatients.ratio <- left_join(newpatients.ratio, newpatients.ratio.dynamcis, by = cols )
+    
+    
     newpatients.ratio[is.na(newpatients.ratio)] <- "0%"
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
     
     newpatients.ratio$Metrics <- "New Patient Ratio"
-    newpatients.ratio <- newpatients.ratio %>% select(cols, Metrics, everything())
+    #newpatients.ratio <- newpatients.ratio %>% select(cols, Metrics, `Dynamic Target`, everything(), Total)
+    newpatients.ratio <- newpatients.ratio %>% select(cols, Metrics, everything(), Total)
     
     #dataAll <- dataAll()
     #dataAll <- dataAll() %>% mutate(Appt.MonthYear = as.yearmon(Appt.MonthYear, "%Y-%m"))
@@ -12045,33 +12181,79 @@ ggplot(data_base,
     
    
     waitTime <- data_access %>%
-      filter(WAIT_TIME >= 0) %>% 
-      group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>% 
+      filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>% 
+      group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>% 
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
-      filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% collect() %>%
+      #filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% 
+      collect() %>%
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))
     
     
     #### Change the TRUE and FALSE to New and Established and filter our new patients and drop the New.PT3 column
-    waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == "NEW", "New","Established")
-    waitTime <- waitTime %>% filter(NEW_PT3 == "New") 
-    drop <- c("NEW_PT3")
-    waitTime = waitTime[,!(names(waitTime) %in% drop)]
+    # waitTime$NEW_PT3 <- ifelse(waitTime$NEW_PT3 == "NEW", "New","Established")
+    # waitTime <- waitTime %>% filter(NEW_PT3 == "New") 
+    # drop <- c("NEW_PT3")
+    # waitTime = waitTime[,!(names(waitTime) %in% drop)]
     
     #### Pivot the data so the months are in the columns and shows only new patient median time   
+    # waitTime <- waitTime %>%
+    #   mutate(`medWaitTime` = case_when(
+    #     `medWaitTime` <= 14 ~  cell_spec(paste0(medWaitTime," Days") , color = "green"),
+    #     `medWaitTime` > 14 ~  cell_spec(paste0(medWaitTime," Days") , color = "red")
+    #   )) %>%
+    #  
     waitTime <- waitTime %>%
-      mutate(`medWaitTime` = case_when(
-        `medWaitTime` <= 14 ~  cell_spec(paste0(medWaitTime," Days") , color = "green"),
-        `medWaitTime` > 14 ~  cell_spec(paste0(medWaitTime," Days") , color = "red")
-      )) %>%
-      
       pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
-                  values_from = medWaitTime,
-                  values_fill = "0")
+                  values_from = medWaitTime)
+    
+    total <- data_access %>%
+      filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>% 
+      group_by(!!!syms(cols)) %>% 
+      dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
+      collect() 
+    
+    waitTime <- left_join(waitTime, total, by = cols)
     
     
-    waitTime$Metrics <- "New Patient Wait Time"
-    waitTime <- waitTime %>% select(cols, Metrics, everything())
+    
+    # if(compare_filters == "CAMPUS_SPECIALTY"){
+    #   
+    #   waitTime.dynamic <- arrived.data.rows %>%
+    #     filter(CAMPUS %in% campus  & 
+    #              CAMPUS_SPECIALTY %in% specialty ) 
+    #   
+    # }
+    # if(compare_filters == "DEPARTMENT"){
+    #   waitTime.dynamic <- arrived.data.rows %>%
+    #     filter(CAMPUS %in% campus  & 
+    #              CAMPUS_SPECIALTY %in% specialty &
+    #              DEPARTMENT %in% department )
+    # }
+    # if(compare_filters == "PROVIDER"){
+    #   waitTime.dynamic <- arrived.data.rows %>%
+    #     filter(CAMPUS %in% campus  &
+    #              CAMPUS_SPECIALTY %in% specialty &
+    #              DEPARTMENT %in% department &
+    #              RESOURCES %in% resources &
+    #              PROVIDER %in% provider)
+    # }
+    # 
+    # 
+    # waitTime.dynamic <- waitTime.dynamic %>%
+    #   filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>% 
+    #   collect() %>%
+    #   mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
+    #   filter(year(APPT_MADE_MONTH_YEAR) %in% year) %>%
+    #   group_by(!!!syms(cols)) %>% 
+    #   dplyr::summarise(`Dynamic Target` = ceiling(0.90* median(WAIT_TIME))) 
+    # 
+    # 
+    # waitTime <- left_join(waitTime, waitTime.dynamic, by= cols)
+ 
+    waitTime$Metrics <- "New Patient Wait Time (Days)"
+    #waitTime <- waitTime %>% select(cols, Metrics, `Dynamic Target`, everything(), Total)
+    waitTime <- waitTime %>% select(cols, Metrics, everything(), Total)
+   
     
     
    
@@ -12143,40 +12325,103 @@ print("10")
     
 
 
-     noShow_perc <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+     data_noShow <- dataArrivedNoShow() %>%
+       filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))%>%
+       mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
 
-# noShow_perc <- arrivedNoShow.data.rows %>%
-#   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
-#   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
-
-
-     noShow_perc <- noShow_perc %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
-
-
+     # data_noShow  <- arrivedNoShow.data.rows %>%
+     #   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
+     #    filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))%>%
+     #  mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
 
 
-    noShow_perc <- noShow_perc %>%
+  noShow_perc <-  data_noShow %>%
   group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
-  dplyr::summarise(Total = n()) %>% collect()
+  dplyr::summarise(Total = n()) %>% collect() %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total)
 
-  noShow_perc <- noShow_perc %>% pivot_wider(names_from = APPT_STATUS, values_from = Total)
+  noShow_perc[is.na(noShow_perc)] <- 0
 
-noShow_perc[is.na(noShow_perc)] <- 0
-
-noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+  noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
   mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))
 
 
 
-noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
+ noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
+ year <- max(year(noShow_perc$APPT_MONTH_YEAR))-1
+ 
+ noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
+   pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+   ungroup()
+ 
+# added total no-show %
+ total <-  data_noShow %>%
+   group_by(!!!syms(cols), APPT_STATUS) %>%
+   dplyr::summarise(Total = n()) %>%
+   collect()%>%
+   pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
+   replace(is.na(.), 0)%>%
+   group_by(!!!syms(cols)) %>%
+   mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+   select(-c(`No Show`,Arrived))
+ 
+   noShow_perc <- left_join(noShow_perc, total, by = cols )
+ 
+ 
+ # ## Added dynamic no-shows
+ # if(compare_filters == "CAMPUS_SPECIALTY"){
+ #   
+ #   dynamic_noshow <- arrivedNoShow.data.rows %>%
+ #     filter(CAMPUS %in% campus  & 
+ #              APPT_YEAR %in% year &
+ #              CAMPUS_SPECIALTY %in% specialty ) 
+ #   
+ # }
+ # if(compare_filters == "DEPARTMENT"){
+ #   dynamic_noshow <- arrivedNoShow.data.rows %>%
+ #     filter(CAMPUS %in% campus  & 
+ #              APPT_YEAR %in% year &
+ #              CAMPUS_SPECIALTY %in% specialty &
+ #              DEPARTMENT %in% department )
+ # }
+ # if(compare_filters == "PROVIDER"){
+ #   dynamic_noshow <- arrivedNoShow.data.rows %>%
+ #     filter(CAMPUS %in% campus  &
+ #              APPT_YEAR %in% year &
+ #              CAMPUS_SPECIALTY %in% specialty &
+ #              DEPARTMENT %in% department &
+ #              RESOURCES %in% resources &
+ #              PROVIDER %in% provider)
+ # }
+ # 
+ # 
+ #   
+ # dynamic_noshow  <- dynamic_noshow %>%
+ #   #filter(CAMPUS %in% "MSUS"  & CAMPUS_SPECIALTY %in% "Allergy")%>%
+ #   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+ #   mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show")) %>%
+ #   group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+ #   dplyr::summarise(Total = n()) %>% 
+ #   collect() %>% 
+ #   pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
+ #   replace(is.na(.), 0) %>%
+ #   mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m")) %>%
+ #   #filter(year(APPT_MONTH_YEAR) == year)%>%
+ #   group_by(!!!syms(cols)) %>%
+ #   summarise(Arrived =sum(Arrived, na.rm = T), 
+ #             `No Show` = sum(`No Show`, na.rm = T))%>%
+ #   mutate(`Dynamic Target` = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+ #   select(-`No Show`,-Arrived)
+ # 
+ #   
+ #   noShow_perc <- left_join(noShow_perc, dynamic_noshow, by = cols )
+   
+  
+   noShow_perc[is.na(noShow_perc)] <- "0%"
 
-noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
-  pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
-  ungroup()
-
-
-noShow_perc$Metrics <- "No Show Rate"
-noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, everything())
+ noShow_perc$Metrics <- "No Show Rate"
+ #noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, `Dynamic Target`, everything(), Total)
+ noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, everything(), Total)
 
 print("11")
 
@@ -12210,15 +12455,93 @@ percent_within_14_days <- join_data %>%
 
 
 percent_within_14_days$APPT_MADE_MONTH_YEAR <- as.yearmon(percent_within_14_days$APPT_MADE_MONTH_YEAR, "%Y-%m")
-
 percent_within_14_days <- percent_within_14_days %>% 
   pivot_wider(names_from = APPT_MADE_MONTH_YEAR, values_from = percent) %>%
   ungroup()
 
 
-percent_within_14_days$Metrics <- "Percent of New Patients Scheduled Within 14 Days"
-percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metrics, everything())
+# Added total
+total_wait <- data %>%
+  filter(WAIT_TIME >= 0) %>%
+  filter(NEW_PT2 == "NEW") %>%
+  group_by(!!!syms(cols)) %>%
+  dplyr::summarise(total_all = n()) %>%
+  collect()
 
+total_14_days <- data %>%
+  filter(WAIT_TIME >= 0, 
+         WAIT_TIME < 14.0001, 
+         NEW_PT2 == "NEW") %>%
+  group_by(!!!syms(cols)) %>%
+  dplyr::summarise(total = n()) %>%
+  collect()
+
+total <- inner_join(total_wait, total_14_days)
+
+total[is.na(total)] <- 0
+
+total <- total %>% 
+  group_by(!!!syms(cols)) %>%
+  summarise(Total = paste0(round((total/total_all),2)*100, "%"))
+
+percent_within_14_days <- left_join(percent_within_14_days, total, by= cols)
+
+
+# # Added dynamic 
+# if(compare_filters == "CAMPUS_SPECIALTY"){
+#   
+#   data.dynamcis <- historical.data %>%
+#     filter(CAMPUS %in% campus  & 
+#              CAMPUS_SPECIALTY %in% specialty ) 
+#   
+# }
+# if(compare_filters == "DEPARTMENT"){
+#   data.dynamcis <- historical.data %>%
+#     filter(CAMPUS %in% campus  & 
+#              CAMPUS_SPECIALTY %in% specialty &
+#              DEPARTMENT %in% department )
+# }
+# if(compare_filters == "PROVIDER"){
+#   data.dynamcis <- historical.data %>%
+#     filter(CAMPUS %in% campus  &
+#              CAMPUS_SPECIALTY %in% specialty &
+#              DEPARTMENT %in% department &
+#              RESOURCES %in% resources &
+#              PROVIDER %in% provider)
+# }
+# 
+# 
+# waitTime.dynamic <- data.dynamcis %>%
+#   filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+#   collect()%>%
+#   mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
+#   filter(year(APPT_MADE_MONTH_YEAR) %in% year) %>%
+#   group_by(!!!syms(cols)) %>%
+#   dplyr::summarise(total_all = n()) 
+# 
+# waitTime_within_14_days.dynamic <- data.dynamcis %>%
+#   filter(WAIT_TIME >= 0, 
+#          WAIT_TIME < 14.0001, 
+#          NEW_PT2 == "NEW") %>%
+#   collect()%>%
+#   mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
+#   filter(year(APPT_MADE_MONTH_YEAR) %in% year) %>%
+#   group_by(!!!syms(cols)) %>%
+#   dplyr::summarise(total = n())
+# 
+# percent_within_14_days.dynamics <- inner_join(waitTime.dynamic, waitTime_within_14_days.dynamic)
+# 
+# percent_within_14_days.dynamics[is.na(percent_within_14_days.dynamics)] <- 0
+# 
+# percent_within_14_days.dynamics <- percent_within_14_days.dynamics %>% 
+#   group_by(!!!syms(cols)) %>%
+#   summarise(`Dynamic Target` = paste0(round((total/total_all),2)*100, "%"))
+# 
+# 
+# percent_within_14_days <- left_join(percent_within_14_days, percent_within_14_days.dynamics, by = cols)
+percent_within_14_days$Metrics <- "Percent of New Patients Scheduled Within 14 Days"
+#percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metrics, `Dynamic Target`, everything(), Total)
+percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metrics, everything(), Total)
 
 
 
@@ -12228,44 +12551,56 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     opt_table <- plyr:: rbind.fill(volume, newpatients.ratio, waitTime, noShow_perc, percent_within_14_days )  
 
     opt_table[is.na(opt_table)] <- 0
+    
 
     i1 <- as.yearmon(names(opt_table))
     opt_table <- opt_table[order(i1)]
     
-   print("11")
+    print("11")
     
-    # months_df <-  opt_table[,!(names( opt_table) %in% c(cols, "Metrics"))]
+    # months_df <-  opt_table[,!(names( opt_table) %in% c(cols, "Metrics", "Dynamic Target"))]
+
     # months <- order(as.yearmon(colnames(months_df), "%b %Y"))
     # order_months <- months_df[months]
     # 
     # 
     # 
     # 
-    # index <- months+length(cols)+1
+    # index <- months+length(cols)+2
     # #index <- c(1:length(cols_name),index,length(opt_table))
-    # index <- c(1:length(cols)+1, index)
+    # index <- c(1:length(cols)+2, index)
     # index <- sort(index, decreasing = F)
-    # 
-    # opt_table <- opt_table[index]
-    opt_table <- opt_table %>% select(cols, "Metrics", everything())
+
+    #opt_table <- opt_table[index]
+    #opt_table <- opt_table %>% select(cols, "Metrics", "Dynamic Target", everything(), Total)
+    opt_table <- opt_table %>% select(cols, "Metrics", everything(), Total)
     
-    opt_table <- opt_table %>% add_column(Target = "TBD", .after = "Metrics") 
-    opt_table <- opt_table %>% mutate(Target= case_when(Metrics=="Booked Rate"~ ">= 95%", 
+    opt_table <- opt_table %>% add_column(`System Target` = "TBD", .after = "Metrics") 
+    opt_table <- opt_table %>% mutate(`System Target`= case_when(Metrics=="Booked Rate"~ ">= 95%", 
                                                         Metrics=="Filled Rate"~ ">= 85%",
-                                                        Metrics=="New Patient Wait Time"~ "14 Days",
+                                                        Metrics=="New Patient Wait Time (Days)"~ "14",
                                                         Metrics=="Average Daily Volume"~ "Variable",
+                                                        Metrics == "New Patient Ratio" ~ "15%",
+                                                        Metrics == "No Show Rate" ~ "10%",
+                                                        Metrics == "Percent of New Patients Scheduled Within 14 Days" ~ "60%",
                                                         TRUE ~ "TBD"))
     
-   print("12") 
+                                                             
+    
+   
+    print("12") 
     time_2 <- Sys.time()
     
     print(time_2 - time_1)
     metric_order <- c("Average Daily Volume",
-                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time", "No Show Rate", "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
+                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time (Days)", "No Show Rate", "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
   
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
     
+     
+    
+   
 
  # opt_table <- as.datatable(formattable(opt_table, list(
  #    `Jan 2021` = formatter("span",
@@ -12304,7 +12639,6 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
   
   output$opt_comparison_tb_kable <- function(){
     data <- schedule_opt()
-    #data <- opt_table
     
     compare_filters <- input$compare_filters_opt
     
@@ -12334,39 +12668,51 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
   
     
-    col_names <- c(cols, "Metrics", "Target",                   
+    # col_names <- c(cols, "Metrics", "System Target", "Dynamic Target",                  
+    #                colnames(data)[(length(cols)+4):length(data)])
+    
+    col_names <- c(cols, "Metrics", "System Target",                 
                    colnames(data)[(length(cols)+3):length(data)])
 
     header_above <- c("title" = length(data))
     names(header_above) <- paste0("Schedule Optimization by ", name_1)
     
-    month_columns <- colnames(data)[(length(cols)+3):length(data)]
+    month_columns <- colnames(data)[(length(cols)+4):length(data)-1]
     
     options(knitr.kable.NA = '-')
     
     pack_rows_name <- table(pack_rows_name)
     border_column <- length(cols)+2 
     
-    # data %>%
-    #   kable(booktabs = T,escape = F, #align = c(rep("r",3),rep("c",length(metrics_dept_output)-4)),
-    #         col.names = col_names) %>%
-    #   kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
-    #   add_header_above(header_above, background = "white", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
-    #   collapse_rows(columns = 1:3, valign = "top") %>%
-    #   row_spec(0,  background = "#212070", color = "white")
-      
+    border_column <- length(cols)+2 
+    
     data %>%
       kable(booktabs = T,escape = F, #align = c(rep("r",3),rep("c",length(metrics_dept_output)-4)),
             col.names = col_names) %>%
       kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
       add_header_above(header_above, background = "white", color = "black", font_size = 20, bold = T, align = "c", line = F) %>%
       row_spec(0,  background = "#212070", color = "white")%>%
-      column_spec(1, border_left = "2px solid #DDDEDD", border_right = FALSE)%>%
-      column_spec(border_column, border_left = FALSE, border_right = "2px solid #DDDEDD" )%>%
-      column_spec(length(data), border_left = "2px solid #DDDEDD", border_right = "2px solid #DDDEDD" )%>%
+      column_spec(1, border_left = "2px solid #dddedd", border_right = FALSE)%>%
+      column_spec(border_column, border_left = FALSE, border_right = "2px solid #dddedd" )%>%
+      column_spec(length(data), border_left = "2px solid #dddedd", border_right = "2px solid #dddedd" )%>%
       #row_spec(nrow(data), hline_after = TRUE, extra_css = "border-bottom: 1px solid;")%>%
       collapse_rows(columns = 1:3, valign = "top")
+      
+   
+      
+    
  
+    
+    # data %>%
+    #   kable("html", booktabs = T,escape = F) %>%
+    #   collapse_rows(columns = "Department", valign = "top")
+    
+    
+    
+    # data_test %>%
+    #     kable(booktabs = T,escape = F) %>%
+    #   kableExtra::collapse_rows(columns = 4:5, valign = "top")
+
   }
   
   output[["opt_comparison_tb"]] <- renderDT({
