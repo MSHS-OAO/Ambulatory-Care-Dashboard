@@ -1216,3 +1216,5 @@ header$children[[2]]$children[[1]] <-  tags$a(href='https://peak.mountsinai.org/
 
 
 print("ui end")
+
+bin_mapping <- tbl(poolcon, "AMBULATORY_BIN_MAPPING") %>% collect() %>% mutate(BIN_CYCLE = as.numeric(BIN_CYCLE)) 
