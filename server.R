@@ -1104,6 +1104,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
+  
   dataCanceledBumpedKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -3699,7 +3700,7 @@ server <- function(input, output, session) {
     #   summarise(total = n()) %>%
       # `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
     
-    data <- dataAll()
+    data <- dataAllKpi()
     
     #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     
