@@ -63,7 +63,7 @@ ui <- dashboardPage(
                          menuSubItem("No Shows/Overbooks", tabName = "noshows"),
                          menuSubItem("Bumps/Cancellations", tabName = "cancellations")
                 ),
-                menuItem("Booked/Filled Rate", tabName = "slotManagement", icon = icon("tachometer-alt")),
+                #menuItem("Booked/Filled Rate", tabName = "slotManagement", icon = icon("tachometer-alt")),
                 menuItem("Utilization", tabName = "utilization", icon = icon("percent")),
                 menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
                 
