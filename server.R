@@ -3941,6 +3941,9 @@ server <- function(input, output, session) {
     
     # data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"), 2))
     data <- data %>% filter(NEW_PT2 == "NEW") %>% filter(WAIT_TIME >= 0)
+    data_new_pt_test <- data %>% head(n = 1L) %>% collect()
+    
+    validate(need(nrow(data_new_pt_test) != 0, "There is no New Patient Data for the selected filters."))
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
@@ -3951,7 +3954,8 @@ server <- function(input, output, session) {
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days",
                title = "Average Wait Time to New Appointment by Year",
-               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+               )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
