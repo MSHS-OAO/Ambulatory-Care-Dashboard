@@ -3701,6 +3701,7 @@ server <- function(input, output, session) {
       # `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
     
     data <- dataAllKpi()
+    # data_correct_ouptut <<- data
     
     #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     
@@ -3722,6 +3723,16 @@ server <- function(input, output, session) {
     
     statusDataYear <- statusData %>% group_by(Year,Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataYear <- reshape2::dcast(statusDataYear, Year ~ Status)
+    column_names <- c("Bumped", "Arrived", "Canceled", "No Show", "Rescheduled")
+    if(!identical(which(column_names %in% colnames(statusDataYear) == FALSE), integer(0))) { 
+      
+        index <- which(column_names %in% colnames(statusDataYear) == FALSE)
+        columns_missing <- column_names[c(index)]
+        statusDataYear[,columns_missing] <- NA
+      }
+
+    
+    
     statusDataYear[is.na(statusDataYear)] <- 0
     statusDataYear <- statusDataYear %>%
       mutate(Cancelled = Canceled / rowSums(statusDataYear[,2:6])) %>%
@@ -3733,6 +3744,12 @@ server <- function(input, output, session) {
     
     statusDataQuarter <- statusData %>% group_by(Year, Quarter, Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataQuarter <- reshape2::dcast(statusDataQuarter, Year + Quarter ~ Status)
+    if(!identical(which(column_names %in% colnames(statusDataQuarter) == FALSE), integer(0))) { 
+      
+      index <- which(column_names %in% colnames(statusDataQuarter) == FALSE)
+      columns_missing <- column_names[c(index)]
+      statusDataQuarter[,columns_missing] <- NA
+    }
     statusDataQuarter[is.na(statusDataQuarter)] <- 0
     statusDataQuarter <- statusDataQuarter %>%
       mutate(Cancelled = Canceled / rowSums(statusDataQuarter[,3:7])) %>%
@@ -3744,6 +3761,12 @@ server <- function(input, output, session) {
     
     statusDataMonth <- statusData %>% group_by(Year, Month, YearMonth, Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataMonth <- reshape2::dcast(statusDataMonth, Year + Month + YearMonth ~ Status)
+    if(!identical(which(column_names %in% colnames(statusDataMonth) == FALSE), integer(0))) { 
+      
+      index <- which(column_names %in% colnames(statusDataMonth) == FALSE)
+      columns_missing <- column_names[c(index)]
+      statusDataMonth[,columns_missing] <- NA
+    }
     statusDataMonth[is.na(statusDataMonth)] <- 0
     statusDataMonth <- statusDataMonth %>%
       mutate(Cancelled = Canceled / rowSums(statusDataMonth[,4:length(statusDataMonth)])) %>%
@@ -3755,6 +3778,12 @@ server <- function(input, output, session) {
     
     statusDataDay <- statusData %>% group_by(Year, Date, DateYear, Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataDay <- reshape2::dcast(statusDataDay, Year + Date + DateYear ~ Status)
+    if(!identical(which(column_names %in% colnames(statusDataDay) == FALSE), integer(0))) { 
+      
+      index <- which(column_names %in% colnames(statusDataDay) == FALSE)
+      columns_missing <- column_names[c(index)]
+      statusDataDay[,columns_missing] <- NA
+    }
     statusDataDay[is.na(statusDataDay)] <- 0
     statusDataDay <- statusDataDay %>%
       mutate(Cancelled = Canceled / rowSums(statusDataDay[,4:length(statusDataDay)])) %>%
