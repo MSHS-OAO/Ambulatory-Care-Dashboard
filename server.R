@@ -3932,10 +3932,26 @@ server <- function(input, output, session) {
   })
   
   
+  dataAllKpi_access <- eventReactive(list(input$update_filters),{
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_access(historical.data,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
+  })
+  
   # Access KPI ========================================================================
   ## Avg New Wait Time
   output$kpiNewWaitTimeGraph <- renderPlot({
-    data <- dataAllKpi() 
+    data <- dataAllKpi_access() 
     # data <- kpi.all.data %>% filter(Campus == "MSUS")
     
     
