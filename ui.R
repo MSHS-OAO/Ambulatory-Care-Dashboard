@@ -76,19 +76,11 @@ ui <- dashboardPage(
                  background: rgba(255, 255, 255, 0);
                  color: #FFFFFF"),
                 tags$hr(style="border-color: #FFFFFF; margin-top: 10px;"),
-                menuItem("Comparison", tabName = "Comparison"),
+                menuItem("Comparison", tabName = "Comparison_Main",
+                         menuSubItem("By Metric", tabName = "Comparison"),
+                         menuSubItem("Metrics Combined", tabName = "optimization" )),
                 
-                menuItem("Trending", tabName = "KPIs"),
-                br(),
-                tags$div("Operational Improvement",
-                         style= "
-                 font-size: 16px;
-                 text-align: center;
-                 margin: 0;
-                 background: rgba(255, 255, 255, 0);
-                 color: #FFFFFF"),
-                tags$hr(style="border-color: #FFFFFF; margin-top: 10px;"),
-                menuItem("Schedule Optimization", tabName = "optimization")
+                menuItem("Trending", tabName = "KPIs")
                 
                 
     ) # Close sidebarMenu
