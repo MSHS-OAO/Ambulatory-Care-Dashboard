@@ -11931,6 +11931,11 @@ ggplot(data_base,
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
+  output$practiceName_appt_length_breakdown <- renderText({
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
+  
   dataArrived_test_schedule <- eventReactive(list(input$update_filters),{
     
     validate(

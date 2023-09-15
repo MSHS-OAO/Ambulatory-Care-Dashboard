@@ -78,7 +78,9 @@ ui <- dashboardPage(
                 tags$hr(style="border-color: #FFFFFF; margin-top: 10px;"),
                 menuItem("Comparison", tabName = "Comparison_Main",
                          menuSubItem("By Metric", tabName = "Comparison"),
-                         menuSubItem("Metrics Combined", tabName = "optimization" )),
+                         menuSubItem("Metrics Combined", tabName = "optimization" ),
+                         menuSubItem("New Tab", tabName = "appt_length_breakdown")
+                         ),
                 
                 menuItem("Trending", tabName = "KPIs")
                 
@@ -1447,6 +1449,20 @@ ui <- dashboardPage(
                        )
                 ) # close column
                 
+        ), # close tabItem
+        
+        tabItem(tabName = "appt_length_breakdown",
+                column(11,
+                       #profvis_ui("profiler"),
+                       div("Insert Title Here", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       textOutput("practiceName_appt_length_breakdown"),
+                       #textOutput("kpis_mem"),
+                       tags$head(tags$style("#practiceName_appt_length_breakdown{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                       
+                       
+          
+                ) # close column
+                
         ) # close tabItem
         
         
@@ -1459,7 +1475,7 @@ ui <- dashboardPage(
       conditionalPanel(
         condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='cancellations' | 
-      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data' | input.sbm == 'Comparison'| input.sbm == 'optimization'",
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data' | input.sbm == 'Comparison'| input.sbm == 'optimization' | input.sbm == 'appt_length_breakdown'",
         
         # Formatting Buttons
         tags$head(tags$style(HTML("#dropdownboxplot {color: #fff;}"))),
@@ -1515,7 +1531,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-        input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'",
+        input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    br(),
                    actionButton("update_filters", "CLICK TO UPDATE", width = "80%"),
                    br(),
@@ -1651,7 +1667,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'",
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Date Range:",
                      width = 12, 
