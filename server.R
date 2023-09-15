@@ -1104,6 +1104,7 @@ server <- function(input, output, session) {
                    input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
   })
   
+  
   dataCanceledBumpedKpi <- eventReactive(list(input$update_filters),{
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
@@ -3699,7 +3700,8 @@ server <- function(input, output, session) {
     #   summarise(total = n()) %>%
       # `colnames<-` (c("Year","Quarter","Month","Date","Status","YearMonth","DateYear","Count"))
     
-    data <- dataAll()
+    data <- dataAllKpi()
+    # data_correct_ouptut <<- data
     
     #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     
@@ -3721,6 +3723,16 @@ server <- function(input, output, session) {
     
     statusDataYear <- statusData %>% group_by(Year,Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataYear <- reshape2::dcast(statusDataYear, Year ~ Status)
+    column_names <- c("Bumped", "Arrived", "Canceled", "No Show", "Rescheduled")
+    if(!identical(which(column_names %in% colnames(statusDataYear) == FALSE), integer(0))) { 
+      
+        index <- which(column_names %in% colnames(statusDataYear) == FALSE)
+        columns_missing <- column_names[c(index)]
+        statusDataYear[,columns_missing] <- NA
+      }
+
+    
+    
     statusDataYear[is.na(statusDataYear)] <- 0
     statusDataYear <- statusDataYear %>%
       mutate(Cancelled = Canceled / rowSums(statusDataYear[,2:6])) %>%
@@ -3732,6 +3744,12 @@ server <- function(input, output, session) {
     
     statusDataQuarter <- statusData %>% group_by(Year, Quarter, Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataQuarter <- reshape2::dcast(statusDataQuarter, Year + Quarter ~ Status)
+    if(!identical(which(column_names %in% colnames(statusDataQuarter) == FALSE), integer(0))) { 
+      
+      index <- which(column_names %in% colnames(statusDataQuarter) == FALSE)
+      columns_missing <- column_names[c(index)]
+      statusDataQuarter[,columns_missing] <- NA
+    }
     statusDataQuarter[is.na(statusDataQuarter)] <- 0
     statusDataQuarter <- statusDataQuarter %>%
       mutate(Cancelled = Canceled / rowSums(statusDataQuarter[,3:7])) %>%
@@ -3743,6 +3761,12 @@ server <- function(input, output, session) {
     
     statusDataMonth <- statusData %>% group_by(Year, Month, YearMonth, Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataMonth <- reshape2::dcast(statusDataMonth, Year + Month + YearMonth ~ Status)
+    if(!identical(which(column_names %in% colnames(statusDataMonth) == FALSE), integer(0))) { 
+      
+      index <- which(column_names %in% colnames(statusDataMonth) == FALSE)
+      columns_missing <- column_names[c(index)]
+      statusDataMonth[,columns_missing] <- NA
+    }
     statusDataMonth[is.na(statusDataMonth)] <- 0
     statusDataMonth <- statusDataMonth %>%
       mutate(Cancelled = Canceled / rowSums(statusDataMonth[,4:length(statusDataMonth)])) %>%
@@ -3754,6 +3778,12 @@ server <- function(input, output, session) {
     
     statusDataDay <- statusData %>% group_by(Year, Date, DateYear, Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataDay <- reshape2::dcast(statusDataDay, Year + Date + DateYear ~ Status)
+    if(!identical(which(column_names %in% colnames(statusDataDay) == FALSE), integer(0))) { 
+      
+      index <- which(column_names %in% colnames(statusDataDay) == FALSE)
+      columns_missing <- column_names[c(index)]
+      statusDataDay[,columns_missing] <- NA
+    }
     statusDataDay[is.na(statusDataDay)] <- 0
     statusDataDay <- statusDataDay %>%
       mutate(Cancelled = Canceled / rowSums(statusDataDay[,4:length(statusDataDay)])) %>%
@@ -3902,15 +3932,34 @@ server <- function(input, output, session) {
   })
   
   
+  dataAllKpi_access <- eventReactive(list(input$update_filters),{
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters_access(historical.data,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRangeKpi[1], input$dateRangeKpi[2], input$daysOfWeek, input$excludeHolidays)
+  })
+  
   # Access KPI ========================================================================
   ## Avg New Wait Time
   output$kpiNewWaitTimeGraph <- renderPlot({
-    data <- dataAllKpi() 
+    data <- dataAllKpi_access() 
     # data <- kpi.all.data %>% filter(Campus == "MSUS")
     
     
     # data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"), 2))
     data <- data %>% filter(NEW_PT2 == "NEW") %>% filter(WAIT_TIME >= 0)
+    data_new_pt_test <- data %>% head(n = 1L) %>% collect()
+    
+    validate(need(nrow(data_new_pt_test) != 0, "There is no New Patient Data for the selected filters."))
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
@@ -3921,7 +3970,8 @@ server <- function(input, output, session) {
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days",
                title = "Average Wait Time to New Appointment by Year",
-               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+               )+
           scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
           theme_new_line()+
           theme_bw()+
