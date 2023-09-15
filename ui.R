@@ -1317,7 +1317,7 @@ ui <- dashboardPage(
                                 radioButtons("breakdown_filters", label = h4("Breakdown by:"),
                                              choices = list("Visit Method" = "VISIT_METHOD", "Visit Type" = "APPT_TYPE",  "New vs. Established Patients*" = "NEW_PT3"),
                                              selected = "VISIT_METHOD"),
-                                h6("*New Patients defined by CPT codes for the first four tabs and by the scheduled data for the last tab.")
+                                h6("*New Patients defined by CPT codes for the first three tabs and by the scheduled data for the last two tabs.")
                                 )
                               
                        ),
@@ -1334,6 +1334,15 @@ ui <- dashboardPage(
                                                 hr(),
                                                 h3(uiOutput(("vol_month_title"))),
                                                 DTOutput("volume_comparison_tb_month") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c")
+                                              )
+                                     ),
+                                     tabPanel("No Show Rate",
+                                              boxPlus(
+                                                title = "No Show Rate", width = 12, status = "primary", 
+                                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                                h3(uiOutput(("noshow_rate_month_title"))),
+                                                DTOutput("new_no_show_rate_monthly") %>% 
                                                   withSpinner(type = 5, color = "#d80b8c")
                                               )
                                      ),
@@ -1363,17 +1372,6 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")
                                               )
                                      ),
-                                     tabPanel("No Show Rate",
-                                              boxPlus(
-                                                title = "No Show Rate", width = 12, status = "primary", 
-                                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                                h3(uiOutput(("noshow_rate_month_title"))),
-                                                DTOutput("new_no_show_rate_monthly") %>% 
-                                                  withSpinner(type = 5, color = "#d80b8c")
-                                              )
-                                     ),
-                                     
-                                     
                                      tabPanel("Percent of New Patients Scheduled Within 14 Days",
                                               boxPlus(
                                                 title = "Percent of New Patients Scheduled Within 14 Days", width = 12, status = "primary", 
