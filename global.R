@@ -454,7 +454,9 @@ date_format <- "YYYY-MM-DD HH24:MI:SS"
 arrived.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Arrived"))
 arrived.data.rows.summary <- ambulatory_access_tbl_summary %>% filter(APPT_STATUS %in% c("Arrived"))
 arrived.data.rows.npr <- ambulatory_access_tbl_summary_npr %>% filter(APPT_STATUS %in% c("Arrived"))
-arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS < 1 ))
+arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled") & LEAD_DAYS < 1 ))
+incomplete.appt.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")) | (APPT_STATUS %in% c("Canceled","Bumped","Rescheduled") & LEAD_DAYS < 1 ))
+
 #arrivedNoShow.data.rows <- historical.data %>% filter((APPT_STATUS %in% c("No Show", "Arrived")))
 noshow.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("No Show") | (APPT_STATUS %in% c("Canceled") & LEAD_DAYS < 1 ))
 bumped.data.rows <- historical.data %>% filter(APPT_STATUS %in% c("Bumped"))

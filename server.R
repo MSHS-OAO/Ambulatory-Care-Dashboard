@@ -3239,13 +3239,31 @@ server <- function(input, output, session) {
     
   })
   
+  
+  dataIncompleteAppt<- eventReactive(list(input$update_filters),{
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters(incomplete.appt.data.rows,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName, 
+                   input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
+    
+  })
+  
   # Average Daily Incomplete Appts
   output$provIncompleteAppts <- renderValueBox({
     
     valueBox(
       #prettyNum(round(nrow(dataNoShow() %>% filter(Appt.Status %in% c("No Show"))) / length(unique(dataArrived()$Appt.DateYear)),0), big.mark = ","),
-      paste0(prettyNum(round(nrow(dataArrivedNoShow() %>% filter(Appt.Status != "Arrived")) / 
-                               nrow(dataArrivedNoShow()), 2)*100, big.mark = ","),"%"),
+      paste0(prettyNum(round(nrow(dataIncompleteAppt() %>% filter(Appt.Status != "Arrived")) / 
+                               nrow(dataIncompleteAppt()), 2)*100, big.mark = ","),"%"),
       subtitle = tags$p("% of Incomplete Appointments", style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
