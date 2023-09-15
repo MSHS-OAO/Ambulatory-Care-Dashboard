@@ -1459,6 +1459,22 @@ ui <- dashboardPage(
                        #textOutput("kpis_mem"),
                        tags$head(tags$style("#practiceName_appt_length_breakdown{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                        
+                       column(12,
+                              
+                              box(title = NULL, id = "tabset18", width = "100%", type = 'pills',      
+                                  boxPlus(
+                                    title = "Appointment Length Breakdown", width = 12, status = "primary", 
+                                    solidHeader = TRUE, collapsible = TRUE, closable = TRUE, 
+                                    tableOutput("appt_length_breakdown_tb_kable") %>%
+                                      withSpinner(type = 5, color = "#d80b8c")
+                                    #hr()
+                                    
+                                    
+                                  )
+                                  
+                                  
+                              )
+                              )
                        
           
                 ) # close column
@@ -1783,7 +1799,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='KPIs' | input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='newPatients' | 
-        input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2'",
+        input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Holidays to Exclude:",
                      width = 12,
@@ -1813,7 +1829,7 @@ ui <- dashboardPage(
       conditionalPanel(
         condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2'",
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'appt_length_breakdown'",
         
         # br(),
         # dropdown(
