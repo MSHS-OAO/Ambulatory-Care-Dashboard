@@ -13198,7 +13198,6 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
   
   output$appt_length_breakdown_tb_kable <- function() {
     
-    data_testing <<- dataAll()
     data <- dataAll()
     
     data <- data %>% select(CAMPUS, CAMPUS_SPECIALTY, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
