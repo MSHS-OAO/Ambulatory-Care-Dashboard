@@ -78,9 +78,10 @@ ui <- dashboardPage(
                 tags$hr(style="border-color: #FFFFFF; margin-top: 10px;"),
                 menuItem("Comparison", tabName = "Comparison_Main",
                          menuSubItem("By Metric", tabName = "Comparison"),
-                         menuSubItem("Metrics Combined", tabName = "optimization" ),
-                         menuSubItem("New Tab", tabName = "appt_length_breakdown")
+                         menuSubItem("Metrics Combined", tabName = "optimization" )
                          ),
+                menuItem("Template Optimization", tabName = "template_opt",
+                         menuSubItem("Visit Types", tabName = "appt_length_breakdown")),
                 
                 menuItem("Trending", tabName = "KPIs")
                 
@@ -1454,7 +1455,7 @@ ui <- dashboardPage(
         tabItem(tabName = "appt_length_breakdown",
                 column(11,
                        #profvis_ui("profiler"),
-                       div("Insert Title Here", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Template Optimization: Visit Types", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        textOutput("practiceName_appt_length_breakdown"),
                        #textOutput("kpis_mem"),
                        tags$head(tags$style("#practiceName_appt_length_breakdown{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),

@@ -13198,7 +13198,10 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
   
   output$appt_length_breakdown_tb_kable <- function() {
     
-    data <- dataAll() %>% select(CAMPUS, CAMPUS_SPECIALTY, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
+    data_testing <<- dataAll()
+    data <- dataAll()
+    
+    data <- data %>% select(CAMPUS, CAMPUS_SPECIALTY, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
       group_by(CAMPUS, CAMPUS_SPECIALTY, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
       summarise(total_appt = n()) %>% collect() %>%
       pivot_wider(names_from = APPT_DUR, values_from = total_appt, names_sort = TRUE) %>%
@@ -13207,14 +13210,17 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
              Specialty = CAMPUS_SPECIALTY,
              `Patient Status` = NEW_PT2,
              `Visit Type` = APPT_TYPE) %>%
-      mutate(`Patient Status` = ifelse(`Patient Status` == "NEW", "New", "Established"))
+      mutate(`Patient Status` = ifelse(`Patient Status` == "NEW", "New", "Established")) %>%
+      ungroup()
+    
+    data <- data %>% mutate(Total = rowSums(data[,5:length(data)], na.rm = TRUE))
     
     data %>%
       kable(booktabs = T,escape = F) %>%
       kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
       row_spec(0,  background = "#212070", color = "white")%>%
       column_spec(1, border_left = "2px solid #dddedd", border_right = FALSE)%>%
-      #column_spec(length(data), border_left = "2px solid #dddedd", border_right = "2px solid #dddedd" )%>%
+      column_spec(length(data), border_left = "2px solid #dddedd", border_right = "2px solid #dddedd" )%>%
       column_spec(4, border_left = "2px solid #dddedd")%>%
       collapse_rows(columns = 1:3, valign = "top")
     
