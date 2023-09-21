@@ -4622,8 +4622,8 @@ server <- function(input, output, session) {
   
   output$schedulingStatusSummary <- renderPlot({
     
-    data <- dataArrivedNoShow()
-    
+    data <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("No Show", "Arrived"))
+
     # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     
     # total_arrived <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>% 
@@ -4640,6 +4640,14 @@ server <- function(input, output, session) {
       group_by(APPT_STATUS) %>%
       summarise(value = ceiling(n()/length(unique(total_arrived$APPT_DATE_YEAR)))) %>%
       arrange(desc(value)) 
+    
+    data_incomplete <- dataCanceledBumpedRescheduledAll() %>% filter(LEAD_DAYS < 1) %>% select(APPT_STATUS, APPT_DATE_YEAR) %>% collect() %>%
+                        group_by(APPT_STATUS) %>%
+                        summarise(value = ceiling(n()/length(unique(total_arrived$APPT_DATE_YEAR)))) %>%
+                        arrange(desc(value)) 
+    
+    sameDay <- bind_rows(sameDay, data_incomplete)
+    
     
     
     sameDay$APPT_STATUS <- as.character(sameDay$APPT_STATUS)
