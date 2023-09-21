@@ -1285,7 +1285,7 @@ ui <- dashboardPage(
         
         tabItem(tabName = "Comparison",
                 column(11,
-                       div("Comparison", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Comparison: By Metric", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        textOutput("practiceName_vol_comp"),
                        #textOutput("kpis_mem"),
                        tags$head(tags$style("#practiceName_vol_comp{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
@@ -1409,7 +1409,7 @@ ui <- dashboardPage(
         tabItem(tabName = "optimization",
                 column(11,
                        #profvis_ui("profiler"),
-                       div("Scheduling Template Optimization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Comparison: Metrics Combined", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        textOutput("practiceName_opt_comp"),
                        #textOutput("kpis_mem"),
                        tags$head(tags$style("#practiceName_opt_comp{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
