@@ -4015,7 +4015,7 @@ server <- function(input, output, session) {
       } else if(input$kpiFreq == 3){ # Month
         data_filter <- data %>% group_by(APPT_MADE_MONTH_YEAR) %>% 
           dplyr::summarise(median = round(median(WAIT_TIME, na.rm=TRUE))) %>% collect()
-        ggplot(data_filter, aes(x=interaction(APPT_MONTH_YEAR,lex.order = TRUE), y=median,group=1)) +
+        ggplot(data_filter, aes(x=interaction(APPT_MADE_MONTH_YEAR,lex.order = TRUE), y=median,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days", 
@@ -11541,7 +11541,7 @@ ggplot(data_base,
     num_of_cols <- length(wite_time_14days())
     col_dissappear <- which(names(wite_time_14days()) %in% c("Total_YN"))
     
-    dtable <-   datatable(patient_lead(), 
+    dtable <-   datatable(wite_time_14days(), 
                           class = 'cell-border stripe',
                           rownames = FALSE,
                           extensions = c('Buttons','Scroller'),
