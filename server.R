@@ -6191,8 +6191,6 @@ server <- function(input, output, session) {
     # population.data <- dataArrivedPop()
     population.data <- dataArrivedPop()
     
-    data_testing_pop <<- population.data
-
     #population.data <- population_tbl %>% filter(CAMPUS == "MSUS", CAMPUS_SPECIALTY== "Internal Medicine")
     
     # newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
