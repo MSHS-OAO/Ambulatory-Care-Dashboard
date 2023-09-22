@@ -3981,64 +3981,64 @@ server <- function(input, output, session) {
     
     if(input$kpiTrend ==1){ # Historical Trend
       if(input$kpiFreq == 1){ #Year
-        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
-        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
-        ggplot(data_filter, aes(x=APPT_YEAR, y=mean, group=1)) +
+        data_filter <- data %>% group_by(APPT_MADE_YEAR) %>% dplyr::summarise(median = round(median(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_MADE_YEAR <- as.character(data_filter$APPT_MADE_YEAR)
+        ggplot(data_filter, aes(x=APPT_MADE_YEAR, y=median, group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days",
-               title = "Average Wait Time to New Appointment by Year",
+               title = "Median Wait Time to New Appointment by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
                )+
-          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$median)*1.2))+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2) { # Quarter
-        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>%
-          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
-        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
-        ggplot(data_filter, aes(x=interaction(APPT_YEAR,APPT_QUARTER,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(APPT_MADE_YEAR, APPT_MADE_QUARTER) %>%
+          dplyr::summarise(median = round(median(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_MADE_YEAR <- as.character(data_filter$APPT_MADE_YEAR)
+        ggplot(data_filter, aes(x=interaction(APPT_MADE_YEAR,APPT_MADE_QUARTER,lex.order = TRUE), y=median,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days",
-               title = "Average Wait Time to New Appointment by Quarter",
+               title = "Median Wait Time to New Appointment by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
-          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$median)*1.2))+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(APPT_MONTH_YEAR) %>% 
-          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
-        ggplot(data_filter, aes(x=interaction(APPT_MONTH_YEAR,lex.order = TRUE), y=mean,group=1)) +
+        data_filter <- data %>% group_by(APPT_MADE_MONTH_YEAR) %>% 
+          dplyr::summarise(median = round(median(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        ggplot(data_filter, aes(x=interaction(APPT_MONTH_YEAR,lex.order = TRUE), y=median,group=1)) +
           geom_line(color="midnightblue") +
           geom_point(color="midnightblue") +
           labs(x = NULL, y = "Days", 
-               title = "Average Wait Time to New Appointment by Month",
+               title = "Median Wait Time to New Appointment by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
-          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$median)*1.2))+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+
           geom_point(size = 3.2)
         
       } else { # Day
-        data_filter <- data %>% group_by(APPT_YEAR, APPT_DATE) %>%
-          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% collect()
-        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
-        data_filter$DateYear <- as.Date(with(data_filter, paste(APPT_YEAR, APPT_DATE,sep="-")), "%Y-%m-%d")
-        ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=mean, group=1)) +
+        data_filter <- data %>% group_by(APPT_MADE_YEAR, APPT_MADE_DATE) %>%
+          dplyr::summarise(median = round(median(WAIT_TIME, na.rm=TRUE))) %>% collect()
+        data_filter$APPT_MADE_YEAR <- as.character(data_filter$APPT_MADE_YEAR)
+        data_filter$DateYear <- as.Date(with(data_filter, paste(APPT_MADE_YEAR, APPT_MADE_DATE,sep="-")), "%Y-%m-%d")
+        ggplot(data_filter, aes(x= as.Date(DateYear,"%Y-%m-%d"), y=median, group=1)) +
           geom_line(color="midnightblue") +
           labs(x = NULL, y = "Days",
-               title = "Average Wait Time to New Appointment by Day",
+               title = "Median Wait Time to New Appointment by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
-          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$median)*1.2))+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+
@@ -4048,15 +4048,15 @@ server <- function(input, output, session) {
       }
     } else { 
       if(input$kpiFreq == 1){ # Year
-        data_filter <- data %>% group_by(APPT_YEAR) %>% dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% 
+        data_filter <- data %>% group_by(APPT_MADE_YEAR) %>% dplyr::summarise(median = round(median(WAIT_TIME, na.rm=TRUE))) %>% 
           mutate(Label = "Year") %>% collect()
-        data_filter$APPT_YEAR <- as.character(data_filter$APPT_YEAR)
-        ggplot(data_filter, aes(x=Label, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+        data_filter$APPT_MADE_YEAR <- as.character(data_filter$APPT_MADE_YEAR)
+        ggplot(data_filter, aes(x=Label, y=median, col=factor(APPT_MADE_YEAR),group=APPT_MADE_YEAR)) +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days", 
-               title = "Average Wait Time to New Appointment by Year",
+               title = "Median Wait Time to New Appointment by Year",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
-          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$median)*1.2))+
           theme_new_line()+
           theme_bw()+
           graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
@@ -4064,16 +4064,16 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 2){ # Quarter 
-        data_filter <- data %>% group_by(APPT_YEAR, APPT_QUARTER) %>% 
-          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% 
+        data_filter <- data %>% group_by(APPT_MADE_YEAR, APPT_MADE_QUARTER) %>% 
+          dplyr::summarise(median = round(median(WAIT_TIME, na.rm=TRUE))) %>% 
           mutate(Label = "Quarter") %>% collect()
-        ggplot(data_filter, aes(x=APPT_QUARTER, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+        ggplot(data_filter, aes(x=APPT_MADE_QUARTER, y=median, col=factor(APPT_MADE_YEAR),group=APPT_MADE_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days", 
-               title = "Average Wait Time to New Appointment by Quarter",
+               title = "Median Wait Time to New Appointment by Quarter",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
-          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$median)*1.2))+
           theme_new_line()+
           theme_bw()+
           graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
@@ -4081,18 +4081,18 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 3){ # Month
-        data_filter <- data %>% group_by(APPT_YEAR, APPT_MONTH) %>% 
-          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>% 
+        data_filter <- data %>% group_by(APPT_MADE_YEAR, APPT_MADE_MONTH) %>% 
+          dplyr::summarise(median = round(median(WAIT_TIME, na.rm=TRUE))) %>% 
           mutate(Label = "Month") %>% collect()
         #rename(Appt.Year = Year)
         
-        ggplot(data_filter, aes(x = factor(APPT_MONTH, level = monthOptions), y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+        ggplot(data_filter, aes(x = factor(APPT_MADE_MONTH, level = monthOptions), y=median, col=factor(APPT_MADE_YEAR),group=APPT_MADE_YEAR)) +
           geom_line() +
           geom_point(size=4, alpha=0.5) +
           labs(x = NULL, y = "Days",
-               title = "Average Wait Time to New Appointment by Month",
+               title = "Median Wait Time to New Appointment by Month",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
-          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$median)*1.2))+
           theme_new_line()+
           theme_bw()+
           graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
@@ -4101,15 +4101,15 @@ server <- function(input, output, session) {
           geom_point(size = 3.2)
         
       } else if(input$kpiFreq == 4){ # Day
-        data_filter <- data %>% group_by(APPT_DATE_YEAR, APPT_YEAR) %>%
-          dplyr::summarise(mean = round(mean(WAIT_TIME, na.rm=TRUE))) %>%
-          mutate(Label = "Date") %>% collect() %>% mutate(APPT_DATE_YEAR = as.Date(format(APPT_DATE_YEAR, "%Y-%m-%d"), "%Y-%m-%d"))
-        ggplot(data_filter, aes(x = APPT_DATE_YEAR, y=mean, col=factor(APPT_YEAR),group=APPT_YEAR)) +
+        data_filter <- data %>% group_by(APPT_MADE_DATE_YEAR, APPT_MADE_YEAR) %>%
+          dplyr::summarise(median = round(median(WAIT_TIME, na.rm=TRUE))) %>%
+          mutate(Label = "Date") %>% collect() %>% mutate(APPT_MADE_DATE_YEAR = as.Date(format(APPT_MADE_DATE_YEAR, "%Y-%m-%d"), "%Y-%m-%d"))
+        ggplot(data_filter, aes(x = APPT_MADE_DATE_YEAR, y=median, col=factor(APPT_MADE_YEAR),group=APPT_MADE_YEAR)) +
           geom_line() +
           labs(x = NULL, y = "Days",
-               title = "Average Wait Time to New Appointment by Day",
+               title = "Median Wait Time to New Appointment by Day",
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
-          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$mean)*1.2))+
+          scale_y_continuous(expand = c(0,0), limits = c(0,max(data_filter$median)*1.2))+
           coord_cartesian(clip = 'off') +
           theme_new_line()+
           theme_bw()+
