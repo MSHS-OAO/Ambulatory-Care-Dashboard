@@ -6191,9 +6191,19 @@ server <- function(input, output, session) {
     # population.data <- dataArrivedPop()
     population.data <- dataArrivedPop()
     
+    data_testing_pop <<- population.data
+
     #population.data <- population_tbl %>% filter(CAMPUS == "MSUS", CAMPUS_SPECIALTY== "Internal Medicine")
     
-    newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
+    # newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
+    
+    newdata <- population.data %>% group_by(NEW_ZIP) %>% dplyr::summarise(total = round(n(),0))%>% collect() %>% filter(!is.na(NEW_ZIP))
+
+    newdata_coordinates <- geocode_zip(newdata$NEW_ZIP) %>% rename(NEW_ZIP = zipcode,
+                                                                   LATITUDE = lat,
+                                                                   LONGITUDE = lng)
+
+    newdata <- inner_join(newdata, newdata_coordinates) %>% select(-NEW_ZIP)
     
     hist <- histogram(newdata$total, type = "irregular", grid = "quantiles", 
                       greedy = TRUE, breaks= 30,  plot = F)
