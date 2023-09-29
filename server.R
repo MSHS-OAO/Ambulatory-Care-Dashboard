@@ -5156,7 +5156,9 @@ server <- function(input, output, session) {
       select(APPT_STATUS, percent) %>%
       filter(APPT_STATUS %in% c("Bumped", "Canceled", "Rescheduled"))
     
-    ggplot(apptsCanceled, aes(reorder(APPT_STATUS, -percent), percent, fill=APPT_STATUS)) +
+    apptsCanceled$APPT_STATUS <- factor(apptsCanceled$APPT_STATUS, levels=sort(unique(apptsCanceled$APPT_STATUS)))
+    
+    ggplot(apptsCanceled, aes(APPT_STATUS, percent, fill=APPT_STATUS)) +
       geom_bar(stat="identity", width = 0.8) +
       scale_y_continuous(labels=scales::percent_format(accuracy = 1), limits=c(0,(max(apptsCanceled$percent))*1.5))+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
@@ -5190,6 +5192,9 @@ server <- function(input, output, session) {
       dplyr::summarise(total = n()) %>%
       group_by(APPT_STATUS) %>%
       mutate(perc = total/sum(total))
+    
+    lead.days.df$APPT_STATUS <- factor(lead.days.df$APPT_STATUS, levels=sort(unique(lead.days.df$APPT_STATUS)))
+    
     
     ggplot(lead.days.df, aes(x=APPT_STATUS, y=perc, fill=factor(leadDays, levels=c("0 day","1-7 days","8-14 days","15-30 days", "> 30 days"))))+
       geom_bar(position="stack",stat="identity", width=0.7)+
@@ -5225,7 +5230,10 @@ server <- function(input, output, session) {
       summarise(total = n()) %>% collect() %>%
       mutate(avg = ceiling(total/rows))
     
-    ggplot(sameDay, aes(reorder(APPT_STATUS, -avg), avg, fill=APPT_STATUS)) +
+    
+    sameDay$APPT_STATUS <- factor(sameDay$APPT_STATUS, levels=sort(unique(sameDay$APPT_STATUS)))
+    
+    ggplot(sameDay, aes(APPT_STATUS, avg, fill=APPT_STATUS)) +
       geom_bar(stat="identity", width = 0.8) +
       scale_y_continuous(limits=c(0,(max(sameDay$avg))*1.5))+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
