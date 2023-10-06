@@ -1461,7 +1461,14 @@ ui <- dashboardPage(
                        tags$head(tags$style("#practiceName_appt_length_breakdown{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                        
                        column(12,
-                              
+                              box(title = NULL, id = "tabset19", width = "100%", type = "pills",
+                                    boxPlus(
+                                      title = "Visit Type Summary", width = 12, status = "primary",
+                                      solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                      column(6, valueBoxOutput("visit_type_summary", width = 12) %>%
+                                               withSpinner(type = 5, color = "#d80b8c"))
+                                    )),
+                              br(),
                               box(title = NULL, id = "tabset18", width = "100%", type = 'pills',      
                                   boxPlus(
                                     title = "Appointment Length Breakdown", width = 12, status = "primary", 

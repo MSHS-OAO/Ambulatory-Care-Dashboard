@@ -13195,6 +13195,22 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     dtable
   },server = FALSE)
   
+  output$visit_type_summary <- renderValueBox({
+    data <- dataAll()
+    
+    unique_visit_types <- data %>% select(APPT_TYPE) %>% distinct() %>% collect()
+    
+    number_visit_types <- nrow(unique_visit_types)
+    
+    valueBoxSpark(
+      value = paste0(number_visit_types),
+      title = "Unique Visit Types",
+      subtitle = NULL,
+      width = 6,
+      color = "fuchsia"
+    )
+  })
+  
   
   output$appt_length_breakdown_tb_kable <- function() {
     
