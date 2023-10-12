@@ -13216,19 +13216,20 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
     data <- dataAll()
     
-    data <- data %>% select(CAMPUS, CAMPUS_SPECIALTY, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
-      group_by(CAMPUS, CAMPUS_SPECIALTY, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
+    data <- data %>% select(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
+      group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
       summarise(total_appt = n()) %>% collect() %>%
       pivot_wider(names_from = APPT_DUR, values_from = total_appt, names_sort = TRUE) %>%
-      arrange(CAMPUS, CAMPUS_SPECIALTY, NEW_PT2, APPT_TYPE) %>%
+      arrange(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, NEW_PT2, APPT_TYPE) %>%
       rename(Campus = CAMPUS,
              Specialty = CAMPUS_SPECIALTY,
-             `Patient Status` = NEW_PT2,
-             `Visit Type` = APPT_TYPE) %>%
-      mutate(`Patient Status` = ifelse(`Patient Status` == "NEW", "New", "Established")) %>%
+             `New vs. Established` = NEW_PT2,
+             `Visit Type` = APPT_TYPE,
+             Department = DEPARTMENT) %>%
+      mutate(`New vs. Established` = ifelse(`New vs. Established` == "NEW", "New", "Established")) %>%
       ungroup()
     
-    data <- data %>% mutate(Total = rowSums(data[,5:length(data)], na.rm = TRUE))
+    data <- data %>% mutate(Total = rowSums(data[,6:length(data)], na.rm = TRUE))
     
     data %>%
       kable(booktabs = T,escape = F) %>%
@@ -13236,8 +13237,8 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
       row_spec(0,  background = "#212070", color = "white")%>%
       column_spec(1, border_left = "2px solid #dddedd", border_right = FALSE)%>%
       column_spec(length(data), border_left = "2px solid #dddedd", border_right = "2px solid #dddedd" )%>%
-      column_spec(4, border_left = "2px solid #dddedd")%>%
-      collapse_rows(columns = 1:3, valign = "top")
+      column_spec(5, border_left = "2px solid #dddedd")%>%
+      collapse_rows(columns = 1:4, valign = "top")
     
     
   }
