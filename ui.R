@@ -1465,7 +1465,7 @@ ui <- dashboardPage(
                                     boxPlus(
                                       title = "Visit Type Summary", width = 12, status = "primary",
                                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                                      column(4, valueBoxOutput("visit_type_summary", width = 12) %>%
+                                      column(3, valueBoxOutput("visit_type_summary", width = 12) %>%
                                                withSpinner(type = 5, color = "#d80b8c"))
                                     )),
                               br(),
