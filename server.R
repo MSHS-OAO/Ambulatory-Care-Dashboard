@@ -11973,6 +11973,11 @@ ggplot(data_base,
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
+  output$practiceName_appt_length_breakdown <- renderText({
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
+  
   dataArrived_test_schedule <- eventReactive(list(input$update_filters),{
     
     validate(
@@ -13231,6 +13236,56 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     dtable$dependencies <- c(dtable$dependencies, list(dep))
     dtable
   },server = FALSE)
+  
+  output$visit_type_summary <- renderValueBox({
+    data <- dataAll()
+    
+    unique_visit_types <- data %>% select(APPT_TYPE) %>% distinct() %>% collect()
+    
+    number_visit_types <- nrow(unique_visit_types)
+    
+    valueBoxSpark(
+      value = paste0(number_visit_types),
+      title = "Unique Visit Types",
+      subtitle = NULL,
+      width = 6,
+      color = "fuchsia"
+    )
+  })
+  
+  
+  output$appt_length_breakdown_tb_kable <- function() {
+    
+    data <- dataAll()
+    
+    data <- data %>% select(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
+      group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, NEW_PT2, APPT_TYPE, APPT_DUR) %>% 
+      summarise(total_appt = n()) %>% collect() %>%
+      pivot_wider(names_from = APPT_DUR, values_from = total_appt, names_sort = TRUE) %>%
+      arrange(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, NEW_PT2, APPT_TYPE) %>%
+      rename(Campus = CAMPUS,
+             Specialty = CAMPUS_SPECIALTY,
+             `New vs. Established` = NEW_PT2,
+             `Visit Type` = APPT_TYPE,
+             Department = DEPARTMENT) %>%
+      mutate(`New vs. Established` = ifelse(`New vs. Established` == "NEW", "New", "Established")) %>%
+      ungroup()
+    
+    data <- data %>% mutate(Total = rowSums(data[,6:length(data)], na.rm = TRUE))
+    
+    options(knitr.kable.NA = '-')
+    
+    data %>%
+      kable(booktabs = T,escape = F) %>%
+      kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
+      row_spec(0,  background = "#212070", color = "white")%>%
+      column_spec(1, border_left = "2px solid #dddedd", border_right = FALSE)%>%
+      column_spec(length(data), border_left = "2px solid #dddedd", border_right = "2px solid #dddedd" )%>%
+      column_spec(5, border_left = "2px solid #dddedd")%>%
+      collapse_rows(columns = 1:4, valign = "top")
+    
+    
+  }
   
 } # Close server 
 
