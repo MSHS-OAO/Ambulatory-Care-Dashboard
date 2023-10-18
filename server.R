@@ -13273,6 +13273,8 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
     data <- data %>% mutate(Total = rowSums(data[,6:length(data)], na.rm = TRUE))
     
+    options(knitr.kable.NA = '-')
+    
     data %>%
       kable(booktabs = T,escape = F) %>%
       kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
