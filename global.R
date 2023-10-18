@@ -1190,13 +1190,17 @@ header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),
                             
                             tags$li(class = "dropdown", dropdown(box(title = "Retrieve Previously Saved Filter:",
                                                                      width = 12,
-                                                                     height = "100px",
+                                                                     #height = "130px",
                                                                      solidHeader = FALSE,
                                                                      pickerInput("filter_list", choices = saved_filter_choices, multiple = TRUE,
                                                                                  selected = NULL, options = pickerOptions(maxOptions = 1)
                                                                      ),
-                                                                     actionButton("update_filters1", "CLICK TO UPDATE", width = "80%")
-                            ), br(), br(), br(), br(), br(), br(),
+                                                                     actionButton("update_filters1", "UPDATE FILTERS", width = "80%"),
+                                                                     br(),
+                                                                     br(),
+                                                                     br(),
+                                                                     fluidRow(p("*Selecting 'Update Filters' will update only the dropdowns in your filter panel. To update the data, open the filter panel and select 'Click to Update'."))
+                            ), br(), br(), br(), br(), br(), br(), 
                             br(), br(),
                             # actionButton("remove_filters", "CLICK TO REMOVE", width = "80%"), br(), br(),
                             style = "material-circle", size = "lg", right = TRUE, status = "default",
