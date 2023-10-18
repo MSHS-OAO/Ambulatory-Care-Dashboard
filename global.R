@@ -1198,7 +1198,8 @@ header <-   dashboardHeader(title = HTML("Ambulatory Analytics Tool"),
                                                                      actionButton("update_filters1", "UPDATE FILTERS", width = "80%"),
                                                                      br(),
                                                                      br(),
-                                                                     fluidRow(p("*After updating the filters please click on the button within the global filters to update the tool."))
+                                                                     br(),
+                                                                     fluidRow(p("*Selecting 'Update Filters' will update only the dropdowns in your filter panel. To update the data, open the filter panel and select 'Click to Update'."))
                             ), br(), br(), br(), br(), br(), br(), 
                             br(), br(),
                             # actionButton("remove_filters", "CLICK TO REMOVE", width = "80%"), br(), br(),
