@@ -1288,7 +1288,7 @@ ui <- dashboardPage(
         
         tabItem(tabName = "Comparison",
                 column(11,
-                       div("Comparison", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Comparison: By Metric", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        textOutput("practiceName_vol_comp"),
                        #textOutput("kpis_mem"),
                        tags$head(tags$style("#practiceName_vol_comp{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
@@ -1412,7 +1412,7 @@ ui <- dashboardPage(
         tabItem(tabName = "optimization",
                 column(11,
                        #profvis_ui("profiler"),
-                       div("Scheduling Template Optimization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Comparison: Metrics Combined", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        textOutput("practiceName_opt_comp"),
                        #textOutput("kpis_mem"),
                        tags$head(tags$style("#practiceName_opt_comp{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
@@ -1807,7 +1807,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='KPIs' | input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='newPatients' | 
-        input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'appt_length_breakdown'",
+        input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'Comparison'| input.sbm == 'optimization' | input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Holidays to Exclude:",
                      width = 12,
@@ -1837,8 +1837,7 @@ ui <- dashboardPage(
       conditionalPanel(
         condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'appt_length_breakdown'",
-        
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'Comparison'| input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",        
         # br(),
         # dropdown(
         #   box(
