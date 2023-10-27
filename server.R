@@ -11259,9 +11259,7 @@ ggplot(data_base,
   
   no_Show_percentage <- reactive({
     
-    
-    data <- dataArrivedNoShow() %>%
-      filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+
     
     # data <- arrivedNoShow.data.rows %>%
     #   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
@@ -11272,6 +11270,17 @@ ggplot(data_base,
     breakdown_filters <- input$breakdown_filters
     
     
+    if(breakdown_filters == "NEW_PT3") {
+      data <- dataArrivedNoShow_access() %>%
+        filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    } else{
+      data <- dataArrivedNoShow() %>%
+        filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    }
+    
+    
+    
+    
     if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
@@ -11280,6 +11289,7 @@ ggplot(data_base,
     }
     if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
+      breakdown_filters <- "NEW_PT2"
     }
     
     
