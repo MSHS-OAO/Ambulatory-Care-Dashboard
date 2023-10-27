@@ -7396,7 +7396,7 @@ print("1")
     
     # No Show Rate
     
-    data.noShow <- dataArrivedNoShow_access() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    data.noShow <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
     # data.noShow <- arrivedNoShow.data
     
     print("3")
@@ -11270,13 +11270,9 @@ ggplot(data_base,
     breakdown_filters <- input$breakdown_filters
     
     
-    if(breakdown_filters == "NEW_PT3") {
-      data <- dataArrivedNoShow_access() %>%
-        filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
-    } else{
       data <- dataArrivedNoShow() %>%
         filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
-    }
+
     
     
     
