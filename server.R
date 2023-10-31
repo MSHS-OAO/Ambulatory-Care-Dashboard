@@ -11360,8 +11360,6 @@ ggplot(data_base,
       
       noShow_perc <- noShow_perc %>% select(cols, everything())
       
-      noShow_perc_test <<- noShow_perc
-      
       noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
       noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
       
