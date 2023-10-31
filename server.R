@@ -7396,7 +7396,7 @@ print("1")
     
     # No Show Rate
     
-    data.noShow <- dataArrivedNoShow_access() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    data.noShow <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
     # data.noShow <- arrivedNoShow.data
     
     print("3")
@@ -7873,8 +7873,8 @@ print("1")
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(cycleTime > 0, New.PT3 == TRUE))$cycleTime))," min"),
-      value =  paste0(data$CYCLETIME," min", " | ", data_median$CYCLETIME, " min"),
-      title = toupper(paste0("Average | MEDIAN "," New Patients Check-in to Visit-end Time*")),
+      value =  paste0("Average: ",data$CYCLETIME," min", " | Median: ", data_median$CYCLETIME, " min"),
+      title = toupper(paste0("New Patients Check-in to Visit-end Time*")),
       # title = toupper("Average New Patients Check-in to Visit-end Time*"),
       subtitle = paste0("*Based on ",round(perc,2)*100,
                            "% of total arrived new patients based on visit timestamps" 
@@ -7902,11 +7902,11 @@ print("1")
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))$cycleTime))," min"),
-      value =  paste0(ceiling(data$CYCLETIME)," min", " | ", data_meadian$CYCLETIME, " min"),
+      value =  paste0("Average: ",ceiling(data$CYCLETIME)," min", " | Median: ", data_meadian$CYCLETIME, " min"),
       title = toupper(
                      #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
                              #paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
-                             "Average | Median Established Patients Check-in to Visit-end Time*"),
+                             "Established Patients Check-in to Visit-end Time*"),
       # subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ", round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
@@ -8450,8 +8450,8 @@ ggplot(data_base,
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min", " | ", ceiling(data_meadian), " min"),
-      title = toupper("Average | Median New Appointments Check-in to Room-in Time"),
+      value =  paste0("Average: ",ceiling(data)," min", " | Median: ", ceiling(data_meadian), " min"),
+      title = toupper("New Appointments Check-in to Room-in Time"),
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
       width = 6,
@@ -8477,12 +8477,12 @@ ggplot(data_base,
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min", " | ", ceiling(data_median), " min"),
+      value =  paste0("Average: ",ceiling(data)," min", " | Median: ", ceiling(data_median), " min"),
       title = toupper( 
               #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
                              #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
                             # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
-                             "Average | Median Established Appointments Check-in to Room-in Time"),
+                             "Established Appointments Check-in to Room-in Time"),
  
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
@@ -8998,8 +8998,8 @@ ggplot(data_base,
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == TRUE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min", " | ", ceiling(data_median), " min"),
-      title = toupper("Average | Median New Appointments Room-in to Visit-end* Time"),
+      value =  paste0("Average: ",ceiling(data)," min", " | Median: ", ceiling(data_median), " min"),
+      title = toupper("New Appointments Room-in to Visit-end* Time"),
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0))/nrow(dataArrived()),2)*100,"% of total arrived new patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived new patients based on visit timestamps"),
       width = 6,
@@ -9025,12 +9025,12 @@ ggplot(data_base,
     
     valueBoxSpark(
       # value =  paste0(round(mean((dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))$checkinToRoomin))," min"),
-      value =  paste0(ceiling(data)," min", " | ", ceiling(data_median), " min"),
+      value =  paste0("Average: ",ceiling(data)," min", " | Median: ", ceiling(data_median), " min"),
       title = toupper( 
         #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
         #paste0("Avg. ", input$selectedApptType2," Appointments Check-in to Room-in Time"),
         # paste0("Avg. ", unique(data_room$APPT_TYPE)," Appointments Check-in to Room-in Time"),
-        "Average | Median Established Appointments Room-in to Visit-end* Time"),
+        "Established Appointments Room-in to Visit-end* Time"),
       
       # subtitle = paste0("*Based on ",round(nrow(dataArrived() %>% filter(checkinToRoomin >= 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ",round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
@@ -11259,9 +11259,7 @@ ggplot(data_base,
   
   no_Show_percentage <- reactive({
     
-    
-    data <- dataArrivedNoShow() %>%
-      filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+
     
     # data <- arrivedNoShow.data.rows %>%
     #   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
@@ -11272,6 +11270,13 @@ ggplot(data_base,
     breakdown_filters <- input$breakdown_filters
     
     
+      data <- dataArrivedNoShow() %>%
+        filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+
+    
+    
+    
+    
     if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
@@ -11280,6 +11285,7 @@ ggplot(data_base,
     }
     if(breakdown_filters == "NEW_PT3"){
       name_2 <- "Patient Status"
+      breakdown_filters <- "NEW_PT2"
     }
     
     
@@ -11355,6 +11361,7 @@ ggplot(data_base,
       noShow_perc <- noShow_perc %>% select(cols, everything())
       
       noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
+      noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
       
       noShow_perc
       
