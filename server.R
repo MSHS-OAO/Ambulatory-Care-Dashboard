@@ -12691,7 +12691,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
                                                         Metrics=="Filled Rate"~ ">= 85%",
                                                         Metrics=="New Patient Wait Time (Days)"~ "14",
                                                         Metrics=="Average Daily Volume"~ "Variable",
-                                                        Metrics == "New Patient Ratio" ~ "15%",
+                                                        Metrics == "New Patient Ratio" ~ "25%",
                                                         Metrics == "No Show Rate" ~ "10%",
                                                         Metrics == "Percent of New Patients Scheduled Within 14 Days" ~ "60%",
                                                         TRUE ~ "TBD"))
