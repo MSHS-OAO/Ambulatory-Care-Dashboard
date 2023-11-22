@@ -6157,7 +6157,7 @@ server <- function(input, output, session) {
   
     
     header_above <- c("Subtitle" = 3)
-    names(header_above) <- paste0(c("Based on data from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))
+    names(header_above) <- paste0(c("Based on arrived data from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))
     total <-  which(zip_table$`Zip Code Layer` == "Total") - 1 
     # northern_ny_ref_1 <- northern_ny_ref + 1
     # northern <- c(northern_ny_ref_1:total)
@@ -6209,7 +6209,7 @@ server <- function(input, output, session) {
                                                                    LATITUDE = lat,
                                                                    LONGITUDE = lng)
 
-    newdata <- inner_join(newdata, newdata_coordinates) %>% select(-NEW_ZIP)
+    newdata <- inner_join(newdata, newdata_coordinates) #%>% select(-NEW_ZIP)
     
     hist <- histogram(newdata$total, type = "irregular", grid = "quantiles", 
                       greedy = TRUE, breaks= 30,  plot = F)
@@ -6239,9 +6239,10 @@ server <- function(input, output, session) {
     #mypalette <- colorFactor(palette= MountSinai_palettes$new , levels = newdata$bins)
     # Prepare the text for the tooltip:
     mytext <- paste(
-      "Total Visits: ", newdata$total, "<br/>", 
-      "Latitude: ", newdata$LATITUDE, "<br/>", 
-      "Longitude: ", newdata$LONGITUDE, sep="") %>%
+      "Total Visits: ", format(newdata$total,big.mark=",",scientific=FALSE), "<br/>", 
+      # "Latitude: ", newdata$LATITUDE, "<br/>", 
+      # "Longitude: ", newdata$LONGITUDE, sep="",
+      "Zip Code:", newdata$NEW_ZIP, sep="") %>%
       lapply(htmltools::HTML)
     
     # Set icons for each MSHS hospital
