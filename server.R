@@ -7314,8 +7314,8 @@ print("1")
     
     print("2")
     newpatients.ratio <- data %>%
-      filter(NEW_PT3 == "NEW") %>%
-        group_by(SCHEDULE_GROUPING_MAPPED, NEW_PT3) %>%
+      filter(NEW_PT2 == "NEW") %>%
+        group_by(SCHEDULE_GROUPING_MAPPED, NEW_PT2) %>%
       dplyr::summarise(Total = n()) %>% collect()
 
     #newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
@@ -7331,10 +7331,10 @@ print("1")
       coord_flip() +
       scale_fill_MountSinai('purple')+
       labs(x=NULL, y=NULL,
-           title = "New* Patient Source",
-           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
-                             "\nTotal New Patients = ",prettyNum(sum(newpatients.ratio$Total), big.mark = ',')),
-           caption = "*New patients defined by CPT codes (level of service).")+
+           title = "New Patient Source",
+           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+                             "\nTotal New Patients = ",prettyNum(sum(newpatients.ratio$Total), big.mark = ','))
+           )+
       theme_new_line()+
       theme_bw()+
       theme(
