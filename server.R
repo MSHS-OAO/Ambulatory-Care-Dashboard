@@ -6120,6 +6120,7 @@ server <- function(input, output, session) {
   
     
     
+    
     a_table <- newdata %>% 
       filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
       group_by(NEW_ZIP_CODE_LAYER_A) %>% summarise(total = n()) %>%
