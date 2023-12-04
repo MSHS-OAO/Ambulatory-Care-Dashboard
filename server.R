@@ -6121,7 +6121,7 @@ server <- function(input, output, session) {
     
     
     a_table <- newdata %>% 
-      filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
+      #filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
       group_by(NEW_ZIP_CODE_LAYER_A) %>% summarise(total = n()) %>%
       arrange(-total) %>%
       mutate(perc = round(total/sum(total, na.rm = T), 2)*100) %>% collect()%>%
@@ -6131,7 +6131,7 @@ server <- function(input, output, session) {
       mutate(Layer = `Zip Code Layer`)
     
     b_table <- newdata %>%
-      filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
+      #filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
       mutate(NEW_ZIP_CODE_LAYER_B= ifelse(is.na(NEW_ZIP_CODE_LAYER_B), "Other", NEW_ZIP_CODE_LAYER_B))%>%
       group_by(NEW_ZIP_CODE_LAYER_A, NEW_ZIP_CODE_LAYER_B) %>% summarise(total = n()) %>%
       arrange(-total) %>% collect()
