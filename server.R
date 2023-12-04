@@ -6116,13 +6116,13 @@ server <- function(input, output, session) {
     #data <- population_tbl %>% filter(CAMPUS_SPECIALTY== "Allergy")
     #data <- population_data_filtered %>% filter(Campus.Specialty == "Allergy")
     newdata <- uniquePts_df_system(data)
-    
   
     
     
     
     a_table <- newdata %>% 
       #filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
+      mutate(NEW_ZIP_CODE_LAYER_A= ifelse(is.null(NEW_ZIP_CODE_LAYER_A), "Out of NYS", NEW_ZIP_CODE_LAYER_A))%>%
       group_by(NEW_ZIP_CODE_LAYER_A) %>% summarise(total = n()) %>%
       arrange(-total) %>%
       mutate(perc = round(total/sum(total, na.rm = T), 2)*100) %>% collect()%>%
@@ -6133,7 +6133,7 @@ server <- function(input, output, session) {
     
     b_table <- newdata %>%
       #filter(NEW_ZIP_CODE_LAYER_A != "EXCLUDE") %>%
-      mutate(NEW_ZIP_CODE_LAYER_B= ifelse(is.na(NEW_ZIP_CODE_LAYER_B), "Other", NEW_ZIP_CODE_LAYER_B))%>%
+      mutate(NEW_ZIP_CODE_LAYER_B= ifelse(is.null(NEW_ZIP_CODE_LAYER_B), "Other", NEW_ZIP_CODE_LAYER_B))%>%
       group_by(NEW_ZIP_CODE_LAYER_A, NEW_ZIP_CODE_LAYER_B) %>% summarise(total = n()) %>%
       arrange(-total) %>% collect()
     
