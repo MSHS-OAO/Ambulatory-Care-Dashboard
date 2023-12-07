@@ -6249,7 +6249,7 @@ server <- function(input, output, session) {
     # Prepare the text for the tooltip:
     mytext <- paste(
       "Total Visits: ", format(newdata$total,big.mark=",",scientific=FALSE), "<br/>", 
-      #"% of Unique Patients: ", newdata$percent, "<br/>", 
+      "% of Unique Patients: ", newdata$percent, "<br/>", 
       # "Longitude: ", newdata$LONGITUDE, sep="",
       "Zip Code:", newdata$NEW_ZIP, sep="") %>%
       lapply(htmltools::HTML)
