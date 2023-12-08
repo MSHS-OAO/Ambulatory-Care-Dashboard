@@ -6199,18 +6199,26 @@ server <- function(input, output, session) {
     
     # population.data <- dataArrivedPop()
     population.data <- dataArrivedPop()
+    population.data_test <<- population.data
     
     #population.data <- population_tbl %>% filter(CAMPUS == "MSUS", CAMPUS_SPECIALTY== "Internal Medicine")
     
     # newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
     
-    newdata <- population.data %>% group_by(NEW_ZIP) %>% dplyr::summarise(total = round(n(),0))%>% collect() %>% filter(!is.na(NEW_ZIP))
-
-    newdata_coordinates <- geocode_zip(newdata$NEW_ZIP) %>% rename(NEW_ZIP = zipcode,
-                                                                   LATITUDE = lat,
-                                                                   LONGITUDE = lng)
-
-    newdata <- inner_join(newdata, newdata_coordinates) #%>% select(-NEW_ZIP)
+    newdata <- population.data %>% group_by(NEW_ZIP, LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect() %>% filter(!is.na(NEW_ZIP))
+    
+    newdata_unique <- population.data %>% filter(!is.na(NEW_ZIP)) %>% select(NEW_ZIP, MRN) %>% distinct() %>% group_by(NEW_ZIP) %>% summarise(total_group = n()) %>% collect() 
+    newdata_unique_total <- newdata_unique %>% mutate(total = sum(total_group)) %>% select(-total_group)
+    
+    newdata_join <- inner_join(newdata_unique, newdata_unique_total)
+    newdata_join <- newdata_join %>% mutate(percent = round(total_group/total, 3)*100) %>% select(-total_group,-total)
+    
+    newdata <- inner_join(newdata, newdata_join)
+    # newdata_coordinates <- geocode_zip(newdata$NEW_ZIP) %>% rename(NEW_ZIP = zipcode,
+    #                                                                LATITUDE = lat,
+    #                                                                LONGITUDE = lng)
+    # 
+    # newdata <- inner_join(newdata, newdata_coordinates) #%>% select(-NEW_ZIP)
     
     hist <- histogram(newdata$total, type = "irregular", grid = "quantiles", 
                       greedy = TRUE, breaks= 30,  plot = F)
@@ -6241,7 +6249,7 @@ server <- function(input, output, session) {
     # Prepare the text for the tooltip:
     mytext <- paste(
       "Total Visits: ", format(newdata$total,big.mark=",",scientific=FALSE), "<br/>", 
-      # "Latitude: ", newdata$LATITUDE, "<br/>", 
+      "% of Unique Patients: ", newdata$percent, "<br/>", 
       # "Longitude: ", newdata$LONGITUDE, sep="",
       "Zip Code:", newdata$NEW_ZIP, sep="") %>%
       lapply(htmltools::HTML)
