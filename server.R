@@ -6199,8 +6199,7 @@ server <- function(input, output, session) {
     
     # population.data <- dataArrivedPop()
     population.data <- dataArrivedPop()
-    population.data_test <<- population.data
-    
+
     #population.data <- population_tbl %>% filter(CAMPUS == "MSUS", CAMPUS_SPECIALTY== "Internal Medicine")
     
     # newdata <- population.data %>% group_by(LATITUDE, LONGITUDE) %>% dplyr::summarise(total = round(n(),0))%>% collect()
@@ -6249,7 +6248,7 @@ server <- function(input, output, session) {
     # Prepare the text for the tooltip:
     mytext <- paste(
       "Total Visits: ", format(newdata$total,big.mark=",",scientific=FALSE), "<br/>", 
-      "% of Unique Patients: ", newdata$percent, "<br/>", 
+      "% of Unique Patients: ", paste0(newdata$percent, "%"), "<br/>", 
       # "Longitude: ", newdata$LONGITUDE, sep="",
       "Zip Code:", newdata$NEW_ZIP, sep="") %>%
       lapply(htmltools::HTML)
