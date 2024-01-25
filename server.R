@@ -1206,37 +1206,40 @@ server <- function(input, output, session) {
   }) 
   
   
-  dataAllSlot <- eventReactive(list(input$update_filters),{
+  dataAllSlot <- eventReactive(list(input$update_filter_slot),{
     print(paste0("Beginning of slot processing ", Sys.time()))
     validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
+      need(input$selectedCampus_slot != "", "Please select a Campus"),
+      need(input$selectedSpecialty_slot != "", "Please select a Specialty"),
+      need(input$selectedDepartment_slot != "", "Please select a Department"),
+      #need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider_slot != "", "Please select a Provider"),
+      #need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      #need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-    groupByFilters_4(slot.data,
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod,
+    groupByFilters_slot(slot.data,
+                     input$selectedCampus_slot, input$selectedSpecialty_slot, input$selectedDepartment_slot, input$selectedProvider_slot,
+                     #input$selectedVisitMethod, input$selectedResource,
                      input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
-  }) 
+    
+    
+    
+  }, ignoreNULL = FALSE) 
   
-  dataAllSlot_comp <- eventReactive(list(input$update_filters),{
+  dataAllSlot_comp <- eventReactive(list(input$update_filter_slot),{
     validate(
-      need(input$selectedCampus != "", "Please select a Campus"),
-      need(input$selectedSpecialty != "", "Please select a Specialty"),
-      need(input$selectedDepartment != "", "Please select a Department"),
-      need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
-      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
-      need(input$selectedPRCName != "", "Please select a Visit Type")
+      need(input$selectedCampus_slot != "", "Please select a Campus"),
+      need(input$selectedSpecialty_slot != "", "Please select a Specialty"),
+      need(input$selectedDepartment_slot != "", "Please select a Department"),
+      #need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider_slot != "", "Please select a Provider"),
+      #need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      #need(input$selectedPRCName != "", "Please select a Visit Type")
     )
-    groupByFilters_4(slot.data,
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedResource, input$selectedProvider,
-                     input$selectedVisitMethod,
-                     input$dateRange[1], input$dateRange[2], input$daysOfWeekslot, input$excludeHolidays)
+    groupByFilters_slot(slot.data,
+                     input$selectedCampus_slot, input$selectedSpecialty_slot, input$selectedDepartment_slot, input$selectedProvider_slot, 
+                     #input$selectedResource, input$selectedVisitMethod,
+                     input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
   }) 
   
   
@@ -2576,7 +2579,7 @@ server <- function(input, output, session) {
   
   output$slot_usage <- renderText({
     paste0("Based on data from ", input$dateRangeslot[1]," to ", input$dateRangeslot[2], 
-           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+           " for ", paste(sort(input$selectedCampus_slot), collapse = ', '))
   })
   
   output$cycle_time <- renderText({
@@ -7466,6 +7469,8 @@ print("1")
     #data <- slot.data.subset[all.slot.rows,] %>% filter(Campus.Specialty == "Allergy")
     print(paste0("Start of slot graph function ", Sys.time()))
     data <- dataAllSlot()
+    
+    test_slot <<- data
     #data <- slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     print(paste0("End of slot reactive ", Sys.time()))
     
@@ -7483,6 +7488,7 @@ print("1")
       mutate(APPT_WEEK = as.Date(APPT_WEEK))
     
     booked_filled <- booked_filled[order(as.Date(booked_filled$APPT_WEEK, format="%Y-%m-%d")),]
+    booked_filled$`0` <- NULL
     
     print(paste0("End of slot processing in function ", Sys.time()))
     
@@ -7577,13 +7583,18 @@ print("1")
     data <- dataAllSlot()
     #data <- slot.data %>% filter(CAMPUS %in% "MSUS" &CAMPUS_SPECIALTY %in% "Cardiology")
     
+    tab_slot <<- data
+    
     if(input$byProvider2 == TRUE){
       
       summary.prov <- data %>%
-        group_by(CAMPUS, CAMPUS_SPECIALTY, PROVIDER, APPT_MONTH_YEAR) %>%
+        group_by(CAMPUS, CAMPUS_SPECIALTY, PROVIDER, SLOT_MONTH_YEAR) %>%
         dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE),0),
                          `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = TRUE), 0),
-                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 0)) %>% collect()
+                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 0)) %>% collect()%>%
+        filter(!is.na(CAMPUS))
+      
+      
       
       summary.prov[is.na(summary.prov)] <- 0
       
@@ -7591,10 +7602,11 @@ print("1")
         mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100,0), "%"),
                `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100,0), "%")) %>%
         gather(variable, value, 5:9) %>%
-        spread(APPT_MONTH_YEAR, value)
+        spread(SLOT_MONTH_YEAR, value)
       
       summary.prov[summary.prov == "Inf%"] <- "-"
       summary.prov[summary.prov == "NaN%"] <- "-"
+      summary.prov[is.na(summary.prov)] <- "-"
       
       level.order <- c("Available Hours", "Booked Hours","Filled Hours","Booked Rate (%)","Filled Rate (%)")
       summary.prov <- summary.prov[order(match(summary.prov$variable, level.order)),]
@@ -7609,10 +7621,11 @@ print("1")
       
       
       summary.prov.month <- data %>%
-        group_by(CAMPUS, CAMPUS_SPECIALTY, PROVIDER, APPT_MONTH_YEAR) %>%
+        group_by(CAMPUS, CAMPUS_SPECIALTY, PROVIDER, SLOT_MONTH_YEAR) %>%
         dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE), 0),
-                         `Booked Hours` = round(sum(BOOKED_HOURS), 0),
-                         `Filled Hours` = round(sum(ARRIVED_HOURS), 0)) %>% collect()
+                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm=TRUE), 0),
+                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm=TRUE), 0)) %>% collect()%>%
+        filter(!is.na(CAMPUS))
       
       summary.prov.month[is.na(summary.prov.month)] <- 0
       
@@ -7620,7 +7633,9 @@ print("1")
         mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100,0),
                `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100,0)) %>%
         gather(variable, value, 5:9) %>%
-        spread(APPT_MONTH_YEAR, value)
+        spread(SLOT_MONTH_YEAR, value)
+      
+      
       
       level.order <- c("Available Hours", "Booked Hours","Filled Hours","Booked Rate (%)","Filled Rate (%)")
       summary.prov.month <- summary.prov.month[order(match(summary.prov.month$variable, level.order)),]
@@ -7634,6 +7649,7 @@ print("1")
       names(summary.prov.month)[names(summary.prov.month) == "PROVIDER"] <- "Provider"
       summary.prov.month[summary.prov.month == as.character("Inf")] <- "-"
       summary.prov.month[summary.prov.month == as.character("NaN")] <- "-"
+      summary.prov.month[is.na(summary.prov.month)] <- "-"
       
       summary.prov.month$`Monthly Average` <- ifelse(summary.prov.month$Status %in% c("Booked Rate (%)", "Filled Rate (%)"), paste0(summary.prov.month$`Monthly Average`, "%"),summary.prov.month$`Monthly Average`)
       summary.prov.month[summary.prov.month == as.character("-%")] <- "-"
@@ -7667,10 +7683,11 @@ print("1")
       
 
       summary.dept <- data %>%
-        group_by(CAMPUS, CAMPUS_SPECIALTY, APPT_MONTH_YEAR) %>%
+        group_by(CAMPUS, CAMPUS_SPECIALTY, SLOT_MONTH_YEAR) %>%
         dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm = TRUE), 0),
                          `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = TRUE), 0),
-                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 0)) %>% collect()
+                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 0)) %>% collect()%>%
+        filter(!is.na(CAMPUS))
       
       summary.dept[is.na(summary.dept)] <- 0
       
@@ -7678,10 +7695,11 @@ print("1")
         mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100,0), "%"),
                `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100,0), "%")) %>%
         gather(variable, value, 4:8) %>%
-        spread(APPT_MONTH_YEAR, value)
+        spread(SLOT_MONTH_YEAR, value)
       
       summary.dept[summary.dept == "Inf%"] <- "-"
       summary.dept[summary.dept == "NaN%"] <- "-"
+      summary.dept[is.na(summary.dept)] <- "-"
       
       level.order <- c("Available Hours", "Booked Hours","Filled Hours","Booked Rate (%)","Filled Rate (%)")
       summary.dept <- summary.dept[order(match(summary.dept$variable, level.order)),]
@@ -7695,10 +7713,11 @@ print("1")
       #Get Monthly Averages
       
       summary.dept.month <- data %>%
-        group_by(CAMPUS, CAMPUS_SPECIALTY, APPT_MONTH_YEAR) %>%
+        group_by(CAMPUS, CAMPUS_SPECIALTY, SLOT_MONTH_YEAR) %>%
         dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm = TRUE), 0),
                          `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = TRUE), 0),
-                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 0)) %>% collect()
+                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 0)) %>% collect()%>%
+        filter(!is.na(CAMPUS))
       
       summary.dept.month[is.na(summary.dept.month)] <- 0
       
@@ -7706,10 +7725,12 @@ print("1")
         mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100,0),
                `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100,0)) %>%
         gather(variable, value, 4:8) %>%
-        spread(APPT_MONTH_YEAR, value)
+        spread(SLOT_MONTH_YEAR, value)
       
       summary.dept.month[summary.dept.month == "Inf%"] <- "-"
       summary.dept.month[summary.dept.month == "NaN%"] <- "-"
+      
+      
       
       level.order <- c("Available Hours", "Booked Hours","Filled Hours","Booked Rate (%)","Filled Rate (%)")
       summary.dept.month <- summary.dept.month[order(match(summary.dept.month$variable, level.order)),]
@@ -7719,11 +7740,12 @@ print("1")
       names(summary.dept.month)[names(summary.dept.month) == "CAMPUS"] <- "Campus"
       names(summary.dept.month)[names(summary.dept.month) == "variable"] <- "Status"
       
-      # summary.dept.month[summary.dept.month == as.character("Inf")] <- "-"
-      # summary.dept.month[summary.dept.month == as.character("NaN")] <- "-"
+      #summary.dept.month[summary.dept.month == as.character("Inf")] <- "-"
+      #summary.dept.month[summary.dept.month == as.character("NaN")] <- "-"
+      
       
       summary.dept.month <- data.frame(summary.dept.month[,1:3], `Monthly Average` = ceiling(rowMeans(summary.dept.month[,-1:-3], na.rm = TRUE)), check.names = FALSE)
-      
+      summary.dept.month <- summary.dept.month %>% mutate(`Monthly Average` = ifelse(is.na(`Monthly Average`), "-", `Monthly Average`))
       
       summary.dept.month$`Monthly Average` <- ifelse(summary.dept.month$Status %in% c("Booked Rate (%)", "Filled Rate (%)"), paste0(summary.dept.month$`Monthly Average`, "%"),summary.dept.month$`Monthly Average`)
       summary.dept.month[summary.dept.month == as.character("-%")] <- "-"
