@@ -700,6 +700,8 @@ ui <- dashboardPage(
                                 plotOutput("volume3") %>%
                                   withSpinner(type = 5, color = "#d80b8c"),
                                 plotOutput("volume5") %>%
+                                  withSpinner(type = 5, color = "#d80b8c"),
+                                plotOutput("volume_am_pm") %>%
                                   withSpinner(type = 5, color = "#d80b8c")),
                          #tableOutput("volume5.1")),
                          column(2,)),

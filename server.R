@@ -6990,6 +6990,43 @@ server <- function(input, output, session) {
     
   })
   
+  output$volume_am_pm <- renderPlot({
+    data <- dataArrived()
+    #data <- arrived.data.rows %>% filter(CAMPUS == 'MSUS', CAMPUS_SPECIALTY == 'Allergy')
+    
+    data_process <- data %>% mutate(hour = to_char(APPT_DTTM, 'HH24')) %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY, hour) %>% summarise(total = n()) %>% collect() %>%
+      mutate(am_pm = ifelse(hour >= 12, "PM", "AM")) %>% group_by(APPT_DAY, am_pm) %>% summarise(total = sum(total))
+    
+    total_dates <- data %>% group_by(APPT_DAY) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
+    
+    data_process <- inner_join(data_process, total_dates) %>% mutate(total = ceiling(total/Day.Count))
+    
+    
+    ggplot(data_process, aes(x = factor(APPT_DAY, levels = daysOfWeek.options), y = total, group = am_pm, fill = am_pm)) +
+      geom_bar(position = "dodge", stat = "identity") +
+      scale_fill_MountSinai('dark') +
+      labs(x = NULL, y = "Patients",
+           title = "Average AM/PM* Breakdown",
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           caption = "*PM appointments occur after 12"
+           )+
+      scale_y_continuous(limits=c(0,(max(data_process$total, na.rm = TRUE))*2))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("top")+
+      theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5)) +
+      geom_col(position = position_dodge())+
+      # geom_text(data=subset(data_process, total > 0.15 * max(total)),aes(label=total), color="white", 
+      #           size=5, fontface="bold", position = position_stack(vjust = 0.5))+
+      geom_text(data=subset(data_process, total > 0.15 * max(total)),aes(label=total), color="white",
+                size=5, fontface="bold", position = position_dodge(width = 0.9), vjust = 4.5)#+
+      # stat_summary(fun = sum, vjust = 4, aes(label=ifelse(..y.. == 0,"",..y..), group = APPT_DAY), geom="text", color="black",
+      #              size=5, fontface="bold.italic")
+    
+    
+    
+  })
+  
   #Daily Volume Distribution by Day Table
   output$volume5.1 <- function(){
     
