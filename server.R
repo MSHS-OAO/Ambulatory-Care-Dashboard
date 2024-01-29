@@ -482,6 +482,89 @@ server <- function(input, output, session) {
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
   
+  
+  observeEvent(input$selectedCampus_slot,{
+    if(is.null(input$filter_list) && !is.null(input$selectedCampus_slot)){
+      #specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
+      selected_campus <- input$selectedCampus_slot
+      
+      specialty_choices <-  filters %>% filter(CAMPUS %in% selected_campus) %>% select( CAMPUS_SPECIALTY)  %>%
+        mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+      specialty_choices <- sort(specialty_choices$CAMPUS_SPECIALTY, na.last = T)
+      print("3")
+      
+      
+      updatePickerInput(session,
+                        inputId = "selectedSpecialty_slot",
+                        choices = specialty_choices,
+                        selected = specialty_choices
+      )
+    }
+    
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+  
+  
+  observeEvent(input$selectedSpecialty_slot,{
+    if(is.null(input$filter_list) && !is.null(input$selectedSpecialty_slot)){
+      # department_choices <- sort(unique(kpi.all.data[
+      #   kpi.all.data$Campus %in% input$selectedCampus &
+      #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
+      selected_campus <- input$selectedCampus_slot
+      selected_specialty <- input$selectedSpecialty_slot
+      
+      department_choices <-  filters %>% filter(CAMPUS %in% selected_campus & 
+                                                  CAMPUS_SPECIALTY %in% selected_specialty) %>% select(DEPARTMENT)  %>%
+        mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
+      department_choices <- sort(department_choices$DEPARTMENT, na.last = T)
+      
+      updatePickerInput(session,
+                        inputId = "selectedDepartment_slot",
+                        choices = department_choices,
+                        selected = department_choices
+      )
+    }
+    
+    
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+  
+  
+  observeEvent(input$selectedDepartment_slot,{
+    if(is.null(input$filter_list) && !is.null(input$selectedDepartment_slot)){
+      # provider_choices <- sort(unique(kpi.all.data[
+      #   kpi.all.data$Campus %in% input$selectedCampus &
+      #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
+      #     kpi.all.data$Department %in% input$selectedDepartment &
+      #     kpi.all.data$Resource %in% input$selectedResource, "Provider"]))
+      
+      selected_campus <- input$selectedCampus_slot
+      selected_specialty <- input$selectedSpecialty_slot
+      selected_department <- input$selectedDepartment_slot
+      
+      provider_choices <-   #filters %>% 
+        filters_table %>%
+        filter(CAMPUS %in% selected_campus & 
+                 CAMPUS_SPECIALTY %in% selected_specialty & 
+                 DEPARTMENT %in% selected_department) %>% 
+        summarise(PROVIDER= unique(PROVIDER)) %>% collect()
+      provider_choices <- sort(provider_choices$PROVIDER, na.last = T)
+      
+      
+      updatePickerInput(session,
+                        inputId = "selectedProvider_slot",
+                        choices = provider_choices,
+                        selected = provider_choices
+      )
+    }
+    
+    
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+  
   observeEvent(input$selectedResource, {
     if(is.null(input$filter_list) && !is.null(input$selectedResource)
     ){
@@ -1981,7 +2064,7 @@ server <- function(input, output, session) {
   })
   
   # testdataset <- reactive({
-  #   slotData <- dataPastSlot()
+  # slotData <- dataPastSlot()
   #   slotData$siteSpecialty <- paste0(slotData$Campus," - ",slotData$Campus.Specialty)
   #   bookedFilledRate <- slotData %>%
   #     group_by(siteSpecialty, Appt.Week) %>%
@@ -7470,7 +7553,7 @@ print("1")
     print(paste0("Start of slot graph function ", Sys.time()))
     data <- dataAllSlot()
     
-    test_slot <<- data
+    need(nrow(data) > 0, "Data is not available for this selection" )
     #data <- slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     print(paste0("End of slot reactive ", Sys.time()))
     
@@ -7583,7 +7666,7 @@ print("1")
     data <- dataAllSlot()
     #data <- slot.data %>% filter(CAMPUS %in% "MSUS" &CAMPUS_SPECIALTY %in% "Cardiology")
     
-    tab_slot <<- data
+    need(nrow(data) > 0, "Data is not available for this selection" )
     
     if(input$byProvider2 == TRUE){
       
