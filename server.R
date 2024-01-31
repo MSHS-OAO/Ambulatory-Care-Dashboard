@@ -493,7 +493,6 @@ server <- function(input, output, session) {
       specialty_choices <- sort(specialty_choices$CAMPUS_SPECIALTY, na.last = T)
       print("3")
       
-      
       updatePickerInput(session,
                         inputId = "selectedSpecialty_slot",
                         choices = specialty_choices,
@@ -544,8 +543,7 @@ server <- function(input, output, session) {
       selected_specialty <- input$selectedSpecialty_slot
       selected_department <- input$selectedDepartment_slot
       
-      provider_choices <-   #filters %>% 
-        filters_table %>%
+      provider_choices <- filters %>% 
         filter(CAMPUS %in% selected_campus & 
                  CAMPUS_SPECIALTY %in% selected_specialty & 
                  DEPARTMENT %in% selected_department) %>% 

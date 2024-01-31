@@ -1159,14 +1159,14 @@ default_specialty_slot <- sort(default_specialty_slot$CAMPUS_SPECIALTY, na.last 
 
 default_department_slot <- slot.data %>% ungroup() %>%
   filter(CAMPUS %in% default_campus & 
-           CAMPUS_SPECIALTY %in% default_specialty_slot) %>% 
+           CAMPUS_SPECIALTY %in% default_specialty) %>% 
   select( DEPARTMENT)  %>%
   summarise(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
 default_department_slot <- sort(default_department_slot$DEPARTMENT, na.last = T)
 
 default_provider_slot <- slot.data %>% ungroup() %>% 
   filter(CAMPUS %in% default_campus &
-           CAMPUS_SPECIALTY %in% default_specialty_slot&
+           CAMPUS_SPECIALTY %in% default_specialty&
            DEPARTMENT %in% default_department_slot ) %>%
   select(PROVIDER)  %>%
   summarise(PROVIDER= unique(PROVIDER)) %>% collect()

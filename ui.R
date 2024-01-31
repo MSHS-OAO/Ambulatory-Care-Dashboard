@@ -1730,7 +1730,7 @@ ui <- dashboardPage(
                                    selectedTextFormat = "count > 1",
                                    countSelectedText = "{0}/{1} Departments",
                                    dropupAuto = FALSE),
-                                 selected = default_department_slot[2])),
+                                 selected = default_department_slot)),
                    
                    box(
                      title = "Select Provider:",
