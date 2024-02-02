@@ -9637,6 +9637,29 @@ ggplot(data_base,
     paste0("Average Daily Volume by ", name_1 , " and ", name_2)
   })
   
+  output$am_pm_breakdown_title <- renderText({
+    if(input$breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "NEW_PT3"){
+      name_2 <- "Patient Status"
+    }
+    
+    print(input$compare_filters)
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "DEPARTMENT"){
+      name_1 <- "Department"
+    }
+    if(input$compare_filters == "PROVIDER"){
+      name_1 <- "Provider"
+    }
+    paste0("Average AM/PM Daily Volume by ", name_1 , " and ", name_2)
+  })
   
   output$npr_month_title <- renderText({
     if(input$breakdown_filters == "VISIT_METHOD"){
@@ -11660,6 +11683,106 @@ ggplot(data_base,
     dtable$dependencies <- c(dtable$dependencies, list(dep))
     dtable
   },server = FALSE)
+  
+  
+  am_pm_conparison_reactive <- reactive({
+    data <- dataArrived()
+    
+    compare_filters <- input$compare_filters
+    breakdown_filters <- input$breakdown_filters
+    
+    data_test <<- dataArrived()
+    
+    compare_filters_test <<- input$compare_filters
+    breakdown_filters_test <- input$breakdown_filters
+    
+    
+    if(breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(breakdown_filters == "NEW_PT3"){
+      name_2 <- "Patient Status"
+    }
+    
+    am_pm_colname <- "AM_PM"
+    am_pm_colname_updated <- "AM/PM"
+    
+    if(compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+      cols <- c(compare_filters,breakdown_filters, am_pm_colname)
+      cols_name <- c(name_1,name_2, am_pm_colname_updated)
+      tot_cols <- c(compare_filters)
+    }
+    if(compare_filters == "DEPARTMENT"){
+      name_1 <- compare_filters
+      cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters, am_pm_colname)
+      cols_name <- c("Specialty",name_1,name_2, am_pm_colname_updated)
+      tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
+    }
+    if(compare_filters == "PROVIDER"){
+      name_1 <- compare_filters
+      cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters, am_pm_colname)
+      cols_name <- c("Specialty","Department",name_1,name_2, am_pm_colname_updated)
+      tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
+    }
+    
+    
+    
+    am_pm <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>% 
+      summarise(total = n()) %>%
+      group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+      summarise(avg = ceiling(sum(total, na.rm = T)/n())) %>% collect() %>%
+      pivot_wider(names_from = APPT_MONTH_YEAR,
+                  values_from = avg,
+                  values_fill = 0)
+    
+    tot <- am_pm %>% group_by(across(all_of(tot_cols))) %>%
+      summarise_at(vars(-!!(c(breakdown_filters, am_pm_colname))), sum)  %>%
+      add_column(!!am_pm_colname := "Total") %>%
+      relocate(all_of(am_pm_colname), .after = !!compare_filters)
+    
+    
+    am_pm <- full_join(am_pm, tot) 
+    am_pm <- am_pm %>% arrange(across(all_of(tot_cols)))
+    
+    am_pm$Total <- rowSums(am_pm[setdiff(names(am_pm),cols)])
+    
+    # am_pm <- am_pm %>% group_by(!!!syms(cols)) %>% arrange(`AM_PM`)
+    
+    
+    am_pm <- setnames(am_pm, old = cols, new = cols_name)
+    
+    
+    
+    months_df <- am_pm[,!(names(am_pm) %in% c(cols_name, "Total", "Total_YN"))]
+    months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
+
+    index <- months+length(cols_name)
+    index <- c(1:length(cols_name),index,(length(am_pm)):length(am_pm))
+
+    
+    am_pm <- am_pm[index]
+    
+    # am_pm_order <- c("AM", "PM")
+    # 
+    # am_pm <- am_pm %>% mutate(`AM/PM` = factor(`AM/PM`, levels = am_pm_order))
+    
+   
+      
+    
+    am_pm
+    
+  })
+  
+  output[["am_pm_breakdown_comparison"]] <- renderDT({
+    
+
+    dtable <-   datatable(am_pm_conparison_reactive())
+    
+  })
   
   booked_and_filled_month <- reactive({
     data <- dataAllSlot_comp() #%>% select(APPT_MONTH_YEAR, VISIT_METHOD, CAMPUS_SPECIALTY, DEPARTMENT_NAME, APPT_DATE_YEAR, PROVIDER, APPT_DTTM, AVAILABLE_HOURS, BOOKED_HOURS, ARRIVED_HOURS) %>% collect()
