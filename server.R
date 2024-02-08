@@ -7551,6 +7551,8 @@ print("1")
     print(paste0("Start of slot graph function ", Sys.time()))
     data <- dataAllSlot()
     
+    test_data <<- data
+    
     need(nrow(data) > 0, "Data is not available for this selection" )
     #data <- slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     print(paste0("End of slot reactive ", Sys.time()))
@@ -7579,6 +7581,21 @@ print("1")
     slot_fig <- plot_ly(booked_filled, x = ~APPT_WEEK,
                         textfont = list(color = '#000000', size = 16))
     
+    current_week <- floor_date(Sys.Date(), "weeks", week_start = 0)
+    
+    
+    vline <- function(x = 0, color = "red") {
+      list(
+        type = "line",
+        y0 = 0,
+        y1 = 1,
+        yref = "paper",
+        x0 = x,
+        x1 = x,
+        line = list(color = color, dash="dot")
+      )
+    }
+    
     if(input$byRate == TRUE){
       y_axis <- "Booked Rate" 
     } else{
@@ -7592,6 +7609,7 @@ print("1")
       slot_fig <- slot_fig %>% add_trace(y = ~`Filled Rate`, name = "Filled Rate (%)", mode = 'lines+markers',
                                          marker = list(color = "#00aeef"), line = list(color = "#00aeef"))
       
+     
       slot_fig %>% layout(
         #annotations = annon,
         #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
@@ -7613,17 +7631,21 @@ print("1")
                      mirror = TRUE,
                      ticks = 'outside',
                      showline = TRUE),
-        hovermode = "x unified") 
+        hovermode = "x unified") %>%
+       layout(shapes = list(vline(current_week)))
+       
+      
+      
       
     } else{
       
       
       slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
-                                         marker = list(color = "#212070"), line = list(color = "#212070"))
+                                         marker = list(color = "#A9A9A9"), line = list(color = "#A9A9A9"))
       slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
                                         marker = list(color = "#f75dbe"))
       slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
-                                        marker = list(color = "#A9A9A9"))
+                                        marker = list(color = "#7030a0"))
       
       tick_text <- c(unique(booked_filled$APPT_WEEK))
       tick_values <- c(unique(booked_filled$APPT_WEEK))
@@ -7651,7 +7673,8 @@ print("1")
           mirror = TRUE,
           ticks = 'outside',
           showline = TRUE),
-        hovermode = "x unified") 
+        hovermode = "x unified") %>%
+        layout(shapes = list(vline(current_week)))
     }
     
     

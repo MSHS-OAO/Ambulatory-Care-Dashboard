@@ -416,7 +416,7 @@ dplyr::summarise(AVAILABLE_HOURS = sum(AVAILABLE_HOURS, na.rm = T),
                  ARRIVED_HOURS = sum(ARRIVED_HOURS, na.rm = T),
                  #`Canceled Hours` = sum(CANCELED_HOURS, na.rm = T),
                  #`No Show Hours` = sum(NOSHOW_HOURS, LEFTWOBEINGSEEN_MINUTES/60)
-                 )
+                 ) 
 print("slot")
 
 # holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
@@ -1216,7 +1216,9 @@ dateRangeSlot_start <- dateRange_min
 # dateRangeSlot_end <- glue("Select max(APPT_DTTM) AS maxDate FROM AMBULATORY_SLOT")
 # dateRangeSlot_end <- dbGetQuery(poolcon, dateRangeSlot_end)
 # dateRangeSlot_end <- as.Date(dateRangeSlot_end$MAXDATE, format="%Y-%m-%d")
-dateRangeSlot_end <- dateRange_max
+dateRangeSlot_end <- slot.data %>% ungroup() %>%
+  select(SLOT_DATE) %>% summarise(max = max(SLOT_DATE, na.rm = TRUE)) %>% collect()
+dateRangeSlot_end <- dateRangeSlot_end$max
 
 dateRangepop_max <- glue("Select max(APPT_DATE_YEAR) AS maxDate FROM AMBULATORY_POPULATION WHERE APPT_STATUS = 'Arrived'")
 dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
