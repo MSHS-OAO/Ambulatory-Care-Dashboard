@@ -359,6 +359,9 @@ poolcon_upt <- dbPool(drv = odbc::odbc(),
 print("conn end")
 
 
+poolcon_production <- dbPool(drv = odbc::odbc(),
+                      dsn= "OAO Cloud DB Production")
+
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
 ### RStudio COnnect Data Read In
@@ -407,7 +410,7 @@ print("npr")
 
 
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-slot.data <- tbl(poolcon_upt, "AMBULATORY_SLOT_TABLE") %>%
+slot.data <- tbl(poolcon_production, "AMBULATORY_SLOT_TABLE") %>%
 group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, PROV_ID, PROVIDER, APPT_WEEK, 
          #APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR,  APPT_TM_HR, RESOURCES,  APPT_DTTM
          SLOT_DATE, SLOT_MONTH_YEAR, APPT_DAY, HOLIDAY) %>%
@@ -1123,14 +1126,14 @@ default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
 
 default_resource_type <- c("Provider","Resource")
 
-# default_provider <-   filters %>% filter(CAMPUS %in% default_campus & 
-#                                                      CAMPUS_SPECIALTY %in% default_specialty& 
-#                                                      DEPARTMENT %in% default_departments ) %>% 
-#   select(PROVIDER)  %>% 
-#   summarise(PROVIDER= unique(PROVIDER)) %>% collect()
-# default_provider <- sort(default_provider$PROVIDER, na.last = T)
+default_provider <-   filters %>% filter(CAMPUS %in% default_campus &
+                                                     CAMPUS_SPECIALTY %in% default_specialty&
+                                                     DEPARTMENT %in% default_departments ) %>%
+  select(PROVIDER)  %>%
+  summarise(PROVIDER= unique(PROVIDER)) %>% collect()
+default_provider <- sort(default_provider$PROVIDER, na.last = T)
 
-default_provider <- c("LEE-WONG, MARY F", "MA, SONGHUI", "MEDICAL TECHNICIANS ALLERGY", "TEITEL, MICHAEL G.", "YOST, SHARON LYNN")
+#default_provider <- c("LEE-WONG, MARY F", "MA, SONGHUI", "MEDICAL TECHNICIANS ALLERGY", "TEITEL, MICHAEL G.", "YOST, SHARON LYNN")
 
 default_visit_method <-    filters %>% filter(CAMPUS %in% default_campus & 
                                                 CAMPUS_SPECIALTY %in% default_specialty & 
@@ -1211,14 +1214,16 @@ dateRangeKpi_max = dateRange_max
 # dateRangeSlot_start <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_SLOT")
 # dateRangeSlot_start <- dbGetQuery(poolcon, dateRangeSlot_start)
 # dateRangeSlot_start <- as.Date(dateRangeSlot_start$MINDATE, format="%Y-%m-%d")
-dateRangeSlot_start <- dateRange_min
-
+dateRangeSlot_min <- dateRange_min
+dateRangeSlot_start <- Sys.Date() -30
 # dateRangeSlot_end <- glue("Select max(APPT_DTTM) AS maxDate FROM AMBULATORY_SLOT")
 # dateRangeSlot_end <- dbGetQuery(poolcon, dateRangeSlot_end)
 # dateRangeSlot_end <- as.Date(dateRangeSlot_end$MAXDATE, format="%Y-%m-%d")
-dateRangeSlot_end <- slot.data %>% ungroup() %>%
+dateRangeSlot_max <- slot.data %>% ungroup() %>%
   select(SLOT_DATE) %>% summarise(max = max(SLOT_DATE, na.rm = TRUE)) %>% collect()
-dateRangeSlot_end <- dateRangeSlot_end$max
+dateRangeSlot_max <- dateRangeSlot_max$max
+dateRangeSlot_end <- Sys.Date() +30
+
 
 dateRangepop_max <- glue("Select max(APPT_DATE_YEAR) AS maxDate FROM AMBULATORY_POPULATION WHERE APPT_STATUS = 'Arrived'")
 dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)

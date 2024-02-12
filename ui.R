@@ -63,8 +63,8 @@ ui <- dashboardPage(
                          menuSubItem("No Shows/Overbooks", tabName = "noshows"),
                          menuSubItem("Bumps/Cancellations", tabName = "cancellations")
                 ),
-                menuItem("Booked/Filled Rate", tabName = "slotManagement", icon = icon("tachometer-alt")),
-                menuItem("Utilization", tabName = "utilization", icon = icon("percent")),
+                menuItem("Template Utilization", tabName = "slotManagement", icon = icon("tachometer-alt")),
+                menuItem("Space Utilization", tabName = "utilization", icon = icon("percent")),
                 menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
                 
                 br(),
@@ -1027,13 +1027,13 @@ ui <- dashboardPage(
         
         tabItem(tabName = "slotManagement",
                 column(11,
-                       div("Access | Slot Management", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Access | Template Utilization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                        textOutput("slot_usage"),
                        tags$head(tags$style("#slot_usage{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
                        fluidRow(
                          boxPlus(
-                           title = "Slot Management", width = 12, status = "primary",
+                           title = "Template Utilization", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            materialSwitch(
                              inputId = "byRate",
@@ -1054,7 +1054,7 @@ ui <- dashboardPage(
                          #   withSpinner(type = 5, color = "#d80b8c"),
                          # br(),
                          boxPlus(
-                           title = "Slot Management Summary Table", width = 12, status = "primary",
+                           title = "Template Utilization Summary", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            materialSwitch(
                              inputId = "byProvider2",
@@ -1817,8 +1817,8 @@ ui <- dashboardPage(
                      width = 12, 
                      solidHeader = FALSE, 
                      dateRangeInput("dateRangeslot", label = NULL,
-                                    start = dateRange_start, end = dateRangeSlot_end,
-                                    min = dateRangeSlot_start, max = dateRangeSlot_end)),
+                                    start = dateRangeSlot_start, end = dateRangeSlot_end,
+                                    min = dateRangeSlot_min, max = dateRangeSlot_max)),
                    
                    
                    box(

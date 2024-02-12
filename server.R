@@ -7576,15 +7576,17 @@ print("1")
     print(paste0("End of slot processing in function ", Sys.time()))
     
     
+    
+    
     #booked_filled$`Booked Rate` <- round(booked_filled$`Booked Hours`/booked_filled$`Available Hours`, 0)*100
     
     slot_fig <- plot_ly(booked_filled, x = ~APPT_WEEK,
-                        textfont = list(color = '#000000', size = 16))
+                        textfont = list(color = '#000000', size = 16, family = "Calibri"))
     
     current_week <- floor_date(Sys.Date(), "weeks", week_start = 0)
     
     
-    vline <- function(x = 0, color = "red") {
+    vline <- function(x = 0, color = "#a5a7a5") {
       list(
         type = "line",
         y0 = 0,
@@ -7592,7 +7594,7 @@ print("1")
         yref = "paper",
         x0 = x,
         x1 = x,
-        line = list(color = color, dash="dot")
+        line = list(color = color, dash="solid")
       )
     }
     
@@ -7613,7 +7615,7 @@ print("1")
       slot_fig %>% layout(
         #annotations = annon,
         #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-        title = "Past and Upcoming Slot Usage (%) by Week", font=list(size=20),
+        title = "Template Usage (%) by Week", font=list(size=20),
         autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
         xaxis = list(
           title = "Date", 
@@ -7632,7 +7634,8 @@ print("1")
                      ticks = 'outside',
                      showline = TRUE),
         hovermode = "x unified") %>%
-       layout(shapes = list(vline(current_week)))
+       layout(shapes = list(vline(current_week)))%>%
+       layout(legend = list(orientation = 'h', x= 0.2, y = 1.15 ))
        
       
       
@@ -7641,7 +7644,7 @@ print("1")
       
       
       slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
-                                         marker = list(color = "#A9A9A9"), line = list(color = "#A9A9A9"))
+                                         marker = list(color = "#A9A9A9"), line = list(color = "#A9A9A9", dash="dash"))
       slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
                                         marker = list(color = "#f75dbe"))
       slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
@@ -7652,7 +7655,7 @@ print("1")
       slot_fig %>% layout(
         #annotations = annon,
         #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-        title = "Past and Upcoming Slot Usage by Week", font=list(size=20),
+        title = "Template Slot Usage by Week", font=list(size=20),
         autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
         xaxis = list(
           autotick = F,
@@ -7674,7 +7677,8 @@ print("1")
           ticks = 'outside',
           showline = TRUE),
         hovermode = "x unified") %>%
-        layout(shapes = list(vline(current_week)))
+        layout(shapes = list(vline(current_week))) %>%
+        layout(legend = list(orientation = 'h', x= 0.2, y = 1.15 ))
     }
     
     
