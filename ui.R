@@ -1334,13 +1334,18 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")
                                               )
                                      ),
-                                     tabPanel("AM/PM Breakdown",
+                                     tabPanel("Session Breakdown",
                                               boxPlus(
-                                                title = "AM/PM Breakdown", width = 12, status = "primary", 
+                                                title = "Session Breakdown", width = 12, status = "primary", 
                                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                                 h3(uiOutput(("am_pm_breakdown_title"))),
                                                 DTOutput("am_pm_breakdown_comparison") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c"),
+                                                hr(),
+                                                h3(uiOutput(("am_pm_breakdown_title_month"))),
+                                                DTOutput("am_pm_breakdown_comparison_month") %>% 
                                                   withSpinner(type = 5, color = "#d80b8c")
+                                                
                                               )
                                      ),
                                      tabPanel("New Patient Ratio",

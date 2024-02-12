@@ -1080,10 +1080,10 @@ default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
 
 default_resource_type <- c("Provider","Resource")
 
-# default_provider <-   filters %>% filter(CAMPUS %in% default_campus & 
-#                                                      CAMPUS_SPECIALTY %in% default_specialty& 
-#                                                      DEPARTMENT %in% default_departments ) %>% 
-#   select(PROVIDER)  %>% 
+# default_provider <-   filters %>% filter(CAMPUS %in% default_campus &
+#                                                      CAMPUS_SPECIALTY %in% default_specialty&
+#                                                      DEPARTMENT %in% default_departments ) %>%
+#   select(PROVIDER)  %>%
 #   summarise(PROVIDER= unique(PROVIDER)) %>% collect()
 # default_provider <- sort(default_provider$PROVIDER, na.last = T)
 
