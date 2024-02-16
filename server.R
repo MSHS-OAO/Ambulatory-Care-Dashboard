@@ -9658,7 +9658,7 @@ ggplot(data_base,
     if(input$compare_filters == "PROVIDER"){
       name_1 <- "Provider"
     }
-    paste0("Average Session Daily Volume by ", name_1 , " and ", name_2)
+    paste0("Average Session* Daily Volume by ", name_1 , " and ", name_2)
   })
   
   output$am_pm_breakdown_title_month <- renderText({
@@ -9682,7 +9682,7 @@ ggplot(data_base,
     if(input$compare_filters == "PROVIDER"){
       name_1 <- "Provider"
     }
-    paste0("Average Session Daily Volume by ", name_1 , " and ", name_2)
+    paste0("Total Session* Monthly Volume by ", name_1 , " and ", name_2)
   })
   
   output$npr_month_title <- renderText({
@@ -11732,7 +11732,7 @@ ggplot(data_base,
     }
     
     am_pm_colname <- "AM_PM"
-    am_pm_colname_updated <- "AM/PM"
+    am_pm_colname_updated <- "Session"
     
     if(compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
@@ -11776,6 +11776,10 @@ ggplot(data_base,
     
     # am_pm <- am_pm %>% group_by(!!!syms(cols)) %>% arrange(`AM_PM`)
     
+    if(breakdown_filters == "NEW_PT3") {
+      am_pm <- am_pm %>% mutate(NEW_PT3 = ifelse(NEW_PT3 == "NEW", "New", "Established"))
+    }
+    
     
     am_pm <- setnames(am_pm, old = cols, new = cols_name)
     
@@ -11810,7 +11814,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('Total Monthly Volume = sum of all patients within the month by breakdown.')
+                            htmltools::em('*PM appointments occur after 12')
                           ),
                           options = list(
                             scrollX = TRUE,
@@ -11880,7 +11884,7 @@ ggplot(data_base,
     }
     
     am_pm_colname <- "AM_PM"
-    am_pm_colname_updated <- "AM/PM"
+    am_pm_colname_updated <- "Session"
     
     if(compare_filters == "CAMPUS_SPECIALTY"){
       name_1 <- "Specialty"
@@ -11913,11 +11917,17 @@ ggplot(data_base,
     am_pm[is.na(am_pm)] <- 0
     
     #### Sum all cloumns with months to get the total for the month
-    tot <- data %>% group_by(APPT_MONTH_YEAR) %>%
-      summarise(total = n()) %>% collect() %>%
-      pivot_wider(names_from = APPT_MONTH_YEAR,
-                  values_from = total,
-                  values_fill = 0) 
+    # tot <- data %>% group_by(APPT_MONTH_YEAR) %>%
+    #   summarise(total = n()) %>% collect() %>%
+    #   pivot_wider(names_from = APPT_MONTH_YEAR,
+    #               values_from = total,
+    #               values_fill = 0) 
+    # 
+    
+    tot <- am_pm %>% group_by(across(all_of(tot_cols))) %>%
+      summarise_at(vars(-!!(c(breakdown_filters, am_pm_colname))), sum)  %>%
+      add_column(!!am_pm_colname := "Total") %>%
+      relocate(all_of(am_pm_colname), .after = !!compare_filters)
     
     
     
@@ -11927,6 +11937,10 @@ ggplot(data_base,
     am_pm$Total <- rowSums(am_pm[setdiff(names(am_pm),cols)])
     
     # am_pm <- am_pm %>% group_by(!!!syms(cols)) %>% arrange(`AM_PM`)
+    
+    if(breakdown_filters == "NEW_PT3") {
+      am_pm <- am_pm %>% mutate(NEW_PT3 = ifelse(NEW_PT3 == "NEW", "New", "Established"))
+    }
     
     
     am_pm <- setnames(am_pm, old = cols, new = cols_name)
@@ -11967,7 +11981,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('Total Monthly Volume = sum of all patients within the month by breakdown.')
+                            htmltools::em('*PM appointments occur after 12')
                           ),
                           options = list(
                             scrollX = TRUE,
