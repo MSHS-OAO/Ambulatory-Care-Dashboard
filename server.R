@@ -7606,10 +7606,12 @@ print("1")
 
     if(input$byRate == TRUE){ # by Booked and Filled Rate
       
-      slot_fig <- slot_fig %>% add_trace(y = ~`Booked Rate`, name = "Booked Rate (%)", mode = 'lines+markers',
-                                         marker = list(color = "#d80b8c"), line = list(color = "#d80b8c"))
-      slot_fig <- slot_fig %>% add_trace(y = ~`Filled Rate`, name = "Filled Rate (%)", mode = 'lines+markers',
-                                         marker = list(color = "#00aeef"), line = list(color = "#00aeef"))
+      slot_fig <- slot_fig %>% add_trace(y = ~`Booked Rate`, name = "Booked Rate (%)", mode = 'lines',
+                                        # marker = list(color = "#d80b8c"), 
+                                         line = list(color = "#f75dbe"))
+      slot_fig <- slot_fig %>% add_trace(y = ~`Filled Rate`, name = "Filled Rate (%)", mode = 'lines',
+                                         #marker = list(color = "#00aeef"),
+                                         line = list(color = "#7030a0"))
       
      
       slot_fig %>% layout(
@@ -7618,10 +7620,10 @@ print("1")
         title = "Template Usage (%) by Week", font=list(size=20),
         autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
         xaxis = list(
-          title = "Date", 
+          #title = "Date",
+          title = "Week Starts",
           font = list(size = 14),
           tickfont = list(size = 14),
-          
           rangeslider = list(type = "date"),
           mirror = TRUE,
           ticks = 'outside',
@@ -7631,20 +7633,19 @@ print("1")
                      tickfont = list(size = 14),
                      ticksuffix = "%",
                      mirror = TRUE,
+                     range = c(0, max(booked_filled$`Booked Rate`, na.rm = T)*1.2),
                      ticks = 'outside',
                      showline = TRUE),
         hovermode = "x unified") %>%
        layout(shapes = list(vline(current_week)))%>%
-       layout(legend = list(orientation = 'h', x= 0.2, y = 1.15 ))
+       layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.15 ))
        
-      
-      
-      
+ 
     } else{
       
       
-      slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", mode = 'lines+markers',
-                                         marker = list(color = "#A9A9A9"), line = list(color = "#A9A9A9", dash="dash"))
+      slot_fig <- slot_fig %>% add_trace(y = ~`Available Hours`, name = "Available Hours", type='scatter', mode = 'lines',
+                                          line = list(color = "#A9A9A9", dash="dash"))
       slot_fig <- slot_fig %>% add_bars(y = ~`Booked Hours`, name = "Booked Hours",
                                         marker = list(color = "#f75dbe"))
       slot_fig <- slot_fig %>% add_bars(y = ~`Filled Hours`, name = "Filled Hours",
@@ -7663,9 +7664,11 @@ print("1")
           tick_values = tick_values,
           tickmode = "array",
           font = list(size = 16),
-          title = "Date", 
+          title = "Week Starts", 
           tickfont = list(size = 14),
           rangeslider = list(type = "date"),
+          tick0 = "2023-12-31",
+          dtick = 604800000, #set for 7 days
           mirror = TRUE,
           ticks = 'outside',
           showline = TRUE),
@@ -7675,10 +7678,11 @@ print("1")
           tickfont = list(size = 14),
           mirror = TRUE,
           ticks = 'outside',
+          range = c(0, max(booked_filled$`Available Hours`, na.rm = T)*1.2),
           showline = TRUE),
         hovermode = "x unified") %>%
         layout(shapes = list(vline(current_week))) %>%
-        layout(legend = list(orientation = 'h', x= 0.2, y = 1.15 ))
+        layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.15 ))
     }
     
     
