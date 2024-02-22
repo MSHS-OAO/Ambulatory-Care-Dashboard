@@ -11211,7 +11211,6 @@ ggplot(data_base,
     
     
     index <- months+length(cols_name)
-    # index <- c(1:length(cols_name),index,length(waitTime))
     index <- c(1:length(cols_name),index,(length(waitTime)-1):length(waitTime))
     
     waitTime <- waitTime[index]
