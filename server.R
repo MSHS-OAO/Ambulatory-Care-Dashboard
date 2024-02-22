@@ -11032,6 +11032,10 @@ ggplot(data_base,
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
+    data_test <<- data
+    compare_filters_test <<- compare_filters
+    breakdown_filters_test <<- breakdown_filters
+    
     if(breakdown_filters == "NEW_PT3") {
       breakdown_filters <- "NEW_PT2"
     }
@@ -11178,6 +11182,23 @@ ggplot(data_base,
       
       
       
+      tot_over_time <- data %>%
+        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols)) %>%
+        dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
+        collect()
+      
+      tot_all <- data %>%
+        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols)) %>%
+        dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
+        collect() %>%
+        add_column(!!breakdown_filters := "Total")
+      
+      total <- bind_rows(tot_over_time, tot_all)
+      waitTime <- left_join(waitTime, total)
+      
+      
     }
     waitTime <- setnames(waitTime, old = cols, new = cols_name)
     
@@ -11190,7 +11211,8 @@ ggplot(data_base,
     
     
     index <- months+length(cols_name)
-    index <- c(1:length(cols_name),index,length(waitTime))
+    # index <- c(1:length(cols_name),index,length(waitTime))
+    index <- c(1:length(cols_name),index,(length(waitTime)-1):length(waitTime))
     
     waitTime <- waitTime[index]
     
@@ -11254,7 +11276,8 @@ ggplot(data_base,
         target = "row",
         fontWeight = styleEqual(1, "bold")
       )%>%
-      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+      formatStyle(columns = c("Total"), fontWeight = 'bold')
     path <- here::here("www")
     
     dep <- htmltools::htmlDependency(
@@ -11283,7 +11306,9 @@ ggplot(data_base,
         filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
 
     
-    
+    data_test <<- data
+    compare_filters_test <<- compare_filters
+    breakdown_filters_test <<- breakdown_filters
     
     
     if(breakdown_filters == "VISIT_METHOD"){
@@ -11369,6 +11394,45 @@ ggplot(data_base,
       
       noShow_perc <- noShow_perc %>% select(cols, everything())
       
+      tot_over_time <- data %>%
+        group_by(!!!syms(cols), APPT_STATUS) %>%
+        dplyr::summarise(Total = n()) %>% 
+        collect() %>%
+        #add_column(!!breakdown_filters := "Total") %>%
+        pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+        replace(is.na(.), 0) %>% 
+        group_by(!!!syms(cols)) %>%
+        mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+        select(-`No Show`,-Arrived) %>% 
+        #mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+        #pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+        ungroup() %>%
+        select(all_of(cols),  everything())
+      
+      tot_all <- data %>%
+        group_by(!!!syms(tot_cols), APPT_STATUS) %>%
+        dplyr::summarise(Total = n()) %>% 
+        collect() %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+        replace(is.na(.), 0) %>% 
+        group_by(!!!syms(cols)) %>%
+        mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+        select(-`No Show`,-Arrived) %>% 
+        # mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+        # pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+        ungroup() %>%
+        select(all_of(cols),  everything())
+      
+      total <- bind_rows(tot_over_time, tot_all)
+      
+      noShow_perc <- left_join(noShow_perc, total)
+      
+      
+
+      
+      
+      
       noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
       noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
       
@@ -11426,7 +11490,8 @@ ggplot(data_base,
         target = "row",
         fontWeight = styleEqual(1, "bold")
       )%>%
-      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+      formatStyle(columns = c("Total"), fontWeight = 'bold')
     path <- here::here("www")
     
     dep <- htmltools::htmlDependency(
