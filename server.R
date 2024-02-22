@@ -10351,6 +10351,9 @@ ggplot(data_base,
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
+    data_test <<- data
+    
+    
     if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
@@ -10487,7 +10490,7 @@ ggplot(data_base,
       # newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
       #   purrr::map_df(., janitor::adorn_totals)
-      # 
+      
       
     }
     
@@ -11031,10 +11034,7 @@ ggplot(data_base,
     # 
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
-    
-    data_test <<- data
-    compare_filters_test <<- compare_filters
-    breakdown_filters_test <<- breakdown_filters
+
     
     if(breakdown_filters == "NEW_PT3") {
       breakdown_filters <- "NEW_PT2"
@@ -11123,6 +11123,25 @@ ggplot(data_base,
       waitTime <- full_join(waitTime,tot)
       
       waitTime <- waitTime %>% arrange(across(all_of(tot_cols)))
+      
+      
+      tot_over_time <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        group_by(!!!syms(cols)) %>%
+        dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
+        collect()
+      
+      tot_over_time$NEW_PT2 <- ifelse(tot_over_time$NEW_PT2 == "NEW", "New","Established")
+      
+      tot_all <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        group_by(!!!syms(tot_cols)) %>%
+        dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
+        collect() %>%
+        add_column(!!breakdown_filters := "Total")
+      
+      total <- bind_rows(tot_over_time, tot_all)
+      waitTime <- left_join(waitTime, total)
       
       # waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
@@ -11304,11 +11323,7 @@ ggplot(data_base,
       data <- dataArrivedNoShow() %>%
         filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
 
-    
-    data_test <<- data
-    compare_filters_test <<- compare_filters
-    breakdown_filters_test <<- breakdown_filters
-    
+
     
     if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
@@ -11509,6 +11524,10 @@ ggplot(data_base,
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
+    data_test <<- data
+    compare_filters_test <- compare_filters
+    breakdown_filters_test <<- breakdown_filters
+    
     if(breakdown_filters == "NEW_PT3") {
       breakdown_filters <- "NEW_PT2"
     }
@@ -11549,7 +11568,7 @@ ggplot(data_base,
     
     if(breakdown_filters == "NEW_PT2"){
       validate(
-        need(input$breakdown_filters != "NEW_PT2", ("Percent of New Patients Scheduled Within 14 Days cannot be viewed by New vs Established Patients"))
+        need(input$breakdown_filters != "NEW_PT3", ("Percent of New Patients Scheduled Within 14 Days cannot be viewed by New vs Established Patients"))
       )
       
     } else{
@@ -11625,6 +11644,63 @@ ggplot(data_base,
       
       percent_within_14_days <- full_join(percent_within_14_days, tot)
       
+      
+      waitTime_tot <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        filter(NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols)) %>%
+        dplyr::summarise(total_all = n()) %>%
+        collect()
+      
+      waitTime_within_14_days_tot <- data %>%
+        filter(WAIT_TIME >= 0, 
+               WAIT_TIME < 14.0001, 
+               NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols)) %>%
+        dplyr::summarise(total = n()) %>%
+        collect()
+      
+      tot_join_data <- inner_join(waitTime_tot, waitTime_within_14_days_tot)
+      
+      tot_join_data[is.na(tot_join_data)] <- 0
+      
+      tot <- tot_join_data %>% 
+        group_by(!!!syms(cols)) %>%
+        summarise(Total = paste0(round((total/total_all),2)*100, "%"))
+      
+      
+      waitTime_tot_overtime <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        filter(NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols)) %>%
+        dplyr::summarise(total_all = n()) %>%
+        collect()
+      
+      waitTime_within_14_days_tot_overtime <- data %>%
+        filter(WAIT_TIME >= 0, 
+               WAIT_TIME < 14.0001, 
+               NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols)) %>%
+        dplyr::summarise(total = n()) %>%
+        collect()
+      
+      tot_join_data <- inner_join(waitTime_tot_overtime, waitTime_within_14_days_tot_overtime)
+      
+      tot_join_data[is.na(tot_join_data)] <- 0
+      
+      tot_overtime <- tot_join_data %>% 
+        group_by(!!!syms(tot_cols)) %>%
+        summarise(Total = paste0(round((total/total_all),2)*100, "%")) %>%
+        add_column(!!breakdown_filters := "Total")
+      
+      total <- bind_rows(tot, tot_overtime)
+      
+      
+      percent_within_14_days <- left_join(percent_within_14_days, total)
+      
+      
+      
+      
       percent_within_14_days$Total_YN <- ifelse(percent_within_14_days[[all_of(breakdown_filters)]] == "Total", 1,0)
       
       percent_within_14_days
@@ -11678,7 +11754,8 @@ ggplot(data_base,
         target = "row",
         fontWeight = styleEqual(1, "bold")
       )%>%
-      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+      formatStyle(columns = c("Total"), fontWeight = 'bold')
     path <- here::here("www")
     
     dep <- htmltools::htmlDependency(
