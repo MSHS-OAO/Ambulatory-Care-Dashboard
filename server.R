@@ -7563,15 +7563,15 @@ print("1")
     booked_filled <- booked_filled %>%
       #mutate(Appt.Week = floor_date(as.Date(suppressWarnings(format(APPT_DTTM, "%Y-%m-%d")), "%Y-%m-%d"), unit="week", week_start = 1)) %>%
       group_by(APPT_WEEK) %>%
-      summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm = T),0),
-                `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = T),0),
-                `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = T)),0) %>% collect() %>%
-      mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`*100,0),
-             `Filled Rate` = round(`Filled Hours`/`Available Hours`*100, 0)) %>%
+      summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm = T),1),
+                `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = T),1),
+                `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = T)),1) %>% collect() %>%
+      mutate(`Booked Rate` = round(`Booked Hours`/`Available Hours`*100,1),
+             `Filled Rate` = round(`Filled Hours`/`Available Hours`*100, 1)) %>%
       mutate(APPT_WEEK = as.Date(APPT_WEEK))
     
     booked_filled <- booked_filled[order(as.Date(booked_filled$APPT_WEEK, format="%Y-%m-%d")),]
-    booked_filled$`0` <- NULL
+    booked_filled$`1` <- NULL
     
     print(paste0("End of slot processing in function ", Sys.time()))
     
@@ -7622,15 +7622,16 @@ print("1")
         xaxis = list(
           #title = "Date",
           title = "Week Starts",
-          font = list(size = 14),
-          tickfont = list(size = 14),
-          rangeslider = list(type = "date"),
+          #font = list(size = 14),
+          titlefont = list(size = 14),
+          tickfont = list(size = 12),
+          #rangeslider = list(type = "date"),
           mirror = TRUE,
           ticks = 'outside',
           showline = TRUE),
         yaxis = list(title = "Percent",
-                     font = list(size = 14),
-                     tickfont = list(size = 14),
+                     titlefont = list(size = 14),
+                     tickfont = list(size = 12),
                      ticksuffix = "%",
                      mirror = TRUE,
                      range = c(0, max(booked_filled$`Booked Rate`, na.rm = T)*1.2),
@@ -7656,33 +7657,35 @@ print("1")
       slot_fig %>% layout(
         #annotations = annon,
         #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-        title = "Template Slot Usage by Week", font=list(size=20),
+        title = "<b> Template Slot Usage by Week <b>", font=list(size=20),
         autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
         xaxis = list(
           autotick = F,
           ticktext = tick_text,
           tick_values = tick_values,
           tickmode = "array",
-          font = list(size = 16),
+          #font = list(size = 14), #16
           title = "Week Starts", 
-          tickfont = list(size = 14),
-          rangeslider = list(type = "date"),
-          tick0 = "2023-12-31",
-          dtick = 604800000, #set for 7 days
+          titlefont = list(size = 14),
+          tickfont = list(size = 12), #14
+          #rangeslider = list(type = "date"),
+          #tick0 = "2023-12-31",
+          #dtick = 604800000, #set for 7 days
           mirror = TRUE,
           ticks = 'outside',
           showline = TRUE),
         yaxis = list(
-          font = list(size = 14),
+          #font = list(size = 14),
           title = "Hours",
-          tickfont = list(size = 14),
+          tickfont = list(size = 12),
+          titlefont = list(size = 14),
           mirror = TRUE,
           ticks = 'outside',
           range = c(0, max(booked_filled$`Available Hours`, na.rm = T)*1.2),
           showline = TRUE),
         hovermode = "x unified") %>%
         layout(shapes = list(vline(current_week))) %>%
-        layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.15 ))
+        layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.1 ))
     }
     
     
@@ -7701,9 +7704,9 @@ print("1")
       
       summary.prov <- data %>%
         group_by(CAMPUS, CAMPUS_SPECIALTY, PROVIDER, SLOT_MONTH_YEAR) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE),0),
-                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = TRUE), 0),
-                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 0)) %>% collect()%>%
+        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE),1),
+                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = TRUE), 1),
+                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 1)) %>% collect()%>%
         filter(!is.na(CAMPUS))
       
       
@@ -7711,8 +7714,8 @@ print("1")
       summary.prov[is.na(summary.prov)] <- 0
       
       summary.prov <- summary.prov %>%
-        mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100,0), "%"),
-               `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100,0), "%")) %>%
+        mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100,1), "%"),
+               `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100,1), "%")) %>%
         gather(variable, value, 5:9) %>%
         spread(SLOT_MONTH_YEAR, value)
       
@@ -7734,16 +7737,16 @@ print("1")
       
       summary.prov.month <- data %>%
         group_by(CAMPUS, CAMPUS_SPECIALTY, PROVIDER, SLOT_MONTH_YEAR) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE), 0),
-                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm=TRUE), 0),
-                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm=TRUE), 0)) %>% collect()%>%
+        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm=TRUE), 1),
+                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm=TRUE), 1),
+                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm=TRUE), 1)) %>% collect()%>%
         filter(!is.na(CAMPUS))
       
       summary.prov.month[is.na(summary.prov.month)] <- 0
       
       summary.prov.month <- summary.prov.month %>%
-        mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100,0),
-               `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100,0)) %>%
+        mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100,1),
+               `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100,1)) %>%
         gather(variable, value, 5:9) %>%
         spread(SLOT_MONTH_YEAR, value)
       
@@ -7754,7 +7757,7 @@ print("1")
       summary.prov.month <- summary.prov.month %>% arrange(CAMPUS, CAMPUS_SPECIALTY, PROVIDER)
 
       
-      summary.prov.month <- data.frame(summary.prov.month[,1:4], `Monthly Average` = ceiling(rowMeans(summary.prov.month[,-1:-4], na.rm = TRUE)), check.names = FALSE)
+      summary.prov.month <- data.frame(summary.prov.month[,1:4], `Monthly Average` = round(rowMeans(summary.prov.month[,-1:-4], na.rm = TRUE),1), check.names = FALSE)
       names(summary.prov.month)[names(summary.prov.month) == "variable"] <- "Status"
       names(summary.prov.month)[names(summary.prov.month) == "CAMPUS_SPECIALTY"] <- "Specialty"
       names(summary.prov.month)[names(summary.prov.month) == "CAMPUS"] <- "Campus"
@@ -7796,16 +7799,16 @@ print("1")
 
       summary.dept <- data %>%
         group_by(CAMPUS, CAMPUS_SPECIALTY, SLOT_MONTH_YEAR) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm = TRUE), 0),
-                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = TRUE), 0),
-                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 0)) %>% collect()%>%
+        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm = TRUE), 1),
+                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = TRUE), 1),
+                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 1)) %>% collect()%>%
         filter(!is.na(CAMPUS))
       
       summary.dept[is.na(summary.dept)] <- 0
       
       summary.dept <- summary.dept %>%
-        mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100,0), "%"),
-               `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100,0), "%")) %>%
+        mutate(`Booked Rate (%)` = paste0(round((`Booked Hours`/`Available Hours`)*100,1), "%"),
+               `Filled Rate (%)` = paste0(round((`Filled Hours`/`Available Hours`)*100,1), "%")) %>%
         gather(variable, value, 4:8) %>%
         spread(SLOT_MONTH_YEAR, value)
       
@@ -7826,16 +7829,16 @@ print("1")
       
       summary.dept.month <- data %>%
         group_by(CAMPUS, CAMPUS_SPECIALTY, SLOT_MONTH_YEAR) %>%
-        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm = TRUE), 0),
-                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = TRUE), 0),
-                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 0)) %>% collect()%>%
+        dplyr::summarise(`Available Hours` = round(sum(AVAILABLE_HOURS, na.rm = TRUE), 1),
+                         `Booked Hours` = round(sum(BOOKED_HOURS, na.rm = TRUE), 1),
+                         `Filled Hours` = round(sum(ARRIVED_HOURS, na.rm = TRUE), 1)) %>% collect()%>%
         filter(!is.na(CAMPUS))
       
       summary.dept.month[is.na(summary.dept.month)] <- 0
       
       summary.dept.month <- summary.dept.month %>%
-        mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100,0),
-               `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100,0)) %>%
+        mutate(`Booked Rate (%)` = round((`Booked Hours`/`Available Hours`)*100,1),
+               `Filled Rate (%)` = round((`Filled Hours`/`Available Hours`)*100,1)) %>%
         gather(variable, value, 4:8) %>%
         spread(SLOT_MONTH_YEAR, value)
       
@@ -7856,7 +7859,7 @@ print("1")
       #summary.dept.month[summary.dept.month == as.character("NaN")] <- "-"
       
       
-      summary.dept.month <- data.frame(summary.dept.month[,1:3], `Monthly Average` = ceiling(rowMeans(summary.dept.month[,-1:-3], na.rm = TRUE)), check.names = FALSE)
+      summary.dept.month <- data.frame(summary.dept.month[,1:3], `Monthly Average` = round(rowMeans(summary.dept.month[,-1:-3], na.rm = TRUE), 1), check.names = FALSE)
       summary.dept.month <- summary.dept.month %>% mutate(`Monthly Average` = ifelse(is.na(`Monthly Average`), "-", `Monthly Average`))
       
       summary.dept.month$`Monthly Average` <- ifelse(summary.dept.month$Status %in% c("Booked Rate (%)", "Filled Rate (%)"), paste0(summary.dept.month$`Monthly Average`, "%"),summary.dept.month$`Monthly Average`)
