@@ -11703,6 +11703,8 @@ ggplot(data_base,
       
       percent_within_14_days$Total_YN <- ifelse(percent_within_14_days[[all_of(breakdown_filters)]] == "Total", 1,0)
       
+      percent_within_14_days <- setnames(percent_within_14_days, old = cols, new = cols_name)
+      
       percent_within_14_days
     }
     
