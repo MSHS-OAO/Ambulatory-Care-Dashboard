@@ -10021,7 +10021,8 @@ ggplot(data_base,
     }
     volume <- setnames(volume, old = cols, new = cols_name)
     #volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
-    volume$Total_YN <- ifelse(volume[["Specialty"]] == "Total", 1,0)
+    volume_test <<- volume
+    volume$Total_YN <- ifelse(volume[[all_of(name_2)]] == "Total", 1,0)
 
    
     months_df <- volume[,!(names(volume) %in% c(cols_name, "Total", "Total_YN"))]
@@ -10310,7 +10311,7 @@ ggplot(data_base,
     
     #volume$Total_YN <- ifelse(volume[[name_2]] == "Total", 1,0)
     
-    volume$Total_YN <- ifelse(volume[["Specialty"]] == "Total", 1,0)
+    volume$Total_YN <- ifelse(volume[[all_of(name_2)]] == "Total", 1,0)
     
     months_df <- volume[,!(names(volume) %in% c(cols_name, "Total", "Total_YN"))]
     months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
@@ -10614,7 +10615,7 @@ ggplot(data_base,
     # 
     # newpatients.ratio <- cbind(newpatients.ratio[months],Total_YN = newpatients.ratio[length(newpatients.ratio)])
     
-    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[["Specialty"]] == "Total", 1,0)
+    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[all_of(name_2)]] == "Total", 1,0)
     
     newpatients.ratio
     
@@ -11265,7 +11266,7 @@ ggplot(data_base,
     waitTime <- setnames(waitTime, old = cols, new = cols_name)
     
     
-    waitTime$Total_YN <- ifelse(waitTime[["Specialty"]] == "Total", 1,0)
+    waitTime$Total_YN <- ifelse(waitTime[[all_of(name_2)]] == "Total", 1,0)
     
     months_df <- waitTime[,!(names(waitTime) %in% c(cols_name, "Total", "Total_YN"))]
     months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
@@ -11782,7 +11783,7 @@ ggplot(data_base,
     
     am_pm <- setnames(am_pm, old = cols, new = cols_name)
     
-    am_pm$Total_YN <- ifelse(am_pm[["Specialty"]] == "Total", 1,0)
+    am_pm$Total_YN <- ifelse(am_pm[["Session"]] == "Total", 1,0)
     
     
     months_df <- am_pm[,!(names(am_pm) %in% c(cols_name, "Total", "Total_YN"))]
@@ -11944,7 +11945,7 @@ ggplot(data_base,
     
     am_pm <- setnames(am_pm, old = cols, new = cols_name)
     
-    am_pm$Total_YN <- ifelse(am_pm[["Specialty"]] == "Total", 1,0)
+    am_pm$Total_YN <- ifelse(am_pm[["Session"]] == "Total", 1,0)
     
     
     months_df <- am_pm[,!(names(am_pm) %in% c(cols_name, "Total", "Total_YN"))]
