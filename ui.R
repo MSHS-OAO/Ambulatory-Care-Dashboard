@@ -700,6 +700,8 @@ ui <- dashboardPage(
                                 plotOutput("volume3") %>%
                                   withSpinner(type = 5, color = "#d80b8c"),
                                 plotOutput("volume5") %>%
+                                  withSpinner(type = 5, color = "#d80b8c"),
+                                plotOutput("volume_am_pm") %>%
                                   withSpinner(type = 5, color = "#d80b8c")),
                          #tableOutput("volume5.1")),
                          column(2,)),
@@ -1312,7 +1314,7 @@ ui <- dashboardPage(
                                 radioButtons("breakdown_filters", label = h4("Breakdown by:"),
                                              choices = list("Visit Method" = "VISIT_METHOD", "Visit Type" = "APPT_TYPE",  "New vs. Established Patients*" = "NEW_PT3"),
                                              selected = "VISIT_METHOD"),
-                                h6("*New Patients defined by CPT codes for the first two tabs and by the scheduled data for the last three tabs.")
+                                h6("*New Patients defined by CPT codes for the first three tabs and by the scheduled data for the last three tabs.")
                                 )
                               
                        ),
@@ -1330,6 +1332,20 @@ ui <- dashboardPage(
                                                 h3(uiOutput(("vol_month_title"))),
                                                 DTOutput("volume_comparison_tb_month") %>% 
                                                   withSpinner(type = 5, color = "#d80b8c")
+                                              )
+                                     ),
+                                     tabPanel("Session Breakdown",
+                                              boxPlus(
+                                                title = "Session Breakdown", width = 12, status = "primary", 
+                                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                                h3(uiOutput(("am_pm_breakdown_title"))),
+                                                DTOutput("am_pm_breakdown_comparison") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c"),
+                                                hr(),
+                                                h3(uiOutput(("am_pm_breakdown_title_month"))),
+                                                DTOutput("am_pm_breakdown_comparison_month") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c")
+                                                
                                               )
                                      ),
                                      tabPanel("New Patient Ratio",
@@ -1376,7 +1392,6 @@ ui <- dashboardPage(
                                                   withSpinner(type = 5, color = "#d80b8c")
                                               )
                                      )
-                                     
                                      # tabPanel("No Show %",
                                      #          boxPlus(
                                      #            title = "No Show %", width = 12, status = "primary", 
