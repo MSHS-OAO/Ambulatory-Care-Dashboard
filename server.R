@@ -6720,7 +6720,7 @@ server <- function(input, output, session) {
     
     names(pts.by.day) <- c("Day","Visit.Method", "Volume")
     
-    totalDates <- data %>% group_by(APPT_DAY) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
+    totalDates <- data %>% group_by(APPT_DAY, VISIT_METHOD) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
     # totalDates <- as.data.frame(seq(as.Date(min(data$Appt.DTTM)), as.Date(max(data$Appt.DTTM)),by="days"))
     # names(totalDates) <- c("Dates")
     # totalDates$day <- format(as.Date(totalDates$Dates, format="%Y-%m-%d"), "%a")
@@ -6733,7 +6733,7 @@ server <- function(input, output, session) {
     
     #pts.by.day$Day.Count <- totalDates$Day[match(pts.by.day$Day, totalDates$APPT_DAY)]
     # pts.by.day <- inner_join(pts.by.day, totalDates, by = c("Day" = "APPT_DAY", "Visit.Method" = "VISIT_METHOD"))
-    pts.by.day <- inner_join(pts.by.day, totalDates, by = c("Day" = "APPT_DAY"))
+    pts.by.day <- inner_join(pts.by.day, totalDates, by = c("Day" = "APPT_DAY", "Visit.Method" = "VISIT_METHOD"))
     
     pts.by.day$Avg.Volume <- as.numeric(ceiling(pts.by.day$Volume/pts.by.day$Day.Count))
     
@@ -6996,7 +6996,7 @@ server <- function(input, output, session) {
     data_process <- data %>%
                     group_by(APPT_DAY, AM_PM) %>% summarise(total = n()) %>% collect()
     
-    total_dates <- data %>% group_by(APPT_DAY) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
+    total_dates <- data %>% group_by(APPT_DAY, AM_PM) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
     
     data_process <- inner_join(data_process, total_dates) %>% mutate(total = ceiling(total/Day.Count))
     
