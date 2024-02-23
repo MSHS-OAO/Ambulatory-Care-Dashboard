@@ -6709,21 +6709,18 @@ server <- function(input, output, session) {
     # pts.by.day$Visit.Method <- factor(pts.by.day$Visit.Method, levels = factor_levels)
     
     
-    data <- dataArrived_summary()
-   
-    #data <- arrived.data.rows.summary  %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")%>%
-    #  select(UNIQUEID, APPT_DAY, VISIT_METHOD, APPT_DATE_YEAR)  
-                                    
+    # data <- dataArrived_summary()
+    data <- dataArrived()
+    data_test <<- data
     
     
-    # pts.by.day <- aggregate(data$UNIQUEID, 
-    #                         by=list(data$APPT_DAY, data$VISIT_METHOD), FUN=NROW)
+    # pts.by.day <- data %>% group_by(APPT_DAY, VISIT_METHOD) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
+    pts.by.day <- data %>% group_by(APPT_DAY, VISIT_METHOD) %>% summarise(total = n()) %>% collect()
     
-    pts.by.day <- data %>% group_by(APPT_DAY, VISIT_METHOD) %>% summarise(total = sum(TOTAL_APPTS)) %>% collect()
     
     names(pts.by.day) <- c("Day","Visit.Method", "Volume")
     
-    totalDates <- data %>% group_by(APPT_DAY, VISIT_METHOD) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
+    totalDates <- data %>% group_by(APPT_DAY) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
     # totalDates <- as.data.frame(seq(as.Date(min(data$Appt.DTTM)), as.Date(max(data$Appt.DTTM)),by="days"))
     # names(totalDates) <- c("Dates")
     # totalDates$day <- format(as.Date(totalDates$Dates, format="%Y-%m-%d"), "%a")
@@ -6735,7 +6732,9 @@ server <- function(input, output, session) {
     # totalDates <- data %>% group_by(Visit.Method) %>% summarise(Day = distinct(Appt.DateYear))
     
     #pts.by.day$Day.Count <- totalDates$Day[match(pts.by.day$Day, totalDates$APPT_DAY)]
-    pts.by.day <- inner_join(pts.by.day, totalDates, by = c("Day" = "APPT_DAY", "Visit.Method" = "VISIT_METHOD"))
+    # pts.by.day <- inner_join(pts.by.day, totalDates, by = c("Day" = "APPT_DAY", "Visit.Method" = "VISIT_METHOD"))
+    pts.by.day <- inner_join(pts.by.day, totalDates, by = c("Day" = "APPT_DAY"))
+    
     pts.by.day$Avg.Volume <- as.numeric(ceiling(pts.by.day$Volume/pts.by.day$Day.Count))
     
     factor_levels <- sort(unique(pts.by.day$Visit.Method), na.last = T)
@@ -6994,15 +6993,15 @@ server <- function(input, output, session) {
     data <- dataArrived()
     #data <- arrived.data.rows %>% filter(CAMPUS == 'MSUS', CAMPUS_SPECIALTY == 'Allergy')
     
-    data_process <- data %>% mutate(hour = to_char(APPT_DTTM, 'HH24')) %>% group_by(APPT_MONTH_YEAR, APPT_DATE_YEAR, APPT_DAY, hour) %>% summarise(total = n()) %>% collect() %>%
-      mutate(am_pm = ifelse(hour >= 12, "PM", "AM")) %>% group_by(APPT_DAY, am_pm) %>% summarise(total = sum(total))
+    data_process <- data %>%
+                    group_by(APPT_DAY, AM_PM) %>% summarise(total = n()) %>% collect()
     
     total_dates <- data %>% group_by(APPT_DAY) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
     
     data_process <- inner_join(data_process, total_dates) %>% mutate(total = ceiling(total/Day.Count))
     
     
-    ggplot(data_process, aes(x = factor(APPT_DAY, levels = daysOfWeek.options), y = total, group = am_pm, fill = am_pm)) +
+    ggplot(data_process, aes(x = factor(APPT_DAY, levels = daysOfWeek.options), y = total, group = AM_PM, fill = AM_PM)) +
       geom_bar(position = "dodge", stat = "identity") +
       scale_fill_MountSinai('dark') +
       labs(x = NULL, y = "Patients",
