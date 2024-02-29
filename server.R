@@ -10461,7 +10461,26 @@ ggplot(data_base,
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
       
+      newpatients.ratio.overtime <- data %>% group_by(!!!syms(cols), NEW_PT3) %>%
+        summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
+        drop_na() %>%
+        spread(NEW_PT3, total) %>%
+        summarise(Total = round(`NEW`/(`NEW`+`ESTABLISHED`),2))
       
+      newpatients.ratio.overtime[is.na(newpatients.ratio.overtime)] <- 0
+      
+      newpatients.ratio.overtime.total <- data %>% group_by(!!!syms(tot_cols), NEW_PT3) %>%
+        summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
+        drop_na() %>%
+        spread(NEW_PT3, total) %>%
+        summarise(Total = round(`NEW`/(`NEW`+`ESTABLISHED`),2)) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        select(all_of(cols),  everything())
+      
+      newpatients.ratio.overtime.total[is.na(newpatients.ratio.overtime.total)] <- 0
+      
+      
+      newpatients.ratio.overtime <- bind_rows(newpatients.ratio.overtime, newpatients.ratio.overtime.total)  
       
       ### Calculate new patient ratio by breakdown
       newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
@@ -10470,6 +10489,8 @@ ggplot(data_base,
       
       drop <- c("ESTABLISHED","NEW", "<NA>")
       newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
+      
+      
       newpatients.ratio <- newpatients.ratio %>%
         pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                     values_from = ratio,
@@ -10491,20 +10512,22 @@ ggplot(data_base,
       #   split( .[,tot_cols] ) %>%
       #   purrr::map_df(., janitor::adorn_totals)
       
+      newpatients.ratio <- left_join(newpatients.ratio, newpatients.ratio.overtime)
+      
       
     }
     
     newpatients.ratio <- setnames(newpatients.ratio, old = cols, new = cols_name)
     
     #newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[name_2]] == "Total", 1,0)
-    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[["Specialty"]] == "Total", 1,0)
+    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[all_of(name_2)]] == "Total", 1,0)
     
     months_df <- newpatients.ratio[,!(names(newpatients.ratio) %in% c(cols_name, "Total", "Total_YN"))]
     months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
     
     
     index <- months+length(cols_name)
-    index <- c(1:length(cols_name),index,length(newpatients.ratio))
+    index <- c(1:length(cols_name),index,(length(newpatients.ratio)-1):length(newpatients.ratio))
     
     newpatients.ratio <- newpatients.ratio[index]
     
@@ -10534,7 +10557,7 @@ ggplot(data_base,
     # 
     # newpatients.ratio <- cbind(newpatients.ratio[months],Total_YN = newpatients.ratio[length(newpatients.ratio)])
     
-    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[["Specialty"]] == "Total", 1,0)
+ 
     
     newpatients.ratio
     
@@ -11450,6 +11473,12 @@ ggplot(data_base,
       noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
       noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
       
+      
+      month_names <- colnames(noShow_perc[,!(names(noShow_perc) %in% c(cols_name, "Total", "Total_YN"))])
+      
+      month_names_new <- format(as.Date(paste0(month_names, "-01"), format = "%b %Y-%d"), "%Y-%m")
+      noShow_perc <- setnames(noShow_perc, old = month_names, new = month_names_new)
+      
       noShow_perc
       
     #}
@@ -11704,6 +11733,11 @@ ggplot(data_base,
       percent_within_14_days$Total_YN <- ifelse(percent_within_14_days[[all_of(breakdown_filters)]] == "Total", 1,0)
       
       percent_within_14_days <- setnames(percent_within_14_days, old = cols, new = cols_name)
+      
+      month_names <- colnames(percent_within_14_days[,!(names(percent_within_14_days) %in% c(cols_name, "Total", "Total_YN"))])
+      
+      month_names_new <- format(as.Date(paste0(month_names, "-01"), format = "%b %Y-%d"), "%Y-%m")
+      percent_within_14_days <- setnames(percent_within_14_days, old = month_names, new = month_names_new)
       
       percent_within_14_days
     }
