@@ -10604,14 +10604,20 @@ ggplot(data_base,
     newpatients.ratio <- setnames(newpatients.ratio, old = cols, new = cols_name)
     
     #newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[name_2]] == "Total", 1,0)
-    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[all_of(name_2)]] == "Total", 1,0)
+    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[all_of(name_2)]] == "Total", "1","0")
     
     months_df <- newpatients.ratio[,!(names(newpatients.ratio) %in% c(cols_name, "Total", "Total_YN"))]
     months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
     
     
     index <- months+length(cols_name)
-    index <- c(1:length(cols_name),index,(length(newpatients.ratio)-1):length(newpatients.ratio))
+    
+    
+    if(breakdown_filters == "NEW_PT3"){
+      index <- c(1:length(cols_name),index,length(newpatients.ratio))
+    } else{
+      index <- c(1:length(cols_name),index,(length(newpatients.ratio)-1):length(newpatients.ratio)) 
+    }
     
     newpatients.ratio <- newpatients.ratio[index]
     
@@ -10688,7 +10694,7 @@ ggplot(data_base,
       formatStyle(
         'Total_YN',
         target = "row",
-        fontWeight = styleEqual(1, "bold")
+        fontWeight = styleEqual("1", "bold")
       )%>%
       formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
     path <- here::here("www")
