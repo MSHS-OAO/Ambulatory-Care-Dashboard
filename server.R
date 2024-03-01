@@ -7641,7 +7641,7 @@ print("1")
                      ticks = 'outside',
                      showline = TRUE),
         hovermode = "x unified",
-        hoverlabel = list(font=list(size=10))) %>%
+        hoverlabel = list(font=list(size=10), namelength = -1)) %>%
        layout(shapes = list(vline(current_week)))%>%
        layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.15 ))
        
@@ -7689,7 +7689,7 @@ print("1")
           range = c(0, max(booked_filled$`Available Hours`, na.rm = T)*1.2),
           showline = TRUE),
         hovermode = "x unified",
-        hoverlabel = list(font=list(size=10))) %>%
+        hoverlabel = list(font=list(size=10), namelength = -1)) %>%
         layout(shapes = list(vline(current_week))) %>%
         layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.1 ))
     }
