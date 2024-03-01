@@ -10435,6 +10435,9 @@ ggplot(data_base,
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
     
+    data_test <<- data
+    
+    
     if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
     }
@@ -10542,7 +10545,26 @@ ggplot(data_base,
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
       
+      newpatients.ratio.overtime <- data %>% group_by(!!!syms(cols), NEW_PT3) %>%
+        summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
+        drop_na() %>%
+        spread(NEW_PT3, total) %>%
+        summarise(Total = round(`NEW`/(`NEW`+`ESTABLISHED`),2))
       
+      newpatients.ratio.overtime[is.na(newpatients.ratio.overtime)] <- 0
+      
+      newpatients.ratio.overtime.total <- data %>% group_by(!!!syms(tot_cols), NEW_PT3) %>%
+        summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
+        drop_na() %>%
+        spread(NEW_PT3, total) %>%
+        summarise(Total = round(`NEW`/(`NEW`+`ESTABLISHED`),2)) %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        select(all_of(cols),  everything())
+      
+      newpatients.ratio.overtime.total[is.na(newpatients.ratio.overtime.total)] <- 0
+      
+      
+      newpatients.ratio.overtime <- bind_rows(newpatients.ratio.overtime, newpatients.ratio.overtime.total)  
       
       ### Calculate new patient ratio by breakdown
       newpatients.ratio <- newpatients.ratio %>% group_by(across(!!tot_cols), APPT_MADE_MONTH_YEAR) %>%
@@ -10551,6 +10573,8 @@ ggplot(data_base,
       
       drop <- c("ESTABLISHED","NEW", "<NA>")
       newpatients.ratio = newpatients.ratio[,!(names(newpatients.ratio) %in% drop)]
+      
+      
       newpatients.ratio <- newpatients.ratio %>%
         pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                     values_from = ratio,
@@ -10571,21 +10595,29 @@ ggplot(data_base,
       # newpatients.ratio <-  newpatients.ratio %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
       #   purrr::map_df(., janitor::adorn_totals)
-      # 
+      
+      newpatients.ratio <- left_join(newpatients.ratio, newpatients.ratio.overtime)
+      
       
     }
     
     newpatients.ratio <- setnames(newpatients.ratio, old = cols, new = cols_name)
     
     #newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[name_2]] == "Total", 1,0)
-    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[["Specialty"]] == "Total", 1,0)
+    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[all_of(name_2)]] == "Total", "1","0")
     
     months_df <- newpatients.ratio[,!(names(newpatients.ratio) %in% c(cols_name, "Total", "Total_YN"))]
     months <- order(as.yearmon(colnames(months_df), "%Y-%m"))
     
     
     index <- months+length(cols_name)
-    index <- c(1:length(cols_name),index,length(newpatients.ratio))
+    
+    
+    if(breakdown_filters == "NEW_PT3"){
+      index <- c(1:length(cols_name),index,length(newpatients.ratio))
+    } else{
+      index <- c(1:length(cols_name),index,(length(newpatients.ratio)-1):length(newpatients.ratio)) 
+    }
     
     newpatients.ratio <- newpatients.ratio[index]
     
@@ -10615,7 +10647,6 @@ ggplot(data_base,
     # 
     # newpatients.ratio <- cbind(newpatients.ratio[months],Total_YN = newpatients.ratio[length(newpatients.ratio)])
     
-    newpatients.ratio$Total_YN <- ifelse(newpatients.ratio[[all_of(name_2)]] == "Total", 1,0)
     
     newpatients.ratio
     
@@ -10663,7 +10694,7 @@ ggplot(data_base,
       formatStyle(
         'Total_YN',
         target = "row",
-        fontWeight = styleEqual(1, "bold")
+        fontWeight = styleEqual("1", "bold")
       )%>%
       formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
     path <- here::here("www")
@@ -11115,6 +11146,7 @@ ggplot(data_base,
     # 
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
+
     
     if(breakdown_filters == "NEW_PT3") {
       breakdown_filters <- "NEW_PT2"
@@ -11204,6 +11236,25 @@ ggplot(data_base,
       
       waitTime <- waitTime %>% arrange(across(all_of(tot_cols)))
       
+      
+      tot_over_time <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        group_by(!!!syms(cols)) %>%
+        dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
+        collect()
+      
+      tot_over_time$NEW_PT2 <- ifelse(tot_over_time$NEW_PT2 == "NEW", "New","Established")
+      
+      tot_all <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        group_by(!!!syms(tot_cols)) %>%
+        dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
+        collect() %>%
+        add_column(!!breakdown_filters := "Total")
+      
+      total <- bind_rows(tot_over_time, tot_all)
+      waitTime <- left_join(waitTime, total)
+      
       # waitTime <-  waitTime %>% dplyr::arrange(across(all_of(tot_cols))) %>%
       #   split( .[,tot_cols] ) %>%
       #   purrr::map_df(., janitor::adorn_totals)
@@ -11262,6 +11313,23 @@ ggplot(data_base,
       
       
       
+      tot_over_time <- data %>%
+        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols)) %>%
+        dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
+        collect()
+      
+      tot_all <- data %>%
+        filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols)) %>%
+        dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
+        collect() %>%
+        add_column(!!breakdown_filters := "Total")
+      
+      total <- bind_rows(tot_over_time, tot_all)
+      waitTime <- left_join(waitTime, total)
+      
+      
     }
     waitTime <- setnames(waitTime, old = cols, new = cols_name)
     
@@ -11274,7 +11342,7 @@ ggplot(data_base,
     
     
     index <- months+length(cols_name)
-    index <- c(1:length(cols_name),index,length(waitTime))
+    index <- c(1:length(cols_name),index,(length(waitTime)-1):length(waitTime))
     
     waitTime <- waitTime[index]
     
@@ -11338,7 +11406,8 @@ ggplot(data_base,
         target = "row",
         fontWeight = styleEqual(1, "bold")
       )%>%
-      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+      formatStyle(columns = c("Total"), fontWeight = 'bold')
     path <- here::here("www")
     
     dep <- htmltools::htmlDependency(
@@ -11366,9 +11435,7 @@ ggplot(data_base,
       data <- dataArrivedNoShow() %>%
         filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
 
-    
-    
-    
+
     
     if(breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
@@ -11453,8 +11520,53 @@ ggplot(data_base,
       
       noShow_perc <- noShow_perc %>% select(cols, everything())
       
+      tot_over_time <- data %>%
+        group_by(!!!syms(cols), APPT_STATUS) %>%
+        dplyr::summarise(Total = n()) %>% 
+        collect() %>%
+        #add_column(!!breakdown_filters := "Total") %>%
+        pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+        replace(is.na(.), 0) %>% 
+        group_by(!!!syms(cols)) %>%
+        mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+        select(-`No Show`,-Arrived) %>% 
+        #mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+        #pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+        ungroup() %>%
+        select(all_of(cols),  everything())
+      
+      tot_all <- data %>%
+        group_by(!!!syms(tot_cols), APPT_STATUS) %>%
+        dplyr::summarise(Total = n()) %>% 
+        collect() %>%
+        add_column(!!breakdown_filters := "Total") %>%
+        pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+        replace(is.na(.), 0) %>% 
+        group_by(!!!syms(cols)) %>%
+        mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+        select(-`No Show`,-Arrived) %>% 
+        # mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+        # pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+        ungroup() %>%
+        select(all_of(cols),  everything())
+      
+      total <- bind_rows(tot_over_time, tot_all)
+      
+      noShow_perc <- left_join(noShow_perc, total)
+      
+      
+
+      
+      
+      
       noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
       noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
+      
+      
+      month_names <- colnames(noShow_perc[,!(names(noShow_perc) %in% c(cols_name, "Total", "Total_YN"))])
+      
+      month_names_new <- format(as.Date(paste0(month_names, "-01"), format = "%b %Y-%d"), "%Y-%m")
+      noShow_perc <- setnames(noShow_perc, old = month_names, new = month_names_new)
       
       noShow_perc
       
@@ -11510,7 +11622,8 @@ ggplot(data_base,
         target = "row",
         fontWeight = styleEqual(1, "bold")
       )%>%
-      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+      formatStyle(columns = c("Total"), fontWeight = 'bold')
     path <- here::here("www")
     
     dep <- htmltools::htmlDependency(
@@ -11528,6 +11641,10 @@ ggplot(data_base,
     
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
+    
+    data_test <<- data
+    compare_filters_test <- compare_filters
+    breakdown_filters_test <<- breakdown_filters
     
     if(breakdown_filters == "NEW_PT3") {
       breakdown_filters <- "NEW_PT2"
@@ -11569,7 +11686,7 @@ ggplot(data_base,
     
     if(breakdown_filters == "NEW_PT2"){
       validate(
-        need(input$breakdown_filters != "NEW_PT2", ("Percent of New Patients Scheduled Within 14 Days cannot be viewed by New vs Established Patients"))
+        need(input$breakdown_filters != "NEW_PT3", ("Percent of New Patients Scheduled Within 14 Days cannot be viewed by New vs Established Patients"))
       )
       
     } else{
@@ -11645,7 +11762,71 @@ ggplot(data_base,
       
       percent_within_14_days <- full_join(percent_within_14_days, tot)
       
+      
+      waitTime_tot <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        filter(NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols)) %>%
+        dplyr::summarise(total_all = n()) %>%
+        collect()
+      
+      waitTime_within_14_days_tot <- data %>%
+        filter(WAIT_TIME >= 0, 
+               WAIT_TIME < 14.0001, 
+               NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(cols)) %>%
+        dplyr::summarise(total = n()) %>%
+        collect()
+      
+      tot_join_data <- inner_join(waitTime_tot, waitTime_within_14_days_tot)
+      
+      tot_join_data[is.na(tot_join_data)] <- 0
+      
+      tot <- tot_join_data %>% 
+        group_by(!!!syms(cols)) %>%
+        summarise(Total = paste0(round((total/total_all),2)*100, "%"))
+      
+      
+      waitTime_tot_overtime <- data %>%
+        filter(WAIT_TIME >= 0) %>%
+        filter(NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols)) %>%
+        dplyr::summarise(total_all = n()) %>%
+        collect()
+      
+      waitTime_within_14_days_tot_overtime <- data %>%
+        filter(WAIT_TIME >= 0, 
+               WAIT_TIME < 14.0001, 
+               NEW_PT2 == "NEW") %>%
+        group_by(!!!syms(tot_cols)) %>%
+        dplyr::summarise(total = n()) %>%
+        collect()
+      
+      tot_join_data <- inner_join(waitTime_tot_overtime, waitTime_within_14_days_tot_overtime)
+      
+      tot_join_data[is.na(tot_join_data)] <- 0
+      
+      tot_overtime <- tot_join_data %>% 
+        group_by(!!!syms(tot_cols)) %>%
+        summarise(Total = paste0(round((total/total_all),2)*100, "%")) %>%
+        add_column(!!breakdown_filters := "Total")
+      
+      total <- bind_rows(tot, tot_overtime)
+      
+      
+      percent_within_14_days <- left_join(percent_within_14_days, total)
+      
+      
+      
+      
       percent_within_14_days$Total_YN <- ifelse(percent_within_14_days[[all_of(breakdown_filters)]] == "Total", 1,0)
+      
+      percent_within_14_days <- setnames(percent_within_14_days, old = cols, new = cols_name)
+      
+      month_names <- colnames(percent_within_14_days[,!(names(percent_within_14_days) %in% c(cols_name, "Total", "Total_YN"))])
+      
+      month_names_new <- format(as.Date(paste0(month_names, "-01"), format = "%b %Y-%d"), "%Y-%m")
+      percent_within_14_days <- setnames(percent_within_14_days, old = month_names, new = month_names_new)
       
       percent_within_14_days
     }
@@ -11698,7 +11879,8 @@ ggplot(data_base,
         target = "row",
         fontWeight = styleEqual(1, "bold")
       )%>%
-      formatStyle(columns = c(1:num_of_cols), fontSize = '115%')
+      formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+      formatStyle(columns = c("Total"), fontWeight = 'bold')
     path <- here::here("www")
     
     dep <- htmltools::htmlDependency(
