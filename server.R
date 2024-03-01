@@ -7571,7 +7571,8 @@ print("1")
       mutate(APPT_WEEK = as.Date(APPT_WEEK))
     
     booked_filled <- booked_filled[order(as.Date(booked_filled$APPT_WEEK, format="%Y-%m-%d")),]
-    booked_filled$`1` <- NULL
+    booked_filled <- booked_filled %>% select(APPT_WEEK, `Available Hours`, `Booked Hours`,
+                                              `Filled Hours`, `Booked Rate`, `Filled Rate`)
     
     print(paste0("End of slot processing in function ", Sys.time()))
     
@@ -7622,10 +7623,12 @@ print("1")
         xaxis = list(
           #title = "Date",
           title = "Week Starts",
+          fixedrange = T,
           #font = list(size = 14),
           titlefont = list(size = 14),
           tickfont = list(size = 12),
           #rangeslider = list(type = "date"),
+          fixedrange = F,
           mirror = TRUE,
           ticks = 'outside',
           showline = TRUE),
@@ -7637,7 +7640,8 @@ print("1")
                      range = c(0, max(booked_filled$`Booked Rate`, na.rm = T)*1.2),
                      ticks = 'outside',
                      showline = TRUE),
-        hovermode = "x unified") %>%
+        hovermode = "x unified",
+        hoverlabel = list(font=list(size=10))) %>%
        layout(shapes = list(vline(current_week)))%>%
        layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.15 ))
        
@@ -7671,6 +7675,7 @@ print("1")
           #rangeslider = list(type = "date"),
           #tick0 = "2023-12-31",
           #dtick = 604800000, #set for 7 days
+          fixedrange = T,
           mirror = TRUE,
           ticks = 'outside',
           showline = TRUE),
@@ -7683,7 +7688,8 @@ print("1")
           ticks = 'outside',
           range = c(0, max(booked_filled$`Available Hours`, na.rm = T)*1.2),
           showline = TRUE),
-        hovermode = "x unified") %>%
+        hovermode = "x unified",
+        hoverlabel = list(font=list(size=10))) %>%
         layout(shapes = list(vline(current_week))) %>%
         layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.1 ))
     }
