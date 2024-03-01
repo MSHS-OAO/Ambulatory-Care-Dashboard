@@ -1679,7 +1679,8 @@ ui <- dashboardPage(
                                    selectedTextFormat = "count > 1", 
                                    countSelectedText = "{0}/{1} Visit Types", 
                                    dropupAuto = FALSE),
-                                 selected = default_PRC_name))
+                                 selected = default_PRC_name)
+                     )
                  ),
                  
                  
@@ -1719,9 +1720,17 @@ ui <- dashboardPage(
                      title = "Select Days of Week:",
                      width = 12, 
                      solidHeader = FALSE, 
-                     selectInput("daysOfWeek",label = NULL,
+                     pickerInput("daysOfWeek",label = NULL,
                                  choices=daysOfWeek.options, selected = daysOfWeek.options,
-                                 multiple=TRUE, selectize=TRUE))
+                                 multiple=TRUE,                        
+                                 options = pickerOptions(
+                                   liveSearch = TRUE,
+                                   actionsBox = TRUE,
+                                   selectedTextFormat = "count > 1", 
+                                   countSelectedText = "{0}/{1} Days", 
+                                   dropupAuto = FALSE)
+                                 )
+                     )
                  ),
                  
                  conditionalPanel(
@@ -1738,9 +1747,17 @@ ui <- dashboardPage(
                      title = "Select Days of Week:",
                      width = 12,
                      solidHeader = FALSE,
-                     selectInput("daysOfWeek",label = NULL,
+                     pickerInput("daysOfWeek",label = NULL,
                                  choices=daysOfWeek.options, selected = daysOfWeek.options,
-                                 multiple=TRUE, selectize=TRUE))
+                                 multiple=TRUE,                        
+                                 options = pickerOptions(
+                                   liveSearch = TRUE,
+                                   actionsBox = TRUE,
+                                   selectedTextFormat = "count > 1", 
+                                   countSelectedText = "{0}/{1} Days", 
+                                   dropupAuto = FALSE)
+                                 )
+                     )
                  ),
                  
                  
@@ -1759,9 +1776,17 @@ ui <- dashboardPage(
                      title = "Select Days of Week:",
                      width = 12, 
                      solidHeader = FALSE, 
-                     selectInput("daysOfWeekslot",label = NULL,
+                     pickerInput("daysOfWeekslot",label = NULL,
                                  choices = daysOfWeek.options, selected = daysOfWeek.options,
-                                 multiple=TRUE, selectize=TRUE))
+                                 multiple=TRUE, 
+                                 options = pickerOptions(
+                                   liveSearch = TRUE,
+                                   actionsBox = TRUE,
+                                   selectedTextFormat = "count > 1", 
+                                   countSelectedText = "{0}/{1} Days", 
+                                   dropupAuto = FALSE)
+                                 )
+                     )
                    
                    
                  ),
@@ -1779,9 +1804,17 @@ ui <- dashboardPage(
                      title = "Select Days of Week:",
                      width = 12, 
                      solidHeader = FALSE, 
-                     selectInput("daysOfWeekKpi",label = NULL,
+                     pickerInput("daysOfWeekKpi",label = NULL,
                                  choices=daysOfWeek.options, selected = daysOfWeek.options,
-                                 multiple=TRUE, selectize=TRUE))
+                                 multiple=TRUE,
+                                 options = pickerOptions(
+                                   liveSearch = TRUE,
+                                   actionsBox = TRUE,
+                                   selectedTextFormat = "count > 1", 
+                                   countSelectedText = "{0}/{1} Days", 
+                                   dropupAuto = FALSE)
+                                 )
+                     )
                  ),
                  
                  conditionalPanel(
@@ -1798,9 +1831,17 @@ ui <- dashboardPage(
                      title = "Select Days of Week:",
                      width = 12, 
                      solidHeader = FALSE, 
-                     selectInput("daysOfWeekUtil",label = NULL,
+                     pickerInput("daysOfWeekUtil",label = NULL,
                                  choices = daysOfWeek.options, selected = daysOfWeek.options,
-                                 multiple=TRUE, selectize=TRUE))
+                                 multiple=TRUE, 
+                                 options = pickerOptions(
+                                   liveSearch = TRUE,
+                                   actionsBox = TRUE,
+                                   selectedTextFormat = "count > 1", 
+                                   countSelectedText = "{0}/{1} Days", 
+                                   dropupAuto = FALSE)
+                                 )
+                     )
                  ),
                  
                  
