@@ -359,6 +359,9 @@ poolcon_upt <- dbPool(drv = odbc::odbc(),
 print("conn end")
 
 
+poolcon_production <- dbPool(drv = odbc::odbc(),
+                      dsn= "OAO Cloud DB Production")
+
 ### (4) Data Subset -----------------------------------------------------------------------------------------------------
 
 ### RStudio COnnect Data Read In
@@ -407,15 +410,16 @@ print("npr")
 
 
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-#slot.data <- tbl(poolcon, "AMBULATORY_SLOT") #%>%
-# group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT_NAME, PROVIDER,
-#          APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR, APPT_WEEK, APPT_DAY, APPT_TM_HR,
-#          RESOURCES, HOLIDAY, APPT_DTTM) %>%
-# dplyr::summarise(`Available Hours` = sum(AVAIL_MINUTES, na.rm = T)/60,
-#                  `Booked Hours` = sum(BOOKED_MINUTES, na.rm = T)/60,
-#                  `Arrived Hours` = sum(ARRIVED_MINUTES, na.rm = T)/60,
-#                  `Canceled Hours` = sum(CANCELED_MINUTES, na.rm = T)/60,
-#                  `No Show Hours` = sum(NOSHOW_MINUTES , LEFTWOBEINGSEEN_MINUTES)/60)
+slot.data <- tbl(poolcon_production, "AMBULATORY_SLOT_TABLE") %>%
+group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, PROV_ID, PROVIDER, APPT_WEEK, 
+         #APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR,  APPT_TM_HR, RESOURCES,  APPT_DTTM
+         SLOT_DATE, SLOT_MONTH_YEAR, APPT_DAY, HOLIDAY) %>%
+dplyr::summarise(AVAILABLE_HOURS = sum(AVAILABLE_HOURS, na.rm = T),
+                 BOOKED_HOURS = sum(SCHEDULED_HOURS, na.rm = T),
+                 ARRIVED_HOURS = sum(ARRIVED_HOURS, na.rm = T),
+                 #`Canceled Hours` = sum(CANCELED_HOURS, na.rm = T),
+                 #`No Show Hours` = sum(NOSHOW_HOURS, LEFTWOBEINGSEEN_MINUTES/60)
+                 ) 
 print("slot")
 
 # holid <- readRDS(paste0(wdpath,"/Data/holid.rds"))
@@ -836,7 +840,49 @@ groupByFilters_4 <- function(dt, campus, specialty, department, resource, provid
   return(result)
 }
 
-
+groupByFilters_slot <- function(dt, campus, specialty, department, provider,
+                             mindateRange, maxdateRange, daysofweek, holidays){
+  # result <- dt %>% filter(Campus %in% campus, Campus.Specialty %in% specialty, Department %in% department, Resource %in% resource, Provider %in% provider,
+  #                         Visit.Method %in% visitMethod, 
+  #                         mindateRange <= Appt.DateYear, maxdateRange >= Appt.DateYear, Appt.Day %in% daysofweek, !holiday %in% holidays)
+  # return(result)
+  
+  format <- "YYYY-MM-DD"
+  daysofweek <- toupper(daysofweek)
+  
+  
+  if(length(provider) >= 1000) {
+    result <- dt %>% filter(CAMPUS %in% campus, 
+                            CAMPUS_SPECIALTY %in% specialty, 
+                            DEPARTMENT %in% department, 
+                            #DEPARTMENT_NAME %in% department, 
+                            #RESOURCES %in% resource, 
+                            PROVIDER %in% provider,
+                            TO_DATE(mindateRange, format) <= SLOT_DATE, 
+                            TO_DATE(maxdateRange, format) >= SLOT_DATE, 
+                            APPT_DAY %in% daysofweek#, 
+                            #!HOLIDAY %in% holidays
+    )
+  } else{
+    result <- dt %>% filter(CAMPUS %in% campus, 
+                            CAMPUS_SPECIALTY %in% specialty, 
+                            DEPARTMENT %in% department, 
+                            #RESOURCES %in% resource, 
+                            PROVIDER %in% provider,
+                            TO_DATE(mindateRange, format) <= SLOT_DATE, 
+                            TO_DATE(maxdateRange, format) >= SLOT_DATE, 
+                            APPT_DAY %in% daysofweek#, 
+                            #!HOLIDAY %in% holidays
+    )
+  }
+  
+  # if(length(department) < 1000){
+  #   
+  #   result <- result %>% filter(DEPARTMENT_NAME %in% department)
+  # }
+  
+  return(result)
+}
 
 ## Filtered Slot Data Test
 groupByFilters_4_Test <- function(dt, campus, specialty, department, resource, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
@@ -1080,14 +1126,16 @@ default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
 
 default_resource_type <- c("Provider","Resource")
 
-default_provider <-   filters %>% filter(CAMPUS %in% default_campus & 
-                                                     CAMPUS_SPECIALTY %in% default_specialty& 
-                                                     DEPARTMENT %in% default_departments ) %>% 
-  select(PROVIDER)  %>% 
+
+default_provider <-   filters %>% filter(CAMPUS %in% default_campus &
+                                                     CAMPUS_SPECIALTY %in% default_specialty&
+                                                     DEPARTMENT %in% default_departments ) %>%
+  select(PROVIDER)  %>%
   summarise(PROVIDER= unique(PROVIDER)) %>% collect()
 default_provider <- sort(default_provider$PROVIDER, na.last = T)
 
-# default_provider <- c("LEE-WONG, MARY F", "MA, SONGHUI", "MEDICAL TECHNICIANS ALLERGY", "TEITEL, MICHAEL G.", "YOST, SHARON LYNN")
+#default_provider <- c("LEE-WONG, MARY F", "MA, SONGHUI", "MEDICAL TECHNICIANS ALLERGY", "TEITEL, MICHAEL G.", "YOST, SHARON LYNN")
+
 
 default_visit_method <-    filters %>% filter(CAMPUS %in% default_campus & 
                                                 CAMPUS_SPECIALTY %in% default_specialty & 
@@ -1107,6 +1155,29 @@ default_PRC_name <-  filters %>% filter(CAMPUS %in% default_campus &
   select(APPT_TYPE )  %>% 
   summarise(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
 default_PRC_name <- sort(default_PRC_name$APPT_TYPE, na.last = T) 
+
+
+# default values for slot filter
+default_specialty_slot <- slot.data %>% ungroup() %>% filter(CAMPUS %in% default_campus) %>% select( CAMPUS_SPECIALTY)  %>%
+  summarise(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+default_specialty_slot <- sort(default_specialty_slot$CAMPUS_SPECIALTY, na.last = T)
+
+default_department_slot <- slot.data %>% ungroup() %>%
+  filter(CAMPUS %in% default_campus & 
+           CAMPUS_SPECIALTY %in% default_specialty) %>% 
+  select( DEPARTMENT)  %>%
+  summarise(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
+default_department_slot <- sort(default_department_slot$DEPARTMENT, na.last = T)
+
+default_provider_slot <- slot.data %>% ungroup() %>% 
+  filter(CAMPUS %in% default_campus &
+           CAMPUS_SPECIALTY %in% default_specialty&
+           DEPARTMENT %in% default_department_slot ) %>%
+  select(PROVIDER)  %>%
+  summarise(PROVIDER= unique(PROVIDER)) %>% collect()
+default_provider_slot <- sort(default_provider_slot$PROVIDER, na.last = T)
+
+
 
 
 # util_date_start = min(utilization.data$Appt.DateYear)
@@ -1145,12 +1216,16 @@ dateRangeKpi_max = dateRange_max
 # dateRangeSlot_start <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_SLOT")
 # dateRangeSlot_start <- dbGetQuery(poolcon, dateRangeSlot_start)
 # dateRangeSlot_start <- as.Date(dateRangeSlot_start$MINDATE, format="%Y-%m-%d")
-dateRangeSlot_start <- dateRange_min
-
+dateRangeSlot_min <- dateRange_min
+dateRangeSlot_start <- Sys.Date() -30
 # dateRangeSlot_end <- glue("Select max(APPT_DTTM) AS maxDate FROM AMBULATORY_SLOT")
 # dateRangeSlot_end <- dbGetQuery(poolcon, dateRangeSlot_end)
 # dateRangeSlot_end <- as.Date(dateRangeSlot_end$MAXDATE, format="%Y-%m-%d")
-dateRangeSlot_end <- dateRange_max
+dateRangeSlot_max <- slot.data %>% ungroup() %>%
+  select(SLOT_DATE) %>% summarise(max = max(SLOT_DATE, na.rm = TRUE)) %>% collect()
+dateRangeSlot_max <- dateRangeSlot_max$max
+dateRangeSlot_end <- Sys.Date() +30
+
 
 dateRangepop_max <- glue("Select max(APPT_DATE_YEAR) AS maxDate FROM AMBULATORY_POPULATION WHERE APPT_STATUS = 'Arrived'")
 dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
