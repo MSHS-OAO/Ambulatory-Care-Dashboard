@@ -7654,7 +7654,7 @@ print("1")
       slot_fig %>% layout(
         #annotations = annon,
         #shapes=list(type='line', x0= max(dataAll()$Appt.DateYear + 2), x1= max(dataAll()$Appt.DateYear + 2), y0=50000, y1=50000, line=list(dash='dot', width=1)),
-        title = "Template Usage (%) by Week", font=list(size=20),
+        title = "<b>Template Usage (%) by Week <b>", font=list(size=20),
         autosize = T, margin=list( l = 50, r = 50, b = 100, t = 130,  pad = 4),
         xaxis = list(
           #title = "Date",
@@ -7679,7 +7679,7 @@ print("1")
         hovermode = "x unified",
         hoverlabel = list(font=list(size=10), namelength = -1)) %>%
        layout(shapes = list(vline(current_week)))%>%
-       layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.15 ))
+       layout(legend = list(orientation = 'h', xanchor = "center", x= 0.5, y = 1.1 ))
        
  
     } else{
