@@ -14047,18 +14047,22 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
       mutate(`New vs. Established` = ifelse(`New vs. Established` == "NEW", "New", "Established")) %>%
       ungroup()
     
-    data <- data %>% mutate(Total = rowSums(data[,6:length(data)], na.rm = TRUE))
+    data <- data %>% mutate(`Total Volume` = rowSums(data[,6:length(data)], na.rm = TRUE))
     
     options(knitr.kable.NA = '-')
     
+    total_rows <- nrow(data)
+    
     data %>%
       kable(booktabs = T,escape = F) %>%
-      kable_styling(bootstrap_options = "hover", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
+      kable_styling(bootstrap_options = "bordered", full_width = FALSE, position = "center", row_label_position = "c", font_size = 16) %>%
       row_spec(0,  background = "#212070", color = "white")%>%
       column_spec(1, border_left = "2px solid #dddedd", border_right = FALSE)%>%
       column_spec(length(data), border_left = "2px solid #dddedd", border_right = "2px solid #dddedd" )%>%
       column_spec(5, border_left = "2px solid #dddedd")%>%
-      collapse_rows(columns = 1:4, valign = "top")
+      #row_spec(total_rows,  extra_css = "border-bottom: 2px solid #dddedd") %>%
+      collapse_rows(columns = 1:4, valign = "top") 
+
     
     
   }
