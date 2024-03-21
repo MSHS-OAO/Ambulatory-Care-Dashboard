@@ -63,7 +63,11 @@ ui <- dashboardPage(
                          menuSubItem("No Shows/Overbooks", tabName = "noshows"),
                          menuSubItem("Bumps/Cancellations", tabName = "cancellations")
                 ),
-                menuItem("Template Utilization", tabName = "slotManagement", icon = icon("tachometer-alt")),
+                menuItem("Template Utilization", tabName = "temp_util", icon = icon("tachometer-alt"),
+                         menuSubItem("Visit Types", tabName = "appt_length_breakdown"),
+                          menuSubItem("Booked/Filled Rate", tabName = "slotManagement")
+                  
+                  ),
                 menuItem("Space Utilization", tabName = "utilization", icon = icon("percent")),
                 menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
                 
@@ -80,9 +84,6 @@ ui <- dashboardPage(
                          menuSubItem("By Metric", tabName = "Comparison"),
                          menuSubItem("Metrics Combined", tabName = "optimization" )
                          ),
-                menuItem("Template Optimization", tabName = "template_opt",
-                         menuSubItem("Visit Types", tabName = "appt_length_breakdown")),
-                
                 menuItem("Trending", tabName = "KPIs")
                 
                 
@@ -1029,7 +1030,7 @@ ui <- dashboardPage(
         
         tabItem(tabName = "slotManagement",
                 column(11,
-                       div("Access | Template Utilization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Template Utilization | Booked/Filled Rate", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                        textOutput("slot_usage"),
                        tags$head(tags$style("#slot_usage{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
@@ -1479,7 +1480,7 @@ ui <- dashboardPage(
         tabItem(tabName = "appt_length_breakdown",
                 column(11,
                        #profvis_ui("profiler"),
-                       div("Template Optimization: Visit Types", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Template Utilization: Visit Types", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        textOutput("practiceName_appt_length_breakdown"),
                        #textOutput("kpis_mem"),
                        tags$head(tags$style("#practiceName_appt_length_breakdown{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
@@ -1490,6 +1491,10 @@ ui <- dashboardPage(
                                       title = "Visit Type Summary", width = 12, status = "primary",
                                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                       column(3, valueBoxOutput("visit_type_summary", width = 12) %>%
+                                               withSpinner(type = 5, color = "#d80b8c")),
+                                      column(3, valueBoxOutput("visit_type_summary_new", width = 12) %>%
+                                               withSpinner(type = 5, color = "#d80b8c")),
+                                      column(3, valueBoxOutput("visit_type_summary_est", width = 12) %>%
                                                withSpinner(type = 5, color = "#d80b8c"))
                                     )),
                               br(),

@@ -13998,6 +13998,37 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     )
   })
   
+  output$visit_type_summary_new <- renderValueBox({
+    data <- dataAll()
+    
+    unique_visit_types <- data %>% filter(NEW_PT2 == "NEW") %>% select(APPT_TYPE) %>% distinct() %>% collect()
+    
+    number_visit_types <- nrow(unique_visit_types)
+    
+    valueBoxSpark(
+      value = paste0(number_visit_types),
+      title = "Unique New Visit Types",
+      subtitle = NULL,
+      width = 6,
+      color = "fuchsia"
+    )
+  })
+  
+  output$visit_type_summary_est <- renderValueBox({
+    data <- dataAll()
+    
+    unique_visit_types <- data %>% filter(NEW_PT2 == "ESTABLISHED") %>% select(APPT_TYPE) %>% distinct() %>% collect()
+    
+    number_visit_types <- nrow(unique_visit_types)
+    
+    valueBoxSpark(
+      value = paste0(number_visit_types),
+      title = "Unique Etablished Visit Types",
+      subtitle = NULL,
+      width = 6,
+      color = "fuchsia"
+    )
+  })
   
   output$appt_length_breakdown_tb_kable <- function() {
     
