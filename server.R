@@ -14023,7 +14023,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
     valueBoxSpark(
       value = paste0(number_visit_types),
-      title = "Unique Etablished Visit Types",
+      title = "Unique Established Visit Types",
       subtitle = NULL,
       width = 6,
       color = "fuchsia"
