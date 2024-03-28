@@ -7141,16 +7141,16 @@ server <- function(input, output, session) {
   
   # New Patient Ratio by Department
   output$newPtRatioByDept <- renderPlot({
-    data <- dataArrived_access_npr()
+    #data <- dataArrived_access_npr()
+    data <- dataArrived_summary()
     # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
 print("1")
 
-
     newpatients.ratio <- data %>%
-      group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
+      group_by(APPT_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
-      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
-      spread(NEW_PT3, Total) 
+      mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
+      spread(NEW_PT2, Total) 
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
@@ -7160,7 +7160,7 @@ print("1")
     newpatients.ratio <- newpatients.ratio %>% mutate(ratio = round(`NEW` / (`ESTABLISHED` + `NEW`),2))
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
-    ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group=1)) +
+    ggplot(newpatients.ratio, aes(x=APPT_MONTH_YEAR, y=ratio, group=1)) +
       # geom_bar(stat = "identity", width = 0.8, fill = "#221f72") +
       geom_line(size=1) +
       geom_line(color = "#221f72", size=1) +
@@ -7168,14 +7168,15 @@ print("1")
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
            title = "Monthly New Patient Ratio",
-           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           )+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
       theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 1),expand = c(0, 0), limits = c(0,max(newpatients.ratio$ratio)*1.5)
                          ) +
-      stat_summary(fun = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..*100,"%")), group = APPT_MADE_MONTH_YEAR), geom="text", color="black", 
+      stat_summary(fun = sum, vjust = -1, aes(label=ifelse(..y.. == 0,"",paste0(..y..*100,"%")), group = APPT_MONTH_YEAR), geom="text", color="black", 
                    size=5, fontface="bold.italic")+
       theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
     geom_point(size = 3.2)+
@@ -7189,15 +7190,17 @@ print("1")
   
   # New Patient Ratio by Provideer
   output$newPtRatioByProv <- renderPlot({
-    data <- dataArrived_access_npr()
+    #data <- dataArrived_access_npr()
+    
+    data <- dataArrived_summary()
     #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
     print("prov_running")
     newpatients.ratio <- data %>%
-      group_by(PROVIDER, APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      group_by(PROVIDER, APPT_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
       mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
-      group_by(PROVIDER,APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
+      group_by(PROVIDER,APPT_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = n()) %>%
       spread(NEW_PT2, Total)
     
@@ -7206,7 +7209,7 @@ print("1")
     newpatients.ratio <-  newpatients.ratio %>% mutate(ratio = round(`NEW` / (`ESTABLISHED` + `NEW`), 2))
     #newpatients.ratio$Appt.MonthYear <- as.Date(paste0(newpatients.ratio$Appt.MonthYear, "-01"), format="%Y-%m-%d") ## Create date-year column
     
-    ggplot(newpatients.ratio, aes(x=APPT_MADE_MONTH_YEAR, y=ratio, group = PROVIDER)) +
+    ggplot(newpatients.ratio, aes(x=APPT_MONTH_YEAR, y=ratio, group = PROVIDER)) +
       geom_line(aes(color=PROVIDER), size=1) +
       # scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
