@@ -7437,7 +7437,7 @@ print("1")
   
   # New Patient Wait Time
   output$newPtApptSourceByDept <- renderPlot({
-    data <- dataArrived_access()
+    data <- dataAll_access()
     # data <- kpi.all.data[arrivedNoShow.data.rows,]
     
     print("2")
@@ -7538,7 +7538,7 @@ print("1")
     noShows[is.na(noShows)] <- 0
     
     noShows$`No Show Perc` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
-    noShows$SCHEDULE_GROUPING_MAPPED[which(noShows$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
+    # noShows$SCHEDULE_GROUPING_MAPPED[which(noShows$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
     
     
     #noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)

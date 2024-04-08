@@ -410,13 +410,13 @@ print("npr")
 
 
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-slot.data <- tbl(poolcon_production, "AMBULATORY_SLOT_TABLE") %>%
+slot.data <- tbl(poolcon_upt, "AMBULATORY_SLOT_TABLE") %>%
 group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, PROV_ID, PROVIDER, APPT_WEEK, 
          #APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR,  APPT_TM_HR, RESOURCES,  APPT_DTTM
          SLOT_DATE, SLOT_MONTH_YEAR, APPT_DAY, HOLIDAY) %>%
-dplyr::summarise(AVAILABLE_HOURS = sum(AVAILABLE_HOURS, na.rm = T),
-                 BOOKED_HOURS = sum(SCHEDULED_HOURS, na.rm = T),
-                 ARRIVED_HOURS = sum(ARRIVED_HOURS, na.rm = T),
+dplyr::summarise(AVAILABLE_HOURS = sum(AVAILABLE_MINS, na.rm = T)/60,
+                 BOOKED_HOURS = sum(SCHEDULED_MINS, na.rm = T)/60,
+                 ARRIVED_HOURS = sum(ARRIVED_MINS, na.rm = T)/60,
                  #`Canceled Hours` = sum(CANCELED_HOURS, na.rm = T),
                  #`No Show Hours` = sum(NOSHOW_HOURS, LEFTWOBEINGSEEN_MINUTES/60)
                  ) 
