@@ -410,7 +410,7 @@ print("npr")
 
 
 # slot.data.subset <- readRDS(paste0(wdpath,"/Data/slot_data_subset.rds"))
-slot.data <- tbl(poolcon_upt, "AMBULATORY_SLOT_TABLE") %>%
+slot.data <- tbl(poolcon_production , "AMBULATORY_SLOT_TABLE") %>%
 group_by(CAMPUS, CAMPUS_SPECIALTY, DEPARTMENT, PROV_ID, PROVIDER, APPT_WEEK, 
          #APPT_DATE_YEAR, APPT_MONTH_YEAR, APPT_YEAR,  APPT_TM_HR, RESOURCES,  APPT_DTTM
          SLOT_DATE, SLOT_MONTH_YEAR, APPT_DAY, HOLIDAY) %>%
