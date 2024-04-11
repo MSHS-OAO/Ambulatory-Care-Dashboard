@@ -7089,7 +7089,7 @@ server <- function(input, output, session) {
       geom_bar(position = "dodge", stat = "identity") +
       scale_fill_MountSinai('dark') +
       labs(x = NULL, y = "Patients",
-           title = "Average Session* Breakdown",
+           title = "Average Patient Volume by Session*",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "*PM appointments occur after 12"
            )+
@@ -7836,6 +7836,9 @@ print("1")
       
       summary.prov
       
+      summary.prov <- summary.prov %>% mutate(Status = ifelse(Status == "Booked Rate (%)", "Scheduled Utilization (Booked Rate)", Status))
+      summary.prov <- summary.prov %>% mutate(Status = ifelse(Status == "Filled Rate (%)", "Provider Utilization (Filled Rate)", Status))
+      
     } else {
       
 
@@ -7926,6 +7929,9 @@ print("1")
       summary.dept <- summary.dept[order(match(summary.dept$Status, level.order)),]
       summary.dept <- summary.dept %>% arrange(Campus, Specialty)
       summary.dept
+      
+      summary.dept <- summary.dept %>% mutate(Status = ifelse(Status == "Booked Rate (%)", "Scheduled Utilization (Booked Rate)", Status))
+      summary.dept <- summary.dept %>% mutate(Status = ifelse(Status == "Filled Rate (%)", "Provider Utilization (Filled Rate)", Status))
     }
   })
   
