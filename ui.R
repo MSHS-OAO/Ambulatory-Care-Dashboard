@@ -52,12 +52,7 @@ ui <- dashboardPage(
                  color: #FFFFFF"),
                 tags$hr(style="border-color: #FFFFFF; margin-top: 10px;"),
                 menuItem("Access", tabName = "newPatients", icon = icon("plus-circle")),
-                menuItem("Cycle Time", tabName = "cycleTime", icon = icon("stopwatch"),
-                         menuSubItem("Cycle Time", tabName = "cycleTime"),
-                         menuSubItem("Check-in to Room-in", tabName = "roomInTime"),
-                         menuSubItem("Room-in to Visit-end", tabName = "roomInTime2")
-                ),
-                menuItem("Population", tabName = "population", icon = icon("users")),
+                menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
                 menuItem("Scheduling", tabName = "scheduling", icon = icon("calendar-day"),
                          menuSubItem("Scheduled/Arrived", tabName = "arrived"),
                          menuSubItem("No Shows/Overbooks", tabName = "noshows"),
@@ -65,11 +60,16 @@ ui <- dashboardPage(
                 ),
                 menuItem("Template", tabName = "temp_util", icon = icon("tachometer-alt"),
                          menuSubItem("Visit Types", tabName = "appt_length_breakdown"),
-                          menuSubItem("Template Utilization", tabName = "slotManagement")
-                  
-                  ),
+                         menuSubItem("Template Utilization", tabName = "slotManagement")
+                         
+                ),
+                menuItem("Cycle Time", tabName = "cycleTime", icon = icon("stopwatch"),
+                         menuSubItem("Cycle Time", tabName = "cycleTime"),
+                         menuSubItem("Check-in to Room-in", tabName = "roomInTime"),
+                         menuSubItem("Room-in to Visit-end", tabName = "roomInTime2")
+                ),
                 menuItem("Space Utilization", tabName = "utilization", icon = icon("percent")),
-                menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
+                menuItem("Population", tabName = "population", icon = icon("users")),
                 
                 br(),
                 tags$div("Analysis",
