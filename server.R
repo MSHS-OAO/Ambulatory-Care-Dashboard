@@ -483,85 +483,85 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
   
   
-  observeEvent(input$selectedCampus_slot,{
-    if(is.null(input$filter_list) && !is.null(input$selectedCampus_slot)){
-      #specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
-      selected_campus <- input$selectedCampus_slot
-      
-      specialty_choices <-  filters %>% filter(CAMPUS %in% selected_campus) %>% select( CAMPUS_SPECIALTY)  %>%
-        mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
-      specialty_choices <- sort(specialty_choices$CAMPUS_SPECIALTY, na.last = T)
-      print("3")
-      
-      updatePickerInput(session,
-                        inputId = "selectedSpecialty_slot",
-                        choices = specialty_choices,
-                        selected = specialty_choices
-      )
-    }
-    
-  },
-  ignoreInit = TRUE,
-  ignoreNULL = FALSE)
+  # observeEvent(input$selectedCampus_slot,{
+  #   if(is.null(input$filter_list) && !is.null(input$selectedCampus_slot)){
+  #     #specialty_choices <- sort(unique(kpi.all.data[kpi.all.data$Campus %in% input$selectedCampus, "Campus.Specialty"]))
+  #     selected_campus <- input$selectedCampus_slot
+  #     
+  #     specialty_choices <-  filters %>% filter(CAMPUS %in% selected_campus) %>% select( CAMPUS_SPECIALTY)  %>%
+  #       mutate(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
+  #     specialty_choices <- sort(specialty_choices$CAMPUS_SPECIALTY, na.last = T)
+  #     print("3")
+  #     
+  #     updatePickerInput(session,
+  #                       inputId = "selectedSpecialty_slot",
+  #                       choices = specialty_choices,
+  #                       selected = specialty_choices
+  #     )
+  #   }
+  #   
+  # },
+  # ignoreInit = TRUE,
+  # ignoreNULL = FALSE)
+  # 
+  # 
+  # observeEvent(input$selectedSpecialty_slot,{
+  #   if(is.null(input$filter_list) && !is.null(input$selectedSpecialty_slot)){
+  #     # department_choices <- sort(unique(kpi.all.data[
+  #     #   kpi.all.data$Campus %in% input$selectedCampus &
+  #     #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
+  #     selected_campus <- input$selectedCampus_slot
+  #     selected_specialty <- input$selectedSpecialty_slot
+  #     
+  #     department_choices <-  filters %>% filter(CAMPUS %in% selected_campus & 
+  #                                                 CAMPUS_SPECIALTY %in% selected_specialty) %>% select(DEPARTMENT)  %>%
+  #       mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
+  #     department_choices <- sort(department_choices$DEPARTMENT, na.last = T)
+  #     
+  #     updatePickerInput(session,
+  #                       inputId = "selectedDepartment_slot",
+  #                       choices = department_choices,
+  #                       selected = department_choices
+  #     )
+  #   }
+  #   
+  #   
+  # },
+  # ignoreInit = TRUE,
+  # ignoreNULL = FALSE)
   
   
-  observeEvent(input$selectedSpecialty_slot,{
-    if(is.null(input$filter_list) && !is.null(input$selectedSpecialty_slot)){
-      # department_choices <- sort(unique(kpi.all.data[
-      #   kpi.all.data$Campus %in% input$selectedCampus &
-      #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty, "Department"]))
-      selected_campus <- input$selectedCampus_slot
-      selected_specialty <- input$selectedSpecialty_slot
-      
-      department_choices <-  filters %>% filter(CAMPUS %in% selected_campus & 
-                                                  CAMPUS_SPECIALTY %in% selected_specialty) %>% select(DEPARTMENT)  %>%
-        mutate(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
-      department_choices <- sort(department_choices$DEPARTMENT, na.last = T)
-      
-      updatePickerInput(session,
-                        inputId = "selectedDepartment_slot",
-                        choices = department_choices,
-                        selected = department_choices
-      )
-    }
-    
-    
-  },
-  ignoreInit = TRUE,
-  ignoreNULL = FALSE)
-  
-  
-  observeEvent(input$selectedDepartment_slot,{
-    if(is.null(input$filter_list) && !is.null(input$selectedDepartment_slot)){
-      # provider_choices <- sort(unique(kpi.all.data[
-      #   kpi.all.data$Campus %in% input$selectedCampus &
-      #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
-      #     kpi.all.data$Department %in% input$selectedDepartment &
-      #     kpi.all.data$Resource %in% input$selectedResource, "Provider"]))
-      
-      selected_campus <- input$selectedCampus_slot
-      selected_specialty <- input$selectedSpecialty_slot
-      selected_department <- input$selectedDepartment_slot
-      
-      provider_choices <- filters %>% 
-        filter(CAMPUS %in% selected_campus & 
-                 CAMPUS_SPECIALTY %in% selected_specialty & 
-                 DEPARTMENT %in% selected_department) %>% 
-        summarise(PROVIDER= unique(PROVIDER)) %>% collect()
-      provider_choices <- sort(provider_choices$PROVIDER, na.last = T)
-      
-      
-      updatePickerInput(session,
-                        inputId = "selectedProvider_slot",
-                        choices = provider_choices,
-                        selected = provider_choices
-      )
-    }
-    
-    
-  },
-  ignoreInit = TRUE,
-  ignoreNULL = FALSE)
+  # observeEvent(input$selectedDepartment_slot,{
+  #   if(is.null(input$filter_list) && !is.null(input$selectedDepartment_slot)){
+  #     # provider_choices <- sort(unique(kpi.all.data[
+  #     #   kpi.all.data$Campus %in% input$selectedCampus &
+  #     #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
+  #     #     kpi.all.data$Department %in% input$selectedDepartment &
+  #     #     kpi.all.data$Resource %in% input$selectedResource, "Provider"]))
+  #     
+  #     selected_campus <- input$selectedCampus_slot
+  #     selected_specialty <- input$selectedSpecialty_slot
+  #     selected_department <- input$selectedDepartment_slot
+  #     
+  #     provider_choices <- filters %>% 
+  #       filter(CAMPUS %in% selected_campus & 
+  #                CAMPUS_SPECIALTY %in% selected_specialty & 
+  #                DEPARTMENT %in% selected_department) %>% 
+  #       summarise(PROVIDER= unique(PROVIDER)) %>% collect()
+  #     provider_choices <- sort(provider_choices$PROVIDER, na.last = T)
+  #     
+  #     
+  #     updatePickerInput(session,
+  #                       inputId = "selectedProvider_slot",
+  #                       choices = provider_choices,
+  #                       selected = provider_choices
+  #     )
+  #   }
+  #   
+  #   
+  # },
+  # ignoreInit = TRUE,
+  # ignoreNULL = FALSE)
   
   observeEvent(input$selectedResource, {
     if(is.null(input$filter_list) && !is.null(input$selectedResource)
@@ -1290,16 +1290,16 @@ server <- function(input, output, session) {
   dataAllSlot <- eventReactive(list(input$update_filter_slot),{
     print(paste0("Beginning of slot processing ", Sys.time()))
     validate(
-      need(input$selectedCampus_slot != "", "Please select a Campus"),
-      need(input$selectedSpecialty_slot != "", "Please select a Specialty"),
-      need(input$selectedDepartment_slot != "", "Please select a Department"),
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
       #need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider_slot != "", "Please select a Provider"),
+      need(input$selectedProvider != "", "Please select a Provider"),
       #need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       #need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     groupByFilters_slot(slot.data,
-                     input$selectedCampus_slot, input$selectedSpecialty_slot, input$selectedDepartment_slot, input$selectedProvider_slot,
+                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedProvider,
                      #input$selectedVisitMethod, input$selectedResource,
                      input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
     
@@ -1309,16 +1309,16 @@ server <- function(input, output, session) {
   
   dataAllSlot_comp <- eventReactive(list(input$update_filter_slot),{
     validate(
-      need(input$selectedCampus_slot != "", "Please select a Campus"),
-      need(input$selectedSpecialty_slot != "", "Please select a Specialty"),
-      need(input$selectedDepartment_slot != "", "Please select a Department"),
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
       #need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider_slot != "", "Please select a Provider"),
+      need(input$selectedProvider != "", "Please select a Provider"),
       #need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       #need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     groupByFilters_slot(slot.data,
-                     input$selectedCampus_slot, input$selectedSpecialty_slot, input$selectedDepartment_slot, input$selectedProvider_slot, 
+                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedProvider, 
                      #input$selectedResource, input$selectedVisitMethod,
                      input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
   }) 
@@ -2660,7 +2660,7 @@ server <- function(input, output, session) {
   
   output$slot_usage <- renderText({
     paste0("Based on data from ", input$dateRangeslot[1]," to ", input$dateRangeslot[2], 
-           " for ", paste(sort(input$selectedCampus_slot), collapse = ', '))
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
   output$cycle_time <- renderText({
