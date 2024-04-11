@@ -63,9 +63,9 @@ ui <- dashboardPage(
                          menuSubItem("No Shows/Overbooks", tabName = "noshows"),
                          menuSubItem("Bumps/Cancellations", tabName = "cancellations")
                 ),
-                menuItem("Template Utilization", tabName = "temp_util", icon = icon("tachometer-alt"),
+                menuItem("Template", tabName = "temp_util", icon = icon("tachometer-alt"),
                          menuSubItem("Visit Types", tabName = "appt_length_breakdown"),
-                          menuSubItem("Booked/Filled Rate", tabName = "slotManagement")
+                          menuSubItem("Template Utilization", tabName = "slotManagement")
                   
                   ),
                 menuItem("Space Utilization", tabName = "utilization", icon = icon("percent")),
@@ -1030,7 +1030,7 @@ ui <- dashboardPage(
         
         tabItem(tabName = "slotManagement",
                 column(11,
-                       div("Template Utilization: Booked/Filled Rate", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Template Utilization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                        textOutput("slot_usage"),
                        tags$head(tags$style("#slot_usage{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
