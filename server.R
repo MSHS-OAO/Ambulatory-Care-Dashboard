@@ -7168,7 +7168,7 @@ print("1")
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
            title = "Monthly New Patient Ratio",
-           subtitle = paste0("Based on visits scheduled for ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -7460,7 +7460,7 @@ print("1")
       scale_fill_MountSinai('purple')+
       labs(x=NULL, y=NULL,
            title = "New Patient Source",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
                              "\nTotal New Patients = ",prettyNum(sum(newpatients.ratio$Total), big.mark = ','))
            )+
       theme_new_line()+
@@ -7501,7 +7501,7 @@ print("1")
       scale_fill_MountSinai('pink')+
       labs(x=NULL, y=NULL, 
            title = "Median Wait Time to New Appointment",
-           subtitle = paste0("Based scheduled on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
                              "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
            # caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service)."
            #caption = "*New patients defined by CPT codes (level of service)."
