@@ -7147,10 +7147,10 @@ print("1")
 
 
     newpatients.ratio <- data %>%
-      group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
+      group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
-      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
-      spread(NEW_PT3, Total) 
+      mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
+      spread(NEW_PT2, Total) 
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
@@ -7168,7 +7168,7 @@ print("1")
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
            title = "Monthly New Patient Ratio",
-           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on visits scheduled for ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -7212,7 +7212,7 @@ print("1")
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       labs(x=NULL, y=NULL, 
            title = "New Patient Ratio Over Time by Provider",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("bottom")+
@@ -7526,19 +7526,27 @@ print("1")
     # No Show Rate
     
     data.noShow <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    data.noShow_test <<- data.noShow
     # data.noShow <- arrivedNoShow.data
     
     print("3")
     noShows <- data.noShow %>%
-      filter(NEW_PT2 == "NEW") %>%
+      filter(NEW_PT3 == "NEW") %>%
       group_by(SCHEDULE_GROUPING_MAPPED, APPT_STATUS) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
+    
+    cols <- c("Arrived", "No Show", "Canceled")
+    
+    missing <- setdiff(cols, names(noShows))
+    if(length(missing) > 0) {
+      noShows[missing] <- NA
+    }
   
     noShows[is.na(noShows)] <- 0
     
     noShows$`No Show Perc` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
-    noShows$SCHEDULE_GROUPING_MAPPED[which(noShows$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
+    # noShows$SCHEDULE_GROUPING_MAPPED[which(noShows$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
     
     
     #noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)
@@ -7556,7 +7564,7 @@ print("1")
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
            title = "New Patient No Show Rate*",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on visits from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "*No Show Rate = (No Show + Same-day Canceled) / (Arrived + No Show + Same-day Canceled)"
            )+
       theme_new_line()+
