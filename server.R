@@ -7105,7 +7105,7 @@ server <- function(input, output, session) {
       #           size=5, fontface="bold", position = position_dodge(width = 0.9), vjust = 4.5)#+
       # stat_summary(fun = sum, vjust = 4, aes(label=ifelse(..y.. == 0,"",..y..), group = APPT_DAY), geom="text", color="black",
       #              size=5, fontface="bold.italic")
-      geom_text(size = 4, aes(label = total), position = position_dodge(width = 1), vjust = -1, color = "black", fontface="bold.italic")
+      geom_text(size = 5, aes(label = total), position = position_dodge(width = 1), vjust = -1, color = "black", fontface="bold.italic")
     
     
     
