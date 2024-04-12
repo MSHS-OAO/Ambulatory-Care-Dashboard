@@ -7089,8 +7089,8 @@ server <- function(input, output, session) {
       geom_bar(position = "dodge", stat = "identity") +
       scale_fill_MountSinai('dark') +
       labs(x = NULL, y = "Patients",
-           title = "Average Session* Breakdown",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           title = "Average Patient Volume by Session*",
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "*PM appointments occur after 12"
            )+
       scale_y_continuous(limits=c(0,(max(data_process$total, na.rm = TRUE))*2))+
@@ -7101,10 +7101,11 @@ server <- function(input, output, session) {
       geom_col(position = position_dodge())+
       # geom_text(data=subset(data_process, total > 0.15 * max(total)),aes(label=total), color="white", 
       #           size=5, fontface="bold", position = position_stack(vjust = 0.5))+
-      geom_text(data=subset(data_process, total > 0.15 * max(total)),aes(label=total), color="white",
-                size=5, fontface="bold", position = position_dodge(width = 0.9), vjust = 4.5)#+
+      # geom_text(data=subset(data_process, total > 0.15 * max(total)),aes(label=total), color="white",
+      #           size=5, fontface="bold", position = position_dodge(width = 0.9), vjust = 4.5)#+
       # stat_summary(fun = sum, vjust = 4, aes(label=ifelse(..y.. == 0,"",..y..), group = APPT_DAY), geom="text", color="black",
       #              size=5, fontface="bold.italic")
+      geom_text(size = 4, aes(label = total), position = position_dodge(width = 1), vjust = -1, color = "black", fontface="bold.italic")
     
     
     
@@ -7836,6 +7837,9 @@ print("1")
       
       summary.prov
       
+      summary.prov <- summary.prov %>% mutate(Status = ifelse(Status == "Booked Rate (%)", "Scheduled Utilization (Booked Rate)", Status))
+      summary.prov <- summary.prov %>% mutate(Status = ifelse(Status == "Filled Rate (%)", "Provider Utilization (Filled Rate)", Status))
+      
     } else {
       
 
@@ -7926,6 +7930,9 @@ print("1")
       summary.dept <- summary.dept[order(match(summary.dept$Status, level.order)),]
       summary.dept <- summary.dept %>% arrange(Campus, Specialty)
       summary.dept
+      
+      summary.dept <- summary.dept %>% mutate(Status = ifelse(Status == "Booked Rate (%)", "Scheduled Utilization (Booked Rate)", Status))
+      summary.dept <- summary.dept %>% mutate(Status = ifelse(Status == "Filled Rate (%)", "Provider Utilization (Filled Rate)", Status))
     }
   })
   
