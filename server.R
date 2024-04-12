@@ -7090,7 +7090,7 @@ server <- function(input, output, session) {
       scale_fill_MountSinai('dark') +
       labs(x = NULL, y = "Patients",
            title = "Average Patient Volume by Session*",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "*PM appointments occur after 12"
            )+
       scale_y_continuous(limits=c(0,(max(data_process$total, na.rm = TRUE))*2))+
@@ -7101,10 +7101,11 @@ server <- function(input, output, session) {
       geom_col(position = position_dodge())+
       # geom_text(data=subset(data_process, total > 0.15 * max(total)),aes(label=total), color="white", 
       #           size=5, fontface="bold", position = position_stack(vjust = 0.5))+
-      geom_text(data=subset(data_process, total > 0.15 * max(total)),aes(label=total), color="white",
-                size=5, fontface="bold", position = position_dodge(width = 0.9), vjust = 4.5)#+
+      # geom_text(data=subset(data_process, total > 0.15 * max(total)),aes(label=total), color="white",
+      #           size=5, fontface="bold", position = position_dodge(width = 0.9), vjust = 4.5)#+
       # stat_summary(fun = sum, vjust = 4, aes(label=ifelse(..y.. == 0,"",..y..), group = APPT_DAY), geom="text", color="black",
       #              size=5, fontface="bold.italic")
+      geom_text(size = 4, aes(label = total), position = position_dodge(width = 1), vjust = -1, color = "black", fontface="bold.italic")
     
     
     
