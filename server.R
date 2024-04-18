@@ -6242,7 +6242,7 @@ server <- function(input, output, session) {
   
     
     header_above <- c("Subtitle" = 3)
-    names(header_above) <- paste0(c("Based on visits from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))
+    names(header_above) <- paste0(c("Based on arrived visits from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))
     total <-  which(zip_table$`Zip Code Layer` == "Total") - 1 
     # northern_ny_ref_1 <- northern_ny_ref + 1
     # northern <- c(northern_ny_ref_1:total)
