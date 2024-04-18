@@ -7167,7 +7167,7 @@ print("1")
       geom_point(color = "#221f72", size = 3.2) +
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
-           title = "Monthly New Patient Ratio",
+           title = "Monthly Percent of New Patients Scheduled",
            subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
@@ -7211,7 +7211,7 @@ print("1")
       # scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       labs(x=NULL, y=NULL, 
-           title = "New Patient Ratio Over Time by Provider",
+           title = "Monthly Percent of New Patients Scheduled by Provider",
            subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
@@ -9855,7 +9855,7 @@ ggplot(data_base,
     if(input$compare_filters == "PROVIDER"){
       name_1 <- "Provider"
     }
-    paste0("Monthly New Patient Ratio (%) by ", name_1 , " and ", name_2)
+    paste0("Monthly Percent of New Patients Scheduled by ", name_1 , " and ", name_2)
   })
   
   
@@ -10815,7 +10815,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('Monthly New Patient Ratio = Total new arrived patients within the month / Total new and established patients within the month')
+                            htmltools::em('Monthly Percent of New Patients Scheduled = Total new arrived patients within the month / Total new and established patients within the month')
                           ),
                           options = list(
                             scrollX = TRUE,
@@ -13018,7 +13018,7 @@ ggplot(data_base,
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
     
-    newpatients.ratio$Metrics <- "New Patient Ratio"
+    newpatients.ratio$Metrics <- "Percent of New Patients Scheduled"
     #newpatients.ratio <- newpatients.ratio %>% select(cols, Metrics, `Dynamic Target`, everything(), Total)
     newpatients.ratio <- newpatients.ratio %>% select(cols, Metrics, everything(), Total)
     

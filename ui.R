@@ -972,7 +972,7 @@ ui <- dashboardPage(
                              ))),
                        fluidRow(
                          boxPlus(
-                           title = "New Patient Visit Ratio", width = 12, status = "primary",
+                           title = "Percent of New Patients Scheduled", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            tabBox(
                              title = NULL, type = "pills",
@@ -1358,9 +1358,9 @@ ui <- dashboardPage(
                                                 
                                               )
                                      ),
-                                     tabPanel("New Patient Ratio",
+                                     tabPanel("Percent of New Patients Scheduled",
                                               boxPlus(
-                                                title = "New Patient Ratio", width = 12, status = "primary", 
+                                                title = "Percent of New Patients Scheduled", width = 12, status = "primary", 
                                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                                 # h2(uiOutput(("npr_day_title"))),
                                                 # br(),
