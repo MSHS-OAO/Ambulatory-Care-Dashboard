@@ -52,24 +52,24 @@ ui <- dashboardPage(
                  color: #FFFFFF"),
                 tags$hr(style="border-color: #FFFFFF; margin-top: 10px;"),
                 menuItem("Access", tabName = "newPatients", icon = icon("plus-circle")),
-                menuItem("Cycle Time", tabName = "cycleTime", icon = icon("stopwatch"),
-                         menuSubItem("Cycle Time", tabName = "cycleTime"),
-                         menuSubItem("Check-in to Room-in", tabName = "roomInTime"),
-                         menuSubItem("Room-in to Visit-end", tabName = "roomInTime2")
-                ),
-                menuItem("Population", tabName = "population", icon = icon("users")),
+                menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
                 menuItem("Scheduling", tabName = "scheduling", icon = icon("calendar-day"),
                          menuSubItem("Scheduled/Arrived", tabName = "arrived"),
                          menuSubItem("No Shows/Overbooks", tabName = "noshows"),
                          menuSubItem("Bumps/Cancellations", tabName = "cancellations")
                 ),
-                menuItem("Template Utilization", tabName = "temp_util", icon = icon("tachometer-alt"),
+                menuItem("Template", tabName = "temp_util", icon = icon("tachometer-alt"),
                          menuSubItem("Visit Types", tabName = "appt_length_breakdown"),
-                          menuSubItem("Booked/Filled Rate", tabName = "slotManagement")
-                  
-                  ),
+                         menuSubItem("Template Utilization", tabName = "slotManagement")
+                         
+                ),
+                menuItem("Cycle Time", tabName = "cycleTime", icon = icon("stopwatch"),
+                         menuSubItem("Cycle Time", tabName = "cycleTime"),
+                         menuSubItem("Check-in to Room-in", tabName = "roomInTime"),
+                         menuSubItem("Room-in to Visit-end", tabName = "roomInTime2")
+                ),
                 menuItem("Space Utilization", tabName = "utilization", icon = icon("percent")),
-                menuItem("Volume", tabName = "volume", icon = icon("chart-bar")),
+                menuItem("Population", tabName = "population", icon = icon("users")),
                 
                 br(),
                 tags$div("Analysis",
@@ -1030,7 +1030,7 @@ ui <- dashboardPage(
         
         tabItem(tabName = "slotManagement",
                 column(11,
-                       div("Template Utilization: Booked/Filled Rate", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       div("Template Utilization", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
                        textOutput("slot_usage"),
                        tags$head(tags$style("#slot_usage{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
