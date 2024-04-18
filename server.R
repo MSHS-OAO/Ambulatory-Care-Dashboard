@@ -7531,7 +7531,7 @@ print("1")
     
     print("3")
     noShows <- data.noShow %>%
-      filter(NEW_PT3 == "NEW") %>%
+      filter(NEW_PT2 == "NEW") %>%
       group_by(SCHEDULE_GROUPING_MAPPED, APPT_STATUS) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
@@ -10597,6 +10597,7 @@ ggplot(data_base,
     }
     if(breakdown_filters == "NEW_PT3"){
       name_2 <- "New vs. Established"
+      breakdown_filters <- "NEW_PT2"
     }
     
     
@@ -10621,7 +10622,7 @@ ggplot(data_base,
     
     
     
-    if(breakdown_filters == "NEW_PT3"){
+    if(breakdown_filters == "NEW_PT2"){
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
       newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
@@ -10688,26 +10689,26 @@ ggplot(data_base,
     }else{
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
+      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
-        spread(NEW_PT3, total)
+        spread(NEW_PT2, total)
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
       
-      newpatients.ratio.overtime <- data %>% group_by(!!!syms(cols), NEW_PT3) %>%
+      newpatients.ratio.overtime <- data %>% group_by(!!!syms(cols), NEW_PT2) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
-        spread(NEW_PT3, total) %>%
+        spread(NEW_PT2, total) %>%
         summarise(Total = round(`NEW`/(`NEW`+`ESTABLISHED`),2))
       
       newpatients.ratio.overtime[is.na(newpatients.ratio.overtime)] <- 0
       
-      newpatients.ratio.overtime.total <- data %>% group_by(!!!syms(tot_cols), NEW_PT3) %>%
+      newpatients.ratio.overtime.total <- data %>% group_by(!!!syms(tot_cols), NEW_PT2) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
-        spread(NEW_PT3, total) %>%
+        spread(NEW_PT2, total) %>%
         summarise(Total = round(`NEW`/(`NEW`+`ESTABLISHED`),2)) %>%
         add_column(!!breakdown_filters := "Total") %>%
         select(all_of(cols),  everything())
@@ -10764,7 +10765,7 @@ ggplot(data_base,
     index <- months+length(cols_name)
     
     
-    if(breakdown_filters == "NEW_PT3"){
+    if(breakdown_filters == "NEW_PT2"){
       index <- c(1:length(cols_name),index,length(newpatients.ratio))
     } else{
       index <- c(1:length(cols_name),index,(length(newpatients.ratio)-1):length(newpatients.ratio)) 
@@ -12893,11 +12894,11 @@ ggplot(data_base,
     
     # data_access <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-    newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
+    newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
       summarise(total = SUM(TOTAL_APPTS)) %>% collect()%>%  # it was n()
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
-      spread(NEW_PT3, total)
+      spread(NEW_PT2, total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
@@ -12933,11 +12934,11 @@ ggplot(data_base,
     newpatients.ratio <- newpatients.ratio %>% spread(APPT_MADE_MONTH_YEAR, ratio)
     
     
-    total <- data_access %>% group_by(!!!syms(cols), NEW_PT3) %>%
+    total <- data_access %>% group_by(!!!syms(cols), NEW_PT2) %>%
       summarise(total = SUM(TOTAL_APPTS)) %>%
       collect()%>% 
       drop_na() %>%
-      spread(NEW_PT3, total) %>%
+      spread(NEW_PT2, total) %>%
       replace(is.na(.), 0) 
 
     col_index <- which(!(c(cols, "NEW", "ESTABLISHED") %in% colnames(total)))
@@ -13038,7 +13039,7 @@ ggplot(data_base,
     
    
     waitTime <- data_access %>%
-      filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>% 
+      filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>% 
       group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>% 
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
       #filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% 
@@ -13064,7 +13065,7 @@ ggplot(data_base,
                   values_from = medWaitTime)
     
     total <- data_access %>%
-      filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>% 
+      filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>% 
       group_by(!!!syms(cols)) %>% 
       dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
       collect() 
