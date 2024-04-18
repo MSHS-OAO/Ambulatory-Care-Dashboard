@@ -6242,7 +6242,7 @@ server <- function(input, output, session) {
   
     
     header_above <- c("Subtitle" = 3)
-    names(header_above) <- paste0(c("Based on arrived data from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))
+    names(header_above) <- paste0(c("Based on visits from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))
     total <-  which(zip_table$`Zip Code Layer` == "Total") - 1 
     # northern_ny_ref_1 <- northern_ny_ref + 1
     # northern <- c(northern_ny_ref_1:total)
@@ -7212,7 +7212,7 @@ print("1")
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       labs(x=NULL, y=NULL, 
            title = "New Patient Ratio Over Time by Provider",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("bottom")+
@@ -7260,7 +7260,7 @@ print("1")
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Monthly Median Wait Time to New and Established Appointment",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -7315,7 +7315,7 @@ print("1")
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Percent of New Patients Scheduled Within 14 Days",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -7413,7 +7413,7 @@ print("1")
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Percent of New Patients Scheduled Within 14 Days",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
