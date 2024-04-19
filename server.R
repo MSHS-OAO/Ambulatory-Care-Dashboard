@@ -6086,16 +6086,19 @@ server <- function(input, output, session) {
     data <- dataArrivedPop() 
     #data <-  arrived.data.rows %>%  filter(CAMPUS== "MSUS")
     
+    data <- uniquePts_df_system(data)
+    
+    
     data <- data %>%
       group_by(COVERAGE) %>%
-      dplyr::summarise(`Total Arrived Patients` = n()) %>%
-      mutate(Percent = round((`Total Arrived Patients`/sum(`Total Arrived Patients`, na.rm = T))*100, 1)) %>%
+      dplyr::summarise(`Arrived Unique Patients` = n()) %>%
+      mutate(Percent = round((`Arrived Unique Patients`/sum(`Arrived Unique Patients`, na.rm = T))*100, 1)) %>%
       rename(Payer = COVERAGE) %>% collect() %>%
       mutate(Percent = paste0(sprintf("%.1f", Percent), "%")) %>%
-      arrange(desc(`Total Arrived Patients`))
+      arrange(desc(`Arrived Unique Patients`))
     
     data$Payer[is.na(data$Payer)] <- "Unknown"
-    data$`Total Arrived Patients` <- prettyNum(data$`Total Arrived Patients`, big.mark = ',')
+    data$`Arrived Unique Patients` <- prettyNum(data$`Arrived Unique Patients`, big.mark = ',')
     
     data %>%
       knitr::kable("html", align = "l") %>%
