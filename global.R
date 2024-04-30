@@ -1299,3 +1299,366 @@ header$children[[2]]$children[[1]] <-  tags$a(href='https://peak.mountsinai.org/
 print("ui end")
 
 bin_mapping <- tbl(poolcon, "AMBULATORY_BIN_MAPPING") %>% collect() %>% mutate(BIN_CYCLE = as.numeric(BIN_CYCLE)) 
+
+
+
+## Shiny Module Function
+default_campus_choices <- filters %>% select(CAMPUS) %>% distinct() %>% pull()
+
+# Define UI for Campus
+CampusInput <- function(id) {
+  box(
+    title = "Select Campus:",
+    width = 12,
+    height = "100px",
+    solidHeader = FALSE,
+    pickerInput(NS(id, "selectedCampus"),
+                label=NULL,
+                choices=  default_campus_choices,
+                multiple=TRUE,
+                options = pickerOptions(
+                  liveSearch = TRUE,
+                  actionsBox = FALSE,
+                  selectedTextFormat = "count > 1", 
+                  countSelectedText = paste0("{0}/{1}", "Campus"), 
+                  dropupAuto = FALSE),
+                selected = "MSUS"))
+}
+
+
+# Define Server for Campus
+CampusServer <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    reactive({
+      input$selectedCampus
+    })
+  })
+}
+
+
+# Define UI for Specialty
+SpecialtyInput <- function(id) {
+  
+  box(
+    title = "Select Specialty:",
+    width = 12,
+    height = "100px",
+    solidHeader = FALSE,
+    pickerInput(NS(id,"selectedSpecialty"),
+                label=NULL,
+                choices= NULL,
+                multiple=TRUE,
+                options = pickerOptions(
+                  liveSearch = TRUE,
+                  actionsBox = TRUE,
+                  selectedTextFormat = "count > 1",
+                  countSelectedText = "{0}/{1} Specialties",
+                  dropupAuto = FALSE),
+                selected = NULL))
+}
+
+
+
+
+
+# Define Server for Specialty
+SpecialtyServer <- function(id, data, campus) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(campus(), {
+      if(!is.null(campus())) {
+        
+        selected_campus <- campus()
+        
+        specailty_choices <- data %>% filter(CAMPUS %in% selected_campus) %>%
+          select(CAMPUS_SPECIALTY) %>% distinct() %>% pull()
+        
+        updatePickerInput(session,
+                          inputId = id,
+                          choices = specailty_choices,
+                          selected = specailty_choices)
+      }
+    }, 
+    ignoreNULL = FALSE)
+    
+    return(reactive(input[[paste0("selectedSpecialty")]]))
+  })
+  
+}
+
+
+
+# Define UI for Department
+DepartmentInput <- function(id) {
+  box(
+    title = "Select Department:",
+    width = 12,
+    height = "100px",
+    solidHeader = FALSE,
+    pickerInput(NS(id, "selectedDepartment"),
+                label=NULL,
+                choices= NULL,
+                multiple=TRUE,
+                options = pickerOptions(
+                  liveSearch = TRUE,
+                  actionsBox = TRUE,
+                  selectedTextFormat = "count > 1",
+                  countSelectedText = "{0}/{1} Departments",
+                  dropupAuto = FALSE),
+                selected = NULL))
+}
+
+
+# Define Server for Department
+DepartmentServer <- function(id, data, campus, specialty) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(specialty(), {
+      # print(specialty())
+      if(!is.null(specialty())) {
+        
+        selected_campus <- campus()
+        selected_specialty <- specialty()
+        
+        department_choices <-  data %>% dplyr::filter(CAMPUS %in% selected_campus, CAMPUS_SPECIALTY %in% selected_specialty) %>%
+          select(DEPARTMENT) %>% distinct() %>% pull()
+        
+        # print(department_choices)
+        updatePickerInput(session,
+                          inputId = id,
+                          choices = department_choices,
+                          selected = department_choices)
+      }
+    }, 
+    ignoreNULL = FALSE)
+    
+    return(reactive(input[["selectedDepartment"]]))
+    
+  })
+  
+}
+
+
+ResourceInput <- function(id) {
+  box(
+    title = "Select Resource Type:",
+    width = 12,
+    height = "100px",
+    solidHeader = FALSE,
+    checkboxGroupButtons(
+      inputId = NS(id, "selectedResource"),
+      label = NULL, 
+      choices = c("Provider","Resource"),
+      justified = TRUE,
+      checkIcon = list(
+        yes = icon("ok", lib = "glyphicon")),
+      selected = c("Provider","Resource"))
+  )}
+
+
+ResourceServer <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    
+    return(reactive(input[["selectedResource"]]))
+    #reactive({input$selectedResource})
+  })
+  
+}
+
+
+
+ProviderInput <- function(id) {
+  box(
+    title = "Select Provider:",
+    width = 12,
+    height = "100px",
+    solidHeader = FALSE, 
+    pickerInput(NS(id, "selectedProvider"), 
+                label=NULL,
+                choices= NULL,
+                multiple=TRUE,
+                options = pickerOptions(
+                  liveSearch = TRUE,
+                  actionsBox = TRUE,
+                  selectedTextFormat = "count > 1", 
+                  countSelectedText = "{0}/{1} Providers", 
+                  dropupAuto = FALSE),
+                selected = NULL))
+}
+
+
+
+
+
+
+# Define Server for Provider
+ProviderServer <- function(id, data, campus, specialty, department, resource) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(department(), {
+      if(!is.null(department())) {
+        
+        selected_campus <- campus()
+        selected_specialty <- specialty()
+        selected_department <- department()
+        selected_resource <- resource()
+        print(resource())
+        
+        provider_choices <-  data %>% dplyr::filter(CAMPUS %in% selected_campus, 
+                                                    CAMPUS_SPECIALTY %in% selected_specialty,
+                                                    DEPARTMENT %in% selected_department,
+                                                    RESOURCES %in% selected_resource
+        ) %>%
+          select(PROVIDER) %>% distinct() %>% pull()
+        
+        updatePickerInput(session,
+                          inputId = id,
+                          choices = provider_choices,
+                          selected = provider_choices)
+      }
+    }, 
+    ignoreNULL = FALSE)
+    
+    return(reactive(input[["selectedProvider"]]))
+    
+  })
+  
+}
+
+
+#Define UI for Visit Method
+VisitMethodInput <- function(id) {
+  
+  box(
+    title = "Select Visit Method:",
+    width = 12,
+    height = "100px",
+    solidHeader = FALSE,
+    pickerInput(NS(id, "selectedVisitMethod"),
+                label=NULL,
+                choices= NULL,
+                multiple=TRUE,
+                options = pickerOptions(
+                  liveSearch = TRUE,
+                  actionsBox = TRUE,
+                  selectedTextFormat = "count > 1", 
+                  countSelectedText = "{0}/{1} Visit Methods", 
+                  dropupAuto = FALSE),
+                selected = NULL))
+  
+}
+
+
+# Define Server for Visit Method
+VisitMethodServer <- function(id, data, campus, specialty, department, resource, provider) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(provider(), {
+      if(!is.null(provider())) {
+        
+        selected_campus <- campus()
+        selected_specialty <- specialty()
+        selected_department <- department()
+        selected_resource <- resource()
+        selected_provider <- provider()
+        
+        if(length(selected_provider) >1000){
+          
+          visit_choices <-  data %>% dplyr::filter(CAMPUS %in% selected_campus, 
+                                                   CAMPUS_SPECIALTY %in% selected_specialty,
+                                                   DEPARTMENT %in% selected_department,
+                                                   RESOURCES %in% selected_resource) %>%
+            select(VISIT_METHOD) %>% distinct() %>% pull()
+          
+        }else{
+          
+          visit_choices <-  data %>% dplyr::filter(CAMPUS %in% selected_campus, 
+                                                   CAMPUS_SPECIALTY %in% selected_specialty,
+                                                   DEPARTMENT %in% selected_department,
+                                                   RESOURCES %in% selected_resource,
+                                                   PROVIDER %in% selected_provider) %>%
+            select(VISIT_METHOD) %>% distinct() %>% pull()
+          
+        }
+        
+        updatePickerInput(session,
+                          inputId = id,
+                          choices = visit_choices,
+                          selected = visit_choices)
+      }
+    }, 
+    ignoreNULL = FALSE)
+    
+    return(reactive(input[["selectedVisitMethod"]]))
+    
+  })
+  
+}
+
+
+#Define UI for Visit Type
+VisitTypeInput <- function(id) {
+  box(
+    title = "Select Visit Type:",
+    width = 12,
+    height = "100px",
+    solidHeader = FALSE,
+    pickerInput(NS(id, "selectedPRCName"),
+                label=NULL,
+                choices= NULL,
+                multiple=TRUE,
+                options = pickerOptions(
+                  liveSearch = TRUE,
+                  actionsBox = TRUE,
+                  selectedTextFormat = "count > 1", 
+                  countSelectedText = "{0}/{1} Visit Types", 
+                  dropupAuto = FALSE),
+                selected = NULL))
+  
+}
+
+
+# Define Server for Visit Method
+VisitTypeServer <- function(id, data, campus, specialty, department, resource, provider, visit_method) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(visit_method(), {
+      if(!is.null(visit_method())) {
+        
+        selected_campus <- campus()
+        selected_specialty <- specialty()
+        selected_department <- department()
+        selected_resource <- resource()
+        selected_provider <- provider()
+        selected_visit_method <- visit_method()
+        
+        if(length(selected_provider) >1000){
+          
+          prc_choices <-  data %>% dplyr::filter(CAMPUS %in% selected_campus, 
+                                                 CAMPUS_SPECIALTY %in% selected_specialty,
+                                                 DEPARTMENT %in% selected_department,
+                                                 RESOURCES %in% selected_resource,
+                                                 VISIT_METHOD %in% selected_visit_method) %>%
+            select(APPT_TYPE) %>% distinct() %>% pull()
+          
+        }else{
+          
+          prc_choices <-  data %>% dplyr::filter(CAMPUS %in% selected_campus, 
+                                                 CAMPUS_SPECIALTY %in% selected_specialty,
+                                                 DEPARTMENT %in% selected_department,
+                                                 RESOURCES %in% selected_resource,
+                                                 PROVIDER %in% selected_provider,
+                                                 VISIT_METHOD %in% selected_visit_method) %>%
+            select(APPT_TYPE) %>% distinct() %>% pull()
+          
+        }
+        
+        updatePickerInput(session,
+                          inputId = id,
+                          choices =  prc_choices,
+                          selected =  prc_choices)
+      }
+    }, 
+    ignoreNULL = FALSE)
+    
+    return(reactive(input[["selectedPRCName"]]))
+    
+  })
+  
+}
+
