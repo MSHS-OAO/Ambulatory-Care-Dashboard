@@ -248,6 +248,38 @@ server <- function(input, output, session) {
   #   updatePickerInput(session, "filter_list", choices = filter_choices)
   # }, once = TRUE)
   
+  
+  ## Access Module
+  selected_campus <- CampusServer("selectedCampus")
+  selected_specialty <- SpecialtyServer("selectedSpecialty", data = filters, campus = selected_campus)
+  selected_department <- DepartmentServer("selectedDepartment", data = filters,
+                                          campus = selected_campus, specialty = selected_specialty)
+  
+  selected_resource <- ResourceServer("selectedResource")
+  selected_provider <- ProviderServer("selectedProvider", data = filters,
+                                      campus = selected_campus, 
+                                      specialty = selected_specialty,
+                                      department = selected_department, 
+                                      resource = selected_resource)
+  
+  selected_visitmethod <- VisitMethodServer("selectedVisitMethod", data = filters,
+                                            campus = selected_campus, 
+                                            specialty = selected_specialty,
+                                            department = selected_department, 
+                                            resource = selected_resource,
+                                            provider = selected_provider)
+  
+  selected_visittype <- VisitTypeServer("selectedPRCName", data = filters,
+                                        campus = selected_campus, 
+                                        specialty = selected_specialty,
+                                        department = selected_department, 
+                                        resource = selected_resource,
+                                        provider = selected_provider,
+                                        visit_method = selected_visitmethod
+  )
+  
+  
+  
   observeEvent(input$save_filters,{
     user <- user()
     
@@ -947,6 +979,42 @@ server <- function(input, output, session) {
                    input$dateRange[1], input$dateRange[2], input$daysOfWeek, input$excludeHolidays)
 
   })
+  
+  
+  
+  dataAll_access_new <- eventReactive(input$update_filter_access, {
+    
+    selected_campus <- selected_campus()
+    selected_specialty <- selected_specialty()
+    selected_department <-  selected_department()
+    selected_resource <- selected_resource()
+    selected_provider <- selected_provider()
+    selected_visitmethod <- selected_visitmethod()
+    selected_visittype <- selected_visittype()
+    
+    
+    if(length(selected_provider) >= 1000){
+      
+      data <- historical.data %>% filter(CAMPUS %in%  selected_campus, 
+                                         CAMPUS_SPECIALTY %in% selected_specialty,
+                                         DEPARTMENT %in% selected_department,
+                                         RESOURCES %in% selected_resource,
+                                         #PROVIDER %in% selected_provider
+      )
+      
+    }
+    else {
+      
+      data <- historical.data %>% filter(CAMPUS %in%  selected_campus, 
+                                         CAMPUS_SPECIALTY %in% selected_specialty,
+                                         DEPARTMENT %in% selected_department,
+                                         RESOURCES %in% selected_resource,
+                                         PROVIDER %in% selected_provider
+      )
+    }
+  })
+  
+
   
   dataArrivedNoShow_access <- eventReactive(list(input$update_filters),{
     validate(
@@ -7226,7 +7294,10 @@ print("1")
   
   # New Patient Wait Time
   output$newPtWaitTimeByDept <- renderPlot({
-    data <- dataAll_access()
+    #data <- dataAll_access()
+    data <-   dataAll_access_new()
+    
+    test_new <<- data
     # data <- kpi.all.data[all.data.rows,] %>% filter(Campus == "MSUS")
     
     #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))

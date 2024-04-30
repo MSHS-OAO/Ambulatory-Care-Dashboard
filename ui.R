@@ -159,6 +159,14 @@ ui <- dashboardPage(
                     ")),
       
       tags$style(HTML("
+    #update_filter_access {
+    position: absolute;
+    left: 25px
+    
+    }
+                    ")),
+      
+      tags$style(HTML("
     #update_filter_slot {
     position: absolute;
     left: 25px
@@ -1563,6 +1571,9 @@ ui <- dashboardPage(
         tags$head(tags$style(HTML("#update_filters {background-color: #d80b8c;
                                                 color: #FFFFFF;
                                                 font-size: 18px}"))),
+        tags$head(tags$style(HTML("#update_filter_access {background-color: #d80b8c;
+                                                color: #FFFFFF;
+                                                font-size: 18px}"))),
         tags$head(tags$style(HTML("#update_filter_slot {background-color: #d80b8c;
                                                 color: #FFFFFF;
                                                 font-size: 18px}"))),
@@ -1588,7 +1599,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
+                   input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    br(),
                    actionButton("update_filters", "CLICK TO UPDATE", width = "80%"),
                    br(),
@@ -1790,11 +1801,28 @@ ui <- dashboardPage(
                  #                        selected = unique(kpi.all.data$Visit.Method)))
                  #   )),
                  
+                 conditionalPanel(condition = "input.sbm == 'newPatients'",
+                                  
+                                  br(),
+                                  actionButton("update_filter_access", "CLICK TO UPDATE", width = "80%"),
+                                  br(),
+                                  br(),
+                                  
+                                  CampusInput("selectedCampus"),
+                                  SpecialtyInput("selectedSpecialty"),
+                                  DepartmentInput("selectedDepartment"),
+                                  ResourceInput("selectedResource"),
+                                  ProviderInput("selectedProvider"),
+                                  VisitMethodInput("selectedVisitMethod"),
+                                  VisitTypeInput("selectedPRCName")            
+                                   
+                                  ),
                  
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
+        input.sbm=='newPatients' | 
+                   input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Date Range:",
                      width = 12, 
@@ -2091,6 +2119,9 @@ ui <- dashboardPage(
                   "top", options = list(container = "body")
         ),
         bsTooltip("update_filters", "Select filters and press the button to update the tool",
+                  "top", options = list(container = "body")
+        ),
+        bsTooltip("update_filter_access", "Select filters and press the button to update the tool",
                   "top", options = list(container = "body")
         )
       ),
