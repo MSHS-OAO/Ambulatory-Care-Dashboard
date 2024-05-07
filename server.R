@@ -275,8 +275,12 @@ server <- function(input, output, session) {
                                         department = selected_department, 
                                         resource = selected_resource,
                                         provider = selected_provider,
-                                        visit_method = selected_visitmethod
-  )
+                                        visit_method = selected_visitmethod)
+  
+  
+  selected_dateRange <- DateServer("dateRange")
+  selected_daysOfWeek <- WeekServer("daysOfWeek")
+  selected_holiday <- HolidayServer("excludeHolidays")
   
   
   
@@ -983,7 +987,6 @@ server <- function(input, output, session) {
   
   
   dataAll_access_new <- eventReactive(input$update_filter_access, {
-    
     selected_campus <- selected_campus()
     selected_specialty <- selected_specialty()
     selected_department <-  selected_department()
@@ -991,7 +994,23 @@ server <- function(input, output, session) {
     selected_provider <- selected_provider()
     selected_visitmethod <- selected_visitmethod()
     selected_visittype <- selected_visittype()
+    selected_dateRange <- selected_dateRange()
+    min_date <- selected_dateRange[1]
+    end_date <- selected_dateRange[2]
+    selected_days <- selected_daysOfWeek()
+    selected_holiday <- selected_holiday()
     
+    validate(
+      need(selected_campus != "", "Please select a Campus"),
+      need(selected_specialty != "", "Please select a Specialty"),
+      need(selected_department != "", "Please select a Department"),
+      need(selected_resource != "", "Please select a Resource"),
+      need(selected_provider != "", "Please select a Provider"),
+      need(selected_visitmethod != "", "Please select a Visit Method"),
+      need(selected_visittype != "", "Please select a Visit Type")
+    )
+    
+    format <- "YYYY-MM-DD HH24:MI:SS"
     
     if(length(selected_provider) >= 1000){
       
@@ -999,7 +1018,12 @@ server <- function(input, output, session) {
                                          CAMPUS_SPECIALTY %in% selected_specialty,
                                          DEPARTMENT %in% selected_department,
                                          RESOURCES %in% selected_resource,
-                                         #PROVIDER %in% selected_provider
+                                         VISIT_METHOD %in% selected_visitmethod,
+                                         #PROVIDER %in% selected_provider,
+                                         TO_DATE(min_date, format) <= APPT_MADE_DATE_YEAR, 
+                                         TO_DATE(end_date, format) >= APPT_MADE_DATE_YEAR, 
+                                         APPT_DAY %in% selected_days
+                                         #HOLIDAY %in% selected_holiday
       )
       
     }
@@ -1009,12 +1033,148 @@ server <- function(input, output, session) {
                                          CAMPUS_SPECIALTY %in% selected_specialty,
                                          DEPARTMENT %in% selected_department,
                                          RESOURCES %in% selected_resource,
-                                         PROVIDER %in% selected_provider
+                                         PROVIDER %in% selected_provider,
+                                         VISIT_METHOD %in% selected_visitmethod,
+                                         TO_DATE(min_date, format) <= APPT_MADE_DATE_YEAR, 
+                                         TO_DATE(end_date, format) >= APPT_MADE_DATE_YEAR, 
+                                         APPT_DAY %in% selected_days
+                                         #HOLIDAY %in% selected_holiday
       )
+    }
+    
+    if(length(selected_visittype) < 1000){
+      
+      data <- data %>% filter(APPT_TYPE %in% selected_visittype)
     }
   })
   
-
+  dataArrived_access_new <- eventReactive(list(input$update_filter_access),{
+    
+    selected_campus <- selected_campus()
+    selected_specialty <- selected_specialty()
+    selected_department <-  selected_department()
+    selected_resource <- selected_resource()
+    selected_provider <- selected_provider()
+    selected_visitmethod <- selected_visitmethod()
+    selected_visittype <- selected_visittype()
+    selected_dateRange <- selected_dateRange()
+    min_date <- selected_dateRange[1]
+    end_date <- selected_dateRange[2]
+    selected_days <- selected_daysOfWeek()
+    selected_holiday <- selected_holiday()
+    
+    validate(
+      need(selected_campus != "", "Please select a Campus"),
+      need(selected_specialty != "", "Please select a Specialty"),
+      need(selected_department != "", "Please select a Department"),
+      need(selected_resource != "", "Please select a Resource"),
+      need(selected_provider != "", "Please select a Provider"),
+      need(selected_visitmethod != "", "Please select a Visit Method"),
+      need(selected_visittype != "", "Please select a Visit Type")
+    )
+    
+    format <- "YYYY-MM-DD HH24:MI:SS"
+    
+    if(length(selected_provider) >= 1000){
+      
+      data <- arrived.data.rows %>% filter(CAMPUS %in%  selected_campus, 
+                                           CAMPUS_SPECIALTY %in% selected_specialty,
+                                           DEPARTMENT %in% selected_department,
+                                           RESOURCES %in% selected_resource,
+                                           VISIT_METHOD %in% selected_visitmethod,
+                                           #PROVIDER %in% selected_provider,
+                                           TO_DATE(min_date, format) <= APPT_MADE_DATE_YEAR, 
+                                           TO_DATE(end_date, format) >= APPT_MADE_DATE_YEAR, 
+                                           APPT_DAY %in% selected_days
+                                           #HOLIDAY %in% selected_holiday
+      )
+      
+    }
+    else {
+      
+      data <- arrived.data.rows %>% filter(CAMPUS %in%  selected_campus, 
+                                           CAMPUS_SPECIALTY %in% selected_specialty,
+                                           DEPARTMENT %in% selected_department,
+                                           RESOURCES %in% selected_resource,
+                                           PROVIDER %in% selected_provider,
+                                           VISIT_METHOD %in% selected_visitmethod,
+                                           TO_DATE(min_date, format) <= APPT_MADE_DATE_YEAR, 
+                                           TO_DATE(end_date, format) >= APPT_MADE_DATE_YEAR, 
+                                           APPT_DAY %in% selected_days
+                                           #HOLIDAY %in% selected_holiday
+      )
+    }
+    
+    if(length(selected_visittype) < 1000){
+      
+      data <- data %>% filter(APPT_TYPE %in% selected_visittype)
+    }
+  })
+  
+  
+  dataArrivedNoShow_new <- eventReactive(list(input$update_filter_access),{
+    
+    selected_campus <- selected_campus()
+    selected_specialty <- selected_specialty()
+    selected_department <-  selected_department()
+    selected_resource <- selected_resource()
+    selected_provider <- selected_provider()
+    selected_visitmethod <- selected_visitmethod()
+    selected_visittype <- selected_visittype()
+    selected_dateRange <- selected_dateRange()
+    min_date <- selected_dateRange[1]
+    end_date <- selected_dateRange[2]
+    selected_days <- selected_daysOfWeek()
+    selected_holiday <- selected_holiday()
+    
+    validate(
+      need(selected_campus != "", "Please select a Campus"),
+      need(selected_specialty != "", "Please select a Specialty"),
+      need(selected_department != "", "Please select a Department"),
+      need(selected_resource != "", "Please select a Resource"),
+      need(selected_provider != "", "Please select a Provider"),
+      need(selected_visitmethod != "", "Please select a Visit Method"),
+      need(selected_visittype != "", "Please select a Visit Type")
+    )
+    
+    format <- "YYYY-MM-DD HH24:MI:SS"
+    
+    if(length(selected_provider) >= 1000){
+      
+      data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in%  selected_campus, 
+                                                 CAMPUS_SPECIALTY %in% selected_specialty,
+                                                 DEPARTMENT %in% selected_department,
+                                                 RESOURCES %in% selected_resource,
+                                                 VISIT_METHOD %in% selected_visitmethod,
+                                                 #PROVIDER %in% selected_provider,
+                                                 TO_DATE(min_date, format) <= APPT_MADE_DATE_YEAR, 
+                                                 TO_DATE(end_date, format) >= APPT_MADE_DATE_YEAR, 
+                                                 APPT_DAY %in% selected_days
+                                                 #HOLIDAY %in% selected_holiday
+      )
+      
+    }
+    else {
+      
+      data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in%  selected_campus, 
+                                                 CAMPUS_SPECIALTY %in% selected_specialty,
+                                                 DEPARTMENT %in% selected_department,
+                                                 RESOURCES %in% selected_resource,
+                                                 PROVIDER %in% selected_provider,
+                                                 VISIT_METHOD %in% selected_visitmethod,
+                                                 TO_DATE(min_date, format) <= APPT_MADE_DATE_YEAR, 
+                                                 TO_DATE(end_date, format) >= APPT_MADE_DATE_YEAR, 
+                                                 APPT_DAY %in% selected_days
+                                                 #HOLIDAY %in% selected_holiday
+      )
+    }
+    
+    if(length(selected_visittype) < 1000){
+      
+      data <- data %>% filter(APPT_TYPE %in% selected_visittype)
+    }
+  })
+  
   
   dataArrivedNoShow_access <- eventReactive(list(input$update_filters),{
     validate(
@@ -2721,9 +2881,14 @@ server <- function(input, output, session) {
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
+  # output$newpatients <- renderText({
+  #   paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+  #          " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  # })
+  
   output$newpatients <- renderText({
-    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
-           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+    paste0("Based on data from ", selected_dateRange()[1]," to ", selected_dateRange()[2], 
+           " for ", paste(sort(selected_campus()), collapse = ', '))
   })
   
   output$slot_usage <- renderText({
@@ -7211,7 +7376,7 @@ server <- function(input, output, session) {
   output$newPtRatioByDept <- renderPlot({
     data <- dataArrived_access_npr()
     # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
-print("1")
+     print("1")
 
 
     newpatients.ratio <- data %>%
@@ -7349,7 +7514,8 @@ print("1")
   })
   
   output$newPtWaitTimeByDeptPercent <- renderPlot({
-    data <- dataAll_access()
+    #data <- dataAll_access()
+    data <- dataAll_access_new()
     # data_test <<- data
     # data <- kpi.all.data[all.data.rows,] %>% filter(Campus == "MSUS")
     
@@ -7410,7 +7576,8 @@ print("1")
   
   # New Patient Wait Time
   output$newPtWaitTimeByProv <- renderPlot({
-    data <- dataAll_access()
+    #data <- dataAll_access()
+    data <- dataAll_access_new()
     # data <- all.data %>% filter(Provider %in% c("BODDU, LAVANYA","CHUEY, JOHN N"))
     
     #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
@@ -7447,7 +7614,8 @@ print("1")
   
   
   output$newPtWaitTimeByProvPercent <- renderPlot({
-    data <- dataAll_access()
+    #data <- dataAll_access()
+    data <- dataAll_access_new()
     # data_test <<- data
     # data <- kpi.all.data[all.data.rows,] %>% filter(Campus == "MSUS")
     
@@ -7508,7 +7676,7 @@ print("1")
   
   # New Patient Wait Time
   output$newPtApptSourceByDept <- renderPlot({
-    data <- dataArrived_access()
+    data <- dataArrived_access_new()
     # data <- kpi.all.data[arrivedNoShow.data.rows,]
     
     print("2")
@@ -7552,7 +7720,7 @@ print("1")
     
     #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
     
-    waitTime <- dataAll_access() %>%
+    waitTime <- dataAll_access_new() %>%
       filter(WAIT_TIME >= 0) %>%
       group_by(SCHEDULE_GROUPING_MAPPED, NEW_PT2) %>%
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
@@ -7596,7 +7764,7 @@ print("1")
     
     # No Show Rate
     
-    data.noShow <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    data.noShow <- dataArrivedNoShow_new() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
     # data.noShow <- arrivedNoShow.data
     
     print("3")

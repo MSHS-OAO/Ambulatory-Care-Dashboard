@@ -1303,7 +1303,7 @@ bin_mapping <- tbl(poolcon, "AMBULATORY_BIN_MAPPING") %>% collect() %>% mutate(B
 
 
 ## Shiny Module Function
-default_campus_choices <- filters %>% select(CAMPUS) %>% distinct() %>% pull()
+print("Shiny Module")
 
 # Define UI for Campus
 CampusInput <- function(id) {
@@ -1322,7 +1322,7 @@ CampusInput <- function(id) {
                   selectedTextFormat = "count > 1", 
                   countSelectedText = paste0("{0}/{1}", "Campus"), 
                   dropupAuto = FALSE),
-                selected = "MSUS"))
+                selected = default_campus))
 }
 
 
@@ -1346,7 +1346,7 @@ SpecialtyInput <- function(id) {
     solidHeader = FALSE,
     pickerInput(NS(id,"selectedSpecialty"),
                 label=NULL,
-                choices= NULL,
+                choices= default_specialty_choices,
                 multiple=TRUE,
                 options = pickerOptions(
                   liveSearch = TRUE,
@@ -1354,11 +1354,8 @@ SpecialtyInput <- function(id) {
                   selectedTextFormat = "count > 1",
                   countSelectedText = "{0}/{1} Specialties",
                   dropupAuto = FALSE),
-                selected = NULL))
+                selected = default_specialty))
 }
-
-
-
 
 
 # Define Server for Specialty
@@ -1386,7 +1383,6 @@ SpecialtyServer <- function(id, data, campus) {
 }
 
 
-
 # Define UI for Department
 DepartmentInput <- function(id) {
   box(
@@ -1396,7 +1392,7 @@ DepartmentInput <- function(id) {
     solidHeader = FALSE,
     pickerInput(NS(id, "selectedDepartment"),
                 label=NULL,
-                choices= NULL,
+                choices= default_departments,
                 multiple=TRUE,
                 options = pickerOptions(
                   liveSearch = TRUE,
@@ -1404,7 +1400,7 @@ DepartmentInput <- function(id) {
                   selectedTextFormat = "count > 1",
                   countSelectedText = "{0}/{1} Departments",
                   dropupAuto = FALSE),
-                selected = NULL))
+                selected = default_departments))
 }
 
 
@@ -1446,11 +1442,11 @@ ResourceInput <- function(id) {
     checkboxGroupButtons(
       inputId = NS(id, "selectedResource"),
       label = NULL, 
-      choices = c("Provider","Resource"),
+      choices = default_resource_type,
       justified = TRUE,
       checkIcon = list(
         yes = icon("ok", lib = "glyphicon")),
-      selected = c("Provider","Resource"))
+      selected = default_resource_type)
   )}
 
 
@@ -1473,7 +1469,7 @@ ProviderInput <- function(id) {
     solidHeader = FALSE, 
     pickerInput(NS(id, "selectedProvider"), 
                 label=NULL,
-                choices= NULL,
+                choices= default_provider,
                 multiple=TRUE,
                 options = pickerOptions(
                   liveSearch = TRUE,
@@ -1481,12 +1477,8 @@ ProviderInput <- function(id) {
                   selectedTextFormat = "count > 1", 
                   countSelectedText = "{0}/{1} Providers", 
                   dropupAuto = FALSE),
-                selected = NULL))
+                selected = default_provider))
 }
-
-
-
-
 
 
 # Define Server for Provider
@@ -1533,7 +1525,7 @@ VisitMethodInput <- function(id) {
     solidHeader = FALSE,
     pickerInput(NS(id, "selectedVisitMethod"),
                 label=NULL,
-                choices= NULL,
+                choices= default_visit_method,
                 multiple=TRUE,
                 options = pickerOptions(
                   liveSearch = TRUE,
@@ -1541,7 +1533,7 @@ VisitMethodInput <- function(id) {
                   selectedTextFormat = "count > 1", 
                   countSelectedText = "{0}/{1} Visit Methods", 
                   dropupAuto = FALSE),
-                selected = NULL))
+                selected = default_visit_method))
   
 }
 
@@ -1601,7 +1593,7 @@ VisitTypeInput <- function(id) {
     solidHeader = FALSE,
     pickerInput(NS(id, "selectedPRCName"),
                 label=NULL,
-                choices= NULL,
+                choices= default_PRC_name,
                 multiple=TRUE,
                 options = pickerOptions(
                   liveSearch = TRUE,
@@ -1609,7 +1601,7 @@ VisitTypeInput <- function(id) {
                   selectedTextFormat = "count > 1", 
                   countSelectedText = "{0}/{1} Visit Types", 
                   dropupAuto = FALSE),
-                selected = NULL))
+                selected = default_PRC_name))
   
 }
 
@@ -1658,6 +1650,83 @@ VisitTypeServer <- function(id, data, campus, specialty, department, resource, p
     
     return(reactive(input[["selectedPRCName"]]))
     
+  })
+  
+}
+
+DateInput <- function(id) {
+  box(
+    title = "Select Date Range:",
+    width = 12, 
+    height = "100px",
+    solidHeader = FALSE, 
+    dateRangeInput(NS(id,"dateRange"), label = NULL,
+                   start = dateRange_start, end = dateRange_max,
+                   min = dateRange_min, max = dateRange_max))
+}
+
+
+
+DateServer <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    
+    return(reactive(input[["dateRange"]]))
+  })
+  
+}
+
+
+weekInput <- function(id){
+  box(
+    title = "Select Days of Week:",
+    width = 12, 
+    solidHeader = FALSE, 
+    pickerInput(NS(id, "daysOfWeek"),
+                label = NULL,
+                choices = daysOfWeek.options,
+                selected = daysOfWeek.options,
+                multiple=TRUE,                        
+                options = pickerOptions(
+                  liveSearch = TRUE,
+                  actionsBox = TRUE,
+                  selectedTextFormat = "count > 1", 
+                  countSelectedText = "{0}/{1} Days", 
+                  dropupAuto = FALSE))
+  )
+}
+
+
+
+WeekServer <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    
+    return(reactive(input[["daysOfWeek"]]))
+  })
+  
+}
+
+
+HolidayInput <- function(id){
+  box(
+    title = "Select Holidays to Exclude:",
+    width = 12,
+    solidHeader = FALSE,
+    pickerInput(NS(id, "excludeHolidays"),label=NULL,
+                choices= unique(holid$holiday),
+                multiple=TRUE,
+                options = pickerOptions(
+                  liveSearch = TRUE,
+                  actionsBox = TRUE,
+                  dropupAuto = FALSE),
+                selected = unique(holid$holiday)
+    )
+  )
+}
+
+HolidayServer <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    
+    return(reactive(input[["excludeHolidays"]]))
   })
   
 }

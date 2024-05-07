@@ -1814,14 +1814,17 @@ ui <- dashboardPage(
                                   ResourceInput("selectedResource"),
                                   ProviderInput("selectedProvider"),
                                   VisitMethodInput("selectedVisitMethod"),
-                                  VisitTypeInput("selectedPRCName")            
+                                  VisitTypeInput("selectedPRCName"),
+                                  DateInput("dateRange"),
+                                  weekInput("daysOfWeek"),
+                                  HolidayInput("excludeHolidays")
                                    
                                   ),
                  
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
-        input.sbm=='newPatients' | 
+        
                    input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Date Range:",
@@ -1977,7 +1980,7 @@ ui <- dashboardPage(
                  
                  conditionalPanel(
                    condition = "input.sbm=='KPIs' | input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
-        input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='newPatients' | 
+        input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' |
         input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'Comparison'| input.sbm == 'optimization' | input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Holidays to Exclude:",
