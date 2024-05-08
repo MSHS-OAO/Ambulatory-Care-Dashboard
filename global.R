@@ -1108,7 +1108,7 @@ saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FI
 saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
 
 default_campus <- "MSUS"
-default_campus_choices <- filters %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
+default_campus_choices <- filters %>% select(CAMPUS) %>% summarise(CAMPUS = unique(CAMPUS)) %>% collect()
 default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
 
 default_specialty_choices <-  filters %>% filter(CAMPUS %in% default_campus) %>% select( CAMPUS_SPECIALTY)  %>%

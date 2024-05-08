@@ -1588,7 +1588,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown' | input.sbm=='slotManagement'",
                    br(),
                    actionButton("update_filters", "CLICK TO UPDATE", width = "80%"),
                    br(),
@@ -1638,7 +1638,12 @@ ui <- dashboardPage(
                                    selectedTextFormat = "count > 1",
                                    countSelectedText = "{0}/{1} Departments",
                                    dropupAuto = FALSE),
-                                 selected = default_departments)),
+                                 selected = default_departments))
+                 ),
+                 conditionalPanel(
+                   condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
+        input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Resource Type:",
                      width = 12,
@@ -1652,7 +1657,11 @@ ui <- dashboardPage(
                        checkIcon = list(
                          yes = icon("ok", lib = "glyphicon")),
                        selected = c("Provider","Resource"))
-                   ),
+                   )),
+                 conditionalPanel(
+                   condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
+        input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Provider:",
                      width = 12,
@@ -1667,7 +1676,12 @@ ui <- dashboardPage(
                                    selectedTextFormat = "count > 1", 
                                    countSelectedText = "{0}/{1} Providers", 
                                    dropupAuto = FALSE),
-                                 selected = default_provider)),
+                                 selected = default_provider))
+                 ),
+                 conditionalPanel(
+                   condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
+        input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Visit Method:",
                      width = 12,
@@ -1703,70 +1717,70 @@ ui <- dashboardPage(
                  
                  conditionalPanel(
                    condition = "input.sbm=='slotManagement'",
-                   br(),
-                   actionButton("update_filter_slot", "CLICK TO UPDATE", width = "80%"),
-                   br(),
-                   br(),
-                   box(
-                     title = "Select Campus:",
-                     width = 12,
-                     height = "100px",
-                     solidHeader = FALSE,
-                     pickerInput("selectedCampus_slot",label=NULL,
-                                 choices=default_campus_choices,
-                                 multiple=TRUE,
-                                 options = pickerOptions(
-                                   liveSearch = TRUE,
-                                   actionsBox = FALSE,
-                                   selectedTextFormat = "count > 1", 
-                                   countSelectedText = "{0}/{1} Campuses", 
-                                   dropupAuto = FALSE),
-                                 selected = "MSUS")),
-                   
-                   box(
-                     title = "Select Specialty:",
-                     width = 12,
-                     height = "100px",
-                     solidHeader = FALSE,
-                     pickerInput("selectedSpecialty_slot",label=NULL,
-                                 choices=default_specialty_slot,
-                                 multiple=TRUE,
-                                 options = pickerOptions(
-                                   liveSearch = TRUE,
-                                   actionsBox = TRUE,
-                                   selectedTextFormat = "count > 1",
-                                   countSelectedText = "{0}/{1} Specialties",
-                                   dropupAuto = FALSE),
-                                 selected = default_specialty)),
-                   box(
-                     title = "Select Department:",
-                     width = 12,
-                     height = "100px",
-                     solidHeader = FALSE,
-                     pickerInput("selectedDepartment_slot",label=NULL,
-                                 choices=default_department_slot,
-                                 multiple=TRUE,
-                                 options = pickerOptions(
-                                   liveSearch = TRUE,
-                                   actionsBox = TRUE,
-                                   selectedTextFormat = "count > 1",
-                                   countSelectedText = "{0}/{1} Departments",
-                                   dropupAuto = FALSE),
-                                 selected = default_department_slot)),
-                   
+                 #   br(),
+                 #   actionButton("update_filter_slot", "CLICK TO UPDATE", width = "80%"),
+                 #   br(),
+                 #   br(),
+                 #   box(
+                 #     title = "Select Campus:",
+                 #     width = 12,
+                 #     height = "100px",
+                 #     solidHeader = FALSE,
+                 #     pickerInput("selectedCampus_slot",label=NULL,
+                 #                 choices=default_campus_choices,
+                 #                 multiple=TRUE,
+                 #                 options = pickerOptions(
+                 #                   liveSearch = TRUE,
+                 #                   actionsBox = FALSE,
+                 #                   selectedTextFormat = "count > 1", 
+                 #                   countSelectedText = "{0}/{1} Campuses", 
+                 #                   dropupAuto = FALSE),
+                 #                 selected = "MSUS")),
+                 #   
+                 #   box(
+                 #     title = "Select Specialty:",
+                 #     width = 12,
+                 #     height = "100px",
+                 #     solidHeader = FALSE,
+                 #     pickerInput("selectedSpecialty_slot",label=NULL,
+                 #                 choices=default_specialty_slot,
+                 #                 multiple=TRUE,
+                 #                 options = pickerOptions(
+                 #                   liveSearch = TRUE,
+                 #                   actionsBox = TRUE,
+                 #                   selectedTextFormat = "count > 1",
+                 #                   countSelectedText = "{0}/{1} Specialties",
+                 #                   dropupAuto = FALSE),
+                 #                 selected = default_specialty)),
+                 #   box(
+                 #     title = "Select Department:",
+                 #     width = 12,
+                 #     height = "100px",
+                 #     solidHeader = FALSE,
+                 #     pickerInput("selectedDepartment_slot",label=NULL,
+                 #                 choices=default_department_slot,
+                 #                 multiple=TRUE,
+                 #                 options = pickerOptions(
+                 #                   liveSearch = TRUE,
+                 #                   actionsBox = TRUE,
+                 #                   selectedTextFormat = "count > 1",
+                 #                   countSelectedText = "{0}/{1} Departments",
+                 #                   dropupAuto = FALSE),
+                 #                 selected = default_department_slot)),
+                 #   
                    box(
                      title = "Select Provider:",
                      width = 12,
                      height = "100px",
-                     solidHeader = FALSE, 
+                     solidHeader = FALSE,
                      pickerInput("selectedProvider_slot",label=NULL,
                                  choices=default_provider_slot,
                                  multiple=TRUE,
                                  options = pickerOptions(
                                    liveSearch = TRUE,
                                    actionsBox = TRUE,
-                                   selectedTextFormat = "count > 1", 
-                                   countSelectedText = "{0}/{1} Providers", 
+                                   selectedTextFormat = "count > 1",
+                                   countSelectedText = "{0}/{1} Providers",
                                    dropupAuto = FALSE),
                                  selected = default_provider_slot))
                  ),
