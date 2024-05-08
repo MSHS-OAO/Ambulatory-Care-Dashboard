@@ -1328,7 +1328,7 @@ server <- function(input, output, session) {
       #need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     groupByFilters_slot(slot.data,
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedProvider,
+                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedProvider_slot,
                      #input$selectedVisitMethod, input$selectedResource,
                      input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
     
@@ -1347,7 +1347,7 @@ server <- function(input, output, session) {
       #need(input$selectedPRCName != "", "Please select a Visit Type")
     )
     groupByFilters_slot(slot.data,
-                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedProvider, 
+                     input$selectedCampus, input$selectedSpecialty, input$selectedDepartment, input$selectedProvider_slot, 
                      #input$selectedResource, input$selectedVisitMethod,
                      input$dateRangeslot[1], input$dateRangeslot[2], input$daysOfWeekslot, input$excludeHolidays)
   }) 
@@ -7616,7 +7616,6 @@ print("1")
     print(paste0("Start of slot graph function ", Sys.time()))
     data <- dataAllSlot()
     
-    test_data <<- data
     
     need(nrow(data) > 0, "Data is not available for this selection" )
     #data <- slot.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
