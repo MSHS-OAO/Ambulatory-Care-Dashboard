@@ -1323,7 +1323,7 @@ server <- function(input, output, session) {
       need(input$selectedSpecialty != "", "Please select a Specialty"),
       need(input$selectedDepartment != "", "Please select a Department"),
       #need(input$selectedResource != "", "Please select a Resource"),
-      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedProvider_slot != "", "Please select a Provider"),
       #need(input$selectedVisitMethod != "", "Please select a Visit Method"),
       #need(input$selectedPRCName != "", "Please select a Visit Type")
     )
