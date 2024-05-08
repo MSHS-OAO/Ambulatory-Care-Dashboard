@@ -445,7 +445,7 @@ server <- function(input, output, session) {
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
   
-  
+  provider_all_choices <- reactiveVal(default_provider)
   observeEvent(input$selectedDepartment,{
     if(is.null(input$filter_list) && !is.null(input$selectedDepartment)){
       # provider_choices <- sort(unique(kpi.all.data[
@@ -475,6 +475,8 @@ server <- function(input, output, session) {
                         choices = provider_choices,
                         selected = provider_choices
       )
+      
+      provider_all_choices(provider_choices)
     }
     
     
@@ -592,12 +594,15 @@ server <- function(input, output, session) {
                         choices = provider_choices,
                         selected = provider_choices
       )
+      provider_all_choices(provider_choices)
+      
     }
     
     if (is.null(input$selectedResource)){
       updatePickerInput(session,
                         inputId = "selectedProvider",
                         choices = NA)
+      provider_all_choices(provider_choices)
       
     }
     
@@ -671,6 +676,30 @@ server <- function(input, output, session) {
                         )
       
       
+    }
+    number_of_providers_selected <-length(selected_provider)
+    number_of_provider_choices <- length(provider_all_choices())
+    if(number_of_providers_selected == number_of_provider_choices) {
+      provider_choices_slot <- slot.data %>% ungroup() %>% 
+        filter(CAMPUS %in% selected_campus &
+                 CAMPUS_SPECIALTY %in% selected_specialty&
+                 DEPARTMENT %in% selected_department ) %>%
+        select(PROVIDER)  %>%
+        summarise(PROVIDER= unique(PROVIDER)) %>% collect()
+      provider_choices_slot <- sort(provider_choices_slot$PROVIDER, na.last = T)
+      
+      
+      updatePickerInput(session,
+                        inputId = "selectedProvider_slot",
+                        choices = provider_choices_slot,
+                        selected = provider_choices_slot
+      )
+    } else {
+      
+      updatePickerInput(session,
+                        inputId = "selectedProvider_slot",
+                        selected = selected_provider
+      )
     }
   },
   ignoreInit = TRUE,

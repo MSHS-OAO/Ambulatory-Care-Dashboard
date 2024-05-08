@@ -1108,17 +1108,17 @@ saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FI
 saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
 
 default_campus <- "MSUS"
-default_campus_choices <- filters_table %>% select(CAMPUS) %>% summarise(CAMPUS = unique(CAMPUS)) %>% collect()
+default_campus_choices <- filters %>% select(CAMPUS) %>% summarise(CAMPUS = unique(CAMPUS)) %>% collect()
 default_campus_choices <- sort(default_campus_choices$CAMPUS, na.last = T)
 
-default_specialty_choices <-  filters_table %>% filter(CAMPUS %in% default_campus) %>% select( CAMPUS_SPECIALTY)  %>%
+default_specialty_choices <-  filters %>% filter(CAMPUS %in% default_campus) %>% select( CAMPUS_SPECIALTY)  %>%
   summarise(CAMPUS_SPECIALTY= unique(CAMPUS_SPECIALTY)) %>% collect()
 default_specialty_choices <- sort(default_specialty_choices$CAMPUS_SPECIALTY, na.last = T)
 
 default_specialty <- "Allergy"
 
 
-default_departments <-  filters_table %>% filter(CAMPUS %in% default_campus & 
+default_departments <-  filters %>% filter(CAMPUS %in% default_campus & 
                                              CAMPUS_SPECIALTY %in% default_specialty) %>% select( DEPARTMENT)  %>%
   summarise(DEPARTMENT= unique(DEPARTMENT)) %>% collect()
 default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
@@ -1127,7 +1127,7 @@ default_departments <- sort(default_departments$DEPARTMENT, na.last = T)
 default_resource_type <- c("Provider","Resource")
 
 
-default_provider <-   filters_table %>% filter(CAMPUS %in% default_campus &
+default_provider <-   filters %>% filter(CAMPUS %in% default_campus &
                                                      CAMPUS_SPECIALTY %in% default_specialty&
                                                      DEPARTMENT %in% default_departments ) %>%
   select(PROVIDER)  %>%
@@ -1137,7 +1137,7 @@ default_provider <- sort(default_provider$PROVIDER, na.last = T)
 #default_provider <- c("LEE-WONG, MARY F", "MA, SONGHUI", "MEDICAL TECHNICIANS ALLERGY", "TEITEL, MICHAEL G.", "YOST, SHARON LYNN")
 
 
-default_visit_method <-    filters_table %>% filter(CAMPUS %in% default_campus & 
+default_visit_method <-    filters %>% filter(CAMPUS %in% default_campus & 
                                                 CAMPUS_SPECIALTY %in% default_specialty & 
                                                 DEPARTMENT %in% default_departments &
                                                 PROVIDER %in% default_provider) %>% 
@@ -1147,7 +1147,7 @@ default_visit_method <- sort(default_visit_method$VISIT_METHOD, na.last = T)
 
 
 
-default_PRC_name <-  filters_table %>% filter(CAMPUS %in% default_campus & 
+default_PRC_name <-  filters %>% filter(CAMPUS %in% default_campus & 
                                           CAMPUS_SPECIALTY %in% default_specialty & 
                                           DEPARTMENT %in% default_departments &
                                           PROVIDER %in% default_provider &
