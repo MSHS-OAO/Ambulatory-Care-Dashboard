@@ -4840,7 +4840,7 @@ server <- function(input, output, session) {
       scale_y_continuous(expand = c(0, 0), limits = c(0,max(arrived$avg)*1.2))+
       labs(x = NULL, y = "Pateints",
            title = "Average Patients Arrived* by Time of Day and Day of Week",
-           subtitle = paste0("Based on visits from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on arrived appointments from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "*Based on scheduled appointment time.")+
       scale_color_MountSinai("main")+
       theme_new_line()+
