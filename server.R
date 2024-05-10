@@ -4869,7 +4869,7 @@ server <- function(input, output, session) {
       scale_y_continuous(expand = c(0, 0), limits = c(0,max(arrived$avg)*1.2))+
       labs(x = NULL, y = "Pateints",
            title = "Average Patients Arrived* by Time of Day and Day of Week",
-           subtitle = paste0("Based on scheduled appointment time from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on arrived appointments from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "*Based on scheduled appointment time.")+
       scale_color_MountSinai("main")+
       theme_new_line()+
@@ -6115,16 +6115,19 @@ server <- function(input, output, session) {
     data <- dataArrivedPop() 
     #data <-  arrived.data.rows %>%  filter(CAMPUS== "MSUS")
     
+    data <- uniquePts_df_system(data)
+    
+    
     data <- data %>%
       group_by(COVERAGE) %>%
-      dplyr::summarise(`Total Arrived Patients` = n()) %>%
-      mutate(Percent = round((`Total Arrived Patients`/sum(`Total Arrived Patients`, na.rm = T))*100, 1)) %>%
+      dplyr::summarise(`Arrived Unique Patients` = n()) %>%
+      mutate(Percent = round((`Arrived Unique Patients`/sum(`Arrived Unique Patients`, na.rm = T))*100, 1)) %>%
       rename(Payer = COVERAGE) %>% collect() %>%
       mutate(Percent = paste0(sprintf("%.1f", Percent), "%")) %>%
-      arrange(desc(`Total Arrived Patients`))
+      arrange(desc(`Arrived Unique Patients`))
     
     data$Payer[is.na(data$Payer)] <- "Unknown"
-    data$`Total Arrived Patients` <- prettyNum(data$`Total Arrived Patients`, big.mark = ',')
+    data$`Arrived Unique Patients` <- prettyNum(data$`Arrived Unique Patients`, big.mark = ',')
     
     data %>%
       knitr::kable("html", align = "l") %>%
@@ -6271,7 +6274,7 @@ server <- function(input, output, session) {
   
     
     header_above <- c("Subtitle" = 3)
-    names(header_above) <- paste0(c("Based on arrived data from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))
+    names(header_above) <- paste0(c("Based on arrived visits from "),c(isolate(input$dateRangepop[1])),c(" to "),c(isolate(input$dateRangepop[2])))
     total <-  which(zip_table$`Zip Code Layer` == "Total") - 1 
     # northern_ny_ref_1 <- northern_ny_ref + 1
     # northern <- c(northern_ny_ref_1:total)
@@ -7177,10 +7180,10 @@ print("1")
 
 
     newpatients.ratio <- data %>%
-      group_by(APPT_MADE_MONTH_YEAR,NEW_PT3) %>%
+      group_by(APPT_MADE_MONTH_YEAR,NEW_PT2) %>%
       dplyr::summarise(Total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
-      mutate(NEW_PT3 = ifelse(is.na(NEW_PT3), "ESTABLISHED", NEW_PT3)) %>%
-      spread(NEW_PT3, Total) 
+      mutate(NEW_PT2 = ifelse(is.na(NEW_PT2), "ESTABLISHED", NEW_PT2)) %>%
+      spread(NEW_PT2, Total) 
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
@@ -7197,8 +7200,8 @@ print("1")
       geom_point(color = "#221f72", size = 3.2) +
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
-           title = "Monthly New Patient Ratio",
-           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           title = "Monthly Percent of New Patients Scheduled",
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -7241,8 +7244,8 @@ print("1")
       # scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       labs(x=NULL, y=NULL, 
-           title = "New Patient Ratio Over Time by Provider",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           title = "Monthly Percent of New Patients Scheduled by Provider",
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
       graph_theme("bottom")+
@@ -7290,7 +7293,7 @@ print("1")
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Monthly Median Wait Time to New and Established Appointment",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -7345,7 +7348,7 @@ print("1")
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Percent of New Patients Scheduled Within 14 Days",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -7443,7 +7446,7 @@ print("1")
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Percent of New Patients Scheduled Within 14 Days",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -7490,7 +7493,7 @@ print("1")
       scale_fill_MountSinai('purple')+
       labs(x=NULL, y=NULL,
            title = "New Patient Source",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
                              "\nTotal New Patients = ",prettyNum(sum(newpatients.ratio$Total), big.mark = ','))
            )+
       theme_new_line()+
@@ -7531,7 +7534,7 @@ print("1")
       scale_fill_MountSinai('pink')+
       labs(x=NULL, y=NULL, 
            title = "Median Wait Time to New Appointment",
-           subtitle = paste0("Based scheduled on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+           subtitle = paste0("Based on visits scheduled from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
                              "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
            # caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service)."
            #caption = "*New patients defined by CPT codes (level of service)."
@@ -7556,6 +7559,7 @@ print("1")
     # No Show Rate
     
     data.noShow <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    data.noShow_test <<- data.noShow
     # data.noShow <- arrivedNoShow.data
     
     print("3")
@@ -7564,11 +7568,17 @@ print("1")
       group_by(SCHEDULE_GROUPING_MAPPED, APPT_STATUS) %>%
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
+    
+    cols <- c("Arrived", "No Show", "Canceled")
+    
+    missing <- setdiff(cols, names(noShows))
+    if(length(missing) > 0) {
+      noShows[missing] <- NA
+    }
   
     noShows[is.na(noShows)] <- 0
     
     noShows$`No Show Perc` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
-    #noShows$SCHEDULE_GROUPING_MAPPED[which(noShows$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
     
     
     #noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)
@@ -7586,7 +7596,7 @@ print("1")
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
            title = "New Patient No Show Rate*",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on visits from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "*No Show Rate = (No Show + Same-day Canceled) / (Arrived + No Show + Same-day Canceled)"
            )+
       theme_new_line()+
@@ -9882,7 +9892,7 @@ ggplot(data_base,
     if(input$compare_filters == "PROVIDER"){
       name_1 <- "Provider"
     }
-    paste0("Monthly New Patient Ratio (%) by ", name_1 , " and ", name_2)
+    paste0("Monthly Percent of New Patients Scheduled by ", name_1 , " and ", name_2)
   })
   
   
@@ -10624,6 +10634,7 @@ ggplot(data_base,
     }
     if(breakdown_filters == "NEW_PT3"){
       name_2 <- "New vs. Established"
+      breakdown_filters <- "NEW_PT2"
     }
     
     
@@ -10648,7 +10659,7 @@ ggplot(data_base,
     
     
     
-    if(breakdown_filters == "NEW_PT3"){
+    if(breakdown_filters == "NEW_PT2"){
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
       newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>%
@@ -10715,26 +10726,26 @@ ggplot(data_base,
     }else{
       
       ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
+      newpatients.ratio <- data %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
-        spread(NEW_PT3, total)
+        spread(NEW_PT2, total)
       
       newpatients.ratio[is.na(newpatients.ratio)] <- 0
       
       
-      newpatients.ratio.overtime <- data %>% group_by(!!!syms(cols), NEW_PT3) %>%
+      newpatients.ratio.overtime <- data %>% group_by(!!!syms(cols), NEW_PT2) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
-        spread(NEW_PT3, total) %>%
+        spread(NEW_PT2, total) %>%
         summarise(Total = round(`NEW`/(`NEW`+`ESTABLISHED`),2))
       
       newpatients.ratio.overtime[is.na(newpatients.ratio.overtime)] <- 0
       
-      newpatients.ratio.overtime.total <- data %>% group_by(!!!syms(tot_cols), NEW_PT3) %>%
+      newpatients.ratio.overtime.total <- data %>% group_by(!!!syms(tot_cols), NEW_PT2) %>%
         summarise(total = sum(TOTAL_APPTS)) %>% collect() %>%
         drop_na() %>%
-        spread(NEW_PT3, total) %>%
+        spread(NEW_PT2, total) %>%
         summarise(Total = round(`NEW`/(`NEW`+`ESTABLISHED`),2)) %>%
         add_column(!!breakdown_filters := "Total") %>%
         select(all_of(cols),  everything())
@@ -10791,7 +10802,7 @@ ggplot(data_base,
     index <- months+length(cols_name)
     
     
-    if(breakdown_filters == "NEW_PT3"){
+    if(breakdown_filters == "NEW_PT2"){
       index <- c(1:length(cols_name),index,length(newpatients.ratio))
     } else{
       index <- c(1:length(cols_name),index,(length(newpatients.ratio)-1):length(newpatients.ratio)) 
@@ -10841,7 +10852,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('Monthly New Patient Ratio = Total new arrived patients within the month / Total new and established patients within the month')
+                            htmltools::em('Monthly Percent of New Patients Scheduled = Total new arrived patients within the month / Total new and established patients within the month')
                           ),
                           options = list(
                             scrollX = TRUE,
@@ -12920,11 +12931,11 @@ ggplot(data_base,
     
     # data_access <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     ### Get total of new patients to arrive per month and spread that to TRUE and FALSE columns
-    newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT3) %>%
+    newpatients.ratio <- data_access %>% group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
       summarise(total = SUM(TOTAL_APPTS)) %>% collect()%>%  # it was n()
       mutate(APPT_MADE_MONTH_YEAR = as.yearmon(APPT_MADE_MONTH_YEAR, "%Y-%m"))%>%
       drop_na() %>%
-      spread(NEW_PT3, total)
+      spread(NEW_PT2, total)
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
@@ -12960,11 +12971,11 @@ ggplot(data_base,
     newpatients.ratio <- newpatients.ratio %>% spread(APPT_MADE_MONTH_YEAR, ratio)
     
     
-    total <- data_access %>% group_by(!!!syms(cols), NEW_PT3) %>%
+    total <- data_access %>% group_by(!!!syms(cols), NEW_PT2) %>%
       summarise(total = SUM(TOTAL_APPTS)) %>%
       collect()%>% 
       drop_na() %>%
-      spread(NEW_PT3, total) %>%
+      spread(NEW_PT2, total) %>%
       replace(is.na(.), 0) 
 
     col_index <- which(!(c(cols, "NEW", "ESTABLISHED") %in% colnames(total)))
@@ -13044,7 +13055,7 @@ ggplot(data_base,
     #newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
     
-    newpatients.ratio$Metrics <- "New Patient Ratio"
+    newpatients.ratio$Metrics <- "Percent of New Patients Scheduled"
     #newpatients.ratio <- newpatients.ratio %>% select(cols, Metrics, `Dynamic Target`, everything(), Total)
     newpatients.ratio <- newpatients.ratio %>% select(cols, Metrics, everything(), Total)
     
@@ -13065,7 +13076,7 @@ ggplot(data_base,
     
    
     waitTime <- data_access %>%
-      filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>% 
+      filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>% 
       group_by(!!!syms(cols), APPT_MADE_MONTH_YEAR) %>% 
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
       #filter(NEW_PT3 %in% c("NEW","ESTABLISHED")) %>% 
@@ -13091,7 +13102,7 @@ ggplot(data_base,
                   values_from = medWaitTime)
     
     total <- data_access %>%
-      filter(WAIT_TIME >= 0, NEW_PT3 == "NEW") %>% 
+      filter(WAIT_TIME >= 0, NEW_PT2 == "NEW") %>% 
       group_by(!!!syms(cols)) %>% 
       dplyr::summarise(Total = ceiling(median(WAIT_TIME))) %>%
       collect() 

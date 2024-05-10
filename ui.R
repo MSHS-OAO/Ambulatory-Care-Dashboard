@@ -972,7 +972,7 @@ ui <- dashboardPage(
                              ))),
                        fluidRow(
                          boxPlus(
-                           title = "New Patient Visit Ratio", width = 12, status = "primary",
+                           title = "Percent of New Patients Scheduled", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            tabBox(
                              title = NULL, type = "pills",
@@ -1324,7 +1324,7 @@ ui <- dashboardPage(
                                 radioButtons("breakdown_filters", label = h4("Breakdown by:"),
                                              choices = list("Visit Method" = "VISIT_METHOD", "Visit Type" = "APPT_TYPE",  "New vs. Established Patients*" = "NEW_PT3"),
                                              selected = "VISIT_METHOD"),
-                                h6("*New Patients defined by CPT codes for the first three tabs and by the scheduled data for the last three tabs.")
+                                h6("*New Patients defined by CPT codes for the first two tabs and by the scheduled data for the last three tabs.")
                                 )
                               
                        ),
@@ -1358,9 +1358,9 @@ ui <- dashboardPage(
                                                 
                                               )
                                      ),
-                                     tabPanel("New Patient Ratio",
+                                     tabPanel("Percent of New Patients Scheduled",
                                               boxPlus(
-                                                title = "New Patient Ratio", width = 12, status = "primary", 
+                                                title = "Percent of New Patients Scheduled", width = 12, status = "primary", 
                                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                                 # h2(uiOutput(("npr_day_title"))),
                                                 # br(),
