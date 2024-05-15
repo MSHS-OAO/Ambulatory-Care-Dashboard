@@ -1316,7 +1316,7 @@ server <- function(input, output, session) {
   }) 
   
   
-  dataAllSlot <- eventReactive(list(input$update_filter_slot),{
+  dataAllSlot <- eventReactive(list(input$update_filters),{
     print(paste0("Beginning of slot processing ", Sys.time()))
     validate(
       need(input$selectedCampus != "", "Please select a Campus"),
