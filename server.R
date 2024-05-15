@@ -7470,7 +7470,7 @@ print("1")
   
   # New Patient Wait Time
   output$newPtApptSourceByDept <- renderPlot({
-    data <- dataArrived_access()
+    data <- dataAll_access()
     # data <- kpi.all.data[arrivedNoShow.data.rows,]
     
     print("2")
