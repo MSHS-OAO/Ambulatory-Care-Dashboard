@@ -7478,6 +7478,8 @@ print("1")
       filter(NEW_PT2 == "NEW") %>%
         group_by(SCHEDULE_GROUPING_MAPPED, NEW_PT2) %>%
       dplyr::summarise(Total = n()) %>% collect()
+    
+    print(newpatients.ratio)
 
     #newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
     
