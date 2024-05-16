@@ -1,4 +1,6 @@
 server <- function(input, output, session) {
+  callModule(profvis_server, "profiler")
+  
   # observeEvent(input$dropdownbutton3, {
   #   print("clcick button")
   #   saved_filter_choices <- return_saved_choices(df_choices, "FILTER_NAME")
@@ -1157,6 +1159,71 @@ server <- function(input, output, session) {
     else {
       
       data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in%  selected_campus, 
+                                                 CAMPUS_SPECIALTY %in% selected_specialty,
+                                                 DEPARTMENT %in% selected_department,
+                                                 RESOURCES %in% selected_resource,
+                                                 PROVIDER %in% selected_provider,
+                                                 VISIT_METHOD %in% selected_visitmethod,
+                                                 TO_DATE(min_date, format) <= APPT_MADE_DATE_YEAR, 
+                                                 TO_DATE(end_date, format) >= APPT_MADE_DATE_YEAR, 
+                                                 APPT_DAY %in% selected_days
+                                                 #HOLIDAY %in% selected_holiday
+      )
+    }
+    
+    if(length(selected_visittype) < 1000){
+      
+      data <- data %>% filter(APPT_TYPE %in% selected_visittype)
+    }
+  })
+  
+  
+  dataArrived_access_npr_new <- eventReactive(list(input$update_filter_access),{
+    
+    selected_campus <- selected_campus()
+    selected_specialty <- selected_specialty()
+    selected_department <-  selected_department()
+    selected_resource <- selected_resource()
+    selected_provider <- selected_provider()
+    selected_visitmethod <- selected_visitmethod()
+    selected_visittype <- selected_visittype()
+    selected_dateRange <- selected_dateRange()
+    min_date <- selected_dateRange[1]
+    end_date <- selected_dateRange[2]
+    selected_days <- selected_daysOfWeek()
+    selected_holiday <- selected_holiday()
+    
+    validate(
+      need(selected_campus != "", "Please select a Campus"),
+      need(selected_specialty != "", "Please select a Specialty"),
+      need(selected_department != "", "Please select a Department"),
+      need(selected_resource != "", "Please select a Resource"),
+      need(selected_provider != "", "Please select a Provider"),
+      need(selected_visitmethod != "", "Please select a Visit Method"),
+      need(selected_visittype != "", "Please select a Visit Type")
+    )
+    
+    
+    format <- "YYYY-MM-DD HH24:MI:SS"
+    
+    if(length(selected_provider) >= 1000){
+      
+      data <- arrived.data.rows.npr %>% filter(CAMPUS %in%  selected_campus, 
+                                                 CAMPUS_SPECIALTY %in% selected_specialty,
+                                                 DEPARTMENT %in% selected_department,
+                                                 RESOURCES %in% selected_resource,
+                                                 VISIT_METHOD %in% selected_visitmethod,
+                                                 #PROVIDER %in% selected_provider,
+                                                 TO_DATE(min_date, format) <= APPT_MADE_DATE_YEAR, 
+                                                 TO_DATE(end_date, format) >= APPT_MADE_DATE_YEAR, 
+                                                 APPT_DAY %in% selected_days
+                                                 #HOLIDAY %in% selected_holiday
+      )
+      
+    }
+    else {
+      
+      data <- arrived.data.rows.npr %>% filter(CAMPUS %in%  selected_campus, 
                                                  CAMPUS_SPECIALTY %in% selected_specialty,
                                                  DEPARTMENT %in% selected_department,
                                                  RESOURCES %in% selected_resource,
@@ -7374,7 +7441,10 @@ server <- function(input, output, session) {
   
   # New Patient Ratio by Department
   output$newPtRatioByDept <- renderPlot({
-    data <- dataArrived_access_npr()
+    #data <- dataArrived_access_npr()
+    data <- dataArrived_access_npr_new()
+    
+    test_npr <<- data
     # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
      print("1")
 
@@ -7389,6 +7459,10 @@ server <- function(input, output, session) {
     
     
     print("1.5")
+    
+    start_date <- isolate(selected_dateRange()[1])
+    end_date <- isolate(selected_dateRange()[2])
+    
    
     newpatients.ratio <- newpatients.ratio %>% mutate(ratio = round(`NEW` / (`ESTABLISHED` + `NEW`),2))
     #newpatients.ratio$Appt.MonthYear <- as.Date(newpatients.ratio$Appt.MonthYear, format="%Y-%m") ## Create date-year column
@@ -7401,7 +7475,7 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            #title = "New Patient Ratio Trending over Time",
            title = "Monthly New Patient Ratio",
-           subtitle = paste0("Based on arrived data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on arrived data from ", start_date," to ", end_date))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
@@ -7422,7 +7496,8 @@ server <- function(input, output, session) {
   
   # New Patient Ratio by Provideer
   output$newPtRatioByProv <- renderPlot({
-    data <- dataArrived_access_npr()
+    #data <- dataArrived_access_npr()
+    data <- dataArrived_access_npr_new()
     #data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
     print("prov_running")
@@ -7436,6 +7511,9 @@ server <- function(input, output, session) {
     
     newpatients.ratio[is.na(newpatients.ratio)] <- 0
     
+    start_date <- isolate(selected_dateRange()[1])
+    end_date <- isolate(selected_dateRange()[2])
+    
     newpatients.ratio <-  newpatients.ratio %>% mutate(ratio = round(`NEW` / (`ESTABLISHED` + `NEW`), 2))
     #newpatients.ratio$Appt.MonthYear <- as.Date(paste0(newpatients.ratio$Appt.MonthYear, "-01"), format="%Y-%m-%d") ## Create date-year column
     
@@ -7445,7 +7523,7 @@ server <- function(input, output, session) {
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       labs(x=NULL, y=NULL, 
            title = "New Patient Ratio Over Time by Provider",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on data from ", start_date," to ", end_date))+
       theme_new_line()+
       theme_bw()+
       graph_theme("bottom")+
@@ -7483,6 +7561,8 @@ server <- function(input, output, session) {
     waitTime <- waitTime %>% gather(variable, value, 2:3)
     target <- 14
     
+    start_date <- isolate(selected_dateRange()[1])
+    end_date <- isolate(selected_dateRange()[2])
     
     ggplot(waitTime, aes(x=APPT_MADE_MONTH_YEAR, y=value, group = variable, color=variable))+
       # geom_bar(stat = "identity", position = 'dodge')+
@@ -7496,7 +7576,8 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Monthly Median Wait Time to New and Established Appointment",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           #subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on scheduled data from ",start_date," to ",end_date)#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -7541,6 +7622,8 @@ server <- function(input, output, session) {
     percent_within_14_days <- join_data %>% group_by(APPT_MADE_MONTH_YEAR) %>%
                               summarise(percent = round((total/total_all),2))
     
+    start_date <- isolate(selected_dateRange()[1])
+    end_date <- isolate(selected_dateRange()[2])
     
     ggplot(percent_within_14_days, aes(x=APPT_MADE_MONTH_YEAR, y=percent, group = 1))+
       # geom_bar(stat = "identity", position = 'dodge')+
@@ -7552,7 +7635,8 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Percent of New Patients Scheduled Within 14 Days",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           #subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on scheduled data from ",start_date," to ",end_date)#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -7593,13 +7677,18 @@ server <- function(input, output, session) {
     waitTime <- waitTime %>% spread(NEW_PT2, medWaitTime)
     waitTime[is.na(waitTime)] <- 0
     waitTime <- waitTime %>% gather(variable, value, 3:4)
+    
+    start_date <- isolate(selected_dateRange()[1])
+    end_date <- isolate(selected_dateRange()[2])
+    
     ggplot(waitTime %>% filter(variable == "Established"), aes(x=APPT_MADE_MONTH_YEAR, y=value, group=PROVIDER)) +
       geom_line(aes(color=PROVIDER), size=1) +
       # geom_hline(yintercept=14, linetype="dashed", color = "red", size=1)+
       scale_color_MountSinai("main",reverse = TRUE, labels = wrap_format(25))+
       labs(x=NULL, y=NULL, 
            title = "Median Wait Time to New and Established Appointment Over Time by Provider",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on data from ", start_date," to ",end_date)#,
            #caption = "*New patients defined by CPT codes (level of service)."
            )+
       theme_new_line()+
@@ -7641,6 +7730,8 @@ server <- function(input, output, session) {
     percent_within_14_days <- join_data %>% group_by(APPT_MADE_MONTH_YEAR, PROVIDER) %>%
       summarise(percent = round((total/total_all),2))
     
+    start_date <- isolate(selected_dateRange()[1])
+    end_date <- isolate(selected_dateRange()[2])
     
     ggplot(percent_within_14_days, aes(x=APPT_MADE_MONTH_YEAR, y=percent, group = PROVIDER))+
       # geom_bar(stat = "identity", position = 'dodge')+
@@ -7652,7 +7743,8 @@ server <- function(input, output, session) {
       labs(x=NULL, y=NULL,
            #title = "Median Wait Time to New and Established Appointment Over Time",
            title = "Percent of New Patients Scheduled Within 14 Days",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           #subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))#,
+           subtitle = paste0("Based on scheduled data from ", start_date," to ", end_date)#,
            #caption = "*New patients defined by CPT codes (level of service)."
       )+
       theme_new_line()+
@@ -7684,6 +7776,9 @@ server <- function(input, output, session) {
       filter(NEW_PT2 == "NEW") %>%
         group_by(SCHEDULE_GROUPING_MAPPED, NEW_PT2) %>%
       dplyr::summarise(Total = n()) %>% collect()
+    
+    start_date <- isolate(selected_dateRange()[1])
+    end_date <- isolate(selected_dateRange()[2])
 
     #newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
     
@@ -7699,7 +7794,7 @@ server <- function(input, output, session) {
       scale_fill_MountSinai('purple')+
       labs(x=NULL, y=NULL,
            title = "New Patient Source",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+           subtitle = paste0("Based on scheduled data from ", start_date," to ", end_date,
                              "\nTotal New Patients = ",prettyNum(sum(newpatients.ratio$Total), big.mark = ','))
            )+
       theme_new_line()+
@@ -7740,7 +7835,7 @@ server <- function(input, output, session) {
       scale_fill_MountSinai('pink')+
       labs(x=NULL, y=NULL, 
            title = "Median Wait Time to New Appointment",
-           subtitle = paste0("Based scheduled on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]),
+           subtitle = paste0("Based scheduled on data from ", start_date," to ", end_date,
                              "\nWait Time = (Scheduled Appt Date - Appt Made Date)"),
            # caption = "*Based on all of scheduled patients\n**New patients defined by CPT codes (level of service)."
            #caption = "*New patients defined by CPT codes (level of service)."
@@ -7795,7 +7890,7 @@ server <- function(input, output, session) {
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
            title = "New Patient No Show Rate*",
-           subtitle = paste0("Based on scheduled data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on scheduled data from ", start_date," to ", end_date),
            caption = "*No Show Rate = (No Show + Same-day Canceled) / (Arrived + No Show + Same-day Canceled)"
            )+
       theme_new_line()+
