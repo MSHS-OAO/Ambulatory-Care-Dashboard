@@ -622,7 +622,6 @@ server <- function(input, output, session) {
       
     {
     
-    
       # visit_choices <- sort(unique(kpi.all.data[
       #   kpi.all.data$Campus %in% input$selectedCampus &
       #     kpi.all.data$Campus.Specialty %in% input$selectedSpecialty &
@@ -665,6 +664,31 @@ server <- function(input, output, session) {
                         choices = visit_choices,
                         selected = visit_choices
       )
+      
+      number_of_providers_selected <-length(selected_provider)
+      number_of_provider_choices <- length(provider_all_choices())
+      if(number_of_providers_selected == number_of_provider_choices) {
+        provider_choices_slot <- slot.data %>% ungroup() %>% 
+          filter(CAMPUS %in% selected_campus &
+                   CAMPUS_SPECIALTY %in% selected_specialty&
+                   DEPARTMENT %in% selected_department ) %>%
+          select(PROVIDER)  %>%
+          summarise(PROVIDER= unique(PROVIDER)) %>% collect()
+        provider_choices_slot <- sort(provider_choices_slot$PROVIDER, na.last = T)
+        
+        
+        updatePickerInput(session,
+                          inputId = "selectedProvider_slot",
+                          choices = provider_choices_slot,
+                          selected = provider_choices_slot
+        )
+      } else {
+        
+        updatePickerInput(session,
+                          inputId = "selectedProvider_slot",
+                          selected = selected_provider
+        )
+      }
     } 
     
     if (is.null(input$selectedProvider))
@@ -677,30 +701,7 @@ server <- function(input, output, session) {
       
       
     }
-    number_of_providers_selected <-length(selected_provider)
-    number_of_provider_choices <- length(provider_all_choices())
-    if(number_of_providers_selected == number_of_provider_choices) {
-      provider_choices_slot <- slot.data %>% ungroup() %>% 
-        filter(CAMPUS %in% selected_campus &
-                 CAMPUS_SPECIALTY %in% selected_specialty&
-                 DEPARTMENT %in% selected_department ) %>%
-        select(PROVIDER)  %>%
-        summarise(PROVIDER= unique(PROVIDER)) %>% collect()
-      provider_choices_slot <- sort(provider_choices_slot$PROVIDER, na.last = T)
-      
-      
-      updatePickerInput(session,
-                        inputId = "selectedProvider_slot",
-                        choices = provider_choices_slot,
-                        selected = provider_choices_slot
-      )
-    } else {
-      
-      updatePickerInput(session,
-                        inputId = "selectedProvider_slot",
-                        selected = selected_provider
-      )
-    }
+
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
