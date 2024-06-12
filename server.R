@@ -7484,6 +7484,14 @@ print("1")
     
     newpatients.ratio$ratio <- round(newpatients.ratio$Total / sum(newpatients.ratio$Total), 2)
     
+    newpatients.ratio.test <<- newpatients.ratio
+    
+    newpatients.ratio.filter.out <- newpatients.ratio %>% filter(ratio < 0.01)
+    
+    newpatients.ratio <- newpatients.ratio %>% filter(ratio >= 0.01)
+    
+    newpatients.ratio.filter.out <- unique(newpatients.ratio.filter.out$SCHEDULE_GROUPING_MAPPED)
+    
     newRatio <-
       ggplot(newpatients.ratio, aes(x=factor(SCHEDULE_GROUPING_MAPPED
                                              #, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
@@ -7521,6 +7529,10 @@ print("1")
       dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
       filter(NEW_PT2 == "NEW") %>% collect()
     waitTime$target <- 14
+    
+    if(length(newpatients.ratio.filter.out) > 0) {
+      waitTime <- waitTime %>% filter(!(SCHEDULE_GROUPING_MAPPED %in% newpatients.ratio.filter.out))
+    }
     
     #waitTime$SCHEDULE_GROUPING_MAPPED[which(waitTime$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
     
@@ -7584,7 +7596,9 @@ print("1")
     
     #noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)
     
-    
+    if(length(newpatients.ratio.filter.out) > 0) {
+      noShows <- noShows %>% filter(!(SCHEDULE_GROUPING_MAPPED %in% newpatients.ratio.filter.out))
+    }
     
     newNoShow <-
       
