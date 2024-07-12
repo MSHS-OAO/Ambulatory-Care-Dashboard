@@ -7444,6 +7444,8 @@ server <- function(input, output, session) {
     #data <- dataArrived_access_npr()
     data <- dataArrived_access_npr_new()
     
+    print("npr")
+    
     test_npr <<- data
     # data <- arrived.data.rows.npr %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy"  )
      print("1")
@@ -7539,6 +7541,8 @@ server <- function(input, output, session) {
   output$newPtWaitTimeByDept <- renderPlot({
     #data <- dataAll_access()
     data <-   dataAll_access_new()
+    
+    print("new pat wait time")
     
     test_new <<- data
     # data <- kpi.all.data[all.data.rows,] %>% filter(Campus == "MSUS")
