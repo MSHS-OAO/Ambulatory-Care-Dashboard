@@ -1,5 +1,5 @@
 server <- function(input, output, session) {
-  callModule(profvis_server, "profiler")
+  #callModule(profvis_server, "profiler")
   
   # observeEvent(input$dropdownbutton3, {
   #   print("clcick button")
@@ -988,7 +988,7 @@ server <- function(input, output, session) {
   
   
   
-  dataAll_access_new <- eventReactive(input$update_filter_access, {
+  dataAll_access_new <- eventReactive(list(input$update_filter_access), {
     selected_campus <- selected_campus()
     selected_specialty <- selected_specialty()
     selected_department <-  selected_department()

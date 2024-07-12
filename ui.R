@@ -951,7 +951,7 @@ ui <- dashboardPage(
         # Access Tab ------------------------------------------------------------------------------------------------------------
         # tabItem(tabName = "access"),
         tabItem(tabName = "newPatients",
-                profvis_ui("profiler"),
+               #profvis_ui("profiler"),
                 column(11,
                        div("Access | New Patients", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
                        tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
@@ -1000,6 +1000,7 @@ ui <- dashboardPage(
                            plotOutput("newPtApptSourceByDept", height = "550px") %>% 
                              withSpinner(type = 5, color = "#d80b8c")))
                 )),
+        
         
         # tabItem(tabName = "upcomingDemand",
         #         column(10,
