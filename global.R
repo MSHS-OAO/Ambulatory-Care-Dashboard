@@ -1093,7 +1093,7 @@ write_filters_db <- function(df) {
   
 }
 
-ambulatory_filters_tbl <- tbl(poolcon_upt, "AMBULATORY_FILTERS_SAVED")
+ambulatory_filters_tbl <- tbl(poolcon_upt, "AMBULATORY_FILTERS_SAVED") %>% collect()
 
 return_saved_choices <- function(df_choices, column) {
   choices <- df_choices %>% summarise(choices_unique = unique(!!!syms(column)))
@@ -1104,7 +1104,7 @@ return_saved_choices <- function(df_choices, column) {
 
 ##### UI Global Variables
 print("ui Start")
-saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
+saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) #%>% collect()
 saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
 
 default_campus <- "MSUS"

@@ -10,12 +10,14 @@ server <- function(input, output, session) {
   #   )
   # }, once = TRUE)
   observeEvent(input$update_filters1,{
+    print(paste0("Beginning of visit processing ", Sys.time()))
     filter_name <- input$filter_list
+    test_filter <<- filter_name
     format <- "YYYY-MM-DD HH24:MI:SS"
     date_start <- input$dateRange[1]
     date_end <- input$dateRange[2]
     #filter_name <- "MSUS_CARDIO_ALLERGY"
-    df_choices <- ambulatory_filters_tbl %>% filter(FILTER_NAME == filter_name) %>% collect()
+    df_choices <- ambulatory_filters_tbl %>% filter(FILTER_NAME == filter_name) #%>% collect()
     
     campus_choices <- return_saved_choices(df_choices, "CAMPUS")
     
@@ -31,6 +33,7 @@ server <- function(input, output, session) {
     
     
     specialty_choices <- return_saved_choices(df_choices, "SPECIALTY")
+    print(specialty_choices)
     updated_specialty_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
                                                             TO_DATE(date_start, format) <= APPT_DATE_YEAR,
                                                             TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
@@ -168,7 +171,7 @@ server <- function(input, output, session) {
                       choices = unique(holid$holiday),
                       selected = holiday_choices
     )
-    saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
+    saved_filter_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) #%>% collect()
     saved_filter_choices <- sort(saved_filter_choices$choices, na.last = T)
 
     print("filter observe")
@@ -177,6 +180,8 @@ server <- function(input, output, session) {
                       selected = NULL,
                       choices = saved_filter_choices
     )
+    
+    print(paste0("End of visit processing ", Sys.time()))
     
   },
   ignoreInit = TRUE,
@@ -252,7 +257,7 @@ server <- function(input, output, session) {
     user <- user()
     
     print("collect")
-    choices <- ambulatory_filters_tbl %>% summarise(choices_unique = unique(FILTER_NAME)) %>% collect()
+    choices <- ambulatory_filters_tbl %>% summarise(choices_unique = unique(FILTER_NAME)) #%>% collect()
     choices <- sort(choices$choices_unique, na.last = T)
     print("after collect")
    
@@ -280,7 +285,7 @@ server <- function(input, output, session) {
       # filter_list_choices <- file_path_sans_ext(list.files(path = filter_path_full, pattern = "*.csv"))
       write_filters_db(filter_df)
       
-      filter_list_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) %>% collect()
+      filter_list_choices <- ambulatory_filters_tbl %>% summarise(choices = unique(FILTER_NAME)) #%>% collect()
       filter_list_choices <- sort(filter_list_choices$choices, na.last = T)
       
       print("after collect")
