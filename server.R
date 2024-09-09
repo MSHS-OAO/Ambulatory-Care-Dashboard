@@ -4705,7 +4705,9 @@ server <- function(input, output, session) {
   # Average Daily Appts Scheduled
   
   scheduledAppts_num <- reactive({
-    data <- dataArrivedNoShow()
+    #data <- dataArrivedNoShow()
+    data <- dataIncompleteAppt()
+    
     numerator <- data %>% summarize(n()) %>% collect()
     denominator <- data %>% select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator$APPT_DATE_YEAR)
@@ -4723,11 +4725,15 @@ server <- function(input, output, session) {
   })
   
   incompleteAppts_num <- reactive({
-    data <- dataArrivedNoShow()
+    #data <- dataArrivedNoShow()
+    data <- dataIncompleteAppt()
+    
+    test_new <<- data
     
     numerator <- data %>% filter(APPT_STATUS %in% c("Rescheduled", "Canceled", "Bumped", "No Show")) %>% summarize(n()) %>% collect()
     denominator <- data %>% summarize(n()) %>% collect()
     num <- prettyNum(round(numerator/denominator,2)*100, big.mark = ",")
+    num
   })
   # Average Daily Incomplete Appts
   output$incompleteAppts <- renderValueBox({
@@ -4743,7 +4749,15 @@ server <- function(input, output, session) {
   
   output$schedulingStatusSummary <- renderPlot({
     
-    data <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("No Show", "Arrived"))
+    data <- dataIncompleteAppt()
+    
+    total_arrived <- data %>% select(APPT_DATE_YEAR) %>% collect()
+    
+    #data <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("No Show", "Arrived"))
+    
+    data <- data %>% filter(APPT_STATUS %in% c("No Show", "Arrived"))
+    
+    test_dataArrivedNoShow <<- data
 
     # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     
@@ -4755,12 +4769,13 @@ server <- function(input, output, session) {
     #   summarise(value = round(n()/length(unique(kpi.all.data[arrived.data.rows,]$Appt.DateYear)))) %>%
     #   arrange(desc(value)) 
     data <- data %>% select(APPT_STATUS, APPT_DATE_YEAR) %>% collect()
-    total_arrived <- data %>% select(APPT_DATE_YEAR) %>% collect()
+    #total_arrived <- data %>% select(APPT_DATE_YEAR) %>% collect()
     
     sameDay <- data %>%
       group_by(APPT_STATUS) %>%
       summarise(value = ceiling(n()/length(unique(total_arrived$APPT_DATE_YEAR)))) %>%
       arrange(desc(value)) 
+    
     
     data_incomplete <- dataCanceledBumpedRescheduledAll() %>% filter(LEAD_DAYS < 1) %>% select(APPT_STATUS, APPT_DATE_YEAR) %>% collect() %>%
                         group_by(APPT_STATUS) %>%
@@ -4770,6 +4785,7 @@ server <- function(input, output, session) {
     sameDay <- bind_rows(sameDay, data_incomplete)
     
     
+    data_incom_test <<- dataCanceledBumpedRescheduledAll()
     
     sameDay$APPT_STATUS <- as.character(sameDay$APPT_STATUS)
     
