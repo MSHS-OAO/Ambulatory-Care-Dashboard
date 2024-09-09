@@ -4735,8 +4735,6 @@ server <- function(input, output, session) {
     #data <- dataArrivedNoShow()
     data <- dataIncompleteAppt()
     
-    test_new <<- data
-    
     numerator <- data %>% filter(APPT_STATUS %in% c("Rescheduled", "Canceled", "Bumped", "No Show")) %>% summarize(n()) %>% collect()
     denominator <- data %>% summarize(n()) %>% collect()
     num <- prettyNum(round(numerator/denominator,2)*100, big.mark = ",")
@@ -4764,7 +4762,7 @@ server <- function(input, output, session) {
     
     data <- data %>% filter(APPT_STATUS %in% c("No Show", "Arrived"))
     
-    test_dataArrivedNoShow <<- data
+    
 
     # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Cardiology")
     
@@ -4791,8 +4789,7 @@ server <- function(input, output, session) {
     
     sameDay <- bind_rows(sameDay, data_incomplete)
     
-    
-    data_incom_test <<- dataCanceledBumpedRescheduledAll()
+  
     
     sameDay$APPT_STATUS <- as.character(sameDay$APPT_STATUS)
     
