@@ -21,7 +21,7 @@ server <- function(input, output, session) {
     
     campus_choices <- return_saved_choices(df_choices, "CAMPUS")
     
-    updated_campus_choices <- filters %>% select(CAMPUS) %>% mutate(CAMPUS = unique(CAMPUS)) %>% collect()
+    updated_campus_choices <- filters_table %>% select(CAMPUS) %>% summarise(CAMPUS = unique(CAMPUS)) %>% collect()
     updated_campus_choices <- sort(updated_campus_choices$CAMPUS, na.last = T)
     
     
@@ -34,11 +34,12 @@ server <- function(input, output, session) {
     
     specialty_choices <- return_saved_choices(df_choices, "SPECIALTY")
     print(specialty_choices)
-    updated_specialty_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
-                                                            TO_DATE(date_start, format) <= APPT_DATE_YEAR,
-                                                            TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+    updated_specialty_choices <- filters_table %>% filter(CAMPUS %in% campus_choices#,
+                                                            #TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                            #TO_DATE(date_end, format) >= APPT_DATE_YEAR
+                                                          ) %>%
                                 select(CAMPUS_SPECIALTY) %>% 
-                                mutate(CAMPUS_SPECIALTY = unique(CAMPUS_SPECIALTY)) %>% 
+                                summarise(CAMPUS_SPECIALTY = unique(CAMPUS_SPECIALTY)) %>% 
                                 collect()
     updated_specialty_choices <- sort(updated_specialty_choices$CAMPUS_SPECIALTY, na.last = T)
     
@@ -49,12 +50,13 @@ server <- function(input, output, session) {
     )
     
     dept_choices <- return_saved_choices(df_choices, "DEPARTMENT")
-    updated_dept_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
-                                                       CAMPUS_SPECIALTY %in% specialty_choices,
-                                                            TO_DATE(date_start, format) <= APPT_DATE_YEAR,
-                                                            TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+    updated_dept_choices <- filters_table %>% filter(CAMPUS %in% campus_choices,
+                                                       CAMPUS_SPECIALTY %in% specialty_choices#,
+                                                            #TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                            #TO_DATE(date_end, format) >= APPT_DATE_YEAR
+                                                     ) %>%
       select(DEPARTMENT) %>% 
-      mutate(DEPARTMENT = unique(DEPARTMENT)) %>% 
+      summarise(DEPARTMENT = unique(DEPARTMENT)) %>% 
       collect()
     updated_dept_choices <- sort(updated_dept_choices$DEPARTMENT, na.last = T)
     
@@ -73,14 +75,15 @@ server <- function(input, output, session) {
     )
     
     provider_choices <- return_saved_choices(df_choices, "PROVIDER")
-    updated_provider_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+    updated_provider_choices <- filters_table %>% filter(CAMPUS %in% campus_choices,
                                                        CAMPUS_SPECIALTY %in% specialty_choices,
                                                        DEPARTMENT %in% dept_choices,
-                                                       RESOURCES %in% resource_choices,
-                                                       TO_DATE(date_start, format) <= APPT_DATE_YEAR,
-                                                       TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+                                                       RESOURCES %in% resource_choices#,
+                                                       #TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                       #TO_DATE(date_end, format) >= APPT_DATE_YEAR
+                                                       ) %>%
       select(PROVIDER) %>% 
-      mutate(PROVIDER = unique(PROVIDER)) %>% 
+      summarise(PROVIDER = unique(PROVIDER)) %>% 
       collect()
     updated_provider_choices <- sort(updated_provider_choices$PROVIDER, na.last = T)
     
@@ -93,25 +96,27 @@ server <- function(input, output, session) {
     visit_method_choices <- return_saved_choices(df_choices, "VISIT_METHOD")
     
     if(length(provider_choices) >= 1000) {
-      updated_visit_method_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+      updated_visit_method_choices <- filters_table %>% filter(CAMPUS %in% campus_choices,
                                                              CAMPUS_SPECIALTY %in% specialty_choices,
                                                              DEPARTMENT %in% dept_choices,
-                                                             RESOURCES %in% resource_choices,
-                                                             TO_DATE(date_start, format) <= APPT_DATE_YEAR,
-                                                             TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+                                                             RESOURCES %in% resource_choices#,
+                                                             #TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                             #TO_DATE(date_end, format) >= APPT_DATE_YEAR
+                                                             ) %>%
         select(VISIT_METHOD) %>% 
-        mutate(VISIT_METHOD = unique(VISIT_METHOD)) %>% 
+        summarise(VISIT_METHOD = unique(VISIT_METHOD)) %>% 
         collect()
     } else {
-      updated_visit_method_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+      updated_visit_method_choices <- filters_table %>% filter(CAMPUS %in% campus_choices,
                                                                  CAMPUS_SPECIALTY %in% specialty_choices,
                                                                  DEPARTMENT %in% dept_choices,
                                                                  RESOURCES %in% resource_choices,
-                                                                 PROVIDER %in% provider_choices,
-                                                                 TO_DATE(date_start, format) <= APPT_DATE_YEAR,
-                                                                 TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+                                                                 PROVIDER %in% provider_choices#,
+                                                                 #TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                                 #TO_DATE(date_end, format) >= APPT_DATE_YEAR
+                                                               ) %>%
         select(VISIT_METHOD) %>% 
-        mutate(VISIT_METHOD = unique(VISIT_METHOD)) %>% 
+        summarise(VISIT_METHOD = unique(VISIT_METHOD)) %>% 
         collect()
     }
     updated_visit_method_choices <- sort(updated_visit_method_choices$VISIT_METHOD, na.last = T)
@@ -125,27 +130,29 @@ server <- function(input, output, session) {
     visit_type_choices <- return_saved_choices(df_choices, "VISIT_TYPE")
     
     if(length(provider_choices) >= 1000) {
-      updated_visit_type_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+      updated_visit_type_choices <- filters_table %>% filter(CAMPUS %in% campus_choices,
                                                                  CAMPUS_SPECIALTY %in% specialty_choices,
                                                                  DEPARTMENT %in% dept_choices,
                                                                  RESOURCES %in% resource_choices,
-                                                                 VISIT_METHOD %in% visit_method_choices,
-                                                                 TO_DATE(date_start, format) <= APPT_DATE_YEAR,
-                                                                 TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+                                                                 VISIT_METHOD %in% visit_method_choices#,
+                                                                 #TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                                 #TO_DATE(date_end, format) >= APPT_DATE_YEAR
+                                                             ) %>%
         select(APPT_TYPE) %>% 
-        mutate(APPT_TYPE = unique(APPT_TYPE)) %>% 
+        summarise(APPT_TYPE = unique(APPT_TYPE)) %>% 
         collect()
     } else {
-      updated_visit_type_choices <- historical.data %>% filter(CAMPUS %in% campus_choices,
+      updated_visit_type_choices <- filters %>% filter(CAMPUS %in% campus_choices,
                                                                  CAMPUS_SPECIALTY %in% specialty_choices,
                                                                  DEPARTMENT %in% dept_choices,
                                                                  RESOURCES %in% resource_choices,
                                                                  PROVIDER %in% provider_choices,
-                                                                 VISIT_METHOD %in% visit_method_choices,
-                                                                 TO_DATE(date_start, format) <= APPT_DATE_YEAR,
-                                                                 TO_DATE(date_end, format) >= APPT_DATE_YEAR) %>%
+                                                                 VISIT_METHOD %in% visit_method_choices#,
+                                                                 #TO_DATE(date_start, format) <= APPT_DATE_YEAR,
+                                                                 #TO_DATE(date_end, format) >= APPT_DATE_YEAR
+                                                       ) %>%
         select(APPT_TYPE) %>% 
-        mutate(APPT_TYPE = unique(APPT_TYPE)) %>% 
+        summarise(APPT_TYPE = unique(APPT_TYPE)) %>% 
         collect()
     }
     updated_visit_type_choices <- sort(updated_visit_type_choices$APPT_TYPE, na.last = T)
