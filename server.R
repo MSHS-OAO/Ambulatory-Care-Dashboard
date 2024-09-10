@@ -4782,7 +4782,8 @@ server <- function(input, output, session) {
       arrange(desc(value)) 
     
     
-    data_incomplete <- dataCanceledBumpedRescheduledAll() %>% filter(LEAD_DAYS < 1) %>% select(APPT_STATUS, APPT_DATE_YEAR) %>% collect() %>%
+    data_incomplete <- dataIncompleteAppt() %>% select(APPT_STATUS, APPT_DATE_YEAR) %>% 
+                        filter(APPT_STATUS %in% c("Rescheduled", "Canceled", "Bumped")) %>% collect() %>%
                         group_by(APPT_STATUS) %>%
                         summarise(value = ceiling(n()/length(unique(total_arrived$APPT_DATE_YEAR)))) %>%
                         arrange(desc(value)) 
