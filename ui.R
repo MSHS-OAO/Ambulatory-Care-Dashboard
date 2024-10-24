@@ -64,6 +64,7 @@ ui <- dashboardPage(
                          
                 ),
                 menuItem("Cycle Time", tabName = "cycleTime", icon = icon("stopwatch"),
+                         menuSubItem("Appointment to Check-in", tabName = "dttmCheckin"),
                          menuSubItem("Cycle Time", tabName = "cycleTime"),
                          menuSubItem("Check-in to Room-in", tabName = "roomInTime"),
                          menuSubItem("Room-in to Visit-end", tabName = "roomInTime2")
@@ -1090,6 +1091,41 @@ ui <- dashboardPage(
         #         )),
         # Day of Visit Tab ------------------------------------------------------------------------------------------------------------
         
+        tabItem(tabName = "dttmCheckin",
+                column(11,
+                       div("Appointment to Check-in Time", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                       textOutput("checkin_time"),
+                       tags$head(tags$style("#checkin_time{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
+                       column(12,
+                              boxPlus(
+                                title = "Appointment to Check-in Time Summary", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+  
+                                br(),
+                                fluidRow(
+                                  
+                                  column(6, valueBoxOutput("checkinTimeCompNew", width = 12) %>%
+                                           withSpinner(type = 5, color = "#d80b8c")),
+                                  column(6, valueBoxOutput("checkinTimeCompOther", width = 12)))),
+                              boxPlus(
+                                title = "Appointment to Check-in Time by Visit Type", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                "*Select fewer visit types for better visibility",
+                                br(),
+                                fluidRow(
+                                  column(6, plotOutput("newCheckInTimeBoxPlot", height = "500px") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c")),
+                                  column(6, plotOutput("establishedCheckInTimeBoxPlot", height = "500px") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c"))),
+                                hr(),
+                                fluidRow(column(12, plotOutput("checkInTimeTrend", height = "600px") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c")))
+                              )
+                            
+                              
+                       ))
+        ),
         tabItem(tabName = "cycleTime",
                 column(11,
                        div("Check-in to Visit-end Time", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
@@ -1246,6 +1282,57 @@ ui <- dashboardPage(
                        ))
         ),
         
+        tabItem(tabName = "roomInTime2",
+                column(11,
+                       div("Room-in to Visit-end Time", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
+                       tags$style("#practiceName{color:black; font-family:Calibri; font-style: italic; font-size: 20px; margin-top: -0.5em; margin-bottom: 0.5em; margin-left: 20px}"),
+                       textOutput("room_time2"),
+                       tags$head(tags$style("#room_time2{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 22px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),                    
+                       column(12,
+                              boxPlus(
+                                title = "Room-in to Visit-end Time Summary", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                "*Visit-end Time is the minimum of Visit-end Time and Check-out",
+                                br(),
+                                fluidRow(
+                                  #column(4, uiOutput("apptTypeControl3")),
+                                  column(6, valueBoxOutput("roomInTimeCompNew2", width = 12) %>%
+                                           withSpinner(type = 5, color = "#d80b8c")),
+                                  column(6, valueBoxOutput("roomInTimeCompOther2", width = 12)))),
+                              boxPlus(
+                                title = "Room-in to Visit-end Time by Visit Type", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                "*Select fewer visit types for better visibility",
+                                br(),
+                                fluidRow(
+                                  column(6, plotOutput("newRoomInTimeBoxPlot2", height = "500px") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c")),
+                                  column(6, plotOutput("establishedRoomInTimeBoxPlot2", height = "500px") %>% 
+                                           withSpinner(type = 5, color = "#d80b8c"))),
+                                hr(),
+                                fluidRow(column(12, plotOutput("roomInTimeTrend2", height = "600px") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c")))
+                              ),
+                              boxPlus(
+                                title = "Room-in to Visit-end Time by Time of Day", width = 12, status = "primary",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                materialSwitch(
+                                  inputId = "median4",
+                                  label = "Median", 
+                                  right = TRUE,
+                                  status = "primary"),
+                                plotOutput("roomInTimeByHour2", height = "700px") %>%
+                                  withSpinner(type = 5, color = "#d80b8c")),
+                              boxPlus(
+                                title = "Room-in to Visit-end Time by Provider and Visit Type", width = 12, status = "primary", enable_dropdown = TRUE, dropdown_menu = dropdownItemList(dropdownItem(url = "https://mtsinai.sharepoint.com/:i:/s/MSHSAmbulatoryCareAnalyticsTool/EUcZvHOZbixGl0-bweS36zsBpwy3yX0b7NTpKeTH3yb7DQ?e=Yvff2b", name = "Reading a Boxplot")), dropdown_icon = "question",
+                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                                "*Select fewer providers for better visibility",
+                                plotOutput("newRoomInTimeByProv2", height = "800px") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c"),
+                                plotOutput("establishedRoomInTimeByProv2", height = "650px") %>% 
+                                  withSpinner(type = 5, color = "#d80b8c"))
+                       ))
+        ),
         # tabItem(tabName = "day",
         #         column(10,
         #                div("Patient Flow", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:34px; margin-left: 20px"),
@@ -1529,7 +1616,7 @@ ui <- dashboardPage(
       conditionalPanel(
         condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='cancellations' | 
-      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data' | input.sbm == 'Comparison'| input.sbm == 'optimization' | input.sbm == 'appt_length_breakdown'",
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' |input.sbm=='dttmCheckin' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data' | input.sbm == 'Comparison'| input.sbm == 'optimization' | input.sbm == 'appt_length_breakdown'",
         
         # Formatting Buttons
         tags$head(tags$style(HTML("#dropdownboxplot {color: #fff;}"))),
@@ -1588,7 +1675,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown' | input.sbm=='slotManagement'",
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='dttmCheckin' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown' | input.sbm=='slotManagement'",
                    br(),
                    actionButton("update_filters", "CLICK TO UPDATE", width = "80%"),
                    br(),
@@ -1643,7 +1730,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
+        input.sbm=='newPatients' | input.sbm=='cycleTime' |input.sbm=='dttmCheckin' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Resource Type:",
                      width = 12,
@@ -1661,7 +1748,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='dttmCheckin' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Provider:",
                      width = 12,
@@ -1681,7 +1768,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='dttmCheckin' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison' | input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Visit Method:",
                      width = 12,
@@ -1808,7 +1895,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='access' |
-        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
+        input.sbm=='newPatients' | input.sbm=='cycleTime' | input.sbm=='dttmCheckin' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm=='data'| input.sbm == 'Comparison'| input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Date Range:",
                      width = 12, 
@@ -1964,7 +2051,7 @@ ui <- dashboardPage(
                  conditionalPanel(
                    condition = "input.sbm=='KPIs' | input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
         input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | input.sbm=='newPatients' | 
-        input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'Comparison'| input.sbm == 'optimization' | input.sbm == 'appt_length_breakdown'",
+        input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='dttmCheckin' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'Comparison'| input.sbm == 'optimization' | input.sbm == 'appt_length_breakdown'",
                    box(
                      title = "Select Holidays to Exclude:",
                      width = 12,
@@ -1994,7 +2081,7 @@ ui <- dashboardPage(
       conditionalPanel(
         condition = "input.sbm=='system' | input.sbm=='systemComparison' | input.sbm=='profile' | input.sbm=='provider' | input.sbm=='KPIs' | input.sbm=='population' | input.sbm=='volume' | input.sbm=='scheduling' |
       input.sbm=='arrived' | input.sbm=='noshows'| input.sbm=='cancellations' | input.sbm=='utilization' | input.sbm=='access' | 
-      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'Comparison'| input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",        
+      input.sbm=='newPatients' | input.sbm=='slotManagement' | input.sbm=='cycleTime' | input.sbm=='dttmCheckin' | input.sbm=='roomInTime' | input.sbm=='roomInTime2' | input.sbm == 'Comparison'| input.sbm == 'optimization'| input.sbm == 'appt_length_breakdown'",        
         # br(),
         # dropdown(
         #   box(
@@ -2110,7 +2197,7 @@ ui <- dashboardPage(
       ),
       
       conditionalPanel(
-        condition = "input.sbm == 'cycleTime' | input.sbm == 'roomInTime' | input.sbm == 'roomInTime2'",
+        condition = "input.sbm == 'cycleTime' |input.sbm=='dttmCheckin' | input.sbm == 'roomInTime' | input.sbm == 'roomInTime2'",
           br(),
         br(),
         br(),

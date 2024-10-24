@@ -376,7 +376,7 @@ poolcon_production <- dbPool(drv = odbc::odbc(),
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
-historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
+historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS_TEST")
 print("hist")
 filters <- tbl(poolcon, "AMBULATORY_FILTERS")
 print("filters")
@@ -426,7 +426,7 @@ print("slot")
 # utilization.data <- readRDS(paste0(wdpath,"/Data/utilization_data.rds"))
 filter_path <- paste0(wdpath, "/Filters")
 
-max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM AMBULATORY_ACCESS")
+max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM AMBULATORY_ACCESS_TEST")
 max_date_arrived <- dbGetQuery(poolcon, max_date_arrived)
 max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 
