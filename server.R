@@ -8165,6 +8165,7 @@ print("1")
     
   })
   
+  
   output$checkinTimeCompOther <- renderValueBox({
     
     data_checkin <- dataArrived() %>% filter(NEW_PT3 == "ESTABLISHED")
@@ -8193,6 +8194,7 @@ print("1")
     )
     
   })
+ 
   
   output$newCheckInTimeBoxPlot <- renderPlot({
     
@@ -8205,42 +8207,42 @@ print("1")
       group_by(BIN_DTTM_CHECKIN) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_DTTM_CHECKIN) %>%
       mutate(percent = total_bin / total)
-    #data_checkin$BIN_DTTM_CHECKIN <- as.numeric(data_checkin$BIN_DTTM_CHECKIN)
+   
     
-    
-    #main_rows <- seq(-60, max(data_checkin$BIN_DTTM_CHECKIN), by= 5)
-    
-    #rows_to_be_included <- which(!main_rows %in% data_checkin$BIN_CYCLE)
-    
-    # 
-    # if (length(rows_to_be_included)>0){
-    #   for (i in rows_to_be_included){
-    #     data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
-    #   }
-    #   data_cycle[is.na(data_cycle)] <- 0
-    # }
-    # 
-    #data_cycle <- left_join(data_cycle, bin_mapping)
-    
-    #data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
-    
-      data_checkin <- data_checkin %>% mutate(BIN_DTTM_CHECKIN = factor(BIN_DTTM_CHECKIN))  
-    data_checkin$BIN_DTTM_CHECKIN <- 
+     bin_map <- data.frame(bin_level = c("(-inf,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+                                          "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
+                                          "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
+                                          "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,inf)"),
+                            
+                            BIN_DTTM_CHECKIN = c("<-60", "-60", "-55", "-50",  "-45", "-40", "-35", "-30", "-25", "-20", "-15", "-10",
+                                                 "-5", "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", ">60")
+      )
       
-      factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
+      
+      data_checkin <- left_join(data_checkin, bin_map, by = "BIN_DTTM_CHECKIN")
     
-    graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
+      data_checkin <- data_checkin %>% mutate(bin_level = factor(bin_level, 
+                       levels = c("(-inf,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+                       "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
+                       "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
+                       "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,inf)"), ordered = TRUE))  
+    
+      
+      
+    
+    graph <- ggplot(aes(x = bin_level , y = percent), data = data_checkin) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
-      labs(title = paste0("Distribution of NEW Appointments\nCheck-in to Visit-end Time**"),
+      labs(title = paste0("Distribution of NEW Appointments\nAppointment to Check-in Time**"),
            y = "% of Patients",
            x = "Minutes",
-           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out")
+           )+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_discrete(labels = data_cycle$X_LABEL)+
+      #scale_x_discrete(labels = data_checkin$bin_level)+
       #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
@@ -8252,92 +8254,51 @@ print("1")
   
   
   
-  output$establishedCycleTimeBoxPlot <- renderPlot({
+  output$establishedCheckInTimeBoxPlot <- renderPlot({
     
-    # data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
-    #   select(CYCLETIME, NEW_PT3, APPT_TYPE) %>% collect()
-    # # data <- arrived.data %>% filter(cycleTime > 0) %>% filter(Campus == "MSUS", Campus.Specialty == "Cardiology", Appt.Type %in% c("NEW PATIENT", "FOLLOW UP"))
-    # 
-    # #data <- data_other
-    # 
-    # if(length(unique(data$APPT_TYPE)) == 1){
-    #   appt.type <- unique(data$APPT_TYPE)
-    # } else{
-    #   appt.type <- "Established*"
-    # }
-    # 
-    # graph <- ggplot(data, aes(x=CYCLETIME)) +
-    #   geom_histogram(aes(y = (..count..)/sum(..count..)),
-    #                  bins = 22,
-    #                  color="#d80b8c", fill="#fcc9e9") +
-    #   labs(title = paste0("Distribution of ",appt.type," Appointments\nCheck-in to Visit-end Time**"),
-    #        y = "% of Patients",
-    #        x = "Minutes",
-    #        subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-    #        caption = paste0("*Includes ", length(unique(data$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
-    #   theme_new_line()+
-    #   theme_bw()+
-    #   graph_theme("none")+
-    #   theme(plot.caption = element_text(hjust = 0, size = 12, face = "italic"))+
-    #   scale_x_continuous(breaks = seq(0, 500, 30), lim = c(0, 500))+
-    #   scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
-    # 
+    data_checkin <- dataArrived() %>% filter( NEW_PT3 == "ESTABLISHED") 
+    
+    data_checkin <- data_checkin %>% 
+      select(DTTMTOCHECKIN, NEW_PT3, BIN_DTTM_CHECKIN) %>%
+      group_by(BIN_DTTM_CHECKIN) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_DTTM_CHECKIN) %>%
+      mutate(percent = total_bin / total)
+    
+    bin_map <- data.frame(bin_level = c("(-inf,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+                                        "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
+                                        "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
+                                        "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,inf)"),
+                          
+                          BIN_DTTM_CHECKIN = c("<-60", "-60", "-55", "-50",  "-45", "-40", "-35", "-30", "-25", "-20", "-15", "-10",
+                                               "-5", "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", ">60")
+    )
     
     
-    # appt.type.data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
-    #   select(APPT_TYPE) %>% mutate(APPT_TYPE= unique(APPT_TYPE)) %>% collect()
+    data_checkin <- left_join(data_checkin, bin_map, by = "BIN_DTTM_CHECKIN")
     
-    
-    # appt.type.data <- dataArrived() %>% filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>%
-    #   group_by(APPT_TYPE) %>% summarise(check = 1)  %>% collect()
-    
-    data_cycle <- dataArrived() %>% 
-      filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
-      group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
-    data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
-    
-    main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
-    
-    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
-    
-    
-    if (length(rows_to_be_included)>0){
-      for (i in rows_to_be_included){
-        data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
-      }
-      
-      data_cycle[is.na(data_cycle)] <- 0
-    }
-    
-    
-    data_cycle <- left_join(data_cycle, bin_mapping)
-    
-    data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
-    
-    data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
+    data_checkin <- data_checkin %>% mutate(bin_level = factor(bin_level, 
+                                                               levels = c("(-inf,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+                                                                          "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
+                                                                          "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
+                                                                          "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,inf)"), ordered = TRUE))  
     
     
     
-    # if(length(unique(appt.type.data$APPT_TYPE)) == 1){
-    #   appt.type <- unique(appt.type.data$APPT_TYPE)
-    # } else{
-    #   appt.type <- "Established*"
-    # }
-    
-    graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
+
+    graph <- ggplot(aes(x = bin_level , y = percent), data = data_checkin) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
-      labs(title = paste0("Distribution of Established Appointments\nCheck-in to Visit-end Time**"),
+      labs(title = paste0("Distribution of Established Appointments\nAppointment to Check-in Time**"),
            y = "% of Patients",
            x = "Minutes",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            #caption = paste0("*Includes ", length(unique(appt.type.data$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
-           caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out "))+
+           #caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out ")
+           )+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_discrete(labels = data_cycle$X_LABEL)+
+      #scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -8345,6 +8306,61 @@ print("1")
     graph
     
   })
+  
+  
+  output$checkInTimeTrend <- renderPlot({
+    
+    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS"& CAMPUS_SPECIALTY %in% "Allergy")
+    
+    data <-  dataArrived()
+    data <-  data %>% filter( NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+      select(DTTMTOCHECKIN, NEW_PT3, APPT_TYPE, BIN_DTTM_CHECKIN) %>% collect() %>%
+      mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
+      filter(!is.na(NEW_PT3))
+    
+    data <- data %>% select(DTTMTOCHECKIN, NEW_PT3, BIN_DTTM_CHECKIN) %>%
+      group_by(BIN_DTTM_CHECKIN, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+      ungroup() %>%
+      mutate(total = sum (total_bin, na.rm = TRUE)) %>%
+      group_by(BIN_DTTM_CHECKIN, NEW_PT3) %>%
+      #group_by(BIN_DTTM_CHECKIN) %>%
+      mutate(percent = total_bin / total) 
+    
+    
+    bin_map <- data.frame(bin_level = c("(-inf,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+                                        "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
+                                        "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
+                                        "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,inf)"),
+                          
+                          BIN_DTTM_CHECKIN = c("<-60", "-60", "-55", "-50",  "-45", "-40", "-35", "-30", "-25", "-20", "-15", "-10",
+                                               "-5", "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", ">60")
+    )
+    
+    
+    data <- left_join(data, bin_map, by = "BIN_DTTM_CHECKIN")
+    
+    data <- data %>% mutate(bin_level = factor(bin_level, 
+                                               levels = c("(-inf,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+                                                          "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
+                                                          "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
+                                                          "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,inf)"), ordered = TRUE))  
+    
+    ggplot(aes(x = bin_level , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+      geom_bar(stat = 'identity') +
+      scale_color_MountSinai()+
+      scale_fill_MountSinai()+
+      #geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
+      labs(title = paste0("Appointment to Check-in Time* Comparison by Visit Type"),
+           y = "% of Patients",
+           x = "Minutes",
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+      theme_new_line()+
+      theme_bw()+
+      graph_theme("top")+
+      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) 
+    
+  })
+  
   
   # (1) Cycle Times --------------------------------------------------------------------------
   
