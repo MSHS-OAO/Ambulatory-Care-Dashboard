@@ -8456,9 +8456,9 @@ print("1")
       mutate(percent = total_bin / total) %>%
       mutate(BIN_CYCLE = as.numeric(BIN_CYCLE))
 
+      data <- data %>% filter(!is.na(BIN_CYCLE))
     
-    
-    
+ 
     
     main_rows <- seq(0, 480, by= 30)
 
@@ -8554,6 +8554,7 @@ print("1")
       group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
     data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
+    data_cycle <- data_cycle %>% filter(!is.na(BIN_CYCLE))
     
 
     main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
@@ -8642,7 +8643,9 @@ print("1")
       mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
     data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
     
-    main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
+    data_cycle <- data_cycle %>% filter(!is.na(BIN_CYCLE))
+    
+    main_rows <- seq(0, max(data_cycle$BIN_CYCLE, na.rm = TRUE), by= 30)
     
     rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
 
@@ -8676,7 +8679,7 @@ print("1")
       labs(title = paste0("Distribution of Established Appointments\nCheck-in to Visit-end Time**"),
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            #caption = paste0("*Includes ", length(unique(appt.type.data$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
            caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out "))+
            theme_new_line()+
@@ -9051,6 +9054,8 @@ ggplot(data_base,
       mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_ROOMIN, NEW_PT3) %>%
       mutate(percent = total_bin / total) %>%
       mutate(BIN_ROOMIN = as.numeric(BIN_ROOMIN))
+     
+    data <- data %>% filter(!is.na(BIN_ROOMIN))
 
     
     main_rows <- seq(0, 480, by= 30)
@@ -9116,6 +9121,8 @@ ggplot(data_base,
       group_by(BIN_ROOMIN) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN) %>% mutate(percent = total_bin / total)
     data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
+    
+    data_cycle <- data_cycle %>% filter(!is.na(BIN_ROOMIN))
     
     main_rows <- seq(0, 480, by= 30)
     
@@ -9208,6 +9215,8 @@ ggplot(data_base,
       group_by(BIN_ROOMIN) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN) %>% mutate(percent = total_bin / total)
     data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
+    
+    data_cycle <- data_cycle %>% filter(!is.na(BIN_ROOMIN))
     
     main_rows <- seq(0, 480, by= 30)
     
@@ -9560,6 +9569,7 @@ ggplot(data_base,
       group_by(BIN_ROOMIN_VISIT_END) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN_VISIT_END) %>% mutate(percent = total_bin / total)
     data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
+    data_cycle <- data_cycle %>% filter(!is.na(BIN_ROOMIN_VISIT_END))
     
     main_rows <- seq(0, 480, by= 30)
     
@@ -9608,6 +9618,7 @@ ggplot(data_base,
       group_by(BIN_ROOMIN_VISIT_END) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN_VISIT_END) %>% mutate(percent = total_bin / total)
     data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
+    data_cycle <- data_cycle %>% filter(!is.na(BIN_ROOMIN_VISIT_END))
     
     main_rows <- seq(0, 480, by= 30)
     
@@ -9667,6 +9678,7 @@ ggplot(data_base,
       mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>%
       mutate(percent = total_bin / total) %>%
       mutate(BIN_ROOMIN_VISIT_END = as.numeric(BIN_ROOMIN_VISIT_END))
+    data <- data %>% filter(!is.na(BIN_ROOMIN_VISIT_END))
     
     
     main_rows <- seq(0, 480, by= 30)
