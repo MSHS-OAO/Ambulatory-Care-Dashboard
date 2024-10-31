@@ -2145,7 +2145,7 @@ ui <- dashboardPage(
       ),
       
       conditionalPanel(
-        condition = "input.sbm == 'cycleTime' |input.sbm=='dttmCheckin' | input.sbm == 'roomInTime' | input.sbm == 'roomInTime2'",
+        condition = "input.sbm == 'cycleTime' | input.sbm == 'roomInTime' | input.sbm == 'roomInTime2'",
           br(),
         br(),
         br(),
