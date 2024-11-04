@@ -376,7 +376,7 @@ poolcon_production <- dbPool(drv = odbc::odbc(),
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
-historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
+historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS_TEST")
 print("hist")
 filters <- tbl(poolcon, "AMBULATORY_FILTERS")
 print("filters")
@@ -1298,4 +1298,4 @@ header$children[[2]]$children[[1]] <-  tags$a(href='https://peak.mountsinai.org/
 
 print("ui end")
 
-bin_mapping <- tbl(poolcon, "AMBULATORY_BIN_MAPPING") %>% collect() %>% mutate(BIN_CYCLE = as.numeric(BIN_CYCLE)) 
+bin_mapping <- tbl(poolcon, "AMBULATORY_BIN_MAPPING") %>% collect() #%>% mutate(BIN_CYCLE = as.numeric(BIN_CYCLE)) 

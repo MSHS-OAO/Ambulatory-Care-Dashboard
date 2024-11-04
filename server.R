@@ -8203,9 +8203,9 @@ print("1")
     #   data <- rbind(data_new, data_other)
     # }
     
-    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS"& CAMPUS_SPECIALTY %in% "Allergy")
     
     data <-  dataArrived()
+    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     data <-  data %>% filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
       select(CYCLETIME, NEW_PT3, APPT_TYPE, BIN_CYCLE) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
@@ -8217,41 +8217,56 @@ print("1")
       mutate(total = sum (total_bin, na.rm = TRUE)) %>%
       group_by(BIN_CYCLE, NEW_PT3) %>%
       #group_by(BIN_CYCLE) %>%
-      mutate(percent = total_bin / total) %>%
-      mutate(BIN_CYCLE = as.numeric(BIN_CYCLE))
+      mutate(percent = total_bin / total) #%>%
+      #mutate(BIN_CYCLE = as.numeric(BIN_CYCLE))
 
     
     
     
     
-    main_rows <- seq(0, 480, by= 30)
-
-    rows_to_be_included <- which(!main_rows %in% data$BIN_CYCLE)    
+    # main_rows <- seq(0, 480, by= 30)
+    # 
+    # rows_to_be_included <- which(!main_rows %in% data$BIN_CYCLE)    
+    # 
+    # if (length(rows_to_be_included)>0){
+    #   for (i in rows_to_be_included){
+    #     data[nrow(data) + 1 , 1] <- main_rows[i]
+    #   }
+    #   
+    # }
+    # 
+    # data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    # #data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    # 
+    # data <- unique(data)
+    # data <- left_join(data, bin_mapping)
+    # 
+    # data <- data[order(data$BIN_CYCLE),]
+    # 
+    # data <- data %>%  group_by(BIN_CYCLE, NEW_PT3) %>%
+    #   mutate(BIN_CYCLE = factor(BIN_CYCLE, levels = sort(BIN_CYCLE)))
+    # 
+    # #data$BIN_CYCLE <- factor(data$BIN_CYCLE,levels = sort(data$BIN_CYCLE))
+    # x_label <- data %>% ungroup() %>% select(BIN_CYCLE, X_LABEL) %>% distinct()
+    # x_label <- x_label[order(x_label$BIN_CYCLE),]
     
-    if (length(rows_to_be_included)>0){
-      for (i in rows_to_be_included){
-        data[nrow(data) + 1 , 1] <- main_rows[i]
-      }
-      
-    }
-  
+    bin_mapping <- bin_mapping %>% mutate(BIN_CYCLE = ifelse(BIN_CYCLE== "480", ">480", BIN_CYCLE))  
+    
+    data <- left_join(bin_mapping, data, by = "BIN_CYCLE")
+    
     data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
-    #data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
-    data <- unique(data)
-    data <- left_join(data, bin_mapping)
     
-    data <- data[order(data$BIN_CYCLE),]
+    data$X_LABEL <- factor(data$X_LABEL, 
+                                 levels = c("[0,30) ", "[30,60) ",  "[60,90) ",  "[90,120) ",
+                                            "[120,150) ", "[150,180) ", "[180,210) ", "[210,240) ",
+                                            "[240,270) ", "[270,300) ", "[300,330) ", "[330,360) ", 
+                                            "[360,390) ", "[390,420) ", "[420,450) ", "[450,480) ", "[480,] " ), ordered = TRUE)
     
-    data <- data %>%  group_by(BIN_CYCLE, NEW_PT3) %>%
-      mutate(BIN_CYCLE = factor(BIN_CYCLE, levels = sort(BIN_CYCLE)))
-    
-    #data$BIN_CYCLE <- factor(data$BIN_CYCLE,levels = sort(data$BIN_CYCLE))
-    x_label <- data %>% ungroup() %>% select(BIN_CYCLE, X_LABEL) %>% distinct()
-    x_label <- x_label[order(x_label$BIN_CYCLE),]
     
 
-    ggplot(aes(x = BIN_CYCLE , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+    ggplot(aes(x = X_LABEL , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
       geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
@@ -8265,7 +8280,7 @@ print("1")
       theme_bw()+
       graph_theme("top")+
       # scale_x_discrete()+
-      scale_x_discrete(labels = x_label$X_LABEL)+
+      #scale_x_discrete(labels = x_label$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -8313,43 +8328,54 @@ print("1")
     
     
     
-    data_cycle <- dataArrived() %>% 
+    data_cycle <- dataArrived() %>%
+      #data_cycle <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
       filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
       group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
-    data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
+    
+      #data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
     
 
-    main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
-    
-    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
+    # main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
+    # 
+    # rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
+    # 
+    #    
+    # if (length(rows_to_be_included)>0){
+    #    for (i in rows_to_be_included){
+    #       data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+    #    }
+    # data_cycle[is.na(data_cycle)] <- 0
+    # }
 
-       
-    if (length(rows_to_be_included)>0){
-       for (i in rows_to_be_included){
-          data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
-       }
-    data_cycle[is.na(data_cycle)] <- 0
-    }
-
-    data_cycle <- left_join(data_cycle, bin_mapping)
+      
+    bin_mapping <- bin_mapping %>% mutate(BIN_CYCLE = ifelse(BIN_CYCLE== "480", ">480", BIN_CYCLE))  
+      
+    data_cycle <- left_join(bin_mapping, data_cycle, by = "BIN_CYCLE")
+    data_cycle[, 3:length(data_cycle)][is.na(data_cycle[, 3:length(data_cycle)])] <- 0
     
-    data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
+    #data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
   
-    data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
+    #data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
+    data_cycle$X_LABEL <- factor(data_cycle$X_LABEL, 
+                                   levels = c("[0,30) ", "[30,60) ",  "[60,90) ",  "[90,120) ",
+                                              "[120,150) ", "[150,180) ", "[180,210) ", "[210,240) ",
+                                              "[240,270) ", "[270,300) ", "[300,330) ", "[330,360) ", 
+                                              "[360,390) ", "[390,420) ", "[420,450) ", "[450,480) ", "[480,] " ), ordered = TRUE)
 
-    graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
+    graph <- ggplot(aes(x = X_LABEL , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointments\nCheck-in to Visit-end Time**"),
            y = "% of Patients",
            x = "Minutes",
-           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_discrete(labels = data_cycle$X_LABEL)+
+      #scale_x_discrete(labels = data_cycle$X_LABEL)+
       #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
@@ -8401,32 +8427,46 @@ print("1")
     #   group_by(APPT_TYPE) %>% summarise(check = 1)  %>% collect()
 
     data_cycle <- dataArrived() %>% 
+    #data_cycle <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
       filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
       group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
-    data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
-    
-    main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
-    
-    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
+    # data_cycle$BIN_CYCLE <- as.numeric(data_cycle$BIN_CYCLE)
+    # 
+    # main_rows <- seq(0, max(data_cycle$BIN_CYCLE), by= 30)
+    # 
+    # rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_CYCLE)
+    # 
+    # 
+    # if (length(rows_to_be_included)>0){
+    #   for (i in rows_to_be_included){
+    #       data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+    # }
+    # 
+    # data_cycle[is.na(data_cycle)] <- 0
+    # }
+    # 
+    # 
+    # data_cycle <- left_join(data_cycle, bin_mapping)
+    # 
+    # data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
+    # 
+    # data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
 
+    bin_mapping <- bin_mapping %>% mutate(BIN_CYCLE = as.character(BIN_CYCLE), 
+                                          BIN_CYCLE = ifelse(BIN_CYCLE== "480", ">480", BIN_CYCLE))  
     
-    if (length(rows_to_be_included)>0){
-      for (i in rows_to_be_included){
-          data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
-    }
+    data_cycle <- left_join(bin_mapping, data_cycle, by = "BIN_CYCLE")
+    data_cycle[, 3:length(data_cycle)][is.na(data_cycle[, 3:length(data_cycle)])] <- 0
     
-    data_cycle[is.na(data_cycle)] <- 0
-    }
-
+    #data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
     
-    data_cycle <- left_join(data_cycle, bin_mapping)
-    
-    data_cycle <- data_cycle[order(data_cycle$BIN_CYCLE),]
-    
-    data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
-
-
+    #data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
+    data_cycle$X_LABEL <- factor(data_cycle$X_LABEL, 
+                                 levels = c("[0,30) ", "[30,60) ",  "[60,90) ",  "[90,120) ",
+                                            "[120,150) ", "[150,180) ", "[180,210) ", "[210,240) ",
+                                            "[240,270) ", "[270,300) ", "[300,330) ", "[330,360) ", 
+                                            "[360,390) ", "[390,420) ", "[420,450) ", "[450,480) ", "[480,] " ), ordered = TRUE)
 
     # if(length(unique(appt.type.data$APPT_TYPE)) == 1){
     #   appt.type <- unique(appt.type.data$APPT_TYPE)
@@ -8434,7 +8474,7 @@ print("1")
     #   appt.type <- "Established*"
     # }
 
-    graph <- ggplot(aes(x = BIN_CYCLE , y = percent), data = data_cycle) +
+    graph <- ggplot(aes(x = X_LABEL , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of Established Appointments\nCheck-in to Visit-end Time**"),
@@ -8446,7 +8486,7 @@ print("1")
            theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_discrete(labels = data_cycle$X_LABEL)+
+      #scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
        #theme(axis.text.x = element_text(hjust = 3.5))
 
@@ -8802,7 +8842,9 @@ ggplot(data_base,
     #   scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
     
     
-    data <- dataArrived() %>% filter(CHECKINTOROOMIN > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+    data <- dataArrived() %>%
+      #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
+      filter(CHECKINTOROOMIN > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
       select(CHECKINTOROOMIN, NEW_PT3, APPT_TYPE, BIN_ROOMIN) %>% collect() %>% 
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
@@ -8813,43 +8855,63 @@ ggplot(data_base,
       group_by(BIN_ROOMIN, NEW_PT3) %>% summarise(total_bin = n()) %>% 
       ungroup() %>%
       mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_ROOMIN, NEW_PT3) %>%
-      mutate(percent = total_bin / total) %>%
-      mutate(BIN_ROOMIN = as.numeric(BIN_ROOMIN))
-
+      mutate(percent = total_bin / total) #%>%
+      #mutate(BIN_ROOMIN = as.numeric(BIN_ROOMIN))
     
-    main_rows <- seq(0, 480, by= 30)
+    #data <- data %>% mutate(BIN_ROOMIN = ifelse(is.na(BIN_ROOMIN), 480, BIN_ROOMIN))
     
-    rows_to_be_included <- which(!main_rows %in% data$BIN_ROOMIN)
-
-
-    if (length(rows_to_be_included)>0){
-      for (i in rows_to_be_included){
-        data[nrow(data) + 1 , 1] <- main_rows[i]
-      }
-      
-    }
     
-    data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    bin_mapping <- bin_mapping %>%
+      rename(BIN_ROOMIN= BIN_CYCLE) %>%
+      mutate(BIN_ROOMIN = ifelse(BIN_ROOMIN== "480", ">480", BIN_ROOMIN))  
+    
+    data <- left_join(bin_mapping, data, by = "BIN_ROOMIN")
+   
+    
+    data[, 4:length(data)][is.na(data[, 4:length(data)])] <- 0
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
-    data <- unique(data)
     
-    bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
-    data <- left_join(data, bin_mapping_roomin)
+    data$X_LABEL <- factor(data$X_LABEL, 
+                                 levels = c("[0,30) ", "[30,60) ",  "[60,90) ",  "[90,120) ",
+                                            "[120,150) ", "[150,180) ", "[180,210) ", "[210,240) ",
+                                            "[240,270) ", "[270,300) ", "[300,330) ", "[330,360) ", 
+                                            "[360,390) ", "[390,420) ", "[420,450) ", "[450,480) ", "[480,] " ), ordered = TRUE)
     
-    data <- data[order(data$BIN_ROOMIN),]
+  
+    # main_rows <- seq(0, 480, by= 30)
+    # 
+    # rows_to_be_included <- which(!main_rows %in% data$BIN_ROOMIN)
+    # 
+    # 
+    # if (length(rows_to_be_included)>0){
+    #   for (i in rows_to_be_included){
+    #     data[nrow(data) + 1 , 1] <- main_rows[i]
+    #   }
+    # 
+    # }
+    # 
+    # data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    # data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    # 
+    # data <- unique(data)
+    
+    # bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
+    # data <- left_join(data, bin_mapping_roomin)
+    #
+    # data <- data[order(data$BIN_ROOMIN),]
+    #
+    # data <- data %>%  group_by(BIN_ROOMIN, NEW_PT3) %>%
+    #   mutate(BIN_ROOMIN = factor(BIN_ROOMIN, levels = sort(BIN_ROOMIN)))
+    #
+    # x_label <- data %>% ungroup() %>% select(BIN_ROOMIN, X_LABEL) %>% distinct()
+    # x_label <- x_label[order(x_label$BIN_ROOMIN),]
 
-    data <- data %>%  group_by(BIN_ROOMIN, NEW_PT3) %>%
-      mutate(BIN_ROOMIN = factor(BIN_ROOMIN, levels = sort(BIN_ROOMIN)))
-    
-    x_label <- data %>% ungroup() %>% select(BIN_ROOMIN, X_LABEL) %>% distinct()
-    x_label <- x_label[order(x_label$BIN_ROOMIN),]
-    
     #data$bin <- factor(data$bin,levels = sort(data$bin))
     
     
 
-    ggplot(aes(x = BIN_ROOMIN , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+    ggplot(aes(x = X_LABEL , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
       geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
@@ -8857,11 +8919,12 @@ ggplot(data_base,
       labs(title = paste0("Check-in to Room-in Time Comparison by Appointment Type"),
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           )+
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      scale_x_discrete(labels = x_label$X_LABEL)+
+      #scale_x_discrete(labels = x_label$X_LABEL)+
       #scale_x_continuous(breaks = seq(0, 500, 30), limits = c(0, 500))+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
@@ -8875,34 +8938,53 @@ ggplot(data_base,
     
 
 
-    data_cycle <- dataArrived() %>% filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
+    data_cycle <- dataArrived() %>% 
+      #data_cycle <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
+      filter(CHECKINTOROOMIN >= 0, NEW_PT3 == "NEW") %>%
       select(CHECKINTOROOMIN, BIN_ROOMIN) %>%
       group_by(BIN_ROOMIN) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN) %>% mutate(percent = total_bin / total)
-    data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
+    #data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
     
-    main_rows <- seq(0, 480, by= 30)
+    # main_rows <- seq(0, 480, by= 30)
+    # 
+    # rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN)
+    # 
+    # if (length(rows_to_be_included > 0)){
+    # 
+    # for (i in rows_to_be_included){
+    #   data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+    # 
+    # }
+    # 
+    # data_cycle[is.na(data_cycle)] <- 0
+    # }
+    # 
+    # bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
+    # data_cycle <- left_join(data_cycle, bin_mapping_roomin)
+    # 
+    # data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN),]
+    # 
+    # data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN)
-    
-    if (length(rows_to_be_included > 0)){
-    
-    for (i in rows_to_be_included){
-      data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
       
-    }
+      bin_mapping <- bin_mapping %>% 
+         rename(BIN_ROOMIN= BIN_CYCLE)%>%
+        mutate(BIN_ROOMIN = ifelse(BIN_ROOMIN== "480", ">480", BIN_ROOMIN))  
+      
+      data_cycle <- left_join(bin_mapping, data_cycle, by = "BIN_ROOMIN")
+      data_cycle[is.na(data_cycle)] <- 0
+      
+      
+      data_cycle$X_LABEL <- factor(data_cycle$X_LABEL, 
+                                   levels = c("[0,30) ", "[30,60) ",  "[60,90) ",  "[90,120) ",
+                                              "[120,150) ", "[150,180) ", "[180,210) ", "[210,240) ",
+                                              "[240,270) ", "[270,300) ", "[300,330) ", "[330,360) ", 
+                                              "[360,390) ", "[390,420) ", "[420,450) ", "[450,480) ", "[480,] " ), ordered = TRUE)
+      
+      
     
-    data_cycle[is.na(data_cycle)] <- 0
-    }
-    
-    bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
-    data_cycle <- left_join(data_cycle, bin_mapping_roomin)
-    
-    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN),]
-    
-    data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
-    
-   ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
+   ggplot(aes(x = X_LABEL , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointment\nCheck-in to Room-in Time**"),
@@ -8913,7 +8995,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-     scale_x_discrete(labels = data_cycle$X_LABEL)+
+     #scale_x_discrete(labels = data_cycle$X_LABEL)+
      scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -8971,32 +9053,47 @@ ggplot(data_base,
       select(CHECKINTOROOMIN, BIN_ROOMIN) %>%
       group_by(BIN_ROOMIN) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN) %>% mutate(percent = total_bin / total)
-    data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
     
-    main_rows <- seq(0, 480, by= 30)
+    # data_cycle$BIN_ROOMIN <- as.numeric(data_cycle$BIN_ROOMIN)
+    # 
+    # main_rows <- seq(0, 480, by= 30)
+    # 
+    # rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN)
+    # 
+    # 
+    # if (length(rows_to_be_included > 0)){
+    #   
+    #   for (i in rows_to_be_included){
+    #     data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+    #     
+    #   }
+    #   
+    #   data_cycle[is.na(data_cycle)] <- 0
+    # }
+    # 
+    # bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
+    # data_cycle <- left_join(data_cycle, bin_mapping_roomin)
+    # 
+    # data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN),]
+    # 
+    # data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
     
-    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN)
+    bin_mapping <- bin_mapping %>% 
+      rename(BIN_ROOMIN= BIN_CYCLE)%>%
+      mutate(BIN_ROOMIN = ifelse(BIN_ROOMIN== "480", ">480", BIN_ROOMIN))  
+    
+    data_cycle <- left_join(bin_mapping, data_cycle, by = "BIN_ROOMIN")
+    data_cycle[is.na(data_cycle)] <- 0
+    
+    
+    data_cycle$X_LABEL <- factor(data_cycle$X_LABEL, 
+                                 levels = c("[0,30) ", "[30,60) ",  "[60,90) ",  "[90,120) ",
+                                            "[120,150) ", "[150,180) ", "[180,210) ", "[210,240) ",
+                                            "[240,270) ", "[270,300) ", "[300,330) ", "[330,360) ", 
+                                            "[360,390) ", "[390,420) ", "[420,450) ", "[450,480) ", "[480,] " ), ordered = TRUE)
+    
 
-    
-    if (length(rows_to_be_included > 0)){
-      
-      for (i in rows_to_be_included){
-        data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
-        
-      }
-      
-      data_cycle[is.na(data_cycle)] <- 0
-    }
-    
-    bin_mapping_roomin <- bin_mapping %>% rename(BIN_ROOMIN = BIN_CYCLE)
-    data_cycle <- left_join(data_cycle, bin_mapping_roomin)
-    
-    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN),]
-
-    data_cycle$BIN_ROOMIN <- factor(data_cycle$BIN_ROOMIN,levels = sort(data_cycle$BIN_ROOMIN))
-    
-
-    ggplot(aes(x = BIN_ROOMIN , y = percent), data = data_cycle) +
+    ggplot(aes(x = X_LABEL , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of ESTABLISHED Appointment\nCheck-in to Room-in Time**"),
@@ -9007,7 +9104,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_discrete(labels = data_cycle$X_LABEL)+
+      #scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -9257,7 +9354,8 @@ ggplot(data_base,
   output$roomInTimeCompNew2 <- renderValueBox({
     print("1")
     
-    data_room <- dataArrived() %>% filter(ROOMINTOVISITEND  >= 0, NEW_PT3 == "NEW")
+   data_room <- dataArrived() %>% 
+      filter(ROOMINTOVISITEND  >= 0, NEW_PT3 == "NEW")
     
     data <-  data_room %>% select(ROOMINTOVISITEND ) %>%
       summarise(ROOMINTOVISITEND  = mean(ROOMINTOVISITEND , na.rm = T))  %>% collect()
@@ -9319,35 +9417,54 @@ ggplot(data_base,
     
     
     
-    data_cycle <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "NEW") %>%
+    data_cycle <- dataArrived() %>% 
+      #data_cycle <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
+      filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "NEW") %>%
       select(ROOMINTOVISITEND, BIN_ROOMIN_VISIT_END) %>%
       group_by(BIN_ROOMIN_VISIT_END) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN_VISIT_END) %>% mutate(percent = total_bin / total)
-    data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
-    
-    main_rows <- seq(0, 480, by= 30)
-    
-    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN_VISIT_END)
-    
-    if (length(rows_to_be_included > 0)){
+    #data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
       
-      for (i in rows_to_be_included){
-        data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
-        
-      }
+      bin_mapping <- bin_mapping %>%
+        rename(BIN_ROOMIN_VISIT_END= BIN_CYCLE) %>%
+        mutate(BIN_ROOMIN_VISIT_END = ifelse(BIN_ROOMIN_VISIT_END== "480", ">480", BIN_ROOMIN_VISIT_END))  
       
+      data_cycle <- left_join(bin_mapping, data_cycle, by = "BIN_ROOMIN_VISIT_END")
       data_cycle[is.na(data_cycle)] <- 0
-    }
+      
+      
+      data_cycle$X_LABEL <- factor(data_cycle$X_LABEL, 
+                                   levels = c("[0,30) ", "[30,60) ",  "[60,90) ",  "[90,120) ",
+                                              "[120,150) ", "[150,180) ", "[180,210) ", "[210,240) ",
+                                              "[240,270) ", "[270,300) ", "[300,330) ", "[330,360) ", 
+                                              "[360,390) ", "[390,420) ", "[420,450) ", "[450,480) ", "[480,] " ), ordered = TRUE)
+      
+      
+      
     
-    bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    # main_rows <- seq(0, 480, by= 30)
+    # 
+    # rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN_VISIT_END)
+    # 
+    # if (length(rows_to_be_included > 0)){
+    #   
+    #   for (i in rows_to_be_included){
+    #     data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+    #     
+    #   }
+    #   
+    #   data_cycle[is.na(data_cycle)] <- 0
+    # }
+    # 
+    # bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    # 
+    # data_cycle <- left_join(data_cycle, bin_mapping_visit_end)
+    # 
+    # data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN_VISIT_END),]
+    # 
+    # data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
     
-    data_cycle <- left_join(data_cycle, bin_mapping_visit_end)
-    
-    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN_VISIT_END),]
-    
-    data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
-    
-    ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent), data = data_cycle) +
+    ggplot(aes(x = X_LABEL , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of NEW Appointment\nRoom-in to Visit-end Time**"),
@@ -9358,7 +9475,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_discrete(labels = data_cycle$X_LABEL)+
+      #scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
     
   })
@@ -9367,36 +9484,55 @@ ggplot(data_base,
   output$establishedRoomInTimeBoxPlot2 <- renderPlot({
     print("4")
     
-    data_cycle <- dataArrived() %>% filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "ESTABLISHED") %>%
+    data_cycle <- dataArrived() %>% 
+      #data_cycle <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
+      filter(ROOMINTOVISITEND >= 0, NEW_PT3 == "ESTABLISHED") %>%
       select(ROOMINTOVISITEND, BIN_ROOMIN_VISIT_END) %>%
       group_by(BIN_ROOMIN_VISIT_END) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_ROOMIN_VISIT_END) %>% mutate(percent = total_bin / total)
-    data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
-    
-    main_rows <- seq(0, 480, by= 30)
-    
-    rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN_VISIT_END)
-    
-    
-    if (length(rows_to_be_included > 0)){
+    #data_cycle$BIN_ROOMIN_VISIT_END <- as.numeric(data_cycle$BIN_ROOMIN_VISIT_END)
       
-      for (i in rows_to_be_included){
-        data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
-        
-      }
+      bin_mapping <- bin_mapping %>%
+        rename(BIN_ROOMIN_VISIT_END= BIN_CYCLE) %>%
+        mutate(BIN_ROOMIN_VISIT_END = ifelse(BIN_ROOMIN_VISIT_END== "480", ">480", BIN_ROOMIN_VISIT_END))  
       
+      data_cycle <- left_join(bin_mapping, data_cycle, by = "BIN_ROOMIN_VISIT_END")
       data_cycle[is.na(data_cycle)] <- 0
-    }
+      
+      
+      data_cycle$X_LABEL <- factor(data_cycle$X_LABEL, 
+                                   levels = c("[0,30) ", "[30,60) ",  "[60,90) ",  "[90,120) ",
+                                              "[120,150) ", "[150,180) ", "[180,210) ", "[210,240) ",
+                                              "[240,270) ", "[270,300) ", "[300,330) ", "[330,360) ", 
+                                              "[360,390) ", "[390,420) ", "[420,450) ", "[450,480) ", "[480,] " ), ordered = TRUE)
+      
+      
+      
     
-    bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
-    data_cycle <- left_join(data_cycle, bin_mapping_visit_end)
+    # main_rows <- seq(0, 480, by= 30)
+    # 
+    # rows_to_be_included <- which(!main_rows %in% data_cycle$BIN_ROOMIN_VISIT_END)
+    # 
+    # 
+    # if (length(rows_to_be_included > 0)){
+    #   
+    #   for (i in rows_to_be_included){
+    #     data_cycle[nrow(data_cycle) + 1 , 1] <- main_rows[i]
+    #     
+    #   }
+    #   
+    #   data_cycle[is.na(data_cycle)] <- 0
+    # }
+    # 
+    # bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    # data_cycle <- left_join(data_cycle, bin_mapping_visit_end)
+    # 
+    # data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN_VISIT_END),]
+    # 
+    # 
+    # data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
     
-    data_cycle <- data_cycle[order(data_cycle$BIN_ROOMIN_VISIT_END),]
-    
-    
-    data_cycle$BIN_ROOMIN_VISIT_END <- factor(data_cycle$BIN_ROOMIN_VISIT_END,levels = sort(data_cycle$BIN_ROOMIN_VISIT_END))
-    
-    ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent), data = data_cycle) +
+    ggplot(aes(x = X_LABEL , y = percent), data = data_cycle) +
       geom_bar(stat = 'identity') +
       geom_col(width = 1, fill="#fcc9e9", color = "#d80b8c") +
       labs(title = paste0("Distribution of ESTABLISHED Appointment\nRoom-in to Visit-end Time**"),
@@ -9407,7 +9543,7 @@ ggplot(data_base,
       theme_new_line()+
       theme_bw()+
       graph_theme("none")+
-      scale_x_discrete(labels = data_cycle$X_LABEL)+
+      #scale_x_discrete(labels = data_cycle$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
@@ -9418,54 +9554,73 @@ ggplot(data_base,
   output$roomInTimeTrend2 <- renderPlot({
     print("5")    
     
-    data <- dataArrived() %>% filter(ROOMINTOVISITEND > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+    data <- dataArrived() %>% 
+      #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
+      filter(ROOMINTOVISITEND > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
       select(ROOMINTOVISITEND, NEW_PT3, APPT_TYPE, BIN_ROOMIN_VISIT_END) %>% collect() %>% 
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
     
-    
+    test_room <<- data
     
     data <- data %>% select(ROOMINTOVISITEND, NEW_PT3, BIN_ROOMIN_VISIT_END) %>%
       group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>% summarise(total_bin = n()) %>% 
       ungroup() %>%
       mutate(total = sum (total_bin, na.rm = TRUE))  %>% group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>%
-      mutate(percent = total_bin / total) %>%
-      mutate(BIN_ROOMIN_VISIT_END = as.numeric(BIN_ROOMIN_VISIT_END))
+      mutate(percent = total_bin / total) #%>%
+      #mutate(BIN_ROOMIN_VISIT_END = as.numeric(BIN_ROOMIN_VISIT_END))
     
+    bin_mapping <- bin_mapping %>%
+      rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE) %>%
+      mutate(BIN_ROOMIN_VISIT_END  = ifelse(BIN_ROOMIN_VISIT_END == "480", ">480", BIN_ROOMIN_VISIT_END ))  
     
-    main_rows <- seq(0, 480, by= 30)
-    
-    rows_to_be_included <- which(!main_rows %in% data$BIN_ROOMIN_VISIT_END)
-    
-    
-    if (length(rows_to_be_included)>0){
-      for (i in rows_to_be_included){
-        data[nrow(data) + 1 , 1] <- main_rows[i]
-      }
-      
-    }
-    
-    data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    data <- left_join(bin_mapping, data, by = "BIN_ROOMIN_VISIT_END")
+    data[, 4:length(data)][is.na(data[, 4:length(data)])] <- 0
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
-    data <- unique(data)
     
-    bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
-    data <- left_join(data, bin_mapping_visit_end)
+    data$X_LABEL <- factor(data$X_LABEL, 
+                          levels = c("[0,30) ", "[30,60) ",  "[60,90) ",  "[90,120) ",
+                          "[120,150) ", "[150,180) ", "[180,210) ", "[210,240) ",
+                          "[240,270) ", "[270,300) ", "[300,330) ", "[330,360) ", 
+                          "[360,390) ", "[390,420) ", "[420,450) ", "[450,480) ", "[480,] " ), ordered = TRUE)
+
     
-    data <- data[order(data$BIN_ROOMIN_VISIT_END),]
     
-    data <- data %>%  group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>%
-      mutate(BIN_ROOMIN_VISIT_END = factor(BIN_ROOMIN_VISIT_END, levels = sort(BIN_ROOMIN_VISIT_END)))
     
-    x_label <- data %>% ungroup() %>% select(BIN_ROOMIN_VISIT_END, X_LABEL) %>% distinct()
-    x_label <- x_label[order(x_label$BIN_ROOMIN_VISIT_END),]
+    # main_rows <- seq(0, 480, by= 30)
+    # 
+    # rows_to_be_included <- which(!main_rows %in% data$BIN_ROOMIN_VISIT_END)
+    # 
+    # 
+    # if (length(rows_to_be_included)>0){
+    #   for (i in rows_to_be_included){
+    #     data[nrow(data) + 1 , 1] <- main_rows[i]
+    #   }
+    #   
+    # }
+    # 
+    # data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    # data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
+    # 
+    # data <- unique(data)
+    # 
+    # bin_mapping_visit_end <- bin_mapping %>% rename(BIN_ROOMIN_VISIT_END = BIN_CYCLE)
+    # data <- left_join(data, bin_mapping_visit_end)
+    # 
+    # data <- data[order(data$BIN_ROOMIN_VISIT_END),]
+    # 
+    # data <- data %>%  group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>%
+    #   mutate(BIN_ROOMIN_VISIT_END = factor(BIN_ROOMIN_VISIT_END, levels = sort(BIN_ROOMIN_VISIT_END)))
+    # 
+    # x_label <- data %>% ungroup() %>% select(BIN_ROOMIN_VISIT_END, X_LABEL) %>% distinct()
+    # x_label <- x_label[order(x_label$BIN_ROOMIN_VISIT_END),]
     
     #data$bin <- factor(data$bin,levels = sort(data$bin))
     
     
     
-    ggplot(aes(x = BIN_ROOMIN_VISIT_END , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
+    ggplot(aes(x = X_LABEL , y = percent, fill=factor(NEW_PT3), color=factor(NEW_PT3)), data = data) +
       geom_bar(stat = 'identity') +
       scale_color_MountSinai()+
       scale_fill_MountSinai()+
@@ -9474,11 +9629,12 @@ ggplot(data_base,
            y = "% of Patients",
            x = "Minutes",
            caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"), 
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           )+
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
-      scale_x_discrete(labels = x_label$X_LABEL)+
+      #scale_x_discrete(labels = x_label$X_LABEL)+
       scale_y_continuous(labels = scales::percent_format(accuracy = 5L)) #+
     #theme(axis.text.x = element_text(hjust = 3.5))
     
