@@ -8219,7 +8219,8 @@ print("1")
       )
       
       
-      data_checkin <- left_join(data_checkin, bin_map, by = "BIN_DTTM_CHECKIN")
+      data_checkin <- left_join(bin_map, data_checkin, by = "BIN_DTTM_CHECKIN")
+      data_checkin[, 3:length(data_checkin)][is.na(data_checkin[, 3:length(data_checkin)])] <- 0
     
       data_checkin <- data_checkin %>% mutate(bin_level = factor(bin_level, 
                        levels = c("(,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
@@ -8256,7 +8257,9 @@ print("1")
   
   output$establishedCheckInTimeBoxPlot <- renderPlot({
     
-    data_checkin <- dataArrived() %>% filter( NEW_PT3 == "ESTABLISHED") 
+    data_checkin <- dataArrived() %>% 
+      #data_checkin<- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
+      filter( NEW_PT3 == "ESTABLISHED") 
     
     data_checkin <- data_checkin %>% 
       select(DTTMTOCHECKIN, NEW_PT3, BIN_DTTM_CHECKIN) %>%
@@ -8264,7 +8267,7 @@ print("1")
       mutate(total = sum (total_bin)) %>% group_by(BIN_DTTM_CHECKIN) %>%
       mutate(percent = total_bin / total)
     
-    bin_map <- data.frame(bin_level = c("(-,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+    bin_map <- data.frame(bin_level = c("(,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
                                         "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
                                         "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
                                         "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,)"),
@@ -8274,14 +8277,16 @@ print("1")
     )
     
     
-    data_checkin <- left_join(data_checkin, bin_map, by = "BIN_DTTM_CHECKIN")
+    data_checkin <- left_join(bin_map, data_checkin, by = "BIN_DTTM_CHECKIN")
+    data_checkin[, 3:length(data_checkin)][is.na(data_checkin[, 3:length(data_checkin)])] <- 0
     
-    data_checkin <- data_checkin %>% mutate(bin_level = factor(bin_level, 
-                                                               levels = c("(-,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
-                                                                          "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
-                                                                          "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
-                                                                          "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,)"), ordered = TRUE))  
-    
+    data_checkin <- data_checkin %>% 
+      mutate(bin_level = factor(bin_level, 
+             levels = c("(,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+                        "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
+                        "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
+                        "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,)"), ordered = TRUE))  
+
     
     
 
@@ -8327,7 +8332,7 @@ print("1")
       mutate(percent = total_bin / total) 
     
     
-    bin_map <- data.frame(bin_level = c("(-,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+    bin_map <- data.frame(bin_level = c("(,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
                                         "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
                                         "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
                                         "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,)"),
@@ -8337,10 +8342,12 @@ print("1")
     )
     
     
-    data <- left_join(data, bin_map, by = "BIN_DTTM_CHECKIN")
+    data <- left_join(bin_map, data, by = "BIN_DTTM_CHECKIN")
+    data[, 4:length(data)][is.na(data[, 4:length(data)])] <- 0
+    data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     data <- data %>% mutate(bin_level = factor(bin_level, 
-                                               levels = c("(-,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
+                                               levels = c("(,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
                                                           "[-35,-30)","[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", 
                                                           "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
                                                           "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,)"), ordered = TRUE))  
@@ -8353,7 +8360,8 @@ print("1")
       labs(title = paste0("Appointment to Check-in Time* Comparison by Visit Type"),
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2]))
+           )+
       theme_new_line()+
       theme_bw()+
       graph_theme("top")+
