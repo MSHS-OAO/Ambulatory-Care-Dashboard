@@ -9430,7 +9430,7 @@ ggplot(data_base,
         mutate(BIN_ROOMIN_VISIT_END = ifelse(BIN_ROOMIN_VISIT_END== "480", ">480", BIN_ROOMIN_VISIT_END))  
       
       data_cycle <- left_join(bin_mapping, data_cycle, by = "BIN_ROOMIN_VISIT_END")
-      data_cycle[is.na(data_cycle)] <- 0
+      data_cycle[, 3:length( data_cycle)][is.na( data_cycle[, 3:length( data_cycle)])] <- 0
       
       
       data_cycle$X_LABEL <- factor(data_cycle$X_LABEL, 
@@ -9497,7 +9497,7 @@ ggplot(data_base,
         mutate(BIN_ROOMIN_VISIT_END = ifelse(BIN_ROOMIN_VISIT_END== "480", ">480", BIN_ROOMIN_VISIT_END))  
       
       data_cycle <- left_join(bin_mapping, data_cycle, by = "BIN_ROOMIN_VISIT_END")
-      data_cycle[is.na(data_cycle)] <- 0
+      data_cycle[, 3:length( data_cycle)][is.na( data_cycle[, 3:length( data_cycle)])] <- 0
       
       
       data_cycle$X_LABEL <- factor(data_cycle$X_LABEL, 
