@@ -8479,7 +8479,7 @@ print("1")
       labs(title = paste0("Distribution of Established Appointments\nCheck-in to Visit-end Time**"),
            y = "% of Patients",
            x = "Minutes",
-           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            #caption = paste0("*Includes ", length(unique(appt.type.data$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
            caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out "))+
            theme_new_line()+
