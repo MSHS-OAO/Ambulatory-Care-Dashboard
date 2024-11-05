@@ -8204,9 +8204,9 @@ print("1")
     # }
     
     
-    data <-  dataArrived()
-    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
-    data <-  data %>% filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
+    data <-  dataArrived()%>%
+    #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
+    filter(CYCLETIME > 0, NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
       select(CYCLETIME, NEW_PT3, APPT_TYPE, BIN_CYCLE) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
@@ -8254,7 +8254,7 @@ print("1")
     
     data <- left_join(bin_mapping, data, by = "BIN_CYCLE")
     
-    data[, 3:length(data)][is.na(data[, 3:length(data)])] <- 0
+    data[, 4:length(data)][is.na(data[, 4:length(data)])] <- 0
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
     
@@ -8274,7 +8274,7 @@ print("1")
       labs(title = paste0("Check-in to Visit-end Time* Comparison by Visit Type"),
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
@@ -8329,7 +8329,7 @@ print("1")
     
     
     data_cycle <- dataArrived() %>%
-      #data_cycle <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
+      #data_cycle <- arrived.data.rows %>% filter(CAMPUS %in% "MSB", CAMPUS_SPECIALTY %in% "Allergy")%>%
       filter(CYCLETIME > 0, NEW_PT3 == "NEW") %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
       group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
@@ -8370,7 +8370,7 @@ print("1")
       labs(title = paste0("Distribution of NEW Appointments\nCheck-in to Visit-end Time**"),
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
@@ -8427,7 +8427,7 @@ print("1")
     #   group_by(APPT_TYPE) %>% summarise(check = 1)  %>% collect()
 
     data_cycle <- dataArrived() %>% 
-    #data_cycle <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")%>%
+    #data_cycle <- arrived.data.rows %>% filter(CAMPUS %in% "MSB", CAMPUS_SPECIALTY %in% "Allergy")%>%
       filter(CYCLETIME > 0, NEW_PT3 == "ESTABLISHED") %>% select(CYCLETIME, NEW_PT3, BIN_CYCLE) %>%
       group_by(BIN_CYCLE) %>% summarise(total_bin = n()) %>% collect() %>%
       mutate(total = sum (total_bin)) %>% group_by(BIN_CYCLE) %>% mutate(percent = total_bin / total)
@@ -8453,8 +8453,7 @@ print("1")
     # 
     # data_cycle$BIN_CYCLE <- factor(data_cycle$BIN_CYCLE,levels = sort(data_cycle$BIN_CYCLE))
 
-    bin_mapping <- bin_mapping %>% mutate(BIN_CYCLE = as.character(BIN_CYCLE), 
-                                          BIN_CYCLE = ifelse(BIN_CYCLE== "480", ">480", BIN_CYCLE))  
+    bin_mapping <- bin_mapping %>% mutate(BIN_CYCLE = ifelse(BIN_CYCLE== "480", ">480", BIN_CYCLE))  
     
     data_cycle <- left_join(bin_mapping, data_cycle, by = "BIN_CYCLE")
     data_cycle[, 3:length(data_cycle)][is.na(data_cycle[, 3:length(data_cycle)])] <- 0
@@ -8480,7 +8479,7 @@ print("1")
       labs(title = paste0("Distribution of Established Appointments\nCheck-in to Visit-end Time**"),
            y = "% of Patients",
            x = "Minutes",
-           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            #caption = paste0("*Includes ", length(unique(appt.type.data$APPT_TYPE)), " established visit types \n **Visit-end Time is the minimum of Visit-end Time and Check-out "))+
            caption = paste0("**Visit-end Time is the minimum of Visit-end Time and Check-out "))+
            theme_new_line()+
@@ -9561,7 +9560,6 @@ ggplot(data_base,
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
     
-    test_room <<- data
     
     data <- data %>% select(ROOMINTOVISITEND, NEW_PT3, BIN_ROOMIN_VISIT_END) %>%
       group_by(BIN_ROOMIN_VISIT_END, NEW_PT3) %>% summarise(total_bin = n()) %>% 

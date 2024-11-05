@@ -376,7 +376,7 @@ poolcon_production <- dbPool(drv = odbc::odbc(),
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
-historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS_TEST")
+historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
 print("hist")
 filters <- tbl(poolcon, "AMBULATORY_FILTERS")
 print("filters")
