@@ -8274,7 +8274,7 @@ print("1")
       labs(title = paste0("Check-in to Visit-end Time* Comparison by Visit Type"),
            y = "% of Patients",
            x = "Minutes",
-           #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+           subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = paste0("*Visit-end Time is the minimum of Visit-end Time and Check-out"))+
       theme_new_line()+
       theme_bw()+
