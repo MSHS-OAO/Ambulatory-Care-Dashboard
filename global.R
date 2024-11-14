@@ -330,7 +330,7 @@ wdpath <- here::here()
 #wdpath <- "C:/Users/kweons01/Desktop/IP Demand Modeling Desktop/Ambulatory-Care-Dashboard-Publish"
 
 setwd(wdpath)
-# poolcon <- dbConnect(odbc(), "OAO Cloud DB")
+poolcon <- dbConnect(odbc(), "OAO Cloud DB")
 
 # poolcon <- dbPool(drv  = odbc::odbc(),
 #                  dsn  = "OAO Cloud DB")
@@ -346,7 +346,7 @@ setwd(wdpath)
 
 #profvis({
 print("conn start pool1")
-poolcon <- dbConnect(odbc(), "OAO Cloud DB", timeout = 15)
+# poolcon <- dbConnect(odbc(), "OAO Cloud DB", timeout = 15)
 
 # poolcon <- dbPool(drv = odbc::odbc(),
 #                   dsn= "OAO Cloud DB")
@@ -376,14 +376,14 @@ poolcon_production <- dbPool(drv = odbc::odbc(),
 # historical.data <- tbl(con,  "ACCESS_SQL_UPT")
 
 
-historical.data <- tbl(poolcon,  "AMBULATORY_ACCESS")
+historical.data <- tbl(poolcon_production,  "AMBULATORY_ACCESS")
 print("hist")
-filters <- tbl(poolcon, "AMBULATORY_FILTERS")
+filters <- tbl(poolcon_production, "AMBULATORY_FILTERS")
 print("filters")
 library(pins) 
 board <- board_folder("/data/pin")
 filters_table <- board %>% pin_read("ambulatory_filters")
-holid <- tbl(poolcon, "HOLIDAYS")
+holid <- tbl(poolcon_production, "HOLIDAYS")
 print("holidays")
 holid <- holid %>% distinct(HOLIDAY) %>% rename(holiday = HOLIDAY) %>% collect()
 utilization.data <- tbl(poolcon, "UTILIZATION_VIEW")
@@ -399,7 +399,7 @@ utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_
 
 
 
-population_tbl <- tbl(poolcon, "AMBULATORY_POPULATION") %>% filter(APPT_STATUS == "Arrived")
+population_tbl <- tbl(poolcon_production, "AMBULATORY_POPULATION") %>% filter(APPT_STATUS == "Arrived")
 print("Population")
 
 ambulatory_access_tbl_summary <- tbl(poolcon_upt, "AMBULATORY_ACCESS_SUMMARY_TABLE")
@@ -427,7 +427,7 @@ print("slot")
 filter_path <- paste0(wdpath, "/Filters")
 
 max_date_arrived <- glue("Select max(APPT_MADE_DTTM) AS maxDate FROM AMBULATORY_ACCESS")
-max_date_arrived <- dbGetQuery(poolcon, max_date_arrived)
+max_date_arrived <- dbGetQuery(poolcon_production, max_date_arrived)
 max_date_arrived <- as.Date(max_date_arrived$MAXDATE, format="%Y-%m-%d")
 
 ## Slot datasets
@@ -959,9 +959,9 @@ daysOfWeek.options.utilization <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
 
 ## Volume test
 
-volume_tbl <- tbl(poolcon, "VOLUME_TEST")
-print("volume")
-volume_arrived_rows <- volume_tbl %>% filter(APPT_STATUS == "Arrived")
+# volume_tbl <- tbl(poolcon_production, "VOLUME_TEST")
+# print("volume")
+# volume_arrived_rows <- volume_tbl %>% filter(APPT_STATUS == "Arrived")
 
 ## Filtered Scheduling Data
 groupByFilters_volume <- function(dt, campus, specialty, department, resource, visitMethod, mindateRange, maxdateRange, daysofweek, holidays){
@@ -984,9 +984,9 @@ groupByFilters_volume <- function(dt, campus, specialty, department, resource, v
 }
 
 ## Schedule Optimization Tests
-tbl_schedule <- tbl(poolcon, "SCHEDULE_OPTIMIZATION")
-arrived.data.rows.schedule <- tbl_schedule %>% filter(APPT_STATUS == "Arrived")
-print("opt")
+# tbl_schedule <- tbl(poolcon, "SCHEDULE_OPTIMIZATION")
+# arrived.data.rows.schedule <- tbl_schedule %>% filter(APPT_STATUS == "Arrived")
+# print("opt")
 
 groupByFilters_schedule <- function(dt, campus, specialty, department, resource, provider, visitMethod, appt_type, mindateRange, maxdateRange, daysofweek, holidays){
   format <- "YYYY-MM-DD HH24:MI:SS"
@@ -1228,7 +1228,7 @@ dateRangeSlot_end <- Sys.Date() +30
 
 
 dateRangepop_max <- glue("Select max(APPT_DATE_YEAR) AS maxDate FROM AMBULATORY_POPULATION WHERE APPT_STATUS = 'Arrived'")
-dateRangepop_max <- dbGetQuery(poolcon, dateRangepop_max)
+dateRangepop_max <- dbGetQuery(poolcon_production, dateRangepop_max)
 dateRangepop_max <- as.Date(dateRangepop_max$MAXDATE, format="%Y-%m-%d")
 
 # dateRangepop_min <- glue("Select min(APPT_DTTM) AS minDate FROM AMBULATORY_POPULATION")
@@ -1298,4 +1298,4 @@ header$children[[2]]$children[[1]] <-  tags$a(href='https://peak.mountsinai.org/
 
 print("ui end")
 
-bin_mapping <- tbl(poolcon, "AMBULATORY_BIN_MAPPING") %>% collect() %>% mutate(BIN_CYCLE = as.numeric(BIN_CYCLE)) 
+bin_mapping <- tbl(poolcon_production, "AMBULATORY_BIN_MAPPING") %>% collect() %>% mutate(BIN_CYCLE = as.numeric(BIN_CYCLE)) 
