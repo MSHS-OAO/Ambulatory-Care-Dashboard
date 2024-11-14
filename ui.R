@@ -1100,6 +1100,7 @@ ui <- dashboardPage(
                        column(12,
                               boxPlus(
                                 title = "Appointment to Check-in Time Summary", width = 12, status = "primary",
+                                "*Negative means early, positive means late",
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
   
                                 br(),
