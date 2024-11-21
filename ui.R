@@ -64,7 +64,7 @@ ui <- dashboardPage(
                          
                 ),
                 menuItem("Cycle Time", tabName = "cycleTime", icon = icon("stopwatch"),
-                         menuSubItem("Appointment to Check-in", tabName = "dttmCheckin"),
+                         #menuSubItem("Appointment to Check-in", tabName = "dttmCheckin"),
                          menuSubItem("Cycle Time", tabName = "cycleTime"),
                          menuSubItem("Check-in to Room-in", tabName = "roomInTime"),
                          menuSubItem("Room-in to Visit-end", tabName = "roomInTime2")
