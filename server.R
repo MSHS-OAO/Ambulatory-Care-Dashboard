@@ -2707,6 +2707,11 @@ server <- function(input, output, session) {
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
   })
   
+  output$checkin_time <- renderText({
+    paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
+           " for ", paste(sort(input$selectedCampus), collapse = ', '))
+  })
+  
   output$cycle_time <- renderText({
     paste0("Based on data from ", input$dateRange[1]," to ", input$dateRange[2], 
            " for ", paste(sort(input$selectedCampus), collapse = ', '))
@@ -8196,9 +8201,9 @@ print("1")
     
     #data_checkin <- arrived.data.rows %>% filter(CAMPUS == "MSUS", CAMPUS_SPECIALTY == "Allergy", NEW_PT3 == "NEW")
     data_checkin <- data_checkin %>% 
-      select(DTTMTOCHECKIN, NEW_PT3, BIN_DTTM_CHECKIN) %>%
-      group_by(BIN_DTTM_CHECKIN) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(BIN_DTTM_CHECKIN) %>%
+      select(DTTMTOCHECKIN, NEW_PT3, BIN_CHECKIN) %>%
+      group_by(BIN_CHECKIN) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_CHECKIN) %>%
       mutate(percent = total_bin / total)
     
     
@@ -8207,12 +8212,11 @@ print("1")
                                         "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
                                         "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,)"),
                           
-                          BIN_DTTM_CHECKIN = c("<-60", "-60", "-55", "-50",  "-45", "-40", "-35", "-30", "-25", "-20", "-15", "-10",
-                                               "-5", "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", ">60")
+                          BIN_CHECKIN = seq(-65, 60, 5)
     )
     
     
-    data_checkin <- left_join(bin_map, data_checkin, by = "BIN_DTTM_CHECKIN")
+    data_checkin <- left_join(bin_map, data_checkin, by = "BIN_CHECKIN")
     data_checkin[, 3:length(data_checkin)][is.na(data_checkin[, 3:length(data_checkin)])] <- 0
     
     data_checkin <- data_checkin %>% mutate(bin_level = factor(bin_level, 
@@ -8255,9 +8259,9 @@ print("1")
       filter( NEW_PT3 == "ESTABLISHED") 
     
     data_checkin <- data_checkin %>% 
-      select(DTTMTOCHECKIN, NEW_PT3, BIN_DTTM_CHECKIN) %>%
-      group_by(BIN_DTTM_CHECKIN) %>% summarise(total_bin = n()) %>% collect() %>%
-      mutate(total = sum (total_bin)) %>% group_by(BIN_DTTM_CHECKIN) %>%
+      select(DTTMTOCHECKIN, NEW_PT3, BIN_CHECKIN) %>%
+      group_by(BIN_CHECKIN) %>% summarise(total_bin = n()) %>% collect() %>%
+      mutate(total = sum (total_bin)) %>% group_by(BIN_CHECKIN) %>%
       mutate(percent = total_bin / total)
     
     bin_map <- data.frame(bin_level = c("(,-60)", "[-60,-55)", "[-55,-50)", "[-50,-45)", "[-45,-40)", "[-40,-35)", 
@@ -8265,12 +8269,11 @@ print("1")
                                         "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
                                         "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,)"),
                           
-                          BIN_DTTM_CHECKIN = c("<-60", "-60", "-55", "-50",  "-45", "-40", "-35", "-30", "-25", "-20", "-15", "-10",
-                                               "-5", "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", ">60")
+                          BIN_CHECKIN = seq(-65, 60, 5)
     )
     
     
-    data_checkin <- left_join(bin_map, data_checkin, by = "BIN_DTTM_CHECKIN")
+    data_checkin <- left_join(bin_map, data_checkin, by = "BIN_CHECKIN")
     data_checkin[, 3:length(data_checkin)][is.na(data_checkin[, 3:length(data_checkin)])] <- 0
     
     data_checkin <- data_checkin %>% 
@@ -8312,16 +8315,16 @@ print("1")
     
     data <-  dataArrived()
     data <-  data %>% filter( NEW_PT3 %in% c("NEW", "ESTABLISHED")) %>%
-      select(DTTMTOCHECKIN, NEW_PT3, APPT_TYPE, BIN_DTTM_CHECKIN) %>% collect() %>%
+      select(DTTMTOCHECKIN, NEW_PT3, APPT_TYPE, BIN_CHECKIN) %>% collect() %>%
       mutate(NEW_PT3 = ifelse(NEW_PT3== "NEW", "NEW", APPT_TYPE)) %>%
       filter(!is.na(NEW_PT3))
     
-    data <- data %>% select(DTTMTOCHECKIN, NEW_PT3, BIN_DTTM_CHECKIN) %>%
-      group_by(BIN_DTTM_CHECKIN, NEW_PT3) %>% summarise(total_bin = n()) %>% 
+    data <- data %>% select(DTTMTOCHECKIN, NEW_PT3, BIN_CHECKIN) %>%
+      group_by(BIN_CHECKIN, NEW_PT3) %>% summarise(total_bin = n()) %>% 
       ungroup() %>%
       mutate(total = sum (total_bin, na.rm = TRUE)) %>%
-      group_by(BIN_DTTM_CHECKIN, NEW_PT3) %>%
-      #group_by(BIN_DTTM_CHECKIN) %>%
+      group_by(BIN_CHECKIN, NEW_PT3) %>%
+      #group_by(BIN_CHECKIN) %>%
       mutate(percent = total_bin / total) 
     
     
@@ -8330,12 +8333,11 @@ print("1")
                                         "[-5,0)", "[0,5)", "[5,10)", "[10,15)","[15,20)", "[20,25)","[25,30)", "[30,35)", 
                                         "[35,40)", "[40,45)", "[45,50)", "[50,55)","[55,60)", "[60,)"),
                           
-                          BIN_DTTM_CHECKIN = c("<-60", "-60", "-55", "-50",  "-45", "-40", "-35", "-30", "-25", "-20", "-15", "-10",
-                                               "-5", "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", ">60")
+                          BIN_CHECKIN = seq(-65, 60, 5)
     )
     
     
-    data <- left_join(bin_map, data, by = "BIN_DTTM_CHECKIN")
+    data <- left_join(bin_map, data, by = "BIN_CHECKIN")
     data[, 4:length(data)][is.na(data[, 4:length(data)])] <- 0
     data <- data %>% mutate(NEW_PT3 =ifelse(is.na(NEW_PT3), "NEW", NEW_PT3))
     
