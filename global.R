@@ -330,7 +330,7 @@ wdpath <- here::here()
 #wdpath <- "C:/Users/kweons01/Desktop/IP Demand Modeling Desktop/Ambulatory-Care-Dashboard-Publish"
 
 setwd(wdpath)
-poolcon <- dbConnect(odbc(), "OAO Cloud DB")
+#poolcon <- dbConnect(odbc(), "OAO Cloud DB")
 
 # poolcon <- dbPool(drv  = odbc::odbc(),
 #                  dsn  = "OAO Cloud DB")
@@ -386,7 +386,7 @@ filters_table <- board %>% pin_read("ambulatory_filters")
 holid <- tbl(poolcon_production, "HOLIDAYS")
 print("holidays")
 holid <- holid %>% distinct(HOLIDAY) %>% rename(holiday = HOLIDAY) %>% collect()
-utilization.data <- tbl(poolcon, "UTILIZATION_VIEW")
+utilization.data <- tbl(poolcon_production, "AMBULATORY_UTILIZATION_VIEW")
 print("util")
 
 utilization.data <- utilization.data %>% rename(`07:00`= "H_07_00", `08:00`= "H_08_00",
