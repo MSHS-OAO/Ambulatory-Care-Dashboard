@@ -10901,8 +10901,10 @@ ggplot(data_base,
     
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
+  
     
-    data_test <<- data
+    compare_filters_test <<- input$compare_filters
+    breakdown_filters_test <<- input$breakdown_filters
     
     
     if(breakdown_filters == "VISIT_METHOD"){
@@ -10936,7 +10938,7 @@ ggplot(data_base,
       tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
     }
     
-    
+
     
     if(breakdown_filters == "NEW_PT2"){
       
@@ -11047,14 +11049,28 @@ ggplot(data_base,
         pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
                     values_from = ratio,
                     values_fill = 0)
-      
+    
       
       ##### sum all the columns with months in them to get the Totoal for the month
-      tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
-        summarise_at(vars(-!!breakdown_filters), sum) %>%
+      # tot <- newpatients.ratio %>% group_by(across(all_of(tot_cols))) %>%
+      #   summarise_at(vars(-!!breakdown_filters), sum) %>%
+      #   add_column(!!breakdown_filters := "Total") %>%
+      #   relocate(all_of(breakdown_filters), .after = !!compare_filters)
+      
+      tot <- data %>% group_by(across(all_of(!!tot_cols)), APPT_MADE_MONTH_YEAR, NEW_PT2) %>%
+        summarise(total = sum(TOTAL_APPTS, na.rm = TRUE)) %>% collect() %>%
+        drop_na() %>%
+        spread(NEW_PT2, total)%>%
+        replace(is.na(.), 0)%>%
+        mutate(ratio = round(`NEW`/(`NEW`+`ESTABLISHED`),2))%>%
+        select(-c(ESTABLISHED, NEW))%>%
+        pivot_wider(names_from = APPT_MADE_MONTH_YEAR,
+                    values_from = ratio,
+                    values_fill = 0)%>%
         add_column(!!breakdown_filters := "Total") %>%
         relocate(all_of(breakdown_filters), .after = !!compare_filters)
 
+     
 
       newpatients.ratio <- full_join(newpatients.ratio,tot)
       
