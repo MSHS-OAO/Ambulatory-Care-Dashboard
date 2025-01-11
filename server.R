@@ -7140,7 +7140,7 @@ server <- function(input, output, session) {
   })
   
   output$volume_am_pm <- renderPlot({
-    data <- dataArrived()
+    data <- dataArrived() %>% filter(!is.na(AM_PM))
     #data <- arrived.data.rows %>% filter(CAMPUS == 'MSUS', CAMPUS_SPECIALTY == 'Allergy')
     
     data_process <- data %>%
@@ -12421,7 +12421,9 @@ ggplot(data_base,
     
     
     
-    am_pm <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>% 
+    am_pm <- data %>% 
+      filter(!is.na(AM_PM))%>%
+      group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>% 
       summarise(total = n()) %>%
       group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       summarise(avg = ceiling(sum(total, na.rm = T)/n())) %>% collect() %>%
@@ -12573,7 +12575,8 @@ ggplot(data_base,
     
     
     
-    am_pm <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
+    am_pm <- data %>% filter(!is.na(AM_PM))%>%
+      group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
       summarise(total = n()) %>% collect() %>%
       pivot_wider(names_from = APPT_MONTH_YEAR,
                   values_from = total,
