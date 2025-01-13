@@ -7157,7 +7157,7 @@ server <- function(input, output, session) {
       labs(x = NULL, y = "Patients",
            title = "Average Patient Volume by Session*",
            #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "*PM appointments occur after 12"
+           caption = "*PM appointments occur after 12 till 17"
            )+
       scale_y_continuous(limits=c(0,(max(data_process$total, na.rm = TRUE))*2))+
       theme_new_line()+
@@ -12482,7 +12482,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('*PM appointments occur after 12')
+                            htmltools::em('*PM appointments occur after 12 till 17')
                           ),
                           options = list(
                             scrollX = TRUE,
@@ -12650,7 +12650,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('*PM appointments occur after 12')
+                            htmltools::em('*PM appointments occur after 12 till 17')
                           ),
                           options = list(
                             scrollX = TRUE,
