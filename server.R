@@ -7143,7 +7143,7 @@ server <- function(input, output, session) {
     data <- dataArrived() #%>% filter(!is.na(AM_PM))
     #data <- arrived.data.rows %>% filter(CAMPUS == 'MSUS', CAMPUS_SPECIALTY == 'Allergy')
     test_data <<- data
-    data <- data %>% mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) 
+    #data <- data %>% mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) 
     data_process <- data %>%
                     group_by(APPT_DAY, AM_PM) %>% summarise(total = n()) %>% collect()
     
@@ -12428,7 +12428,7 @@ ggplot(data_base,
     
     am_pm <- data %>% 
       #filter(!is.na(AM_PM))%>%
-      mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) %>%
+      #mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) %>%
       group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>% 
       summarise(total = n()) %>%
       group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
@@ -12586,7 +12586,7 @@ ggplot(data_base,
     
     
     am_pm <- data %>% #filter(!is.na(AM_PM))%>%
-      mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) %>%
+      #mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) %>%
       group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
       summarise(total = n()) %>% collect() %>%
       pivot_wider(names_from = APPT_MONTH_YEAR,
