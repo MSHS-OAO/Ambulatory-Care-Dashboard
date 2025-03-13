@@ -7140,9 +7140,10 @@ server <- function(input, output, session) {
   })
   
   output$volume_am_pm <- renderPlot({
-    data <- dataArrived()
+    data <- dataArrived() #%>% filter(!is.na(AM_PM))
     #data <- arrived.data.rows %>% filter(CAMPUS == 'MSUS', CAMPUS_SPECIALTY == 'Allergy')
-    
+    test_data <<- data
+    #data <- data %>% mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) 
     data_process <- data %>%
                     group_by(APPT_DAY, AM_PM) %>% summarise(total = n()) %>% collect()
     
@@ -7151,13 +7152,17 @@ server <- function(input, output, session) {
     data_process <- inner_join(data_process, total_dates) %>% mutate(total = ceiling(total/Day.Count))
     
     
+    data_process <- data_process %>% 
+      group_by(APPT_DAY) %>%
+      mutate(AM_PM = factor(AM_PM, levels = c("AM", "PM", "EVE")))
+    
     ggplot(data_process, aes(x = factor(APPT_DAY, levels = daysOfWeek.options), y = total, group = AM_PM, fill = AM_PM)) +
       geom_bar(position = "dodge", stat = "identity") +
       scale_fill_MountSinai('dark') +
       labs(x = NULL, y = "Patients",
            title = "Average Patient Volume by Session*",
            #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "*PM appointments occur after 12"
+           caption = "AM = 8am-12pm; PM = 12pm-5pm; and EVE = after 5pm"
            )+
       scale_y_continuous(limits=c(0,(max(data_process$total, na.rm = TRUE))*2))+
       theme_new_line()+
@@ -12421,13 +12426,17 @@ ggplot(data_base,
     
     
     
-    am_pm <- data %>% group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>% 
+    am_pm <- data %>% 
+      #filter(!is.na(AM_PM))%>%
+      #mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) %>%
+      group_by(!!!syms(cols),APPT_DATE_YEAR, APPT_MONTH_YEAR)  %>% 
       summarise(total = n()) %>%
       group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
       summarise(avg = ceiling(sum(total, na.rm = T)/n())) %>% collect() %>%
       pivot_wider(names_from = APPT_MONTH_YEAR,
                   values_from = avg,
                   values_fill = 0)
+    
     
     tot <- am_pm %>% group_by(across(all_of(tot_cols))) %>%
       summarise_at(vars(-!!(c(breakdown_filters, am_pm_colname))), sum)  %>%
@@ -12461,6 +12470,9 @@ ggplot(data_base,
     
     am_pm <- am_pm[index]
     
+    
+    am_pm <- am_pm %>% 
+      mutate(Session = factor(Session, levels = c("AM", "PM", "EVE")))
 
     am_pm <- am_pm %>% arrange(across(all_of(cols_name)))
     
@@ -12480,7 +12492,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('*PM appointments occur after 12')
+                            htmltools::em('*AM = 8am-12pm; PM = 12pm-5pm; and EVE = after 5pm')
                           ),
                           options = list(
                             scrollX = TRUE,
@@ -12573,7 +12585,9 @@ ggplot(data_base,
     
     
     
-    am_pm <- data %>% group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
+    am_pm <- data %>% #filter(!is.na(AM_PM))%>%
+      #mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) %>%
+      group_by(!!!syms(cols),APPT_MONTH_YEAR) %>%
       summarise(total = n()) %>% collect() %>%
       pivot_wider(names_from = APPT_MONTH_YEAR,
                   values_from = total,
@@ -12623,9 +12637,9 @@ ggplot(data_base,
     
     am_pm <- am_pm[index]
     
-    # am_pm_order <- c("AM", "PM")
-    # 
-    # am_pm <- am_pm %>% mutate(`AM/PM` = factor(`AM/PM`, levels = am_pm_order))
+
+    am_pm <- am_pm %>% 
+      mutate(Session = factor(Session, levels = c("AM", "PM", "EVE")))
     
     
     am_pm <- am_pm %>% arrange(across(all_of(cols_name)))
@@ -12647,7 +12661,7 @@ ggplot(data_base,
                           extensions = c('Buttons','Scroller'),
                           caption = htmltools::tags$caption(
                             style = 'caption-side: bottom; text-align: left;',
-                            htmltools::em('*PM appointments occur after 12')
+                            htmltools::em('*AM = 8am-12pm; PM = 12pm-5pm; and EVE = after 5pm')
                           ),
                           options = list(
                             scrollX = TRUE,
