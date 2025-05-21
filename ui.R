@@ -912,6 +912,17 @@ ui <- dashboardPage(
                                        #                 valueBoxOutput("avgUtilization", width=12))))
                                        
                                 )),
+                              #new boxPlus for avg patient volume by hour
+                              boxPlus(
+                                title = "Average Turns per Room per Session",
+                                closable = FALSE,
+                                width = 12,
+                                status = "primary",
+                                solidHeader = TRUE,
+                                collapsible = TRUE,
+                                plotOutput("volume_am_pm_by_room", height = "400px")
+                              ),
+                              
                               
                               boxPlus(
                                 title = "Space Utilization", width = 12, status = "primary",
