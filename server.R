@@ -7174,8 +7174,8 @@ server <- function(input, output, session) {
         x = NULL,
         y = "Patients",
         title = paste("Average Patient Volume by Session"),
-        subtitle = paste("Filtered by", input$setRooms, "Rooms"),
-        caption = "AM = 8am-12pm; PM = 12pm-5pm; EVE = after 5pm\nAverage volume is based on total number of sessions, not days, with completed visits"
+        #subtitle = paste("Filtered by", input$setRooms, "Rooms"),
+        caption = "AM = 8am-12pm; PM = 12pm-5pm; EVE = after 5pm \n Average volume is based on total number of sessions, not days, with completed visits"
       ) +
       scale_y_continuous(limits = c(0, (max(data_process$total, na.rm = TRUE)) * 2)) +
       theme_new_line() +
