@@ -5716,7 +5716,7 @@ server <- function(input, output, session) {
   
   # removed the original to modify with the updated code for average patient volume by session by hours
   output$volume_am_pm_by_room <- renderPlot({
-    req(dataArrived()) # Ensure data exists before processing
+    
     
     data <- dataArrived()
     
@@ -5748,7 +5748,7 @@ server <- function(input, output, session) {
       labs(
         x = NULL,
         y = "Patients",
-        title = paste("Average Patient Volume by Session"),
+        title = paste("Average Turns per Room per Session"),
         #subtitle = paste("Filtered by", input$setRooms, "Rooms"),
         caption = "AM = 8am-12pm; PM = 12pm-5pm; EVE = after 5pm \n Average volume is based on total number of sessions, not days, with completed visits"
       ) +
@@ -7189,7 +7189,7 @@ server <- function(input, output, session) {
   output$volume_am_pm <- renderPlot({
     data <- dataArrived() #%>% filter(!is.na(AM_PM))
     #data <- arrived.data.rows %>% filter(CAMPUS == 'MSUS', CAMPUS_SPECIALTY == 'Allergy')
-    test_data <<- data
+    
     #data <- data %>% mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) 
     data_process <- data %>%
       group_by(APPT_DAY, AM_PM) %>% summarise(total = n()) %>% collect()

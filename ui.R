@@ -914,7 +914,7 @@ ui <- dashboardPage(
                                 )),
                               #new boxPlus for avg patient volume by hour
                               boxPlus(
-                                title = "Average Turns per Room per Session",
+                                title = "Room Turns",
                                 closable = FALSE,
                                 width = 12,
                                 status = "primary",
