@@ -8189,7 +8189,7 @@ print("1")
       title = toupper(
         #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
         #paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
-        "Established Patients Check-in to Visit-end Time*"),
+        "Established Patients Appointment to Check-in Time*"),
       # subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ", round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,
