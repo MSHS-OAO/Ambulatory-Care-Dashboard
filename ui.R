@@ -856,7 +856,7 @@ ui <- dashboardPage(
                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                 br(),
                                 column(12,
-                                       column(3,
+                                       column(4,
                                               #util_choices <- list("SCHEDULED time and duration" = "scheduled", "ACTUAL time and duration" = "arrived"),
                                               box(title = NULL, width = 12, solidHeader = FALSE,
                                                   radioGroupButtons(
@@ -875,7 +875,7 @@ ui <- dashboardPage(
                                                   h5("SCHEDULED: Utilization of all arrived appointments based on scheduled appointment start and end time."),
                                                   h5("ACTUAL: Utilization of all arrived appointments based on actual appointment start and end time."),
                                                   h5("Scheduled time includes an adjustment factor of 20% (every visit duration increased by 20%) to account for room turnover times and any non-physician contact time spent in rooms."))),
-                                       column(3,
+                                       column(2,
                                               box(title = NULL, width = 12, solidHeader = FALSE,
                                                   sliderInput("setRooms", label = h4("Set Rooms Available:"), min = 1, max = 50, value = 8)),
                                               box(title = NULL, width = 12, solidHeader = FALSE,
@@ -912,6 +912,17 @@ ui <- dashboardPage(
                                        #                 valueBoxOutput("avgUtilization", width=12))))
                                        
                                 )),
+                              #new boxPlus for avg patient volume by hour
+                              boxPlus(
+                                title = "Average Turns per Room per Session",
+                                closable = FALSE,
+                                width = 12,
+                                status = "primary",
+                                solidHeader = TRUE,
+                                collapsible = TRUE,
+                                plotOutput("volume_am_pm_by_room", height = "400px")
+                              ),
+                              
                               
                               boxPlus(
                                 title = "Space Utilization", width = 12, status = "primary",
