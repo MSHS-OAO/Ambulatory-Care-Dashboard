@@ -5714,7 +5714,53 @@ server <- function(input, output, session) {
   }
   
   
-  
+  # removed the original to modify with the updated code for average patient volume by session by hours
+  output$volume_am_pm_by_room <- renderPlot({
+    
+    
+    data <- dataArrived()
+    
+    # Ensure the setRooms slider input is used
+    req(input$setRooms)
+    
+    # Group and process data
+    data_process <- data %>%
+      group_by(APPT_DAY, AM_PM) %>%
+      summarise(total = n(), .groups = "drop") %>%
+      collect()
+    
+    total_dates <- data %>%
+      group_by(APPT_DAY, AM_PM) %>%
+      summarise(Day.Count = n_distinct(APPT_DATE_YEAR), .groups = "drop") %>%
+      collect()
+    
+    data_process <- inner_join(data_process, total_dates, by = c("APPT_DAY", "AM_PM")) %>%
+      mutate(total = ceiling(total / Day.Count))
+    data_process <- data_process %>% mutate(total = round(total/input$setRooms,2))
+    
+    data_process <- data_process %>%
+      group_by(APPT_DAY) %>%
+      mutate(AM_PM = factor(AM_PM, levels = c("AM", "PM", "EVE")))
+    
+    ggplot(data_process, aes(x = factor(APPT_DAY, levels = daysOfWeek.options), y = total, group = AM_PM, fill = AM_PM)) +
+      geom_bar(position = "dodge", stat = "identity") +
+      scale_fill_MountSinai('dark') +
+      labs(
+        x = NULL,
+        y = "Patients",
+        title = paste("Average Turns per Room per Session"),
+        #subtitle = paste("Filtered by", input$setRooms, "Rooms"),
+        caption = "AM = 8am-12pm; PM = 12pm-5pm; EVE = after 5pm \n Average volume is based on total number of sessions, not days, with completed visits"
+      ) +
+      scale_y_continuous(limits = c(0, (max(data_process$total, na.rm = TRUE)) * 2)) +
+      theme_new_line() +
+      theme_bw() +
+      graph_theme("top") +
+      theme(axis.text.x = element_text(size = 16, angle = 0, hjust = 0.5)) +
+      geom_col(position = position_dodge()) +
+      geom_text(size = 5, aes(label = total), position = position_dodge(width = 1), vjust = -1, color = "black", fontface = "bold.italic")
+  })
+  #patient volume by hour code ends here
   
   
   # # Scheduled and Avg Utilization --------------------------------------------------------------------------------------------------------
@@ -7139,13 +7185,14 @@ server <- function(input, output, session) {
     
   })
   
+  
   output$volume_am_pm <- renderPlot({
     data <- dataArrived() #%>% filter(!is.na(AM_PM))
     #data <- arrived.data.rows %>% filter(CAMPUS == 'MSUS', CAMPUS_SPECIALTY == 'Allergy')
-    test_data <<- data
+    
     #data <- data %>% mutate(AM_PM = ifelse(is.na(AM_PM), "EVE", AM_PM )) 
     data_process <- data %>%
-                    group_by(APPT_DAY, AM_PM) %>% summarise(total = n()) %>% collect()
+      group_by(APPT_DAY, AM_PM) %>% summarise(total = n()) %>% collect()
     
     total_dates <- data %>% group_by(APPT_DAY, AM_PM) %>% summarise(Day.Count = count(unique(APPT_DATE_YEAR))) %>% collect()
     
@@ -7163,7 +7210,7 @@ server <- function(input, output, session) {
            title = "Average Patient Volume by Session*",
            #subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
            caption = "AM = 8am-12pm; PM = 12pm-5pm; and EVE = after 5pm"
-           )+
+      )+
       scale_y_continuous(limits=c(0,(max(data_process$total, na.rm = TRUE))*2))+
       theme_new_line()+
       theme_bw()+
@@ -7181,6 +7228,9 @@ server <- function(input, output, session) {
     
     
   })
+  
+  
+
   
   #Daily Volume Distribution by Day Table
   output$volume5.1 <- function(){
@@ -8189,7 +8239,7 @@ print("1")
       title = toupper(
         #ifelse(length(unique(dataArrived()$APPT_TYPE)) == 1,
         #paste0("Average ", input$selectedApptType2," Appointments Check-in to Visit-end Time"),
-        "Established Patients Check-in to Visit-end Time*"),
+        "Established Patients Appointment to Check-in Time*"),
       # subtitle = paste0("*Based on ",round(nrow(dataNewComparison() %>% filter(cycleTime > 0, New.PT3 == FALSE))/nrow(dataArrived()),2)*100,"% of total arrived established patients based on visit timestamps"),
       subtitle = paste0("*Based on ", round(perc,2)*100,"% of total arrived established patients based on visit timestamps"),
       width = 6,

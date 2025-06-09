@@ -243,8 +243,9 @@ ui <- dashboardPage(
                                          box(
                                            title = p("Reference Files", style = "font-size:34px; font-weight:bold"), width = 12, height = "400px", status = "warning", solidHeader = TRUE,
                                            p("- Ambulatory Analytics Tool Playbook:", style = "font-size:22px; font-weight: bold"),
-                                           a(href = "https://mtsinai.sharepoint.com/:w:/s/PracticeTest/Ed_jEdvMiaNCjbdeLXm97z8BDJlwRX6J9VPoheoYmakypA?e=pdSCbC",target='blank', 'Click to View', style = "font-size:22px"#, download = 'Ambulatory Analysis Tool - Metric Overview.pdf'
-                                             ),
+                                           #a(href = "https://mtsinai.sharepoint.com/:w:/s/PracticeTest/Ed_jEdvMiaNCjbdeLXm97z8BDJlwRX6J9VPoheoYmakypA?e=pdSCbC",target='blank', 'Click to View', style = "font-size:22px"#, download = 'Ambulatory Analysis Tool - Metric Overview.pdf'
+                                            # ),
+                                           a(href = "https://mtsinai.sharepoint.com/:b:/s/AmbulatoryCareAcademy89/EXjf-v3ucMdIpZzMn2awFBgBe28Amj8yVn8CbXNinYvw8w?e=paM7WH", target='blank', 'Click to View', style = "font-size:22px"),
                                            p("- Grouper 17 Mapping File:", style = "font-size:20px; font-weight: bold"),
                                            a(href = "https://hso-rconnect.mssm.edu/ambulatory-mapping",target='blank', 'Click to View', style = "font-size:22px"#, download = 'Ambulatory Analysis Tool - Metric definitions.xlsx',
                                              )
@@ -912,6 +913,17 @@ ui <- dashboardPage(
                                        #                 valueBoxOutput("avgUtilization", width=12))))
                                        
                                 )),
+                              #new boxPlus for avg patient volume by hour
+                              boxPlus(
+                                title = "Room Turns",
+                                closable = FALSE,
+                                width = 12,
+                                status = "primary",
+                                solidHeader = TRUE,
+                                collapsible = TRUE,
+                                plotOutput("volume_am_pm_by_room", height = "400px")
+                              ),
+                              
                               
                               boxPlus(
                                 title = "Space Utilization", width = 12, status = "primary",
