@@ -4841,9 +4841,9 @@ server <- function(input, output, session) {
     
     data$variable <- as.character(data$variable)
     
-    data$variable[which(data$variable == "Bumped")] <- "Same-day Bumped"
-    data$variable[which(data$variable == "Canceled")] <- "Same-day Canceled (No Show)"
-    data$variable[which(data$variable == "Rescheduled")] <- "Same-day Rescheduled"
+    data$variable[which(data$variable == "Bumped")] <- "Late Bumped"
+    data$variable[which(data$variable == "Canceled")] <- "Late Canceled (No Show)"
+    data$variable[which(data$variable == "Rescheduled")] <- "Late Rescheduled"
     
     data <- data %>% filter(Time %in% timeOptionsHr_filter)
     
@@ -4856,9 +4856,9 @@ server <- function(input, output, session) {
     
     
     ggplot(data, aes(x=Time, y=value, fill=factor(variable, levels=c("Arrived", "No Show",
-                                                                     "Same-day Bumped",
-                                                                     "Same-day Canceled (No Show)", 
-                                                                     "Same-day Rescheduled"))))+
+                                                                     "Late Bumped",
+                                                                     "Late Canceled (No Show)", 
+                                                                     "Late Rescheduled"))))+
       geom_bar(position="stack",stat="identity", width=0.7)+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       #scale_fill_MountSinai(reverse = TRUE)+
@@ -7560,7 +7560,7 @@ print("1")
   # New Patient Wait Time
   output$newPtApptSourceByDept <- renderPlot({
     data <- dataArrived_access()
-    # data <- kpi.all.data[arrivedNoShow.data.rows,]
+    # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
     print("2")
     newpatients.ratio <- data %>%
@@ -7655,9 +7655,9 @@ print("1")
     
     # No Show Rate
     
-    data.noShow <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    data.noShow <- dataArrivedNoShow() #%>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
     data.noShow_test <<- data.noShow
-    # data.noShow <- arrivedNoShow.data
+    # data.noShow <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
     print("3")
     noShows <- data.noShow %>%
@@ -7666,7 +7666,7 @@ print("1")
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
     
-    cols <- c("Arrived", "No Show", "Canceled")
+    cols <- c("Arrived", "No Show", "Canceled", "Rescheduled")
     
     missing <- setdiff(cols, names(noShows))
     if(length(missing) > 0) {
@@ -7675,42 +7675,78 @@ print("1")
   
     noShows[is.na(noShows)] <- 0
     
-    noShows$`No Show Perc` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
-    
+    noShows$`No Show Rate` <- round((noShows$`No Show`)/(noShows$Arrived + noShows$`No Show`),2)
+    noShows$`No Show w. Cancel Rate` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
+    noShows$`No Show w. Rescheduled Rate` <- round((noShows$`No Show` + noShows$`Canceled` + noShows$Rescheduled)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`+ noShows$Rescheduled),2)
     
     #noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)
     
 
-      noShows <- noShows %>% filter(SCHEDULE_GROUPING_MAPPED %in% newpatients.ratio.groups)
-    
-    
-    newNoShow <-
+    noShows <- noShows %>% filter(SCHEDULE_GROUPING_MAPPED %in% newpatients.ratio.groups)
       
-      ggplot(noShows, aes(x=factor(SCHEDULE_GROUPING_MAPPED#, levels =  c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
-                                   ), 
-                          y=`No Show Perc`, group=SCHEDULE_GROUPING_MAPPED, fill=SCHEDULE_GROUPING_MAPPED)) +
-      geom_bar(stat="identity", width = 0.8) +
-      scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.3)+
+    noShows <- noShows %>% select("SCHEDULE_GROUPING_MAPPED", "No Show Rate",            
+                                     "No Show w. Cancel Rate", "No Show w. Rescheduled Rate") 
+      
+    noShows_long <- pivot_longer(noShows, !"SCHEDULE_GROUPING_MAPPED", names_to = "Metrics", 
+                            values_to = "Rate")
+    
+    
+    # newNoShow <-
+    #   
+    #   ggplot(noShows, aes(x=factor(SCHEDULE_GROUPING_MAPPED#, levels =  c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
+    #                                ), 
+    #                       y=`No Show Perc`, group=SCHEDULE_GROUPING_MAPPED, fill=SCHEDULE_GROUPING_MAPPED)) +
+    #   geom_bar(stat="identity", width = 0.8) +
+    #   scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.3)+
+    #   coord_flip() +
+    #   scale_fill_MountSinai('blue')+
+    #   labs(x=NULL, y=NULL,
+    #        title = "New Patient No Show Rate*",
+    #        subtitle = paste0("Based on visits from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+    #        caption = "*No Show Rate = (No Show + Same-day Canceled) / (Arrived + No Show + Same-day Canceled)"
+    #        )+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   theme(
+    #     plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+    #     plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
+    #     plot.caption = element_text(hjust = 0.95, size = 10, face = "italic"),
+    #     legend.position = "none",
+    #     axis.title.y = element_blank(),
+    #     axis.title.x = element_blank(),
+    #     axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
+    #     axis.text.y = element_text(size = "14"))+
+    #   geom_text(aes(label=paste0(`No Show Perc`*100,"%")), color="black", 
+    #             size=5, position = position_dodge(1), hjust=-.5) +
+    #   scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, max(newpatients.ratio$ratio)*1.3))
+    
+    
+    newNoShow <- 
+      ggplot(noShows_long, aes(x=factor(SCHEDULE_GROUPING_MAPPED), y=Rate, group= Metrics, fill= Metrics)) +
+      geom_bar(stat="identity", position="dodge") +
+      scale_y_continuous(limits=c(0,max(noShows_long$Rate))*1.3)+
       coord_flip() +
-      scale_fill_MountSinai('blue')+
+      scale_fill_MountSinai('all')+
       labs(x=NULL, y=NULL,
            title = "New Patient No Show Rate*",
            subtitle = paste0("Based on visits from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "*No Show Rate = (No Show + Same-day Canceled) / (Arrived + No Show + Same-day Canceled)"
-           )+
+           caption = "* No Show Rate = (No Show) / (Arrived + No Show) \n
+       No Show w. Cancel Rate = (No Show + Late Canceled) / (Arrived + No Show + Late Canceled) \n
+       No Show w. Reschedule Rate = (No Show + Late Canceled + Late Rescheduled) / (Arrived + No Show + Late Canceled + Late Rescheduled)"
+      )+
       theme_new_line()+
       theme_bw()+
       theme(
         plot.title = element_text(hjust=0.5, face = "bold", size = 20),
         plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
-        plot.caption = element_text(hjust = 0.95, size = 10, face = "italic"),
-        legend.position = "none",
+        plot.caption = element_text(hjust = 0.95, size = 8, face = "italic"),
+        legend.position = "top",
         axis.title.y = element_blank(),
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
         axis.text.y = element_text(size = "14"))+
-      geom_text(aes(label=paste0(`No Show Perc`*100,"%")), color="black", 
-                size=5, position = position_dodge(1), hjust=-.5) +
+      geom_text(aes(label=paste0(Rate *100,"%")), color="black", 
+                size=5, position = position_dodge(1), hjust = -0.5) +
       scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, max(newpatients.ratio$ratio)*1.3))
     
     
@@ -13577,105 +13613,86 @@ print("10")
       #spread(Appt.MonthYear, value) %>%
       #rename(Metrics = variable)
     
+     #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
+    
+     # data_noShow <- dataArrivedNoShow() %>%
+     #   group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+     #   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))%>%
+     #   mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+       
 
-
-     data_noShow <- dataArrivedNoShow() %>%
-       filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))%>%
-       mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
-
-     # data_noShow  <- arrivedNoShow.data.rows %>%
-     #   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
-     #    filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))%>%
-     #  mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
-
-
-  noShow_perc <-  data_noShow %>%
+data_noShow <- dataArrivedNoShow() %>%
   group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
-  dplyr::summarise(Total = n()) %>% collect() %>%
-    pivot_wider(names_from = APPT_STATUS, values_from = Total)
-
-  noShow_perc[is.na(noShow_perc)] <- 0
-
-  noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
-  mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))
+  summarise(Total = n()) %>% collect() %>%
+  pivot_wider(names_from = APPT_STATUS, values_from = Total)
 
 
+data_noShow <- data_noShow %>% mutate(`No Show Rate` = paste0(round(100* `No Show`/ (`No Show` +Arrived), 0), "%"),
+                                      `No Show w. Cancelled Rate`  =  paste0(round(100* (`No Show`+Canceled)/ (`No Show` + Canceled+ Arrived), 0), "%"),
+                                      `No Show w. Rescheduled Rate` =  paste0(round(100*(`No Show`+ Canceled + Rescheduled)/ (`No Show` + Canceled+ Rescheduled +Arrived), 0), "%"))
 
- noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
- year <- max(year(noShow_perc$APPT_MONTH_YEAR))-1
- 
- noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
-   pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
-   ungroup()
+
+
+data_noShow$APPT_MONTH_YEAR <- as.yearmon(data_noShow$APPT_MONTH_YEAR, "%Y-%m")
+year <- max(year(data_noShow$APPT_MONTH_YEAR))-1
+
+noShow_perc <- data_noShow %>% select(-c("No Show","Arrived", "Canceled", "Rescheduled")) %>% 
+  pivot_longer(cols = c("No Show Rate", "No Show w. Cancelled Rate", "No Show w. Rescheduled Rate"), names_to = 'Metrics', values_to = "Value")%>%
+  pivot_wider(names_from = APPT_MONTH_YEAR, values_from = "Value")%>%
+  ungroup()
+
+
+ #  noShow_perc <-  data_noShow %>%
+ #  group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+ #  dplyr::summarise(Total = n()) %>% collect() %>%
+ #    pivot_wider(names_from = APPT_STATUS, values_from = Total)
+ # 
+ #  noShow_perc[is.na(noShow_perc)] <- 0
+ # 
+ #  noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+ #  mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))
+ # 
+ # 
+ # 
+ # noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
+ # year <- max(year(noShow_perc$APPT_MONTH_YEAR))-1
+ # 
+ # noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
+ #   pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+ #   ungroup()
  
 # added total no-show %
- total <-  data_noShow %>%
+ # total <-  data_noShow %>%
+ #   group_by(!!!syms(cols), APPT_STATUS) %>%
+ #   dplyr::summarise(Total = n()) %>%
+ #   collect()%>%
+ #   pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
+ #   replace(is.na(.), 0)%>%
+ #   group_by(!!!syms(cols)) %>%
+ #   mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+ #   select(-c(`No Show`,Arrived))
+ # 
+ #   noShow_perc <- left_join(noShow_perc, total, by = cols )
+ 
+   total <-  dataArrivedNoShow() %>%
    group_by(!!!syms(cols), APPT_STATUS) %>%
    dplyr::summarise(Total = n()) %>%
    collect()%>%
    pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
-   replace(is.na(.), 0)%>%
+   replace(is.na(.), 0) %>%
    group_by(!!!syms(cols)) %>%
-   mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
-   select(-c(`No Show`,Arrived))
+   mutate(`No Show Rate` = paste0(round(100* `No Show`/ (`No Show` +Arrived), 0), "%"),
+          `No Show w. Cancelled Rate`  =  paste0(round(100* (`No Show`+Canceled)/ (`No Show` + Canceled+ Arrived), 0), "%"),
+          `No Show w. Rescheduled Rate` =  paste0(round(100*(`No Show`+ Canceled + Rescheduled)/ (`No Show` + Canceled+ Rescheduled +Arrived), 0), "%"))%>%
+   select(-c("No Show","Arrived", "Canceled", "Rescheduled"))%>%
+   pivot_longer(cols = c("No Show Rate", "No Show w. Cancelled Rate", "No Show w. Rescheduled Rate"), names_to = 'Metrics', values_to = "Total")
  
-   noShow_perc <- left_join(noShow_perc, total, by = cols )
  
- 
- # ## Added dynamic no-shows
- # if(compare_filters == "CAMPUS_SPECIALTY"){
- #   
- #   dynamic_noshow <- arrivedNoShow.data.rows %>%
- #     filter(CAMPUS %in% campus  & 
- #              APPT_YEAR %in% year &
- #              CAMPUS_SPECIALTY %in% specialty ) 
- #   
- # }
- # if(compare_filters == "DEPARTMENT"){
- #   dynamic_noshow <- arrivedNoShow.data.rows %>%
- #     filter(CAMPUS %in% campus  & 
- #              APPT_YEAR %in% year &
- #              CAMPUS_SPECIALTY %in% specialty &
- #              DEPARTMENT %in% department )
- # }
- # if(compare_filters == "PROVIDER"){
- #   dynamic_noshow <- arrivedNoShow.data.rows %>%
- #     filter(CAMPUS %in% campus  &
- #              APPT_YEAR %in% year &
- #              CAMPUS_SPECIALTY %in% specialty &
- #              DEPARTMENT %in% department &
- #              RESOURCES %in% resources &
- #              PROVIDER %in% provider)
- # }
- # 
- # 
- #   
- # dynamic_noshow  <- dynamic_noshow %>%
- #   #filter(CAMPUS %in% "MSUS"  & CAMPUS_SPECIALTY %in% "Allergy")%>%
- #   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
- #   mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show")) %>%
- #   group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
- #   dplyr::summarise(Total = n()) %>% 
- #   collect() %>% 
- #   pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
- #   replace(is.na(.), 0) %>%
- #   mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m")) %>%
- #   #filter(year(APPT_MONTH_YEAR) == year)%>%
- #   group_by(!!!syms(cols)) %>%
- #   summarise(Arrived =sum(Arrived, na.rm = T), 
- #             `No Show` = sum(`No Show`, na.rm = T))%>%
- #   mutate(`Dynamic Target` = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
- #   select(-`No Show`,-Arrived)
- # 
- #   
- #   noShow_perc <- left_join(noShow_perc, dynamic_noshow, by = cols )
-   
+   noShow_perc <- left_join(noShow_perc, total, by = c(cols, "Metrics"))
   
    noShow_perc[is.na(noShow_perc)] <- "0%"
 
- noShow_perc$Metrics <- "No Show Rate"
- #noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, `Dynamic Target`, everything(), Total)
- noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, everything(), Total)
+   noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, everything(), Total)
 
 print("11")
 
@@ -13836,6 +13853,8 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
                                                         Metrics=="Average Daily Volume"~ "Variable",
                                                         Metrics == "New Patient Ratio" ~ "25%",
                                                         Metrics == "No Show Rate" ~ "10%",
+                                                        Metrics == "No Show w. Cancelled Rate" ~ "10%",
+                                                        Metrics == "No Show w. Rescheduled Rate" ~ "10%",
                                                         Metrics == "Percent of New Patients Scheduled Within 14 Days" ~ "60%",
                                                         TRUE ~ "TBD"))
     
@@ -13847,7 +13866,9 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
     print(time_2 - time_1)
     metric_order <- c("Average Daily Volume",
-                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time (Days)", "No Show Rate", "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
+                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time (Days)", 
+                        "No Show Rate", "No Show w. Cancelled Rate", "No Show w. Rescheduled Rate",
+                        "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
   
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
@@ -13950,7 +13971,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
       column_spec(border_column, border_left = FALSE, border_right = "2px solid #dddedd" )%>%
       column_spec(length(data), border_left = "2px solid #dddedd", border_right = "2px solid #dddedd" )%>%
       #row_spec(nrow(data), hline_after = TRUE, extra_css = "border-bottom: 1px solid;")%>%
-      collapse_rows(columns = 1:3, valign = "top")
+      collapse_rows(columns = 1:length(cols), valign = "top")
       
    
       
