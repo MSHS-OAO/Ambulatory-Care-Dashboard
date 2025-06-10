@@ -1427,7 +1427,17 @@ ui <- dashboardPage(
                                                 solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                                                 h3(uiOutput(("noshow_rate_month_title"))),
                                                 DTOutput("new_no_show_rate_monthly") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c"),
+                                                hr(),
+                                                h3(uiOutput(("noshow_cancel_rate_month_title"))),
+                                                DTOutput("new_no_show_cancel_rate_monthly") %>% 
+                                                  withSpinner(type = 5, color = "#d80b8c"),
+                                                hr(),
+                                                h3(uiOutput(("noshow_rescheduled_rate_month_title"))),
+                                                DTOutput("new_no_show_rescheduled_rate_monthly") %>% 
                                                   withSpinner(type = 5, color = "#d80b8c")
+                                                
+                                                
                                               )
                                      ),
                                      tabPanel("New Patient Wait Time",

@@ -10265,7 +10265,76 @@ ggplot(data_base,
     paste0("Monthly Percent of New Patients Scheduled by ", name_1 , " and ", name_2)
   })
   
+  output$noshow_rate_month_title <- renderText({
+    if(input$breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "NEW_PT3"){
+      name_2 <- "New vs. Established"
+    }
+    
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "DEPARTMENT"){
+      name_1 <- "Department"
+    }
+    if(input$compare_filters == "PROVIDER"){
+      name_1 <- "Provider"
+    }
+    paste0("Monthly No Show Rate by ", name_1 , " and ", name_2)
+  })
   
+  
+  output$noshow_cancel_rate_month_title <- renderText({
+    if(input$breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "NEW_PT3"){
+      name_2 <- "New vs. Established"
+    }
+    
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "DEPARTMENT"){
+      name_1 <- "Department"
+    }
+    if(input$compare_filters == "PROVIDER"){
+      name_1 <- "Provider"
+    }
+    paste0("Monthly No Show w. Cancelled Rate by ", name_1 , " and ", name_2)
+  })
+  
+  
+  output$noshow_rescheduled_rate_month_title <- renderText({
+    if(input$breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "NEW_PT3"){
+      name_2 <- "New vs. Established"
+    }
+    
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "DEPARTMENT"){
+      name_1 <- "Department"
+    }
+    if(input$compare_filters == "PROVIDER"){
+      name_1 <- "Provider"
+    }
+    paste0("Monthly No Show w. Rescheduled Rate by ", name_1 , " and ", name_2)
+  })
   
   output$new_wait_month_title <- renderText({
     if(input$breakdown_filters == "VISIT_METHOD"){
@@ -11996,19 +12065,18 @@ ggplot(data_base,
   
   no_Show_percentage <- reactive({
     
-
-    
     # data <- arrivedNoShow.data.rows %>%
     #   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
-    #   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    #   filter(APPT_STATUS %in% c("Arrived", "No Show"))
     
+    test_noshow <<- dataArrivedNoShow()
     
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
-    
+      
     
       data <- dataArrivedNoShow() %>%
-        filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+        filter(APPT_STATUS %in% c("Arrived", "No Show"))
 
 
     
@@ -12208,6 +12276,404 @@ ggplot(data_base,
     dtable
   },server = FALSE)
   
+  
+no_Show_cancel_percentage <- reactive({
+  
+  
+  # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+  
+  
+  compare_filters <- input$compare_filters
+  breakdown_filters <- input$breakdown_filters
+  
+  
+  data <- dataArrivedNoShow() %>%
+    filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+  
+  
+  
+  if(breakdown_filters == "VISIT_METHOD"){
+    name_2 <- "Visit Method"
+  }
+  if(breakdown_filters == "APPT_TYPE"){
+    name_2 <- "Vist Type"
+  }
+  if(breakdown_filters == "NEW_PT3"){
+    name_2 <- "New vs. Established"
+    breakdown_filters <- "NEW_PT2"
+  }
+  
+  
+  if(compare_filters == "CAMPUS_SPECIALTY"){
+    name_1 <- "Specialty"
+    cols <- c(compare_filters,breakdown_filters)
+    cols_name <- c(name_1,name_2)
+    tot_cols <- c(compare_filters)
+  }
+  if(compare_filters == "DEPARTMENT"){
+    name_1 <- compare_filters
+    cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
+    cols_name <- c("Specialty",name_1,name_2)
+    tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
+  }
+  if(compare_filters == "PROVIDER"){
+    name_1 <- compare_filters
+    cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
+    cols_name <- c("Specialty","Department",name_1,name_2)
+    tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
+  }
+  
+  
+  data <- data %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+  
+  
+  
+  noShow_perc <- data %>%
+    group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+    dplyr::summarise(Total = n()) %>% collect() %>% 
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+    mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+    mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    select(-`No Show`,-Arrived) %>% 
+    pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup()
+  
+  
+  
+  tot <- data %>%
+    group_by(!!!syms(tot_cols), APPT_STATUS, APPT_MONTH_YEAR) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+    mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  noShow_perc <- full_join(noShow_perc, tot)
+  
+  noShow_perc <- noShow_perc %>% arrange(across(all_of(tot_cols)))
+  
+  
+  
+  i1 <- as.yearmon(names(noShow_perc))
+  noShow_perc <- noShow_perc[order(i1)]
+  
+  noShow_perc <- noShow_perc %>% select(cols, everything())
+  
+  tot_over_time <- data %>%
+    group_by(!!!syms(cols), APPT_STATUS) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    #add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols)) %>%
+    mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    #mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    #pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  tot_all <- data %>%
+    group_by(!!!syms(tot_cols), APPT_STATUS) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols)) %>%
+    mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    # mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    # pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  total <- bind_rows(tot_over_time, tot_all)
+  
+  noShow_perc <- left_join(noShow_perc, total)
+  
+  
+  noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
+  noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
+  
+  
+  month_names <- colnames(noShow_perc[,!(names(noShow_perc) %in% c(cols_name, "Total", "Total_YN"))])
+  
+  month_names_new <- format(as.Date(paste0(month_names, "-01"), format = "%b %Y-%d"), "%Y-%m")
+  noShow_perc <- setnames(noShow_perc, old = month_names, new = month_names_new)
+  
+  noShow_perc
+  
+  #}
+  
+})
+
+output[["new_no_show_cancel_rate_monthly"]] <- renderDT({
+  num_of_cols <- length(no_Show_cancel_percentage())
+  col_dissappear <- which(names(no_Show_cancel_percentage()) %in% c("Total_YN"))
+  
+  dtable <-   datatable(no_Show_cancel_percentage(), 
+                        class = 'cell-border stripe',
+                        rownames = FALSE,
+                        extensions = c('Buttons','Scroller'),
+                        caption = htmltools::tags$caption(
+                          style = 'caption-side: bottom; text-align: left;',
+                          #htmltools::em('Median New Patient Wait Time = median wait time of scheduled new patients within the month')
+                          
+                        ),
+                        options = list(
+                          scrollX = TRUE,
+                          columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
+                          list(pageLength = 20, scrollY = "400px"),
+                          dom = 'Bfrtip',
+                          #buttons = c('csv','excel'),
+                          buttons = list(
+                            list(extend = 'csv', filename = 'Monthly No Show Rate Comaprsion'),
+                            list(extend = 'excel', filename = 'Monthly No Show Rate Comaprsion')
+                          ),
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
+                          fixedColumns = list(leftColumns =
+                                                ifelse(colnames(no_Show_cancel_percentage())[3] == "Provider", 4, 3)
+                          ),
+                          rowsGroup = rows_group(),
+                          headerCallback = DT::JS(
+                            "function(thead) {",
+                            "  $(thead).css('font-size', '115%');",
+                            "}"
+                          )
+                          
+                        )
+  )
+  dtable <- dtable %>%
+    formatStyle(
+      'Total_YN',
+      target = "row",
+      fontWeight = styleEqual(1, "bold")
+    )%>%
+    formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+    formatStyle(columns = c("Total"), fontWeight = 'bold')
+  path <- here::here("www")
+  
+  dep <- htmltools::htmlDependency(
+    "RowsGroup", "2.0.0", 
+    path, script = "dataTables.rowsGroup.js")
+  dtable$dependencies <- c(dtable$dependencies, list(dep))
+  dtable
+},server = FALSE)
+
+
+no_Show_rescheduled_percentage <- reactive({
+  
+  
+  # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+  
+  
+  compare_filters <- input$compare_filters
+  breakdown_filters <- input$breakdown_filters
+  
+  
+  data <- dataArrivedNoShow()
+  
+  
+  
+  if(breakdown_filters == "VISIT_METHOD"){
+    name_2 <- "Visit Method"
+  }
+  if(breakdown_filters == "APPT_TYPE"){
+    name_2 <- "Vist Type"
+  }
+  if(breakdown_filters == "NEW_PT3"){
+    name_2 <- "New vs. Established"
+    breakdown_filters <- "NEW_PT2"
+  }
+  
+  
+  if(compare_filters == "CAMPUS_SPECIALTY"){
+    name_1 <- "Specialty"
+    cols <- c(compare_filters,breakdown_filters)
+    cols_name <- c(name_1,name_2)
+    tot_cols <- c(compare_filters)
+  }
+  if(compare_filters == "DEPARTMENT"){
+    name_1 <- compare_filters
+    cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
+    cols_name <- c("Specialty",name_1,name_2)
+    tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
+  }
+  if(compare_filters == "PROVIDER"){
+    name_1 <- compare_filters
+    cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
+    cols_name <- c("Specialty","Department",name_1,name_2)
+    tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
+  }
+  
+  
+  data <- data %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+  
+  
+  
+  noShow_perc <- data %>%
+    group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+    dplyr::summarise(Total = n()) %>% collect() %>% 
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+    mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+    mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    select(-`No Show`,-Arrived) %>% 
+    pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup()
+  
+  
+  
+  tot <- data %>%
+    group_by(!!!syms(tot_cols), APPT_STATUS, APPT_MONTH_YEAR) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+    mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  noShow_perc <- full_join(noShow_perc, tot)
+  
+  noShow_perc <- noShow_perc %>% arrange(across(all_of(tot_cols)))
+  
+  
+  
+  i1 <- as.yearmon(names(noShow_perc))
+  noShow_perc <- noShow_perc[order(i1)]
+  
+  noShow_perc <- noShow_perc %>% select(cols, everything())
+  
+  tot_over_time <- data %>%
+    group_by(!!!syms(cols), APPT_STATUS) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    #add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols)) %>%
+    mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    #mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    #pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  tot_all <- data %>%
+    group_by(!!!syms(tot_cols), APPT_STATUS) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols)) %>%
+    mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    # mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    # pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  total <- bind_rows(tot_over_time, tot_all)
+  
+  noShow_perc <- left_join(noShow_perc, total)
+  
+  
+  noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
+  noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
+  
+  
+  month_names <- colnames(noShow_perc[,!(names(noShow_perc) %in% c(cols_name, "Total", "Total_YN"))])
+  
+  month_names_new <- format(as.Date(paste0(month_names, "-01"), format = "%b %Y-%d"), "%Y-%m")
+  noShow_perc <- setnames(noShow_perc, old = month_names, new = month_names_new)
+  
+  noShow_perc
+  
+  #}
+  
+})
+
+output[["new_no_show_rescheduled_rate_monthly"]] <- renderDT({
+  num_of_cols <- length(no_Show_rescheduled_percentage())
+  col_dissappear <- which(names(no_Show_rescheduled_percentage()) %in% c("Total_YN"))
+  
+  dtable <-   datatable(no_Show_rescheduled_percentage(), 
+                        class = 'cell-border stripe',
+                        rownames = FALSE,
+                        extensions = c('Buttons','Scroller'),
+                        caption = htmltools::tags$caption(
+                          style = 'caption-side: bottom; text-align: left;',
+                          #htmltools::em('Median New Patient Wait Time = median wait time of scheduled new patients within the month')
+                          
+                        ),
+                        options = list(
+                          scrollX = TRUE,
+                          columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
+                          list(pageLength = 20, scrollY = "400px"),
+                          dom = 'Bfrtip',
+                          #buttons = c('csv','excel'),
+                          buttons = list(
+                            list(extend = 'csv', filename = 'Monthly No Show Rate Comaprsion'),
+                            list(extend = 'excel', filename = 'Monthly No Show Rate Comaprsion')
+                          ),
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
+                          fixedColumns = list(leftColumns =
+                                                ifelse(colnames(no_Show_rescheduled_percentage())[3] == "Provider", 4, 3)
+                          ),
+                          rowsGroup = rows_group(),
+                          headerCallback = DT::JS(
+                            "function(thead) {",
+                            "  $(thead).css('font-size', '115%');",
+                            "}"
+                          )
+                          
+                        )
+  )
+  dtable <- dtable %>%
+    formatStyle(
+      'Total_YN',
+      target = "row",
+      fontWeight = styleEqual(1, "bold")
+    )%>%
+    formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+    formatStyle(columns = c("Total"), fontWeight = 'bold')
+  path <- here::here("www")
+  
+  dep <- htmltools::htmlDependency(
+    "RowsGroup", "2.0.0", 
+    path, script = "dataTables.rowsGroup.js")
+  dtable$dependencies <- c(dtable$dependencies, list(dep))
+  dtable
+},server = FALSE)
+
+
   
   wite_time_14days <- reactive({
     ## Percent of New Patients Scheduled Within 14 Days
