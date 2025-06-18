@@ -520,7 +520,7 @@ ui <- dashboardPage(
                                 hr(),
                                 fluidRow(plotOutput("provNoShowPie", height = "200px") %>%
                                            withSpinner(type = 5, color = "#d80b8c")),
-                                tags$em("*Incomplete Appts = No Show + Same-day Bumped/Canceled/Rescheduled Appts"),
+                                tags$em("*Incomplete Appts = No Show + Late Bumped/Canceled/Rescheduled Appts"),
                                 br(), br()), 
                               boxPlus(
                                 title = "Daily Scheduling", width = 12, status = "primary",
@@ -734,12 +734,12 @@ ui <- dashboardPage(
                          boxPlus(
                            title = "Scheduling Summary", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                           column(3,
-                                  br(),
-                                  valueBoxOutput("scheduledAppts", width = 12),
-                                  valueBoxOutput("incompleteAppts", width = 12),
-                                  tags$em("*Incomplete Appts = No Show + Same-day Bumped/Canceled/Rescheduled Appts")),
-                           column(9,
+                           #column(3,
+                                #  br(),
+                                  #valueBoxOutput("scheduledAppts", width = 12),
+                                  #valueBoxOutput("incompleteAppts", width = 12),
+                                  #tags$em("*Incomplete Appts = No Show + Late Bumped/Canceled/Rescheduled Appts")),
+                           column(12,
                                   plotOutput("schedulingStatusSummary") %>% 
                                     withSpinner(type = 5, color = "#d80b8c")))
                        ),
@@ -770,12 +770,13 @@ ui <- dashboardPage(
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
                            br(),
                            fluidRow(
-                             #column(3, uiOutput("apptTypeControl")),
-                             column(4, uiOutput("insuranceControl")),
-                             column(4, valueBoxOutput("avgDailyNoShow_Count", width = 12) %>%
+                             column(3, uiOutput("noshowControl")),
+                             column(3, uiOutput("insuranceControl")),
+                             column(3, valueBoxOutput("avgDailyNoShow_Count", width = 12) %>%
                                       withSpinner(type = 5, color = "#d80b8c")),
-                             column(4, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
-                           tags$em("*No Show Rate = (No Show + Same-day Canceled)  / (Arrived + No Show + Same-day Canceled)")
+                             column(3, valueBoxOutput("avgDailyNoShow_Perc", width = 12))),
+                           textOutput("noshow_equ")
+                           #tags$em("*No Show Rate = (No Show + Late Canceled)  / (Arrived + No Show + Late Canceled)")
                            # h5("No Show includes no show and same-day bumped, canceled, and rescheduled appointments.")
                          ),
                          boxPlus(
@@ -1001,8 +1002,13 @@ ui <- dashboardPage(
                          boxPlus(
                            title = "New Patient Source", width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                           fluidRow(
+                             column(8),
+                           column(4, uiOutput("new_pt_noshowControl")),
+                           br(),
+                           column(12, 
                            plotOutput("newPtApptSourceByDept", height = "550px") %>% 
-                             withSpinner(type = 5, color = "#d80b8c")))
+                             withSpinner(type = 5, color = "#d80b8c")))))
                 )),
         
         # tabItem(tabName = "upcomingDemand",
