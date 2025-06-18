@@ -3856,8 +3856,11 @@ server <- function(input, output, session) {
     
     #data <- historical.data %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     
+   
+    
     data <- data %>% 
-      mutate(STATUS = ifelse((APPT_STATUS %in% c("Canceled") & (LEAD_DAYS < 1)),"No Show", APPT_STATUS),
+      mutate(STATUS = ifelse((APPT_STATUS %in% c("Canceled") & (LEAD_DAYS < 1)),"Late Cancel", APPT_STATUS),
+             STATUS = ifelse((APPT_STATUS %in% c("Rescheduled") & (LEAD_DAYS < 1)),"Late Rescheduled", STATUS),
              STATUS = ifelse((APPT_STATUS %in% c("Canceled") & is.na(LEAD_DAYS)),"Canceled", STATUS)) 
 
     statusData <- data %>% 
@@ -3874,7 +3877,8 @@ server <- function(input, output, session) {
     
     statusDataYear <- statusData %>% group_by(Year,Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataYear <- reshape2::dcast(statusDataYear, Year ~ Status)
-    column_names <- c("Bumped", "Arrived", "Canceled", "No Show", "Rescheduled")
+    #column_names <- c("Bumped", "Arrived", "Canceled", "No Show", "Rescheduled")
+    column_names <- c("Bumped", "Arrived", "Canceled", "No Show", "Rescheduled", "Late Cancel", "Late Rescheduled")
     if(!identical(which(column_names %in% colnames(statusDataYear) == FALSE), integer(0))) { 
       
         index <- which(column_names %in% colnames(statusDataYear) == FALSE)
@@ -3885,13 +3889,30 @@ server <- function(input, output, session) {
     
     
     statusDataYear[is.na(statusDataYear)] <- 0
+    # statusDataYear <- statusDataYear %>%
+    #   mutate(Cancelled = Canceled / rowSums(statusDataYear[,2:6])) %>%
+    #   mutate(Bumped = Bumped / rowSums(statusDataYear[,2:6])) %>%
+    #   mutate(NoShow = `No Show` / rowSums(statusDataYear[,c("Arrived","No Show")])) %>%
+    #   dplyr::select(c("Year","Cancelled","Bumped","NoShow"))
+    
+    
     statusDataYear <- statusDataYear %>%
-      mutate(Cancelled = Canceled / rowSums(statusDataYear[,2:6])) %>%
-      mutate(Bumped = Bumped / rowSums(statusDataYear[,2:6])) %>%
-      mutate(NoShow = `No Show` / rowSums(statusDataYear[,c("Arrived","No Show")])) %>%
-      dplyr::select(c("Year","Cancelled","Bumped","NoShow"))
+      mutate(Cancelled = Canceled / rowSums(statusDataYear[,2:length(statusDataYear)]),
+      Bumped = Bumped / rowSums(statusDataYear[,2:length(statusDataYear)]),
+      NoShow = `No Show` / rowSums(statusDataYear[,c("Arrived","No Show")]),
+     `NoShow + Late Cancelled Rate` = (`No Show`+ `Late Cancel`) / rowSums(statusDataYear[,c("Arrived","No Show", "Late Cancel")]),
+     `NoShow + Late Cancelled + Late Reschedule Rate` = (`No Show`+ `Late Cancel`+ `Late Rescheduled`) / rowSums(statusDataYear[,c("Arrived","No Show", "Late Cancel", "Late Rescheduled")])) %>%
+      dplyr::select(c("Year", "Cancelled","Bumped","NoShow", "NoShow + Late Cancelled Rate", "NoShow + Late Cancelled + Late Reschedule Rate"))
+    
+    
     statusDataYear[is.na(statusDataYear)] <- 0
-    statusDataYear <- reshape2::melt(statusDataYear, id.vars = c("Year"))
+    statusDataYear <- reshape2::melt(statusDataYear, id.vars = c("Year")) %>%
+      mutate(facet_grouper = case_when(
+      variable == "Cancelled" ~ "Cancelled",
+      variable == "Bumped" ~ "Bumped",
+      TRUE ~ "No Show"
+    ))
+    
     
     statusDataQuarter <- statusData %>% group_by(Year, Quarter, Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataQuarter <- reshape2::dcast(statusDataQuarter, Year + Quarter ~ Status)
@@ -3902,13 +3923,33 @@ server <- function(input, output, session) {
       statusDataQuarter[,columns_missing] <- NA
     }
     statusDataQuarter[is.na(statusDataQuarter)] <- 0
+    # statusDataQuarter <- statusDataQuarter %>%
+    #   mutate(Cancelled = Canceled / rowSums(statusDataQuarter[,3:7])) %>%
+    #   mutate(Bumped = Bumped / rowSums(statusDataQuarter[,3:7])) %>%
+    #   mutate(NoShow = `No Show` / rowSums(statusDataQuarter[,c("Arrived","No Show")])) %>%
+    #   dplyr::select(c("Year","Quarter","Cancelled","Bumped","NoShow"))
+    # 
+    
     statusDataQuarter <- statusDataQuarter %>%
-      mutate(Cancelled = Canceled / rowSums(statusDataQuarter[,3:7])) %>%
-      mutate(Bumped = Bumped / rowSums(statusDataQuarter[,3:7])) %>%
-      mutate(NoShow = `No Show` / rowSums(statusDataQuarter[,c("Arrived","No Show")])) %>%
-      dplyr::select(c("Year","Quarter","Cancelled","Bumped","NoShow"))
+      mutate(Cancelled = Canceled / rowSums(statusDataQuarter[, 3:length(statusDataQuarter)]),
+             Bumped = Bumped / rowSums(statusDataQuarter[, 3:length(statusDataQuarter)]),
+             NoShow = `No Show` / rowSums(statusDataQuarter[,c("Arrived","No Show")]),
+             `NoShow + Late Cancelled Rate` = (`No Show`+ `Late Cancel`) / rowSums(statusDataQuarter[,c("Arrived","No Show", "Late Cancel")]),
+             `NoShow + Late Cancelled + Late Reschedule Rate` = (`No Show`+ `Late Cancel`+ `Late Rescheduled`) / rowSums(statusDataQuarter[,c("Arrived","No Show", "Late Cancel", "Late Rescheduled")])) %>%
+      dplyr::select(c("Year", "Quarter", "Cancelled","Bumped","NoShow", "NoShow + Late Cancelled Rate", "NoShow + Late Cancelled + Late Reschedule Rate"))
+    
+    
+    
+    
+    
     statusDataQuarter[is.na(statusDataQuarter)] <- 0
-    statusDataQuarter <- reshape2::melt(statusDataQuarter, id.vars = c("Year","Quarter"))
+    statusDataQuarter <- reshape2::melt(statusDataQuarter, id.vars = c("Year","Quarter")) %>%
+      mutate(facet_grouper = case_when(
+      variable == "Cancelled" ~ "Cancelled",
+      variable == "Bumped" ~ "Bumped",
+      TRUE ~ "No Show"
+    ))
+    
     
     statusDataMonth <- statusData %>% group_by(Year, Month, YearMonth, Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataMonth <- reshape2::dcast(statusDataMonth, Year + Month + YearMonth ~ Status)
@@ -3919,13 +3960,31 @@ server <- function(input, output, session) {
       statusDataMonth[,columns_missing] <- NA
     }
     statusDataMonth[is.na(statusDataMonth)] <- 0
+    # statusDataMonth <- statusDataMonth %>%
+    #   mutate(Cancelled = Canceled / rowSums(statusDataMonth[,4:length(statusDataMonth)])) %>%
+    #   mutate(Bumped = Bumped / rowSums(statusDataMonth[,4:length(statusDataMonth)])) %>%
+    #   mutate(NoShow = `No Show` / rowSums(statusDataMonth[,c("Arrived","No Show")])) %>%
+    #   dplyr::select(c("Year","Month","YearMonth","Cancelled","Bumped","NoShow"))
+    
     statusDataMonth <- statusDataMonth %>%
-      mutate(Cancelled = Canceled / rowSums(statusDataMonth[,4:length(statusDataMonth)])) %>%
-      mutate(Bumped = Bumped / rowSums(statusDataMonth[,4:length(statusDataMonth)])) %>%
-      mutate(NoShow = `No Show` / rowSums(statusDataMonth[,c("Arrived","No Show")])) %>%
-      dplyr::select(c("Year","Month","YearMonth","Cancelled","Bumped","NoShow"))
+      mutate(Cancelled = Canceled / rowSums(statusDataMonth[, 4:length(statusDataMonth)]),
+             Bumped = Bumped / rowSums(statusDataMonth[, 4:length(statusDataMonth)]),
+             NoShow = `No Show` / rowSums(statusDataMonth[,c("Arrived","No Show")]),
+             `NoShow + Late Cancelled Rate` = (`No Show`+ `Late Cancel`) / rowSums(statusDataMonth[,c("Arrived","No Show", "Late Cancel")]),
+             `NoShow + Late Cancelled + Late Reschedule Rate` = (`No Show`+ `Late Cancel`+ `Late Rescheduled`) / rowSums(statusDataMonth[,c("Arrived","No Show", "Late Cancel", "Late Rescheduled")])) %>%
+      dplyr::select(c("Year", "Month", "YearMonth", "Cancelled","Bumped","NoShow", "NoShow + Late Cancelled Rate", "NoShow + Late Cancelled + Late Reschedule Rate"))
+    
+    
+    
+    
     statusDataMonth[is.na(statusDataMonth)] <- 0
-    statusDataMonth <- reshape2::melt(statusDataMonth, id.vars = c("Year","Month","YearMonth"))
+    statusDataMonth <- reshape2::melt(statusDataMonth, id.vars = c("Year","Month","YearMonth")) %>% 
+      mutate(facet_grouper = case_when(
+      variable == "Cancelled" ~ "Cancelled",
+      variable == "Bumped" ~ "Bumped",
+      TRUE ~ "No Show"
+    ))
+    
     
     statusDataDay <- statusData %>% group_by(Year, Date, DateYear, Status) %>% dplyr::summarise(Total = round(sum(Count)))
     statusDataDay <- reshape2::dcast(statusDataDay, Year + Date + DateYear ~ Status)
@@ -3936,28 +3995,48 @@ server <- function(input, output, session) {
       statusDataDay[,columns_missing] <- NA
     }
     statusDataDay[is.na(statusDataDay)] <- 0
+    # statusDataDay <- statusDataDay %>%
+    #   mutate(Cancelled = Canceled / rowSums(statusDataDay[,4:length(statusDataDay)])) %>%
+    #   mutate(Bumped = Bumped / rowSums(statusDataDay[,4:length(statusDataDay)])) %>%
+    #   mutate(NoShow = `No Show` / rowSums(statusDataDay[,c("Arrived","No Show")])) %>%
+    #   dplyr::select(c("Year","Date","DateYear","Cancelled","Bumped","NoShow"))
+    
+    
     statusDataDay <- statusDataDay %>%
-      mutate(Cancelled = Canceled / rowSums(statusDataDay[,4:length(statusDataDay)])) %>%
-      mutate(Bumped = Bumped / rowSums(statusDataDay[,4:length(statusDataDay)])) %>%
-      mutate(NoShow = `No Show` / rowSums(statusDataDay[,c("Arrived","No Show")])) %>%
-      dplyr::select(c("Year","Date","DateYear","Cancelled","Bumped","NoShow"))
+      mutate(Cancelled = Canceled / rowSums(statusDataDay[, 4:length(statusDataDay)]),
+             Bumped = Bumped / rowSums(statusDataDay[, 4:length(statusDataDay)]),
+             NoShow = `No Show` / rowSums(statusDataDay[,c("Arrived","No Show")]),
+             `NoShow + Late Cancelled Rate` = (`No Show`+ `Late Cancel`) / rowSums(statusDataDay[,c("Arrived","No Show", "Late Cancel")]),
+             `NoShow + Late Cancelled + Late Reschedule Rate` = (`No Show`+ `Late Cancel`+ `Late Rescheduled`) / rowSums(statusDataDay[,c("Arrived","No Show", "Late Cancel", "Late Rescheduled")])) %>%
+      dplyr::select(c("Year", "Date", "DateYear", "Cancelled","Bumped","NoShow", "NoShow + Late Cancelled Rate", "NoShow + Late Cancelled + Late Reschedule Rate"))
+    
+    
+    
     statusDataDay[is.na(statusDataDay)] <- 0
-    statusDataDay <- reshape2::melt(statusDataDay, id.vars = c("Year","Date","DateYear"))
+    statusDataDay <- reshape2::melt(statusDataDay, id.vars = c("Year","Date","DateYear")) %>% 
+      mutate(facet_grouper = case_when(
+      variable == "Cancelled" ~ "Cancelled",
+      variable == "Bumped" ~ "Bumped",
+      TRUE ~ "No Show"
+    ))
+    
     
     if(input$kpiTrend ==1){
       if(input$kpiFreq == 1){ #Year
         ggplot(statusDataYear, aes(x=Year, y=value, col=variable, group=variable)) +
           geom_line() +
           geom_point() +
-          facet_wrap(variable~., dir = "v", scales = "free")+
+          facet_wrap(~facet_grouper, dir = "v", scales = "free")+
           labs(x = NULL, y = NULL,
                title = "Historical Trend of Scheduling Status by Year",
-               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2])))+
+               subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
+               )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0,max(statusDataYear$value)*1.2))+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+ 
-          theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          theme(legend.position = "bottom",
+            axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")+
           geom_point(size = 3.2)
         
@@ -3971,10 +4050,11 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v", scales = "free")+
+          facet_wrap(~facet_grouper, dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+ 
+          theme(legend.position = "bottom")+
           scale_color_MountSinai("main")+
           geom_point(size = 3.2)
         
@@ -3987,10 +4067,11 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v", scales = "free")+
+          facet_wrap(~facet_grouper, dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
-          graph_theme("none")+ 
+          graph_theme("none")+
+          theme(legend.position = "bottom")+
           scale_color_MountSinai("main")+
           geom_point(size = 3.2)
         
@@ -4002,10 +4083,11 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v", scales = "free")+
+          facet_wrap(~facet_grouper, dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("none")+ 
+          theme(legend.position = "bottom")+
           scale_color_MountSinai("main")+
           scale_x_date(breaks = "day", date_labels = "%Y-%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))+
@@ -4021,10 +4103,12 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v", scales = "free")+
+          facet_wrap(~facet_grouper, dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
-          graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          graph_theme("top")+ 
+          theme(legend.position = "bottom",
+            axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")+
           geom_point(size = 3.2)
         
@@ -4037,10 +4121,12 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v", scales = "free")+
+          facet_wrap(~facet_grouper, dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
-          graph_theme("top")+ theme( axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          graph_theme("top")+ 
+          theme(legend.position = "bottom",
+            axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")+
           geom_point(size = 3.2)
         
@@ -4053,10 +4139,12 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v", scales = "free")+
+          facet_wrap(~facet_grouper, dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
-          graph_theme("top")+ theme(axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
+          graph_theme("top")+
+          theme(legend.position = "bottom",
+            axis.text.x = element_text(size = 16, angle=0, hjust=0.5))+
           scale_color_MountSinai("main")+
           geom_point(size = 3.2)
         
@@ -4068,10 +4156,11 @@ server <- function(input, output, session) {
                subtitle = paste0("Based on data from ",isolate(input$dateRangeKpi[1])," to ",isolate(input$dateRangeKpi[2]))
           )+
           scale_y_continuous(labels = scales::percent_format(accuracy = 0.1), limits = c(0,max(statusDataYear$value)*1.2))+
-          facet_wrap(variable~., dir = "v", scales = "free")+
+          facet_wrap(~facet_grouper, dir = "v", scales = "free")+
           theme_new_line()+
           theme_bw()+
           graph_theme("top")+ 
+          theme(legend.position = "bottom")+
           scale_color_MountSinai("main")+
           scale_x_date(breaks = "day", date_labels = "%m-%d", date_breaks = "1 month",
                        date_minor_breaks = "1 day", expand = c(0, 0.6))+
@@ -4799,16 +4888,16 @@ server <- function(input, output, session) {
     
     sameDay$APPT_STATUS <- as.character(sameDay$APPT_STATUS)
     
-    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Bumped")] <- "Same-day Bumped"
-    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Canceled")] <- "Same-day Canceled \n(No Show)"
-    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Rescheduled")] <- "Same-day Rescheduled"
+    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Bumped")] <- "Late Bumped"
+    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Canceled")] <- "Late Canceled"
+    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Rescheduled")] <- "Late Rescheduled"
     
     ggplot(sameDay, aes(reorder(APPT_STATUS, -value), value, fill=APPT_STATUS)) +
       geom_bar(stat="identity", width = 0.8) +
       scale_y_continuous(limits=c(0,(max(sameDay$value))*1.3))+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       labs(x=NULL, y=NULL,
-           title = "Average Daily No Shows and Same-day \nBumped/Canceled/Rescheduled Appointments",
+           title = "Average Daily No Shows and Late \nBumped/Canceled/Rescheduled Appointments",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
@@ -4829,7 +4918,8 @@ server <- function(input, output, session) {
       group_by(APPT_TM_HR, APPT_STATUS) %>%
       dplyr::summarise(avg = round(mean(total)))
     
-    data <- dcast(data, APPT_TM_HR ~ APPT_STATUS, sum)
+    data <- pivot_wider(data, names_from = "APPT_STATUS", values_from = "avg")
+    data[is.na(data)] <- 0
     
     byTime.df <- as.data.frame(byTime.df[which(byTime.df$Time %in% unique(data$APPT_TM_HR)),])
     colnames(byTime.df) <- "Time"
@@ -4841,9 +4931,9 @@ server <- function(input, output, session) {
     
     data$variable <- as.character(data$variable)
     
-    data$variable[which(data$variable == "Bumped")] <- "Same-day Bumped"
-    data$variable[which(data$variable == "Canceled")] <- "Same-day Canceled (No Show)"
-    data$variable[which(data$variable == "Rescheduled")] <- "Same-day Rescheduled"
+    data$variable[which(data$variable == "Bumped")] <- "Late Bumped"
+    data$variable[which(data$variable == "Canceled")] <- "Late Canceled"
+    data$variable[which(data$variable == "Rescheduled")] <- "Late Rescheduled"
     
     data <- data %>% filter(Time %in% timeOptionsHr_filter)
     
@@ -4856,9 +4946,9 @@ server <- function(input, output, session) {
     
     
     ggplot(data, aes(x=Time, y=value, fill=factor(variable, levels=c("Arrived", "No Show",
-                                                                     "Same-day Bumped",
-                                                                     "Same-day Canceled (No Show)", 
-                                                                     "Same-day Rescheduled"))))+
+                                                                     "Late Bumped",
+                                                                     "Late Canceled", 
+                                                                     "Late Rescheduled"))))+
       geom_bar(position="stack",stat="identity", width=0.7)+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       #scale_fill_MountSinai(reverse = TRUE)+
@@ -4988,56 +5078,136 @@ server <- function(input, output, session) {
     )
   })
   
-  # Arrived No Show Data with Additional Filters (Appointment Type and Insurance)
-  dataArrivedNoShow_1 <- reactive({
-    data <- dataArrivedNoShow()
-    #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
-    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")),
-                     #input$selectedApptType, 
-                     input$selectedInsurance)
-  })
   
-  dataNoShow_1 <- reactive({
-    data <- dataNoShow()
-    #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
-    groupByFilters_1(data %>% filter(APPT_STATUS %in% c("No Show", "Canceled")),
-                     #input$selectedApptType,
-                     input$selectedInsurance
+  output$noshowControl <- renderUI({
+    box(
+      title = NULL,
+      width = 12, 
+      solidHeader = FALSE,
+      pickerInput("selectedNoShow", label=h4("Select No Show Type:"),
+                  choices = c("No Show Rate", "No Show + Late Cancelled Rate", "No Show+ Late Cancelled + Late Rescheduled Rate"),
+                  multiple=FALSE,
+                  options = pickerOptions(
+                    liveSearch = TRUE,
+                    actionsBox = TRUE,
+                    selectedTextFormat = "count > 1",
+                    countSelectedText = "{0}/{1} Payer Types",
+                    dropupAuto = FALSE),
+                  #selected = unique(dataAll()$Coverage)
+                  selected = c("No Show Rate")
+      )
     )
   })
   
+  # Arrived No Show Data with Additional Filters (Appointment Type and Insurance)
+  dataArrivedNoShow_1 <- reactive({
+    
+    if (input$selectedNoShow == "No Show Rate"){
+      
+      data <- dataArrivedNoShow()%>% filter(APPT_STATUS %in% c("Arrived", "No Show"))
+    } 
+    else if (input$selectedNoShow == "No Show + Late Cancelled Rate"){
+      
+      data <- dataArrivedNoShow()%>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+      
+    } else {
+      
+      data <- dataArrivedNoShow()
+    }
+    
+    
+    #data[,c("Coverage")][is.na(data[,c("Coverage")])] <- "NA"
+    groupByFilters_1(data, input$selectedInsurance)
+  })
+  
+  dataNoShow_1 <- reactive({
+    
+    if (input$selectedNoShow == "No Show Rate"){
+      
+      data <- dataNoShow() %>% filter(APPT_STATUS %in% c("No Show"))
+    } 
+    else if (input$selectedNoShow == "No Show + Late Cancelled Rate"){
+      
+      data <- dataNoShow() %>% filter(APPT_STATUS %in% c("No Show", "Canceled"))
+    } else {
+      
+      data <- dataNoShow()
+    }
+    
+    groupByFilters_1(data, input$selectedInsurance)
+  })
+  
+  output$noshow_equ <- renderText({
+    if (input$selectedNoShow == "No Show Rate"){
+      
+      paste0("*No Show Rate = (No Show )/ (Arrived + No Show)")
+    } 
+    else if (input$selectedNoShow == "No Show + Late Cancelled Rate"){
+      
+      paste0("*No Show Rate = (No Show + Late Canceled)/ (Arrived + No Show + Late Canceled)")
+    } else {
+    
+    paste0("*No Show Rate = (No Show + Late Canceled+ Late Rescheduled)/ (Arrived + No Show + Late Canceled+ Late Rescheduled)")
+  }
+    })
+  
   # Total No Shows per Day
   output$avgDailyNoShow_Count <- renderValueBox({
+    
+    
+    if (input$selectedNoShow == "No Show Rate"){
+      
+      subtitle <- "Avg. No Shows per Day"
+    } 
+    else if (input$selectedNoShow == "No Show + Late Cancelled Rate"){
+      
+      subtitle <- "Avg. No Shows + Late Cancelled per Day"
+    } else {
+      subtitle <- "Avg. No Shows + Late Cancelled + Late Scheduled per Day"
+      
+    }
+    
+    
     data <- dataNoShow_1()
     numerator <- data %>%
-      #filter(APPT_STATUS == "No Show") %>% 
       summarise(n()) %>% collect()
-    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+    denominator <- dataArrivedNoShow_1() %>%
       select(APPT_DATE_YEAR) %>% mutate(APPT_DATE_YEAR = unique(APPT_DATE_YEAR)) %>% collect()
     denominator <- length(denominator$APPT_DATE_YEAR)
     
     valueBox(
-      # prettyNum(round(nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / length(unique((dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived")))$Appt.DateYear)),0), big.mark = ","),
-      prettyNum(ceiling(numerator/denominator),big.mark=","), 
-      subtitle = tags$p("Avg. No Shows per Day", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      prettyNum(ceiling(numerator/denominator), big.mark=","), 
+      subtitle = tags$p(subtitle, style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
   })
   
   # % No Shows per Day
   output$avgDailyNoShow_Perc <- renderValueBox({
+    
+    if (input$selectedNoShow == "No Show Rate"){
+      subtitle <- "No Show Rate (%)"
+    } 
+    else if (input$selectedNoShow == "No Show + Late Cancelled Rate"){
+      subtitle <- "No Show + Late Cancelled Rate (%)"
+      
+    } else {
+      subtitle <- "No Show + Late Cancelled + Late Scheduled Rate (%)"
+      
+    }
+    
     numerator <- dataNoShow_1() 
     numerator <- numerator %>% 
       #filter(APPT_STATUS %in% c("No Show", "Canceled")) %>% 
       summarise(n()) %>% collect()
-    denominator <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% 
+    denominator <- dataArrivedNoShow_1() %>% 
           summarise(n()) %>% collect()
     valueBox(
       # paste0(round((nrow(dataNoShow_1() %>% filter(Appt.Status %in% c("No Show"))) / 
       #                 nrow(dataArrivedNoShow_1() %>% filter(Appt.Status %in% c("Arrived", "No Show"))))*100,1), "%"),
       paste0(round((numerator / 
                       denominator)*100,1), "%"),
-      subtitle = tags$p("No Show Rate (%)", style = "font-size: 130%;"), icon = NULL, color = "yellow"
+      subtitle = tags$p(subtitle, style = "font-size: 130%;"), icon = NULL, color = "yellow"
     )
     
   })
@@ -5046,8 +5216,8 @@ server <- function(input, output, session) {
   output$noShowLeadDays <- renderPlot({
     data <- dataArrivedNoShow_1() 
     #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
-    data <- data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>% 
-                    select(APPT_DTTM, APPT_MADE_DTTM, APPT_STATUS, APPT_DATE_YEAR) %>% collect()
+    data <- data %>%
+        select(APPT_DTTM, APPT_MADE_DTTM, APPT_STATUS, APPT_DATE_YEAR) %>% collect()
     # data <- kpi.all.data[arrivedNoShow.data.rows,] %>% filter(Campus == "MSUS")
     
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
@@ -5085,12 +5255,23 @@ server <- function(input, output, session) {
       noShows_bar_tb <-
         reshape2::melt(noShows_bar_tb, id.vars = c("apptLeadDays"))
       
+      if (input$selectedNoShow == "No Show Rate"){
+        title <- "Average No Show Rate by Wait Time to Appointment"
+      } 
+      else if (input$selectedNoShow == "No Show + Late Cancelled Rate"){
+        title <- "Average No Show + Late Cancelled Rate by Wait Time to Appointment"
+        
+      } else {
+        title <- "Average No Show + Late Cancelled + Late Scheduled Rate by Wait Time to Appointment"
+        
+      }
+      
       ggplot(noShows_bar_tb, aes(x=factor(apptLeadDays, levels = status), y=value,fill=variable)) +
         geom_bar(stat="identity", position=position_dodge(), width = 0.8, fill="#f9878a", color="red") +
         labs(x=NULL, y = "Percent",
              # caption = "*No Show includes no show and same-day bumped,
              # canceled, and rescheduled appointments.",
-             title = "Average No Show Rate by Wait Time to Appointment",
+             title = title, #"Average No Show Rate by Wait Time to Appointment",
              subtitle = paste0("Based on data from ",isolate(input$dateRange[1]),
                                " to ",isolate(input$dateRange[2])))+
         scale_y_continuous(labels=scales::percent_format(accuracy=1),limits = c(0,max(noShows_bar_tb$value)*1.2))+
@@ -5111,7 +5292,7 @@ server <- function(input, output, session) {
   
   # No Shows by Time of Day 
   output$avgNoShowCount <- renderPlot({
-    data <- dataArrivedNoShow_1() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+    data <- dataArrivedNoShow_1() %>% 
       select(APPT_STATUS, APPT_DAY, APPT_TM_HR, APPT_DATE_YEAR) %>% collect()
     # data <- arrivedNoShow.data
     
@@ -5140,10 +5321,22 @@ server <- function(input, output, session) {
     noShow_count.df <- left_join(noShow_count.df, data_arrived)
     noShow_count.df <- noShow_count.df %>% mutate(avgNoShows = ifelse((is.na(avgNoShows) & !is.na(total_arrived)), 0, avgNoShows))
     
+    
+    if (input$selectedNoShow == "No Show Rate"){
+      title <- "Average Daily No Shows*"
+    } 
+    else if (input$selectedNoShow == "No Show + Late Cancelled Rate"){
+      title <- "Average Daily No Shows + Late Cancelled*"
+      
+    } else {
+      title <- "Average Daily No Shows + Late Cancelled + Late Scheduled*"
+      
+    }
+    
     #noShow_count.df$avgNoShows[is.na(noShow_count$avgNoShows)] <- 0
     ggplot(noShow_count.df, aes(x=factor(Day, levels = daysOfWeek.options), y=Time))+
       labs(x=NULL, y=NULL,
-           title = "Average Daily No Shows*",
+           title = title,  #"Average Daily No Shows*",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",
                              isolate(input$dateRange[2])))+
       # caption = "*No Show includes no show and same-day bumped,
@@ -5177,7 +5370,7 @@ server <- function(input, output, session) {
     data <- dataArrivedNoShow_1() 
     #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
     
-    data <- data %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
+    data <- data %>% 
        select(APPT_DATE_YEAR, APPT_DAY, APPT_TM_HR, APPT_STATUS) %>% collect()
     # data <- arrivedNoShow.data
     data$APPT_STATUS <- ifelse(data$APPT_STATUS == "Arrived","Arrived","No Show")
@@ -5194,9 +5387,20 @@ server <- function(input, output, session) {
     
     noShow_perc.df <- noShow_perc.df %>% filter(Time %in% timeOptionsHr_filter)
     
+    if (input$selectedNoShow == "No Show Rate"){
+      title <- "Average No Shows %*"
+    } 
+    else if (input$selectedNoShow == "No Show + Late Cancelled Rate"){
+      title <- "Average No Show + Late Cancelled %*"
+      
+    } else {
+      title <- "Average No Show + Late Cancelled + Late Scheduled % *"
+      
+    }
+    
     ggplot(noShow_perc.df, aes(x=factor(Day, levels = daysOfWeek.options), y=Time))+
       labs(x=NULL, y=NULL,
-           title = "Average No Show %*",
+           title =title,  #"Average No Show %*",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",
                              isolate(input$dateRange[2])))+
       # caption = "*No Show includes no show and same-day bumped, 
@@ -7556,11 +7760,32 @@ print("1")
     
   })
   
+  output$new_pt_noshowControl <- renderUI({
+    box(
+      title = NULL,
+      width = 12, 
+      solidHeader = FALSE,
+      pickerInput("selectedNoShow_Access", label=h4("Select No Show Type:"),
+                  choices = c("No Show Rate", "No Show + Late Cancelled Rate", "No Show+ Late Cancelled + Late Rescheduled Rate"),
+                  multiple=FALSE,
+                  options = pickerOptions(
+                    liveSearch = TRUE,
+                    actionsBox = TRUE,
+                    selectedTextFormat = "count > 1",
+                    countSelectedText = "{0}/{1} Payer Types",
+                    dropupAuto = FALSE),
+                  #selected = unique(dataAll()$Coverage)
+                  selected = c("No Show Rate")
+      )
+    )
+  })
+  
+  
   
   # New Patient Wait Time
   output$newPtApptSourceByDept <- renderPlot({
     data <- dataArrived_access()
-    # data <- kpi.all.data[arrivedNoShow.data.rows,]
+    # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
     print("2")
     newpatients.ratio <- data %>%
@@ -7655,9 +7880,33 @@ print("1")
     
     # No Show Rate
     
-    data.noShow <- dataArrivedNoShow() %>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
-    data.noShow_test <<- data.noShow
-    # data.noShow <- arrivedNoShow.data
+    #data.noShow <- dataArrivedNoShow() #%>% filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    data.noShow_test <<-  dataArrivedNoShow()
+    # data.noShow <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
+    
+    
+    if (input$selectedNoShow_Access == "No Show Rate"){
+      
+      data.noShow <- dataArrivedNoShow()%>%
+        filter(APPT_STATUS %in% c("Arrived", "No Show"))
+      
+      caption <- "*No Show Rate = (No Show) / (Arrived + No Show)"
+    } else if (input$selectedNoShow_Access == "No Show + Late Cancelled Rate"){
+      
+      data.noShow <- dataArrivedNoShow()%>%
+        filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))%>%
+        mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived", "No Show"))
+      
+      caption <- "*No Show Rate = (No Show + Late Cancelled) / (Arrived + No Show + Late Cancelled)"
+      
+    } else {
+      data.noShow <- dataArrivedNoShow()%>%
+        mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived", "No Show"))
+      caption <- "*No Show Rate = (No Show + Late Canceled + Late Rescheduled) / (Arrived + No Show + Late Canceled+ Late Rescheduled)"
+    }
+    
+    
+    
     
     print("3")
     noShows <- data.noShow %>%
@@ -7666,28 +7915,34 @@ print("1")
       dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
     
-    cols <- c("Arrived", "No Show", "Canceled")
-    
-    missing <- setdiff(cols, names(noShows))
-    if(length(missing) > 0) {
-      noShows[missing] <- NA
-    }
+    # cols <- c("Arrived", "No Show", "Canceled", "Rescheduled")
+    # 
+    # missing <- setdiff(cols, names(noShows))
+    # if(length(missing) > 0) {
+    #   noShows[missing] <- NA
+    # }
   
     noShows[is.na(noShows)] <- 0
     
-    noShows$`No Show Perc` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
-    
+    noShows$`No Show Perc` <- round((noShows$`No Show`)/(noShows$Arrived + noShows$`No Show`),2)
+    #noShows$`No Show w. Cancel Rate` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
+    #noShows$`No Show w. Rescheduled Rate` <- round((noShows$`No Show` + noShows$`Canceled` + noShows$Rescheduled)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`+ noShows$Rescheduled),2)
     
     #noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)
     
 
-      noShows <- noShows %>% filter(SCHEDULE_GROUPING_MAPPED %in% newpatients.ratio.groups)
+    noShows <- noShows %>% filter(SCHEDULE_GROUPING_MAPPED %in% newpatients.ratio.groups)
+      
+    #noShows <- noShows %>% select("SCHEDULE_GROUPING_MAPPED", "No Show Rate") 
+      
+    #noShows_long <- pivot_longer(noShows, !"SCHEDULE_GROUPING_MAPPED", names_to = "Metrics", 
+                         #   values_to = "Rate")
     
     
     newNoShow <-
-      
+
       ggplot(noShows, aes(x=factor(SCHEDULE_GROUPING_MAPPED#, levels =  c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
-                                   ), 
+                                   ),
                           y=`No Show Perc`, group=SCHEDULE_GROUPING_MAPPED, fill=SCHEDULE_GROUPING_MAPPED)) +
       geom_bar(stat="identity", width = 0.8) +
       scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.3)+
@@ -7696,7 +7951,8 @@ print("1")
       labs(x=NULL, y=NULL,
            title = "New Patient No Show Rate*",
            subtitle = paste0("Based on visits from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
-           caption = "*No Show Rate = (No Show + Same-day Canceled) / (Arrived + No Show + Same-day Canceled)"
+           #caption = "*No Show Rate = (No Show + Same-day Canceled) / (Arrived + No Show + Same-day Canceled)"
+           caption = caption
            )+
       theme_new_line()+
       theme_bw()+
@@ -7709,9 +7965,38 @@ print("1")
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
         axis.text.y = element_text(size = "14"))+
-      geom_text(aes(label=paste0(`No Show Perc`*100,"%")), color="black", 
+      geom_text(aes(label=paste0(`No Show Perc`*100,"%")), color="black",
                 size=5, position = position_dodge(1), hjust=-.5) +
       scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, max(newpatients.ratio$ratio)*1.3))
+
+    
+    # newNoShow <- 
+    #   ggplot(noShows_long, aes(x=factor(SCHEDULE_GROUPING_MAPPED), y=Rate, group= Metrics, fill= Metrics)) +
+    #   geom_bar(stat="identity", position="dodge") +
+    #   scale_y_continuous(limits=c(0,max(noShows_long$Rate))*1.3)+
+    #   coord_flip() +
+    #   scale_fill_MountSinai('all')+
+    #   labs(x=NULL, y=NULL,
+    #        title = "New Patient No Show Rate*",
+    #        subtitle = paste0("Based on visits from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])),
+    #        caption = "* No Show Rate = (No Show) / (Arrived + No Show) \n
+    #    No Show w. Cancel Rate = (No Show + Late Canceled) / (Arrived + No Show + Late Canceled) \n
+    #    No Show w. Reschedule Rate = (No Show + Late Canceled + Late Rescheduled) / (Arrived + No Show + Late Canceled + Late Rescheduled)"
+    #   )+
+    #   theme_new_line()+
+    #   theme_bw()+
+    #   theme(
+    #     plot.title = element_text(hjust=0.5, face = "bold", size = 20),
+    #     plot.subtitle = element_text(hjust=0.5, size = 14, face = "italic"),
+    #     plot.caption = element_text(hjust = 0.95, size = 8, face = "italic"),
+    #     legend.position = "top",
+    #     axis.title.y = element_blank(),
+    #     axis.title.x = element_blank(),
+    #     axis.text.x = element_text(size = "12", vjust=0.5, angle = 0),
+    #     axis.text.y = element_text(size = "14"))+
+    #   geom_text(aes(label=paste0(Rate *100,"%")), color="black", 
+    #             size=5, position = position_dodge(1), hjust = -0.5) +
+    #   scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, max(newpatients.ratio$ratio)*1.3))
     
     
     grid.arrange(newRatio, newWaitTime, newNoShow, ncol=3)
@@ -10182,6 +10467,7 @@ ggplot(data_base,
     paste0("Average Session* Daily Volume by ", name_1 , " and ", name_2)
   })
   
+  
   output$am_pm_breakdown_title_month <- renderText({
     if(input$breakdown_filters == "VISIT_METHOD"){
       name_2 <- "Visit Method"
@@ -10229,7 +10515,76 @@ ggplot(data_base,
     paste0("Monthly Percent of New Patients Scheduled by ", name_1 , " and ", name_2)
   })
   
+  output$noshow_rate_month_title <- renderText({
+    if(input$breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "NEW_PT3"){
+      name_2 <- "New vs. Established"
+    }
+    
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "DEPARTMENT"){
+      name_1 <- "Department"
+    }
+    if(input$compare_filters == "PROVIDER"){
+      name_1 <- "Provider"
+    }
+    paste0("Monthly No Show Rate by ", name_1 , " and ", name_2)
+  })
   
+  
+  output$noshow_cancel_rate_month_title <- renderText({
+    if(input$breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "NEW_PT3"){
+      name_2 <- "New vs. Established"
+    }
+    
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "DEPARTMENT"){
+      name_1 <- "Department"
+    }
+    if(input$compare_filters == "PROVIDER"){
+      name_1 <- "Provider"
+    }
+    paste0("Monthly No Show + Late Cancelled Rate by ", name_1 , " and ", name_2)
+  })
+  
+  
+  output$noshow_rescheduled_rate_month_title <- renderText({
+    if(input$breakdown_filters == "VISIT_METHOD"){
+      name_2 <- "Visit Method"
+    }
+    if(input$breakdown_filters == "APPT_TYPE"){
+      name_2 <- "Vist Type"
+    }
+    if(input$breakdown_filters == "NEW_PT3"){
+      name_2 <- "New vs. Established"
+    }
+    
+    if(input$compare_filters == "CAMPUS_SPECIALTY"){
+      name_1 <- "Specialty"
+    }
+    if(input$compare_filters == "DEPARTMENT"){
+      name_1 <- "Department"
+    }
+    if(input$compare_filters == "PROVIDER"){
+      name_1 <- "Provider"
+    }
+    paste0("Monthly No Show + Late Cancelled + Late Rescheduled Rate by ", name_1 , " and ", name_2)
+  })
   
   output$new_wait_month_title <- renderText({
     if(input$breakdown_filters == "VISIT_METHOD"){
@@ -11960,19 +12315,18 @@ ggplot(data_base,
   
   no_Show_percentage <- reactive({
     
-
-    
     # data <- arrivedNoShow.data.rows %>%
     #   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
-    #   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+    #   filter(APPT_STATUS %in% c("Arrived", "No Show"))
     
+    test_noshow <<- dataArrivedNoShow()
     
     compare_filters <- input$compare_filters
     breakdown_filters <- input$breakdown_filters
-    
+      
     
       data <- dataArrivedNoShow() %>%
-        filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+        filter(APPT_STATUS %in% c("Arrived", "No Show"))
 
 
     
@@ -12172,6 +12526,404 @@ ggplot(data_base,
     dtable
   },server = FALSE)
   
+  
+no_Show_cancel_percentage <- reactive({
+  
+  
+  # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+  
+  
+  compare_filters <- input$compare_filters
+  breakdown_filters <- input$breakdown_filters
+  
+  
+  data <- dataArrivedNoShow() %>%
+    filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))
+  
+  
+  
+  if(breakdown_filters == "VISIT_METHOD"){
+    name_2 <- "Visit Method"
+  }
+  if(breakdown_filters == "APPT_TYPE"){
+    name_2 <- "Vist Type"
+  }
+  if(breakdown_filters == "NEW_PT3"){
+    name_2 <- "New vs. Established"
+    breakdown_filters <- "NEW_PT2"
+  }
+  
+  
+  if(compare_filters == "CAMPUS_SPECIALTY"){
+    name_1 <- "Specialty"
+    cols <- c(compare_filters,breakdown_filters)
+    cols_name <- c(name_1,name_2)
+    tot_cols <- c(compare_filters)
+  }
+  if(compare_filters == "DEPARTMENT"){
+    name_1 <- compare_filters
+    cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
+    cols_name <- c("Specialty",name_1,name_2)
+    tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
+  }
+  if(compare_filters == "PROVIDER"){
+    name_1 <- compare_filters
+    cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
+    cols_name <- c("Specialty","Department",name_1,name_2)
+    tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
+  }
+  
+  
+  data <- data %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+  
+  
+  
+  noShow_perc <- data %>%
+    group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+    dplyr::summarise(Total = n()) %>% collect() %>% 
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+    mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+    mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    select(-`No Show`,-Arrived) %>% 
+    pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup()
+  
+  
+  
+  tot <- data %>%
+    group_by(!!!syms(tot_cols), APPT_STATUS, APPT_MONTH_YEAR) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+    mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  noShow_perc <- full_join(noShow_perc, tot)
+  
+  noShow_perc <- noShow_perc %>% arrange(across(all_of(tot_cols)))
+  
+  
+  
+  i1 <- as.yearmon(names(noShow_perc))
+  noShow_perc <- noShow_perc[order(i1)]
+  
+  noShow_perc <- noShow_perc %>% select(cols, everything())
+  
+  tot_over_time <- data %>%
+    group_by(!!!syms(cols), APPT_STATUS) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    #add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols)) %>%
+    mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    #mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    #pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  tot_all <- data %>%
+    group_by(!!!syms(tot_cols), APPT_STATUS) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols)) %>%
+    mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    # mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    # pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  total <- bind_rows(tot_over_time, tot_all)
+  
+  noShow_perc <- left_join(noShow_perc, total)
+  
+  
+  noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
+  noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
+  
+  
+  month_names <- colnames(noShow_perc[,!(names(noShow_perc) %in% c(cols_name, "Total", "Total_YN"))])
+  
+  month_names_new <- format(as.Date(paste0(month_names, "-01"), format = "%b %Y-%d"), "%Y-%m")
+  noShow_perc <- setnames(noShow_perc, old = month_names, new = month_names_new)
+  
+  noShow_perc
+  
+  #}
+  
+})
+
+output[["new_no_show_cancel_rate_monthly"]] <- renderDT({
+  num_of_cols <- length(no_Show_cancel_percentage())
+  col_dissappear <- which(names(no_Show_cancel_percentage()) %in% c("Total_YN"))
+  
+  dtable <-   datatable(no_Show_cancel_percentage(), 
+                        class = 'cell-border stripe',
+                        rownames = FALSE,
+                        extensions = c('Buttons','Scroller'),
+                        caption = htmltools::tags$caption(
+                          style = 'caption-side: bottom; text-align: left;',
+                          #htmltools::em('Median New Patient Wait Time = median wait time of scheduled new patients within the month')
+                          
+                        ),
+                        options = list(
+                          scrollX = TRUE,
+                          columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
+                          list(pageLength = 20, scrollY = "400px"),
+                          dom = 'Bfrtip',
+                          #buttons = c('csv','excel'),
+                          buttons = list(
+                            list(extend = 'csv', filename = 'Monthly No Show Rate Comaprsion'),
+                            list(extend = 'excel', filename = 'Monthly No Show Rate Comaprsion')
+                          ),
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
+                          fixedColumns = list(leftColumns =
+                                                ifelse(colnames(no_Show_cancel_percentage())[3] == "Provider", 4, 3)
+                          ),
+                          rowsGroup = rows_group(),
+                          headerCallback = DT::JS(
+                            "function(thead) {",
+                            "  $(thead).css('font-size', '115%');",
+                            "}"
+                          )
+                          
+                        )
+  )
+  dtable <- dtable %>%
+    formatStyle(
+      'Total_YN',
+      target = "row",
+      fontWeight = styleEqual(1, "bold")
+    )%>%
+    formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+    formatStyle(columns = c("Total"), fontWeight = 'bold')
+  path <- here::here("www")
+  
+  dep <- htmltools::htmlDependency(
+    "RowsGroup", "2.0.0", 
+    path, script = "dataTables.rowsGroup.js")
+  dtable$dependencies <- c(dtable$dependencies, list(dep))
+  dtable
+},server = FALSE)
+
+
+no_Show_rescheduled_percentage <- reactive({
+  
+  
+  # data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")
+  
+  
+  compare_filters <- input$compare_filters
+  breakdown_filters <- input$breakdown_filters
+  
+  
+  data <- dataArrivedNoShow()
+  
+  
+  
+  if(breakdown_filters == "VISIT_METHOD"){
+    name_2 <- "Visit Method"
+  }
+  if(breakdown_filters == "APPT_TYPE"){
+    name_2 <- "Vist Type"
+  }
+  if(breakdown_filters == "NEW_PT3"){
+    name_2 <- "New vs. Established"
+    breakdown_filters <- "NEW_PT2"
+  }
+  
+  
+  if(compare_filters == "CAMPUS_SPECIALTY"){
+    name_1 <- "Specialty"
+    cols <- c(compare_filters,breakdown_filters)
+    cols_name <- c(name_1,name_2)
+    tot_cols <- c(compare_filters)
+  }
+  if(compare_filters == "DEPARTMENT"){
+    name_1 <- compare_filters
+    cols <- c("CAMPUS_SPECIALTY",compare_filters,breakdown_filters)
+    cols_name <- c("Specialty",name_1,name_2)
+    tot_cols <- c("CAMPUS_SPECIALTY",compare_filters)
+  }
+  if(compare_filters == "PROVIDER"){
+    name_1 <- compare_filters
+    cols <- c("CAMPUS_SPECIALTY","DEPARTMENT",compare_filters,breakdown_filters)
+    cols_name <- c("Specialty","Department",name_1,name_2)
+    tot_cols <- c("CAMPUS_SPECIALTY", "DEPARTMENT",compare_filters)
+  }
+  
+  
+  data <- data %>% mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+  
+  
+  
+  noShow_perc <- data %>%
+    group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+    dplyr::summarise(Total = n()) %>% collect() %>% 
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+    mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+    mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    select(-`No Show`,-Arrived) %>% 
+    pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup()
+  
+  
+  
+  tot <- data %>%
+    group_by(!!!syms(tot_cols), APPT_STATUS, APPT_MONTH_YEAR) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+    mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  noShow_perc <- full_join(noShow_perc, tot)
+  
+  noShow_perc <- noShow_perc %>% arrange(across(all_of(tot_cols)))
+  
+  
+  
+  i1 <- as.yearmon(names(noShow_perc))
+  noShow_perc <- noShow_perc[order(i1)]
+  
+  noShow_perc <- noShow_perc %>% select(cols, everything())
+  
+  tot_over_time <- data %>%
+    group_by(!!!syms(cols), APPT_STATUS) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    #add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols)) %>%
+    mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    #mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    #pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  tot_all <- data %>%
+    group_by(!!!syms(tot_cols), APPT_STATUS) %>%
+    dplyr::summarise(Total = n()) %>% 
+    collect() %>%
+    add_column(!!breakdown_filters := "Total") %>%
+    pivot_wider(names_from = APPT_STATUS, values_from = Total) %>%
+    replace(is.na(.), 0) %>% 
+    group_by(!!!syms(cols)) %>%
+    mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%")) %>%
+    select(-`No Show`,-Arrived) %>% 
+    # mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m"))%>%
+    # pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+    ungroup() %>%
+    select(all_of(cols),  everything())
+  
+  total <- bind_rows(tot_over_time, tot_all)
+  
+  noShow_perc <- left_join(noShow_perc, total)
+  
+  
+  noShow_perc$Total_YN <- ifelse(noShow_perc[[all_of(breakdown_filters)]] == "Total", 1,0)
+  noShow_perc <- setnames(noShow_perc, old = cols, new = cols_name)
+  
+  
+  month_names <- colnames(noShow_perc[,!(names(noShow_perc) %in% c(cols_name, "Total", "Total_YN"))])
+  
+  month_names_new <- format(as.Date(paste0(month_names, "-01"), format = "%b %Y-%d"), "%Y-%m")
+  noShow_perc <- setnames(noShow_perc, old = month_names, new = month_names_new)
+  
+  noShow_perc
+  
+  #}
+  
+})
+
+output[["new_no_show_rescheduled_rate_monthly"]] <- renderDT({
+  num_of_cols <- length(no_Show_rescheduled_percentage())
+  col_dissappear <- which(names(no_Show_rescheduled_percentage()) %in% c("Total_YN"))
+  
+  dtable <-   datatable(no_Show_rescheduled_percentage(), 
+                        class = 'cell-border stripe',
+                        rownames = FALSE,
+                        extensions = c('Buttons','Scroller'),
+                        caption = htmltools::tags$caption(
+                          style = 'caption-side: bottom; text-align: left;',
+                          #htmltools::em('Median New Patient Wait Time = median wait time of scheduled new patients within the month')
+                          
+                        ),
+                        options = list(
+                          scrollX = TRUE,
+                          columnDefs = list(list(visible = F, targets = as.list(col_dissappear-1))),
+                          list(pageLength = 20, scrollY = "400px"),
+                          dom = 'Bfrtip',
+                          #buttons = c('csv','excel'),
+                          buttons = list(
+                            list(extend = 'csv', filename = 'Monthly No Show Rate Comaprsion'),
+                            list(extend = 'excel', filename = 'Monthly No Show Rate Comaprsion')
+                          ),
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
+                          fixedColumns = list(leftColumns =
+                                                ifelse(colnames(no_Show_rescheduled_percentage())[3] == "Provider", 4, 3)
+                          ),
+                          rowsGroup = rows_group(),
+                          headerCallback = DT::JS(
+                            "function(thead) {",
+                            "  $(thead).css('font-size', '115%');",
+                            "}"
+                          )
+                          
+                        )
+  )
+  dtable <- dtable %>%
+    formatStyle(
+      'Total_YN',
+      target = "row",
+      fontWeight = styleEqual(1, "bold")
+    )%>%
+    formatStyle(columns = c(1:num_of_cols), fontSize = '115%') %>%
+    formatStyle(columns = c("Total"), fontWeight = 'bold')
+  path <- here::here("www")
+  
+  dep <- htmltools::htmlDependency(
+    "RowsGroup", "2.0.0", 
+    path, script = "dataTables.rowsGroup.js")
+  dtable$dependencies <- c(dtable$dependencies, list(dep))
+  dtable
+},server = FALSE)
+
+
   
   wite_time_14days <- reactive({
     ## Percent of New Patients Scheduled Within 14 Days
@@ -13577,105 +14329,86 @@ print("10")
       #spread(Appt.MonthYear, value) %>%
       #rename(Metrics = variable)
     
+     #data <- arrivedNoShow.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
+    
+     # data_noShow <- dataArrivedNoShow() %>%
+     #   group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+     #   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))%>%
+     #   mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
+       
 
-
-     data_noShow <- dataArrivedNoShow() %>%
-       filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))%>%
-       mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
-
-     # data_noShow  <- arrivedNoShow.data.rows %>%
-     #   filter(CAMPUS %in% "MSUS" & CAMPUS_SPECIALTY %in% "Allergy")%>%
-     #    filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled"))%>%
-     #  mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show"))
-
-
-  noShow_perc <-  data_noShow %>%
+data_noShow <- dataArrivedNoShow() %>%
   group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
-  dplyr::summarise(Total = n()) %>% collect() %>%
-    pivot_wider(names_from = APPT_STATUS, values_from = Total)
-
-  noShow_perc[is.na(noShow_perc)] <- 0
-
-  noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
-  mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))
+  summarise(Total = n()) %>% collect() %>%
+  pivot_wider(names_from = APPT_STATUS, values_from = Total)
 
 
+data_noShow <- data_noShow %>% mutate(`No Show Rate` = paste0(round(100* `No Show`/ (`No Show` +Arrived), 0), "%"),
+                                      `No Show + Late Cancelled Rate`  =  paste0(round(100* (`No Show`+Canceled)/ (`No Show` + Canceled+ Arrived), 0), "%"),
+                                      `No Show + Late Cancelled + Late Rescheduled Rate` =  paste0(round(100*(`No Show`+ Canceled + Rescheduled)/ (`No Show` + Canceled+ Rescheduled +Arrived), 0), "%"))
 
- noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
- year <- max(year(noShow_perc$APPT_MONTH_YEAR))-1
- 
- noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
-   pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
-   ungroup()
+
+
+data_noShow$APPT_MONTH_YEAR <- as.yearmon(data_noShow$APPT_MONTH_YEAR, "%Y-%m")
+year <- max(year(data_noShow$APPT_MONTH_YEAR))-1
+
+noShow_perc <- data_noShow %>% select(-c("No Show","Arrived", "Canceled", "Rescheduled")) %>% 
+  pivot_longer(cols = c("No Show Rate", "No Show + Late Cancelled Rate", "No Show + Late Cancelled + Late Rescheduled Rate"), names_to = 'Metrics', values_to = "Value")%>%
+  pivot_wider(names_from = APPT_MONTH_YEAR, values_from = "Value")%>%
+  ungroup()
+
+
+ #  noShow_perc <-  data_noShow %>%
+ #  group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
+ #  dplyr::summarise(Total = n()) %>% collect() %>%
+ #    pivot_wider(names_from = APPT_STATUS, values_from = Total)
+ # 
+ #  noShow_perc[is.na(noShow_perc)] <- 0
+ # 
+ #  noShow_perc <- noShow_perc %>% group_by(!!!syms(cols), APPT_MONTH_YEAR) %>%
+ #  mutate(percentage = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))
+ # 
+ # 
+ # 
+ # noShow_perc$APPT_MONTH_YEAR <- as.yearmon(noShow_perc$APPT_MONTH_YEAR, "%Y-%m")
+ # year <- max(year(noShow_perc$APPT_MONTH_YEAR))-1
+ # 
+ # noShow_perc <- noShow_perc %>% select(-`No Show`,-Arrived) %>% 
+ #   pivot_wider(names_from = APPT_MONTH_YEAR, values_from = percentage)%>%
+ #   ungroup()
  
 # added total no-show %
- total <-  data_noShow %>%
+ # total <-  data_noShow %>%
+ #   group_by(!!!syms(cols), APPT_STATUS) %>%
+ #   dplyr::summarise(Total = n()) %>%
+ #   collect()%>%
+ #   pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
+ #   replace(is.na(.), 0)%>%
+ #   group_by(!!!syms(cols)) %>%
+ #   mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
+ #   select(-c(`No Show`,Arrived))
+ # 
+ #   noShow_perc <- left_join(noShow_perc, total, by = cols )
+ 
+   total <-  dataArrivedNoShow() %>%
    group_by(!!!syms(cols), APPT_STATUS) %>%
    dplyr::summarise(Total = n()) %>%
    collect()%>%
    pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
-   replace(is.na(.), 0)%>%
+   replace(is.na(.), 0) %>%
    group_by(!!!syms(cols)) %>%
-   mutate(Total = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
-   select(-c(`No Show`,Arrived))
+   mutate(`No Show Rate` = paste0(round(100* `No Show`/ (`No Show` +Arrived), 0), "%"),
+          `No Show + Late Cancelled Rate`  =  paste0(round(100* (`No Show`+Canceled)/ (`No Show` + Canceled+ Arrived), 0), "%"),
+          `No Show + Late Cancelled + Late Rescheduled Rate` =  paste0(round(100*(`No Show`+ Canceled + Rescheduled)/ (`No Show` + Canceled+ Rescheduled +Arrived), 0), "%"))%>%
+   select(-c("No Show","Arrived", "Canceled", "Rescheduled"))%>%
+   pivot_longer(cols = c("No Show Rate", "No Show + Late Cancelled Rate", "No Show + Late Cancelled + Late Rescheduled Rate"), names_to = 'Metrics', values_to = "Total")
  
-   noShow_perc <- left_join(noShow_perc, total, by = cols )
  
- 
- # ## Added dynamic no-shows
- # if(compare_filters == "CAMPUS_SPECIALTY"){
- #   
- #   dynamic_noshow <- arrivedNoShow.data.rows %>%
- #     filter(CAMPUS %in% campus  & 
- #              APPT_YEAR %in% year &
- #              CAMPUS_SPECIALTY %in% specialty ) 
- #   
- # }
- # if(compare_filters == "DEPARTMENT"){
- #   dynamic_noshow <- arrivedNoShow.data.rows %>%
- #     filter(CAMPUS %in% campus  & 
- #              APPT_YEAR %in% year &
- #              CAMPUS_SPECIALTY %in% specialty &
- #              DEPARTMENT %in% department )
- # }
- # if(compare_filters == "PROVIDER"){
- #   dynamic_noshow <- arrivedNoShow.data.rows %>%
- #     filter(CAMPUS %in% campus  &
- #              APPT_YEAR %in% year &
- #              CAMPUS_SPECIALTY %in% specialty &
- #              DEPARTMENT %in% department &
- #              RESOURCES %in% resources &
- #              PROVIDER %in% provider)
- # }
- # 
- # 
- #   
- # dynamic_noshow  <- dynamic_noshow %>%
- #   #filter(CAMPUS %in% "MSUS"  & CAMPUS_SPECIALTY %in% "Allergy")%>%
- #   filter(APPT_STATUS %in% c("Arrived", "No Show", "Canceled")) %>%
- #   mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived","No Show")) %>%
- #   group_by(!!!syms(cols),APPT_STATUS, APPT_MONTH_YEAR) %>%
- #   dplyr::summarise(Total = n()) %>% 
- #   collect() %>% 
- #   pivot_wider(names_from = APPT_STATUS, values_from = Total)%>%
- #   replace(is.na(.), 0) %>%
- #   mutate(APPT_MONTH_YEAR = as.yearmon(APPT_MONTH_YEAR, "%Y-%m")) %>%
- #   #filter(year(APPT_MONTH_YEAR) == year)%>%
- #   group_by(!!!syms(cols)) %>%
- #   summarise(Arrived =sum(Arrived, na.rm = T), 
- #             `No Show` = sum(`No Show`, na.rm = T))%>%
- #   mutate(`Dynamic Target` = paste0(round((`No Show` / (Arrived + `No Show`))*100,0), "%"))%>%
- #   select(-`No Show`,-Arrived)
- # 
- #   
- #   noShow_perc <- left_join(noShow_perc, dynamic_noshow, by = cols )
-   
+   noShow_perc <- left_join(noShow_perc, total, by = c(cols, "Metrics"))
   
    noShow_perc[is.na(noShow_perc)] <- "0%"
 
- noShow_perc$Metrics <- "No Show Rate"
- #noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, `Dynamic Target`, everything(), Total)
- noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, everything(), Total)
+   noShow_perc <- noShow_perc %>% select(all_of(cols), Metrics, everything(), Total)
 
 print("11")
 
@@ -13832,10 +14565,12 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     opt_table <- opt_table %>% add_column(`System Target` = "TBD", .after = "Metrics") 
     opt_table <- opt_table %>% mutate(`System Target`= case_when(Metrics=="Booked Rate"~ ">= 95%", 
                                                         Metrics=="Filled Rate"~ ">= 85%",
-                                                        Metrics=="New Patient Wait Time (Days)"~ "14",
+                                                        Metrics=="New Patient Wait Time (Days)"~ "<= 14",
                                                         Metrics=="Average Daily Volume"~ "Variable",
                                                         Metrics == "New Patient Ratio" ~ "25%",
-                                                        Metrics == "No Show Rate" ~ "10%",
+                                                        Metrics == "No Show Rate" ~ "TBD",
+                                                        Metrics == "No Show + Late Cancelled Rate" ~ "10%",
+                                                        Metrics == "No Show + Late Cancelled + Late Rescheduled Rate" ~ "TBD",
                                                         Metrics == "Percent of New Patients Scheduled Within 14 Days" ~ "60%",
                                                         TRUE ~ "TBD"))
     
@@ -13847,15 +14582,13 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
     
     print(time_2 - time_1)
     metric_order <- c("Average Daily Volume",
-                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time (Days)", "No Show Rate", "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
+                      c("Booked Rate", "Filled Rate", "New Patient Ratio", "New Patient Wait Time (Days)", 
+                        "No Show Rate", "No Show + Late Cancelled Rate", "No Show + Late Cancelled + Late Rescheduled Rate",
+                        "Percent of New Patients Scheduled Within 14 Days") , as.vector(unique(opt_table$Metrics)))
   
 
     opt_table <- opt_table[order(match(opt_table$Metrics, metric_order )),]
     
-     
-    
-   
-
  # opt_table <- as.datatable(formattable(opt_table, list(
  #    `Jan 2021` = formatter("span",
  #                          style = x ~ style(color = 'white',
@@ -13950,7 +14683,7 @@ percent_within_14_days <- percent_within_14_days %>% select(all_of(cols), Metric
       column_spec(border_column, border_left = FALSE, border_right = "2px solid #dddedd" )%>%
       column_spec(length(data), border_left = "2px solid #dddedd", border_right = "2px solid #dddedd" )%>%
       #row_spec(nrow(data), hline_after = TRUE, extra_css = "border-bottom: 1px solid;")%>%
-      collapse_rows(columns = 1:3, valign = "top")
+      collapse_rows(columns = 1:length(cols), valign = "top")
       
    
       
