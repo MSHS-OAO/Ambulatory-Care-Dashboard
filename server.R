@@ -4889,7 +4889,7 @@ server <- function(input, output, session) {
     sameDay$APPT_STATUS <- as.character(sameDay$APPT_STATUS)
     
     sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Bumped")] <- "Late Bumped"
-    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Canceled")] <- "Late Canceled"
+    sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Canceled")] <- "Late Cancelled"
     sameDay$APPT_STATUS[which(sameDay$APPT_STATUS == "Rescheduled")] <- "Late Rescheduled"
     
     ggplot(sameDay, aes(reorder(APPT_STATUS, -value), value, fill=APPT_STATUS)) +
@@ -4897,7 +4897,7 @@ server <- function(input, output, session) {
       scale_y_continuous(limits=c(0,(max(sameDay$value))*1.3))+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
       labs(x=NULL, y=NULL,
-           title = "Average Daily No Shows and Late \nBumped/Canceled/Rescheduled Appointments",
+           title = "Average Daily No Shows and Late \nBumped/Cancelled/Rescheduled Appointments",
            subtitle = paste0("Based on data from ",isolate(input$dateRange[1])," to ",isolate(input$dateRange[2])))+
       theme_new_line()+
       theme_bw()+
@@ -4932,7 +4932,7 @@ server <- function(input, output, session) {
     data$variable <- as.character(data$variable)
     
     data$variable[which(data$variable == "Bumped")] <- "Late Bumped"
-    data$variable[which(data$variable == "Canceled")] <- "Late Canceled"
+    data$variable[which(data$variable == "Canceled")] <- "Late Cancelled"
     data$variable[which(data$variable == "Rescheduled")] <- "Late Rescheduled"
     
     data <- data %>% filter(Time %in% timeOptionsHr_filter)
@@ -4947,7 +4947,7 @@ server <- function(input, output, session) {
     
     ggplot(data, aes(x=Time, y=value, fill=factor(variable, levels=c("Arrived", "No Show",
                                                                      "Late Bumped",
-                                                                     "Late Canceled", 
+                                                                     "Late Cancelled", 
                                                                      "Late Rescheduled"))))+
       geom_bar(position="stack",stat="identity", width=0.7)+
       scale_fill_manual(values=MountSinai_pal("all")(10))+
@@ -5144,10 +5144,10 @@ server <- function(input, output, session) {
     } 
     else if (input$selectedNoShow == "No Show + Late Cancelled Rate"){
       
-      paste0("*No Show Rate = (No Show + Late Canceled)/ (Arrived + No Show + Late Canceled)")
+      paste0("*No Show Rate = (No Show + Late Cancelled)/ (Arrived + No Show + Late Cancelled)")
     } else {
     
-    paste0("*No Show Rate = (No Show + Late Canceled+ Late Rescheduled)/ (Arrived + No Show + Late Canceled+ Late Rescheduled)")
+    paste0("*No Show Rate = (No Show + Late Cancelled+ Late Rescheduled)/ (Arrived + No Show + Late Cancelled+ Late Rescheduled)")
   }
     })
   
@@ -7902,7 +7902,7 @@ print("1")
     } else {
       data.noShow <- dataArrivedNoShow()%>%
         mutate(APPT_STATUS = ifelse(APPT_STATUS == "Arrived","Arrived", "No Show"))
-      caption <- "*No Show Rate = (No Show + Late Canceled + Late Rescheduled) / (Arrived + No Show + Late Canceled+ Late Rescheduled)"
+      caption <- "*No Show Rate = (No Show + Late Cancelled + Late Rescheduled) / (Arrived + No Show + Late Cancelled+ Late Rescheduled)"
     }
     
     
