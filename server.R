@@ -7780,52 +7780,32 @@ print("1")
     )
   })
   
-  # === helper: map SCHED_METHOD_TRIMMED -> SCHED_METHOD_GROUP ===
-  classify_sched_group <- function(x) {
-    key <- tolower(trimws(x))
-    dplyr::case_when(
-      grepl("external - zocdoc", key) ~ "External - ZocDoc",
-      grepl("^external - ", key) & grepl("google|avaamo|docasap", key) ~ "External - Other",
-      grepl("epic - fast pass|epic - fast pass - sms", key) ~ "Fast Pass",
-      grepl("epic - ticket - mobile|epic - ticket - web|epic - ticket pass", key) ~ "Ticket Scheduling",
-      grepl("internal - find-a-doc", key) ~ "Internal - Find-a-Doc",
-      grepl("radiant|appointment import|access center|front end|cerner - keane", key) ~ "Scheduler",
-      grepl("guest scheduling|kiosk|on my way - mobile|on my way - web|open scheduling (internal)|open scheduling widget|conversational scheduling|direct scheduling - mobile|direct scheduling - web",
-            key) ~ "Epic - Digital",
-      grepl("quick reg|haiku", key) ~ "Epic - Non-Digital",
-      #grepl("conversational scheduling", key) ~ "Epic - Digital",  # flip to 'External - Other' if your team prefers
-      TRUE ~ "Unmapped - Review"
-    )
-  }
+  
   
   # New Patient Wait Time
   output$newPtApptSourceByDept <- renderPlot({
-    # 1) Get the same data the chart already uses
-    data <- dataArrived_access() %>%
-      collect() %>%  # bring data to R first
-      dplyr::mutate(SCHED_METHOD_GROUP = classify_sched_group(SCHED_METHOD_TRIMMED))
-    
-     #data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
+    data <- dataArrived_access()
+    # data <- arrived.data.rows %>% filter(CAMPUS %in% "MSUS", CAMPUS_SPECIALTY %in% "Allergy")
     
     print("2")
     newpatients.ratio <- data %>%
       filter(NEW_PT2 == "NEW") %>%
-      group_by(SCHED_METHOD_GROUP, NEW_PT2) %>%
-      dplyr::summarise(Total = n())
+        group_by(SCHEDULE_GROUPING_MAPPED, NEW_PT2) %>%
+      dplyr::summarise(Total = n()) %>% collect()
 
     #newpatients.ratio$APPT_SOURCE_NEW[which(newpatients.ratio$APPT_SOURCE_NEW == "Other")] <- "Practice"
     
     newpatients.ratio$ratio <- round(newpatients.ratio$Total / sum(newpatients.ratio$Total), 2)
 
-    newpatients.ratio <- newpatients.ratio %>% filter(ratio >= 0.001)
+    newpatients.ratio <- newpatients.ratio %>% filter(ratio >= 0.01)
     
-    newpatients.ratio.groups <- unique(newpatients.ratio$SCHED_METHOD_GROUP)
+    newpatients.ratio.groups <- unique(newpatients.ratio$SCHEDULE_GROUPING_MAPPED)
     
     newRatio <-
-      ggplot(newpatients.ratio, aes(x=factor(SCHED_METHOD_GROUP
+      ggplot(newpatients.ratio, aes(x=factor(SCHEDULE_GROUPING_MAPPED
                                              #, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
                                              ), 
-                                    y=ratio, group=SCHED_METHOD_GROUP, fill=SCHED_METHOD_GROUP)) +
+                                    y=ratio, group=SCHEDULE_GROUPING_MAPPED, fill=SCHEDULE_GROUPING_MAPPED)) +
       geom_bar(stat="identity", width = 0.8) +
       coord_flip() +
       scale_fill_MountSinai('purple')+
@@ -7853,25 +7833,22 @@ print("1")
     #data$wait.time <- as.numeric(round(difftime(data$Appt.DTTM, data$Appt.Made.DTTM,  units = "days"),2))
     
     waitTime <- dataAll_access() %>%
-      collect() %>%  # bring to R first
-      dplyr::mutate(SCHED_METHOD_GROUP = classify_sched_group(SCHED_METHOD_TRIMMED)) %>%
-      dplyr::filter(WAIT_TIME >= 0) %>%
-      dplyr::group_by(SCHED_METHOD_GROUP, NEW_PT2) %>%
-      dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME)), .groups = "drop") %>%
-      dplyr::filter(NEW_PT2 == "NEW")
+      filter(WAIT_TIME >= 0) %>%
+      group_by(SCHEDULE_GROUPING_MAPPED, NEW_PT2) %>%
+      dplyr::summarise(medWaitTime = ceiling(median(WAIT_TIME))) %>%
+      filter(NEW_PT2 == "NEW") %>% collect()
     waitTime$target <- 14
     
 
-    #  waitTime <- waitTime %>% dplyr::filter(SCHED_METHOD_GROUP %in% newpatients.ratio.groups)
-    waitTime <- waitTime %>% dplyr::filter(SCHED_METHOD_GROUP %in% newpatients.ratio.groups)
+      waitTime <- waitTime %>% filter(SCHEDULE_GROUPING_MAPPED %in% newpatients.ratio.groups)
+   
     
-    
-    #waitTime$SCHED_METHOD_TRIMMED[which(waitTime$SCHED_METHOD_TRIMMED == "Other")] <- "Practice"
+    #waitTime$SCHEDULE_GROUPING_MAPPED[which(waitTime$SCHEDULE_GROUPING_MAPPED == "Other")] <- "Practice"
     
     newWaitTime <-
-      ggplot(waitTime, aes(x=factor(SCHED_METHOD_GROUP#, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
+      ggplot(waitTime, aes(x=factor(SCHEDULE_GROUPING_MAPPED#, levels = c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
                                     ), 
-                           y=medWaitTime, group=SCHED_METHOD_GROUP, fill=SCHED_METHOD_GROUP)) +
+                           y=medWaitTime, group=SCHEDULE_GROUPING_MAPPED, fill=SCHEDULE_GROUPING_MAPPED)) +
       geom_bar(stat="identity", width = 0.8) +
       geom_hline(aes(yintercept=target), linetype="dashed", color = "red", size=1)+
       scale_y_continuous(limits=c(0,max(waitTime$medWaitTime)*1.3))+
@@ -7929,15 +7906,13 @@ print("1")
     }
     
     
-    data.noShow <- data.noShow %>%
-      collect() %>%  # bring to R first
-      dplyr::mutate(SCHED_METHOD_GROUP = classify_sched_group(SCHED_METHOD_TRIMMED))
+    
     
     print("3")
     noShows <- data.noShow %>%
       filter(NEW_PT2 == "NEW") %>%
-      group_by(SCHED_METHOD_GROUP, APPT_STATUS) %>%
-      dplyr::summarise(Total = n(), .groups = "drop") %>%
+      group_by(SCHEDULE_GROUPING_MAPPED, APPT_STATUS) %>%
+      dplyr::summarise(Total = n()) %>% collect() %>%
       spread(APPT_STATUS, Total)
     
     # cols <- c("Arrived", "No Show", "Canceled", "Rescheduled")
@@ -7953,25 +7928,24 @@ print("1")
     #noShows$`No Show w. Cancel Rate` <- round((noShows$`No Show` + noShows$`Canceled`)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`),2)
     #noShows$`No Show w. Rescheduled Rate` <- round((noShows$`No Show` + noShows$`Canceled` + noShows$Rescheduled)/(noShows$Arrived + noShows$`No Show` + noShows$`Canceled`+ noShows$Rescheduled),2)
     
-    #noShows$SCHED_METHOD_TRIMMED <- ifelse(noShows$SCHED_METHOD_TRIMMED == "Other", "Practice", noShows$SCHED_METHOD_TRIMMED)
+    #noShows$SCHEDULE_GROUPING_MAPPED <- ifelse(noShows$SCHEDULE_GROUPING_MAPPED == "Other", "Practice", noShows$SCHEDULE_GROUPING_MAPPED)
     
 
-    #noShows <- noShows %>% dplyr::filter(SCHED_METHOD_GROUP %in% newpatients.ratio.groups)
-    noShows <- noShows %>% dplyr::filter(SCHED_METHOD_GROUP %in% newpatients.ratio.groups)
-    
-    #noShows <- noShows %>% select("SCHED_METHOD_TRIMMED", "No Show Rate") 
+    noShows <- noShows %>% filter(SCHEDULE_GROUPING_MAPPED %in% newpatients.ratio.groups)
       
-    #noShows_long <- pivot_longer(noShows, !"SCHED_METHOD_TRIMMED", names_to = "Metrics", 
+    #noShows <- noShows %>% select("SCHEDULE_GROUPING_MAPPED", "No Show Rate") 
+      
+    #noShows_long <- pivot_longer(noShows, !"SCHEDULE_GROUPING_MAPPED", names_to = "Metrics", 
                          #   values_to = "Rate")
     
     
     newNoShow <-
 
-      ggplot(noShows, aes(x=factor(SCHED_METHOD_GROUP#, levels =  c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
+      ggplot(noShows, aes(x=factor(SCHEDULE_GROUPING_MAPPED#, levels =  c("Practice","Access Center","My MountSinai/MyChart","StayWell","Zocdoc", "FindADoc")
                                    ),
-                          y=`No Show Perc`, group=SCHED_METHOD_GROUP, fill=SCHED_METHOD_GROUP)) +
+                          y=`No Show Perc`, group=SCHEDULE_GROUPING_MAPPED, fill=SCHEDULE_GROUPING_MAPPED)) +
       geom_bar(stat="identity", width = 0.8) +
-      #scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.3)+
+      scale_y_continuous(limits=c(0,max(noShows$`No Show Perc`))*1.3)+
       coord_flip() +
       scale_fill_MountSinai('blue')+
       labs(x=NULL, y=NULL,
@@ -7993,13 +7967,11 @@ print("1")
         axis.text.y = element_text(size = "14"))+
       geom_text(aes(label=paste0(`No Show Perc`*100,"%")), color="black",
                 size=5, position = position_dodge(1), hjust=-.5) +
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1),
-                         limits = c(0, max(noShows$`No Show Perc`) * 1.3))
-    
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, max(newpatients.ratio$ratio)*1.3))
 
     
     # newNoShow <- 
-    #   ggplot(noShows_long, aes(x=factor(SCHED_METHOD_TRIMMED), y=Rate, group= Metrics, fill= Metrics)) +
+    #   ggplot(noShows_long, aes(x=factor(SCHEDULE_GROUPING_MAPPED), y=Rate, group= Metrics, fill= Metrics)) +
     #   geom_bar(stat="identity", position="dodge") +
     #   scale_y_continuous(limits=c(0,max(noShows_long$Rate))*1.3)+
     #   coord_flip() +
