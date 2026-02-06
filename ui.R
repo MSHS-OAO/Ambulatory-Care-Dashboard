@@ -716,7 +716,7 @@ ui <- dashboardPage(
                                 plotOutput("volume_am_pm") %>%
                                   withSpinner(type = 5, color = "#d80b8c")),
                          #tableOutput("volume5.1")),
-                         column(2,)),
+                         column(2,"")),
                        boxPlus(
                          title = "Volume Over Time", width = 12, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -1277,7 +1277,7 @@ ui <- dashboardPage(
                                   #          withSpinner(type = 5, color = "#d80b8c")),
                                   # column(6, plotOutput("establishedRoomInTimeBoxPlot2", height = "500px") %>% 
                                   #          withSpinner(type = 5, color = "#d80b8c"))),
-                                hr(),
+                                # hr(),
                                 # fluidRow(column(12, plotOutput("roomInTimeTrend2", height = "600px") %>%
                                 #                   withSpinner(type = 5, color = "#d80b8c")))
                               ),
