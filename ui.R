@@ -1273,13 +1273,13 @@ ui <- dashboardPage(
                                 "*Select fewer visit types for better visibility",
                                 br(),
                                 fluidRow(
-                                  column(6, plotOutput("newRoomInTimeBoxPlot2", height = "500px") %>% 
-                                           withSpinner(type = 5, color = "#d80b8c")),
-                                  column(6, plotOutput("establishedRoomInTimeBoxPlot2", height = "500px") %>% 
-                                           withSpinner(type = 5, color = "#d80b8c"))),
+                                  # column(6, plotOutput("newRoomInTimeBoxPlot2", height = "500px") %>% 
+                                  #          withSpinner(type = 5, color = "#d80b8c")),
+                                  # column(6, plotOutput("establishedRoomInTimeBoxPlot2", height = "500px") %>% 
+                                  #          withSpinner(type = 5, color = "#d80b8c"))),
                                 hr(),
-                                fluidRow(column(12, plotOutput("roomInTimeTrend2", height = "600px") %>% 
-                                                  withSpinner(type = 5, color = "#d80b8c")))
+                                # fluidRow(column(12, plotOutput("roomInTimeTrend2", height = "600px") %>%
+                                #                   withSpinner(type = 5, color = "#d80b8c")))
                               ),
                               boxPlus(
                                 title = "Room-in to Visit-end Time by Time of Day", width = 12, status = "primary",
