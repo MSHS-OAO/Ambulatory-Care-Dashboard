@@ -1027,6 +1027,25 @@ server <- function(input, output, session) {
     
   })
   
+  # NEW reactive: feeds the Turns per Room per Session chart in the util tab
+  dataArrivedUtil <- eventReactive(list(input$update_filters), {
+    validate(
+      need(input$selectedCampus != "", "Please select a Campus"),
+      need(input$selectedSpecialty != "", "Please select a Specialty"),
+      need(input$selectedDepartment != "", "Please select a Department"),
+      need(input$selectedResource != "", "Please select a Resource"),
+      need(input$selectedProvider != "", "Please select a Provider"),
+      need(input$selectedVisitMethod != "", "Please select a Visit Method"),
+      need(input$selectedPRCName != "", "Please select a Visit Type")
+    )
+    groupByFilters(arrived.data.rows,
+                   input$selectedCampus, input$selectedSpecialty, input$selectedDepartment,
+                   input$selectedResource, input$selectedProvider,
+                   input$selectedVisitMethod, input$selectedPRCName,
+                   input$dateRangeUtil[1], input$dateRangeUtil[2],   
+                   input$daysOfWeekUtil, input$excludeHolidays)       
+  })
+
   
   dataArrived_summary <- eventReactive(list(input$update_filters),{
     validate(
@@ -5922,7 +5941,7 @@ server <- function(input, output, session) {
   output$volume_am_pm_by_room <- renderPlot({
     
     
-    data <- dataArrived()
+    data <- dataArrivedUtil()
     
     # Ensure the setRooms slider input is used
     req(input$setRooms)
